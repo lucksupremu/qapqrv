@@ -43,58 +43,58 @@
 :root {
   --radius: 1rem;
 
-  /* Arctic Frost — paleta clara, suave e sofisticada */
-  --bg: #f4f8fc;
+  /* Nova paleta com mais contraste e cores diferenciadas */
+  --bg: #edf2f7;
   --surface: #ffffff;
-  --surface-2: #e8f0f8;
-  --primary: #2e6b8a;
-  --primary-dark: #1f4e68;
-  --primary-light: #6ba3c8;
-  --card-field: #b8d4e8;
+  --surface-2: #e0e9f2;
+  --primary: #1a5276;
+  --primary-dark: #0f3045;
+  --primary-light: #4a90c2;
+  --card-field: #a8c8e0;
   --text-white: #ffffff;
-  --text-dark: #0f2535;
-  --muted-fg: #5b7a8f;
-  --border-soft: #d5e3ee;
-  --success: #16a34a;
-  --danger: #dc2626;
+  --text-dark: #0a1922;
+  --muted-fg: #3d5a6e;
+  --border-soft: #c5d5e3;
+  --success: #0d8a3c;
+  --danger: #c81d1d;
 
-  --gradient-primary: linear-gradient(135deg, #2e6b8a 0%, #6ba3c8 100%);
+  --gradient-primary: linear-gradient(135deg, #1a5276 0%, #3498db 100%);
   --gradient-surface: linear-gradient(180deg, #ffffff 0%, #eef4f9 100%);
-  --gradient-header: linear-gradient(180deg, #f4f8fc 0%, #e8f0f8 100%);
-  --shadow-glow: 0 0 32px -10px rgba(46, 107, 138, 0.35);
-  --shadow-elegant: 0 8px 28px -14px rgba(31, 78, 104, 0.25), 0 2px 8px -3px rgba(31, 78, 104, 0.12);
-  --shadow-card: 0 4px 20px -10px rgba(31, 78, 104, 0.18);
+  --gradient-header: linear-gradient(180deg, #edf2f7 0%, #d5e3ee 100%);
+  --shadow-glow: 0 0 32px -10px rgba(26, 82, 118, 0.45);
+  --shadow-elegant: 0 8px 28px -14px rgba(15, 48, 69, 0.3), 0 2px 8px -3px rgba(15, 48, 69, 0.15);
+  --shadow-card: 0 4px 20px -10px rgba(15, 48, 69, 0.22);
 
-  --background: oklch(0.98 0.012 230);
-  --foreground: oklch(0.22 0.04 240);
+  --background: oklch(0.96 0.015 230);
+  --foreground: oklch(0.18 0.05 240);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.04 240);
+  --card-foreground: oklch(0.18 0.05 240);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.04 240);
+  --popover-foreground: oklch(0.18 0.05 240);
 
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.94 0.025 230);
-  --secondary-foreground: oklch(0.22 0.04 240);
+  --secondary: oklch(0.9 0.03 230);
+  --secondary-foreground: oklch(0.18 0.05 240);
 
-  --muted: oklch(0.94 0.025 230);
-  --muted-foreground: oklch(0.52 0.04 235);
+  --muted: oklch(0.9 0.03 230);
+  --muted-foreground: oklch(0.42 0.05 235);
 
-  --accent: oklch(0.88 0.05 230);
-  --accent-foreground: oklch(0.22 0.04 240);
+  --accent: oklch(0.82 0.07 230);
+  --accent-foreground: oklch(0.18 0.05 240);
 
-  --destructive: oklch(0.62 0.22 25);
+  --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.9 0.03 230);
-  --input: oklch(0.9 0.03 230);
-  --ring: oklch(0.55 0.1 230);
+  --border: oklch(0.85 0.035 230);
+  --input: oklch(0.85 0.035 230);
+  --ring: oklch(0.48 0.12 230);
 
-  --brand-navy: oklch(0.3 0.06 235);
+  --brand-navy: oklch(0.25 0.07 235);
   --brand-navy-foreground: oklch(0.99 0 0);
-  --brand-blue: oklch(0.55 0.1 230);
+  --brand-blue: oklch(0.5 0.12 230);
   --brand-blue-foreground: oklch(0.99 0 0);
 }
 
