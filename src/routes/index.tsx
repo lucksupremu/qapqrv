@@ -87,19 +87,20 @@ function HomeScreen() {
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
-    // Trilha A — abre AGORA, no clique, sem await: evita popup blocker e
-    // qualquer conflito de sessão com a aba do usuário.
-    if (isNativeApp()) {
-      void openInAppBrowser(url, { titulo: `Escala ${id}` });
-    } else if (typeof window !== "undefined") {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-
-    // Trilha B — fire-and-forget, completamente desacoplada.
     setConsultando(true);
-    setTimeout(() => {
-      void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
-    }, 0);
+    void guardIntranet(() => {
+      if (isNativeApp()) {
+        void openInAppBrowser(url, { titulo: `Escala ${id}` });
+      } else if (typeof window !== "undefined") {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+      setTimeout(() => {
+        void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
+      }, 0);
+    }, `a escala #${id}`).finally(() => {
+      // se o guard recusou (toast), libera o botão
+      setTimeout(() => setConsultando(false), 300);
+    });
   };
 
 
