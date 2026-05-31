@@ -111,9 +111,13 @@ function HomeScreen() {
       gradient: "linear-gradient(135deg, #1a5276 0%, #3498db 100%)",
       shadow: "0 0 24px -8px rgba(26,82,118,0.45)",
       onClick: () =>
-        openInAppBrowser(
-          "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
-          { titulo: "Marcar / Desmarcar" }
+        void guardIntranet(
+          () =>
+            openInAppBrowser(
+              "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
+              { titulo: "Marcar / Desmarcar" },
+            ),
+          "Marcar / Desmarcar",
         ),
     },
     {
@@ -122,9 +126,13 @@ function HomeScreen() {
       gradient: "linear-gradient(135deg, #8e44ad 0%, #c39bd3 100%)",
       shadow: "0 0 24px -8px rgba(142,68,173,0.45)",
       onClick: () =>
-        openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
-          titulo: "Email iNotes",
-        }),
+        void guardIntranet(
+          () =>
+            openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
+              titulo: "Email iNotes",
+            }),
+          "o Email iNotes",
+        ),
     },
     {
       label: "Calendário",
