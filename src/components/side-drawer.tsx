@@ -73,20 +73,20 @@ function SideDrawer() {
       "flex items-center gap-3 px-6 py-4 text-[15px] transition-all duration-200 relative";
     const activeCls = isActive
       ? "font-bold"
-      : "hover:bg-[#F0F4FA]";
+      : "hover:bg-[#1e1e3a]";
     const style = isActive
-      ? { background: "#E8EEF4", color: "#1B3A6B" }
-      : { color: "#1A1A2E" };
+      ? { background: "#1e1e3a", color: "#4f46e5" }
+      : { color: "#e8eaf6" };
 
     const content = (
       <>
         {isActive && (
           <span
             className="absolute left-0 top-0 bottom-0 w-[3px]"
-            style={{ background: "#1B3A6B" }}
+            style={{ background: "#4f46e5" }}
           />
         )}
-        <Icon size={20} style={{ color: isActive ? "#1B3A6B" : "#5A6B85" }} />
+        <Icon size={20} style={{ color: isActive ? "#4f46e5" : "#8b8db5" }} />
         <span>{it.label}</span>
       </>
     );
@@ -130,12 +130,12 @@ function SideDrawer() {
       />
       {/* drawer */}
       <aside
-        className={`fixed right-0 top-0 z-50 h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 z-50 h-full w-[280px] bg-[#141432] shadow-2xl transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ borderRadius: "20px 0 0 20px" }}
       >
-        <div className="flex items-start justify-between p-6" style={{ background: "#1B3A6B", borderRadius: "20px 0 0 0" }}>
+        <div className="flex items-start justify-between p-6" style={{ background: "#4f46e5", borderRadius: "20px 0 0 0" }}>
           <div>
             <h2 className="text-[22px] font-bold text-white">Atividade D</h2>
             <p className="text-[14px] text-white/70">PMESP</p>
@@ -150,9 +150,9 @@ function SideDrawer() {
         </div>
         <nav className="flex flex-col overflow-y-auto" style={{ maxHeight: "calc(100% - 110px)" }}>
           {grupo1.map(renderItem)}
-          <div className="my-2 mx-6 border-t" style={{ borderColor: "#E0E8F0" }} />
+          <div className="my-2 mx-6 border-t" style={{ borderColor: "#23234a" }} />
           {grupo2.map(renderItem)}
-          <div className="my-2 mx-6 border-t" style={{ borderColor: "#E0E8F0" }} />
+          <div className="my-2 mx-6 border-t" style={{ borderColor: "#23234a" }} />
           {grupo3.map(renderItem)}
         </nav>
       </aside>
