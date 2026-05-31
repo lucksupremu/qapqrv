@@ -326,7 +326,7 @@ function HomeScreen() {
                 Conecte-se à VPN da PMESP (AnyConnect) e tente novamente.
               </p>
               <button
-                onClick={() => navigate({ to: "/anyconnect" })}
+                onClick={openAnyConnect}
                 className="mt-2 rounded-[10px] px-3 py-1.5 text-[12px] font-bold text-white"
                 style={{ background: "#1B3A6B" }}
               >
