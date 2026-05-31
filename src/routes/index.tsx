@@ -195,7 +195,7 @@ function HomeScreen() {
       <section className="mx-4 mt-4 rounded-[20px] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
         {/* Marcar/Desmarcar */}
         <button
-          onClick={() => navigate({ to: "/escalas-baixadas" })}
+          onClick={() => setMarcarOpen(true)}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] font-bold text-white active:scale-[0.99]"
           style={{ background: "#1B3A6B" }}
         >
