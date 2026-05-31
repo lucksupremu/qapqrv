@@ -10,7 +10,7 @@ import passo5 from "@/assets/anyconnect/passo-5.jpg";
 import passo6 from "@/assets/anyconnect/passo-6.jpg";
 
 export const Route = createFileRoute("/anyconnect")({
-  head: () => ({ meta: [{ title: "Configurar AnyConnect — Atividade D" }] }),
+  head: () => ({ meta: [{ title: "Configurar AnyConnect — QAP, QRV!" }] }),
   component: AnyConnectGuideScreen,
 });
 

@@ -28,7 +28,7 @@ import {
 } from "@/lib/marcas";
 
 export const Route = createFileRoute("/calendario")({
-  head: () => ({ meta: [{ title: "Calendário — Atividade D" }] }),
+  head: () => ({ meta: [{ title: "Calendário — QAP, QRV!" }] }),
   component: CalendarScreen,
 });
 
