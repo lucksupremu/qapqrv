@@ -19,6 +19,7 @@ import { useDrawer } from "@/components/side-drawer";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { upsertEscala, baixarPdfEmBackground } from "@/lib/escalas-baixadas";
+import { isIntranetReachable } from "@/lib/check-vpn";
 
 export const Route = createFileRoute("/")({
   head: () => ({
