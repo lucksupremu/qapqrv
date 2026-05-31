@@ -62,17 +62,34 @@ function HomeScreen() {
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
-    // Abre o link conforme a plataforma — esse é o objetivo principal.
+    // No web, abre uma aba em branco já no clique para não ser bloqueado.
+    // Será preenchida ou fechada depois do teste de VPN.
+    const novaAba =
+      !isNativeApp() && typeof window !== "undefined"
+        ? window.open("about:blank", "_blank", "noopener,noreferrer")
+        : null;
+
     try {
+      const vpnOk = await isIntranetReachable();
+
+      if (!vpnOk) {
+        if (novaAba) novaAba.close();
+        toast.error("VPN AnyConnect não está conectada. Abrindo o app...");
+        openAnyConnect();
+        setConsultando(false);
+        return;
+      }
+
       if (isNativeApp()) {
-        // APK: navegador interno do Capacitor
         await openInAppBrowser(url, { titulo: `Escala ${id}` });
+      } else if (novaAba) {
+        novaAba.location.href = url;
       } else {
-        // Web: abrir em nova aba de forma SÍNCRONA para não ser bloqueado
         window.open(url, "_blank", "noopener,noreferrer");
       }
     } catch (e) {
       console.error("Erro ao abrir escala:", e);
+      if (novaAba) novaAba.close();
       toast.error("Não foi possível abrir a escala.");
       setConsultando(false);
       return;
