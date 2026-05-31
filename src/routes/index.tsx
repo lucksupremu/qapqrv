@@ -59,9 +59,13 @@ function HomeScreen() {
     return { mesesRecentes: recentes, mesesValores: valores };
   }, []);
 
-  const contar = (tipo: Marca["tipo"], ano: number, mes: number) =>
+  const contarTipo = (
+    match: (t: Marca["tipo"]) => boolean,
+    ano: number,
+    mes: number,
+  ) =>
     marcas.filter((mk) => {
-      if (mk.tipo !== tipo) return false;
+      if (!match(mk.tipo)) return false;
       const d = new Date(mk.data);
       return d.getFullYear() === ano && d.getMonth() === mes;
     }).length;
@@ -74,8 +78,17 @@ function HomeScreen() {
       })
       .reduce((acc, mk) => acc + (mk.valor || 0), 0);
 
-  const dejemContagens = mesesRecentes.map((x) => contar("dejem", x.ano, x.mes));
-  const delegadaContagens = mesesRecentes.map((x) => contar("delegada", x.ano, x.mes));
+  const dejemContagens = mesesRecentes.map((x) =>
+    contarTipo((t) => t === "dejem", x.ano, x.mes),
+  );
+  const delegadaContagens = mesesRecentes.map((x) =>
+    contarTipo(
+      (t) => t === "delegada_capital" || t === "delegada_outras",
+      x.ano,
+      x.mes,
+    ),
+  );
+
   const valoresMensais = mesesValores.map((x) => somar(x.ano, x.mes));
 
   const handleConsultar = () => {
