@@ -79,8 +79,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
           showURL: true,
           showNavigationButtons: true,
           closeButtonText: "Fechar",
-          toolbarColor: "#1B3A6B",
-          title: titulo,
+          showToolbar: true,
         },
       });
 
