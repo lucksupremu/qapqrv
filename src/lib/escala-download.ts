@@ -112,7 +112,7 @@ export async function salvarEscalaEmBackground(id: string, url: string): Promise
       dataSalva: new Date().toISOString(),
     });
 
-    const ok = isNative()
+    const ok = (await isNative())
       ? await baixarNoNativo(id, url)
       : await baixarNoWeb(id, url);
 
