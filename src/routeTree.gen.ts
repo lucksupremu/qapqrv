@@ -10,9 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as IntranetRouteImport } from './routes/intranet'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
+import { Route as CalendarioRouteImport } from './routes/calendario'
+import { Route as AnyconnectRouteImport } from './routes/anyconnect'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
@@ -21,6 +26,16 @@ import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntranetRoute = IntranetRouteImport.update({
+  id: '/intranet',
+  path: '/intranet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InicioRoute = InicioRouteImport.update({
@@ -36,6 +51,21 @@ const HistoricoRoute = HistoricoRouteImport.update({
 const FavoritosRoute = FavoritosRouteImport.update({
   id: '/favoritos',
   path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EscalasBaixadasRoute = EscalasBaixadasRouteImport.update({
+  id: '/escalas-baixadas',
+  path: '/escalas-baixadas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarioRoute = CalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnyconnectRoute = AnyconnectRouteImport.update({
+  id: '/anyconnect',
+  path: '/anyconnect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -63,9 +93,14 @@ const FerramentaSlugRoute = FerramentaSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/anyconnect': typeof AnyconnectRoute
+  '/calendario': typeof CalendarioRoute
+  '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
   '/inicio': typeof InicioRoute
+  '/intranet': typeof IntranetRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -73,9 +108,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/anyconnect': typeof AnyconnectRoute
+  '/calendario': typeof CalendarioRoute
+  '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
   '/inicio': typeof InicioRoute
+  '/intranet': typeof IntranetRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -84,9 +124,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/anyconnect': typeof AnyconnectRoute
+  '/calendario': typeof CalendarioRoute
+  '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
   '/inicio': typeof InicioRoute
+  '/intranet': typeof IntranetRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -96,9 +141,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/anyconnect'
+    | '/calendario'
+    | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
     | '/inicio'
+    | '/intranet'
+    | '/privacidade'
     | '/sobre'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -106,9 +156,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/anyconnect'
+    | '/calendario'
+    | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
     | '/inicio'
+    | '/intranet'
+    | '/privacidade'
     | '/sobre'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -116,9 +171,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/anyconnect'
+    | '/calendario'
+    | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
     | '/inicio'
+    | '/intranet'
+    | '/privacidade'
     | '/sobre'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -127,9 +187,14 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnyconnectRoute: typeof AnyconnectRoute
+  CalendarioRoute: typeof CalendarioRoute
+  EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FavoritosRoute: typeof FavoritosRoute
   HistoricoRoute: typeof HistoricoRoute
   InicioRoute: typeof InicioRoute
+  IntranetRoute: typeof IntranetRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
@@ -143,6 +208,20 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intranet': {
+      id: '/intranet'
+      path: '/intranet'
+      fullPath: '/intranet'
+      preLoaderRoute: typeof IntranetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inicio': {
@@ -164,6 +243,27 @@ declare module '@tanstack/react-router' {
       path: '/favoritos'
       fullPath: '/favoritos'
       preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/escalas-baixadas': {
+      id: '/escalas-baixadas'
+      path: '/escalas-baixadas'
+      fullPath: '/escalas-baixadas'
+      preLoaderRoute: typeof EscalasBaixadasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendario': {
+      id: '/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof CalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anyconnect': {
+      id: '/anyconnect'
+      path: '/anyconnect'
+      fullPath: '/anyconnect'
+      preLoaderRoute: typeof AnyconnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -199,9 +299,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnyconnectRoute: AnyconnectRoute,
+  CalendarioRoute: CalendarioRoute,
+  EscalasBaixadasRoute: EscalasBaixadasRoute,
   FavoritosRoute: FavoritosRoute,
   HistoricoRoute: HistoricoRoute,
   InicioRoute: InicioRoute,
+  IntranetRoute: IntranetRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
@@ -210,3 +315,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
