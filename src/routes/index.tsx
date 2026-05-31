@@ -7,7 +7,6 @@ import {
   Menu,
   Globe,
   Mail,
-  KeyRound,
   BookOpen,
   FolderDown,
   Loader2,
