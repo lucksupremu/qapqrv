@@ -51,12 +51,14 @@ const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 const TIPO_LABEL: Record<TipoMarca, string> = {
   dejem: "Dejem",
+  delegada: "Delegada",
   delegada_capital: "Delegada Capital",
   delegada_outras: "Outras Delegadas",
 };
 
 const TIPO_COR: Record<TipoMarca, string> = {
   dejem: "#3498DB",
+  delegada: "#2ECC71",
   delegada_capital: "#2ECC71",
   delegada_outras: "#E67E22",
 };
