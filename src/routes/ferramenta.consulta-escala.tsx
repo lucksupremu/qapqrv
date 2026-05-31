@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import {
   ArrowLeft,
@@ -10,10 +10,14 @@ import {
   Trash2,
   RotateCcw,
   AlertCircle,
+  ShieldAlert,
+  ShieldCheck,
+  Loader,
 } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { consultarEscala, formatBRL, formatDateBR, type Escala } from "@/lib/escala";
 import { useEscalaHistorico } from "@/hooks/use-escala-historico";
+import { isIntranetReachable } from "@/lib/check-vpn";
 
 const idSchema = z
   .string()
