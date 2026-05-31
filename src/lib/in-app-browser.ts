@@ -72,14 +72,14 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
         if (pin) cred = await loadCredenciais(pin);
       }
 
-      // API openInWebView (v4+)
+      // API openInWebView (v4+) — espalha defaults para satisfazer o tipo
       await InAppBrowser.openInWebView({
         url,
         options: {
+          ...mod.DefaultWebViewOptions,
           showURL: true,
           showNavigationButtons: true,
           closeButtonText: "Fechar",
-          showToolbar: true,
         },
       });
 
