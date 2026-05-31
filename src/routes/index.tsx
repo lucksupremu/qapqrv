@@ -133,7 +133,7 @@ function HomeScreen() {
     setVpnAviso(false);
     setConsultando(true);
 
-    const url = `http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelpreesc.aspx?nuesc=${encodeURIComponent(id)}`;
+    const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
     try {
       // Não dá para pré-checar via fetch: navegador bloqueia HTTP a partir de origem HTTPS
