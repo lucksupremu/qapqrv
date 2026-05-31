@@ -331,3 +331,46 @@ function ResultadoCard({
     </article>
   );
 }
+
+function VpnBadge({
+  status,
+  onRecheck,
+}: {
+  status: "checking" | "ok" | "off";
+  onRecheck: () => void;
+}) {
+  if (status === "checking") {
+    return (
+      <div className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-xs text-muted-foreground">
+        <Loader className="size-3.5 animate-spin" />
+        Verificando conexão com a intranet…
+      </div>
+    );
+  }
+  if (status === "ok") {
+    return (
+      <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300">
+        <ShieldCheck className="size-3.5" />
+        Intranet acessível — pronto para consultar.
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+      <ShieldAlert className="size-4 mt-0.5 shrink-0" />
+      <div className="flex-1">
+        <p className="font-semibold">Intranet não detectada</p>
+        <p className="opacity-90">
+          Verifique se a VPN AnyConnect está conectada. Você ainda pode tentar consultar.
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onRecheck}
+        className="rounded-md px-2 py-1 text-[11px] font-semibold underline-offset-2 hover:underline"
+      >
+        Verificar
+      </button>
+    </div>
+  );
+}
