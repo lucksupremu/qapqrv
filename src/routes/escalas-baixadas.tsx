@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, FolderOpen } from "lucide-react";
+import { ArrowLeft, FolderOpen, FileDown } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -13,39 +13,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-type EscalaSalva = {
-  id: string;
-  url: string;
-  titulo?: string;
-  dataSalva?: string;
-  savedAt?: string; // compat com /intranet legado
-};
+import {
+  type EscalaSalva,
+  lerLista,
+  salvarLista,
+  removerEscala,
+  lerPdfBlob,
+} from "@/lib/escalas-baixadas";
 
 export const Route = createFileRoute("/escalas-baixadas")({
   head: () => ({ meta: [{ title: "Escalas baixadas — Atividade D" }] }),
   component: DownloadedReportsScreen,
 });
-
-const STORAGE_KEY = "escalas_baixadas";
-
-function loadEscalas(): EscalaSalva[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as EscalaSalva[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveEscalas(list: EscalaSalva[]) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  } catch {
-    /* ignore */
-  }
-}
 
 function formatBR(iso?: string) {
   if (!iso) return "—";
@@ -62,28 +41,47 @@ function formatBR(iso?: string) {
   }
 }
 
+function formatBytes(n?: number) {
+  if (!n) return "";
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function DownloadedReportsScreen() {
   const navigate = useNavigate();
-  const [escalas, setEscalas] = useState<EscalaSalva[]>(() => loadEscalas());
+  const [escalas, setEscalas] = useState<EscalaSalva[]>(() => lerLista());
   const [confirmDelete, setConfirmDelete] = useState<EscalaSalva | null>(null);
 
   useEffect(() => {
-    saveEscalas(escalas);
+    salvarLista(escalas);
   }, [escalas]);
 
-  const handleAbrir = (e: EscalaSalva) => {
+  const handleAbrir = async (e: EscalaSalva) => {
+    if (e.hasPdf) {
+      const blob = await lerPdfBlob(e.id);
+      if (blob) {
+        const objUrl = URL.createObjectURL(blob);
+        window.open(objUrl, "_blank", "noopener,noreferrer");
+        // Libera após algum tempo
+        setTimeout(() => URL.revokeObjectURL(objUrl), 60_000);
+        return;
+      }
+    }
     navigate({
       to: "/intranet",
       search: { url: e.url, titulo: e.titulo ?? `Escala ${e.id}` },
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!confirmDelete) return;
+    await removerEscala(confirmDelete.id);
     setEscalas((prev) => prev.filter((x) => x.id !== confirmDelete.id));
     setConfirmDelete(null);
     toast.success("Escala removida.");
   };
+
 
   return (
     <div className="min-h-screen pb-10" style={{ background: "var(--bg)" }}>
