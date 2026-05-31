@@ -264,6 +264,12 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
+
+      <MarcarModal
+        open={marcarOpen}
+        onOpenChange={setMarcarOpen}
+        onSave={(marca) => setMarcas((prev) => [marca, ...prev])}
+      />
     </div>
   );
 }
