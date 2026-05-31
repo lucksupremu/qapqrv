@@ -9,6 +9,9 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
@@ -188,18 +191,20 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DrawerProvider>
-        <div
-          className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
-          style={{ background: "var(--bg)" }}
-        >
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </div>
-        <BottomNav />
-        <PrivacyConsent />
-        <Toaster />
-      </DrawerProvider>
+      <TooltipProvider delayDuration={200}>
+        <DrawerProvider>
+          <div
+            className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
+            style={{ background: "var(--bg)" }}
+          >
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+          </div>
+          <BottomNav />
+          <PrivacyConsent />
+          <Toaster />
+        </DrawerProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
