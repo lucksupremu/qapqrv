@@ -355,18 +355,34 @@ function VpnBadge({
   }
   if (status === "ok") {
     return (
-      <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 text-xs text-emerald-700 dark:text-emerald-300">
-        <Wifi className="size-4" />
-        Intranet acessível — pronto para consultar.
-      </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex cursor-help items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 text-xs text-emerald-700 dark:text-emerald-300">
+            <Wifi className="size-4" />
+            Intranet acessível — pronto para consultar.
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p>A VPN está ativa e a intranet da PMESP responde.</p>
+        </TooltipContent>
+      </Tooltip>
     );
   }
   return (
     <div className="flex flex-col gap-3 rounded-xl border-2 border-amber-500/50 bg-amber-500/10 px-4 py-3">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
-          <WifiOff className="size-4 text-amber-700 dark:text-amber-300" />
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 cursor-help items-center justify-center rounded-full bg-amber-500/20">
+              <WifiOff className="size-4 text-amber-700 dark:text-amber-300" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="max-w-[220px]">
+              Sem VPN a intranet da PMESP fica inacessível. Conecte o AnyConnect para continuar.
+            </p>
+          </TooltipContent>
+        </Tooltip>
         <div className="flex-1">
           <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
             VPN AnyConnect desconectada
@@ -376,15 +392,31 @@ function VpnBadge({
           </p>
         </div>
       </div>
+      {/* Mensagem de ação passo a passo */}
+      <div className="flex items-start gap-2 rounded-lg bg-amber-600/10 px-3 py-2">
+        <Info size={16} className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-300" />
+        <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-200">
+          <span className="font-bold">Ação necessária:</span> abra o Cisco AnyConnect, toque em{" "}
+          <span className="font-semibold">Conectar</span> e aguarde o cadeado verde. Depois volte
+          aqui e toque em <span className="font-semibold">Verificar novamente</span>.
+        </p>
+      </div>
       <div className="flex items-center gap-2 pl-11">
-        <button
-          type="button"
-          onClick={() => openAnyConnect()}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition active:scale-[0.97] hover:bg-amber-700"
-        >
-          <ShieldCheck className="size-3.5" />
-          Abrir AnyConnect
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={() => openAnyConnect()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition active:scale-[0.97] hover:bg-amber-700"
+            >
+              <ShieldCheck className="size-3.5" />
+              Abrir AnyConnect
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p>Abre o app Cisco AnyConnect para conectar a VPN</p>
+          </TooltipContent>
+        </Tooltip>
         <button
           type="button"
           onClick={onRecheck}
