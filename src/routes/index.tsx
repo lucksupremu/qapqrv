@@ -39,23 +39,8 @@ function formatBRL(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-const ESCALAS_KEY = "escalas_baixadas";
-function salvarEscalaBaixada(id: string, url: string) {
-  if (typeof window === "undefined") return;
-  try {
-    const raw = window.localStorage.getItem(ESCALAS_KEY);
-    const list: Array<{ id: string; url: string; titulo?: string; dataSalva?: string }> =
-      raw ? JSON.parse(raw) : [];
-    const semDup = list.filter((x) => x.id !== id);
-    const next = [
-      { id, url, titulo: `Escala ${id}`, dataSalva: new Date().toISOString() },
-      ...semDup,
-    ].slice(0, 100);
-    window.localStorage.setItem(ESCALAS_KEY, JSON.stringify(next));
-  } catch {
-    /* ignore */
-  }
-}
+
+
 
 function HomeScreen() {
   const navigate = useNavigate();
