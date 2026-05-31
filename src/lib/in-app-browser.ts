@@ -2,17 +2,22 @@
 // - No app nativo (Capacitor): usa @capacitor/inappbrowser
 // - No web (navegador comum): abre nova aba
 
+import { Capacitor } from "@capacitor/core";
+
 export type AbrirOpts = {
   titulo?: string;
 };
 
-async function isNative() {
+export function isNativeApp(): boolean {
   try {
-    const { Capacitor } = await import("@capacitor/core");
     return Capacitor.isNativePlatform();
   } catch {
     return false;
   }
+}
+
+async function isNative() {
+  return isNativeApp();
 }
 
 export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {

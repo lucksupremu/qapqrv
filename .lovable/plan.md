@@ -1,54 +1,31 @@
-# Splash com anúncio na abertura do app
 
-## Objetivo
+## Problema
 
-Mostrar um anúncio em tela cheia toda vez que o app abrir, com countdown e botão "Pular", funcionando tanto no app nativo (Capacitor iOS/Android) quanto na versão web/PWA.
+Hoje `handleConsultar` em `src/routes/index.tsx` usa `openInAppBrowser`, que já tenta detectar nativo vs web. Porém quando rodando no navegador web a chamada está dando erro (provavelmente bloqueio de pop-up por ser `await` antes do `window.open`, ou import dinâmico do Capacitor falhando silenciosamente e atrasando).
 
-## Comportamento
+## Solução
 
-1. Ao abrir o app (cold start ou retomar do background após >30min), aparece uma tela cheia com:
-   - Logo PMESP no topo
-   - Espaço do anúncio no centro (banner/imagem ou AdMob)
-   - Countdown de 5 segundos no canto superior direito
-   - Botão "Pular" que aparece após 5s
-2. Após o tempo OU clique em "Pular", redireciona para a home (`/`).
-3. Frequência: 1x por sessão (não aparece em navegação interna entre telas).
+Dividir explicitamente o fluxo de abertura conforme o ambiente, sem depender de uma única função genérica para o caso da escala:
 
-## Estrutura técnica
+1. **Detecção síncrona de plataforma**
+   - Criar helper `isNativeApp()` em `src/lib/in-app-browser.ts` (ou novo `src/lib/platform.ts`) que retorna boolean síncrono via `Capacitor.isNativePlatform()` importado estaticamente. Import estático evita o `await import()` que atrasa o `window.open` e dispara bloqueio de pop-up no navegador.
 
-### Camada web (funciona já, sem plugin)
-- **Nova rota** `src/routes/splash.tsx` — tela cheia com:
-  - Estado de countdown (5s → 0)
-  - `<div>` placeholder para o anúncio (substituível por AdSense depois)
-  - Botão "Pular" habilitado quando countdown chega a 0
-  - `navigate({ to: "/" })` ao fim
-- **Lógica de exibição** em `src/routes/__root.tsx` (ou novo hook `useSplashGate`):
-  - Verifica `sessionStorage.getItem("splash_shown")` 
-  - Se não mostrado E rota atual é `/`, redireciona para `/splash`
-  - Após splash, marca `sessionStorage.setItem("splash_shown", "1")`
-- Funciona em web/PWA sem dependências extras.
+2. **`handleConsultar` em `src/routes/index.tsx`**
+   - Montar a URL da escala.
+   - Se `isNativeApp()` → chamar `openInAppBrowser(url, { titulo })` (InAppBrowser do Capacitor, fluxo atual do APK).
+   - Senão (web/PWA) → abrir direto via `window.open(url, "_blank", "noopener,noreferrer")` de forma síncrona, dentro do mesmo tick do clique, para não ser bloqueado pelo navegador.
+   - Manter o `try/catch` que salva em "Escalas baixadas" em segundo plano, sem bloquear a abertura.
+   - Garantir `setConsultando(false)` no `finally`.
 
-### Camada nativa (Capacitor — preparação)
-- Adicionar comentário/TODO no `splash.tsx` indicando onde plugar `@capacitor-community/admob` no futuro:
-  ```ts
-  // TODO nativo: if (Capacitor.isNativePlatform()) { AdMob.showAppOpenAd(...) }
-  ```
-- **Não instalar AdMob agora** — requer conta AdMob, App ID, configuração em `capacitor.config.ts` e build nativo. Fica como passo separado quando o usuário tiver as credenciais.
-- A tela de splash web serve como fallback no nativo até o AdMob ser configurado.
+3. **Não mexer** em outros botões (Marcar/Desmarcar, etc.) — eles continuam usando `openInAppBrowser`, que segue funcionando para casos onde o delay não importa.
 
-## Arquivos a criar/editar
+## Detalhes técnicos
 
-- **Criar** `src/routes/splash.tsx` — tela de splash com countdown, placeholder de anúncio e botão pular
-- **Criar** `src/hooks/use-splash-gate.ts` — hook que decide se mostra splash
-- **Editar** `src/routes/__root.tsx` — chamar o gate na montagem
-- **Editar** `src/components/ad-slot.tsx` — reaproveitar componente existente para o slot de anúncio do splash (se compatível)
+- `@capacitor/core` já é dependência do projeto (usado em `in-app-browser.ts` e `open-anyconnect.ts`); import estático é seguro tanto em build web quanto nativo — `Capacitor.isNativePlatform()` retorna `false` no web.
+- O ponto-chave da correção é remover o `await` antes do `window.open` no caminho web: navegadores só permitem `window.open` se chamado de forma síncrona dentro do handler de clique do usuário; com `await` no meio, o pop-up é bloqueado e aparece o erro.
+- Nenhuma alteração de UI, rotas ou lógica de salvamento offline.
 
-## Fora do escopo (próximos passos quando o usuário quiser)
+## Arquivos
 
-- Conta Google AdMob + App ID/Ad Unit IDs
-- Instalação de `@capacitor-community/admob` e configuração nativa
-- Conta Google AdSense + script no `__root.tsx` para a versão web
-
-## Resultado
-
-Ao abrir o app (web ou nativo), o usuário vê uma tela com anúncio por 5s, pode pular e entra na home. Estrutura pronta para plugar AdMob/AdSense reais depois.
+- `src/lib/in-app-browser.ts` — exportar `isNativeApp()` síncrono (ou criar `src/lib/platform.ts`).
+- `src/routes/index.tsx` — reescrever `handleConsultar` com o branch nativo vs web.
