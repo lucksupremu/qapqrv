@@ -357,7 +357,7 @@ function HomeScreen() {
         <div className="mt-4 flex items-center gap-2">
           {[
             { icon: Globe, label: "Acesse o site" },
-            { icon: KeyRound, label: "Conecte no NConnect" },
+            { icon: KeyRound, label: "Conecte no AnyConnect" },
             { icon: Search, label: "Informe o ID e pesquise" },
           ].map((passo, i, arr) => (
             <div key={i} className="flex items-center gap-2">
