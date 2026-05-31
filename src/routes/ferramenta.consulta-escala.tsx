@@ -83,7 +83,7 @@ function ConsultaEscalaPage() {
         setLoading(false);
       }
     },
-    [adicionar],
+    [adicionar, checkVpn],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
