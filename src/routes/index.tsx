@@ -84,7 +84,11 @@ function HomeScreen() {
     {
       label: "Marcar / Desmarcar",
       icon: CalendarPlus,
-      onClick: () => setMarcarOpen(true),
+      onClick: () =>
+        openInAppBrowser(
+          "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
+          { titulo: "Marcar / Desmarcar" }
+        ),
     },
     {
       label: "Calendário",
@@ -248,12 +252,6 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
-
-      <MarcarModal
-        open={marcarOpen}
-        onOpenChange={setMarcarOpen}
-        onSave={(marca) => setMarcas((prev) => [marca, ...prev])}
-      />
     </div>
   );
 }
