@@ -6,7 +6,6 @@
 //   bun add @capacitor/filesystem
 //   npx cap sync
 import { toast } from "sonner";
-import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import {
   upsertEscala,
   marcarComPdf,
@@ -17,8 +16,10 @@ import {
 
 const emAndamento = new Set<string>();
 
-function isNative() {
+async function isNative(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
   try {
+    const { Capacitor } = await import("@capacitor/core");
     return Capacitor.isNativePlatform();
   } catch {
     return false;
@@ -27,12 +28,14 @@ function isNative() {
 
 async function baixarNoNativo(id: string, url: string): Promise<boolean> {
   try {
+    const { CapacitorHttp } = await import("@capacitor/core");
     const resp = await CapacitorHttp.request({
       method: "GET",
       url,
       responseType: "blob",
     });
     if (resp.status < 200 || resp.status >= 300) return false;
+
     // CapacitorHttp retorna base64 quando responseType=blob
     const data: string = resp.data;
     if (!data || typeof data !== "string") return false;
