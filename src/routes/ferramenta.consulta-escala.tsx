@@ -16,7 +16,9 @@ import {
   WifiOff,
   Wifi,
   ChevronRight,
+  Info,
 } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { BottomNav } from "@/components/bottom-nav";
 import { consultarEscala, formatBRL, formatDateBR, type Escala } from "@/lib/escala";
 import { useEscalaHistorico } from "@/hooks/use-escala-historico";
