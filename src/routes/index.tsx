@@ -254,7 +254,7 @@ function HomeScreen() {
         <h2 className="mb-3 text-[14px] font-bold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
           Acesso rápido
         </h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {blocos.map((b) => (
             <button
               key={b.label}
