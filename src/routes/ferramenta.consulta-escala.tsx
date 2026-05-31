@@ -46,10 +46,22 @@ function ConsultaEscalaPage() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<Escala | null>(null);
   const { items, adicionar, favoritar, remover } = useEscalaHistorico();
+  const [vpnStatus, setVpnStatus] = useState<"checking" | "ok" | "off">("checking");
+
+  const checkVpn = useCallback(async () => {
+    setVpnStatus("checking");
+    const ok = await isIntranetReachable();
+    setVpnStatus(ok ? "ok" : "off");
+  }, []);
+
+  useEffect(() => {
+    void checkVpn();
+  }, [checkVpn]);
 
   const consultar = useCallback(
     async (rawId: string) => {
       setErro(null);
+      void checkVpn();
       const parsed = idSchema.safeParse(rawId);
       if (!parsed.success) {
         setErro(parsed.error.issues[0]?.message ?? "ID inválido");
