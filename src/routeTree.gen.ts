@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char91indexChar93RouteImport } from './routes/[index]'
+import { Route as SplashRouteImport } from './routes/splash'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as IntranetRouteImport } from './routes/intranet'
@@ -27,6 +28,11 @@ import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 const Char91indexChar93Route = Char91indexChar93RouteImport.update({
   id: '/index',
   path: '/index',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplashRoute = SplashRouteImport.update({
+  id: '/splash',
+  path: '/splash',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SobreRoute = SobreRouteImport.update({
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/intranet': typeof IntranetRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
+  '/splash': typeof SplashRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/intranet': typeof IntranetRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
+  '/splash': typeof SplashRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/intranet': typeof IntranetRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
+  '/splash': typeof SplashRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/intranet'
     | '/privacidade'
     | '/sobre'
+    | '/splash'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/intranet'
     | '/privacidade'
     | '/sobre'
+    | '/splash'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/intranet'
     | '/privacidade'
     | '/sobre'
+    | '/splash'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   IntranetRoute: typeof IntranetRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
+  SplashRoute: typeof SplashRoute
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
   FerramentaMinhaLocalizacaoRoute: typeof FerramentaMinhaLocalizacaoRoute
@@ -221,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: '/index'
       fullPath: '/index'
       preLoaderRoute: typeof Char91indexChar93RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/splash': {
+      id: '/splash'
+      path: '/splash'
+      fullPath: '/splash'
+      preLoaderRoute: typeof SplashRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sobre': {
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntranetRoute: IntranetRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
+  SplashRoute: SplashRoute,
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
   FerramentaMinhaLocalizacaoRoute: FerramentaMinhaLocalizacaoRoute,
@@ -336,3 +357,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
