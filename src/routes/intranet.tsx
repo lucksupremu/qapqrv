@@ -72,16 +72,23 @@ function IntranetWebviewScreen() {
     }
   };
 
-  const salvarEscala = () => {
+  const salvarEscala = async () => {
     try {
-      const m = currentUrl.match(/nuesc=(\d+)/i);
+      const m = currentUrl.match(/(?:nuesc=|arrelconesc\.aspx\?)(\d+)/i);
       const id = m?.[1] ?? Date.now().toString();
-      const raw = window.localStorage.getItem("escalas_baixadas");
-      const list = raw ? (JSON.parse(raw) as Array<{ id: string; url: string; titulo?: string; dataSalva?: string }>) : [];
-      const novo = { id, url: currentUrl, titulo, dataSalva: new Date().toISOString() };
-      const dedup = [novo, ...list.filter((x) => x.id !== id)].slice(0, 100);
-      window.localStorage.setItem("escalas_baixadas", JSON.stringify(dedup));
-      toast.success("Escala salva!");
+      const { upsertEscala, baixarPdfEmBackground } = await import(
+        "@/lib/escalas-baixadas"
+      );
+      upsertEscala({
+        id,
+        url: currentUrl,
+        titulo,
+        dataSalva: new Date().toISOString(),
+      });
+      toast.success("Escala salva em Escalas baixadas!");
+      // Tenta também salvar o PDF para consulta offline.
+      const ok = await baixarPdfEmBackground(id, currentUrl);
+      if (ok) toast.success("PDF salvo offline.");
     } catch {
       toast.error("Não foi possível salvar a escala.");
     }
