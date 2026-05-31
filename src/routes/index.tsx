@@ -175,14 +175,19 @@ function HomeScreen() {
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
       {/* HEADER */}
       <header className="flex items-center justify-between px-4 pt-6 pb-2">
-        <h1 className="text-[32px] font-extrabold leading-none" style={{ color: "#4f46e5" }}>
-          Atividade D
-        </h1>
+        <div>
+          <h1 className="text-[32px] font-extrabold leading-none tracking-tight text-[#e8eaf6]">
+            Atividade D
+          </h1>
+          <p className="mt-1 text-[12px] font-medium tracking-wide text-[#8b8db5]">
+            Escalas PMESP
+          </p>
+        </div>
         <button
           aria-label="Menu"
           onClick={() => setDrawerOpen(true)}
-          className="flex h-12 w-12 items-center justify-center rounded-full transition active:scale-95"
-          style={{ background: "#1e1e3a", color: "#4f46e5" }}
+          className="flex h-12 w-12 items-center justify-center rounded-2xl border transition active:scale-95"
+          style={{ background: "#1e1e3a", color: "#a5b4fc", borderColor: "#23234a" }}
         >
           <Menu size={22} />
         </button>
@@ -190,16 +195,24 @@ function HomeScreen() {
 
       {/* CARD AZUL */}
       <section
-        className="mx-4 mt-4 rounded-[20px] p-5 text-white"
-        style={{ background: "#4f46e5" }}
+        className="relative mx-4 mt-4 overflow-hidden rounded-[24px] p-5 text-white"
+        style={{
+          background: "var(--gradient-primary)",
+          boxShadow: "var(--shadow-glow), var(--shadow-elegant)",
+        }}
       >
-        <div className="flex items-center justify-between">
-          <h2 className="text-[18px] font-bold">Valores a receber</h2>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl"
+          style={{ background: "#a5b4fc" }}
+        />
+        <div className="relative flex items-center justify-between">
+          <h2 className="text-[18px] font-bold tracking-tight">Valores a receber</h2>
           <button
             aria-label="Abrir calendário"
             onClick={() => navigate({ to: "/calendario" })}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#141432]"
-            style={{ color: "#4f46e5" }}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm transition active:scale-95 hover:bg-white/25"
+            style={{ color: "#ffffff" }}
           >
             <Calendar size={18} />
           </button>
