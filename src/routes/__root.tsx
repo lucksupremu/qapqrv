@@ -77,21 +77,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      {
+        name: "viewport",
+        content:
+          "width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no",
+      },
+      { name: "theme-color", content: "#0b1733" },
+      { title: "QAP, QRV! — Ferramentas operacionais" },
+      {
+        name: "description",
+        content: "Central de ferramentas operacionais para o policial militar.",
+      },
+      { property: "og:title", content: "QAP, QRV!" },
+      {
+        property: "og:description",
+        content: "Ferramentas operacionais em um só lugar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
     ],
   }),
   shellComponent: RootShell,
