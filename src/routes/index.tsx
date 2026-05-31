@@ -13,8 +13,10 @@ import {
   Search,
   ArrowRight,
   ShieldCheck,
+  Info,
   type LucideIcon,
 } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 
