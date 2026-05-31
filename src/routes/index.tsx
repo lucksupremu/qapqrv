@@ -281,6 +281,138 @@ function HomeScreen() {
         </div>
       </section>
 
+      {/* PRÓXIMAS ESCALAS */}
+      <section className="mx-4 mt-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: "var(--primary)" }}>
+            Próximas escalas
+          </h2>
+          <button
+            onClick={() => navigate({ to: "/calendario" })}
+            className="text-[12px] font-bold"
+            style={{ color: "var(--primary)" }}
+          >
+            Ver tudo →
+          </button>
+        </div>
+        {(() => {
+          const now = Date.now();
+          const proximas = marcas
+            .filter((m) => {
+              const t = new Date(m.data).getTime();
+              return !Number.isNaN(t) && t >= now;
+            })
+            .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
+            .slice(0, 5);
+
+          if (proximas.length === 0) {
+            return (
+              <div
+                className="flex items-center gap-3 rounded-[16px] border bg-[#ffffff] p-4"
+                style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
+              >
+                <Calendar size={22} style={{ color: "var(--muted-fg)" }} />
+                <div className="flex-1">
+                  <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
+                    Nenhuma escala agendada
+                  </p>
+                  <p className="text-[12px]" style={{ color: "var(--muted-fg)" }}>
+                    Toque em "Ver tudo" para criar uma marcação.
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
+          const TIPO_LABEL: Record<string, string> = {
+            dejem: "Dejem",
+            delegada: "Delegada",
+            delegada_capital: "Delegada Capital",
+            delegada_outras: "Delegada",
+          };
+          const TIPO_COR: Record<string, string> = {
+            dejem: "#3498DB",
+            delegada: "#2ECC71",
+            delegada_capital: "#2ECC71",
+            delegada_outras: "#E67E22",
+          };
+
+          const startOfDay = (d: Date) => {
+            const x = new Date(d);
+            x.setHours(0, 0, 0, 0);
+            return x.getTime();
+          };
+          const today0 = startOfDay(new Date());
+
+          return (
+            <ul className="space-y-2">
+              {proximas.map((m) => {
+                const d = new Date(m.data);
+                const diasFalta = Math.round((startOfDay(d) - today0) / 86400000);
+                const label =
+                  diasFalta === 0
+                    ? "Hoje"
+                    : diasFalta === 1
+                      ? "Amanhã"
+                      : `Em ${diasFalta} dias`;
+                const cor = TIPO_COR[m.tipo] ?? "#5b7a8f";
+                return (
+                  <li
+                    key={m.id}
+                    onClick={() => navigate({ to: "/calendario" })}
+                    className="flex cursor-pointer overflow-hidden rounded-[14px] border bg-[#ffffff] transition active:scale-[0.99]"
+                    style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
+                  >
+                    <div className="w-1.5 shrink-0" style={{ background: cor }} />
+                    <div className="flex flex-1 items-center gap-3 p-3">
+                      <div
+                        className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-[12px] text-white"
+                        style={{ background: cor }}
+                      >
+                        <span className="text-[16px] font-bold leading-none">
+                          {d.getDate().toString().padStart(2, "0")}
+                        </span>
+                        <span className="mt-0.5 text-[9px] font-bold uppercase leading-none">
+                          {d.toLocaleString("pt-BR", { month: "short" }).replace(".", "")}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="truncate text-[14px] font-bold"
+                          style={{ color: "var(--text-dark)" }}
+                        >
+                          {TIPO_LABEL[m.tipo] ?? "Escala"}
+                        </p>
+                        <p className="text-[12px]" style={{ color: "var(--muted-fg)" }}>
+                          {d.toLocaleString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {m.valor > 0
+                            ? ` · ${m.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+                            : ""}
+                        </p>
+                      </div>
+                      <span
+                        className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold"
+                        style={{
+                          background: diasFalta <= 1 ? cor : "var(--surface-2)",
+                          color: diasFalta <= 1 ? "#fff" : "var(--text-dark)",
+                        }}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        })()}
+      </section>
+
       {/* FOOTER */}
       <footer className="mt-8 text-center">
         <button
@@ -291,6 +423,7 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
+
     </div>
   );
 }
