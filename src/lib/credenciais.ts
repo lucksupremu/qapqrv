@@ -46,16 +46,23 @@ async function storageRemove(key: string) {
 }
 
 // ---------- Crypto ----------
-function b64(bytes: Uint8Array) {
-  let s = "";
-  bytes.forEach((b) => (s += String.fromCharCode(b)));
-  return btoa(s);
-}
-function ub64(s: string) {
+function ub64(s: string): Uint8Array {
   const bin = atob(s);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
+}
+function b64(bytes: Uint8Array): string {
+  let s = "";
+  bytes.forEach((b) => (s += String.fromCharCode(b)));
+  return btoa(s);
+}
+// Garante ArrayBuffer "puro" (não SharedArrayBuffer) para as APIs WebCrypto.
+function buf(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength,
+  ) as ArrayBuffer;
 }
 
 async function deriveKey(pin: string, salt: Uint8Array) {
