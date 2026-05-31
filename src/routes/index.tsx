@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
 
 function Splash() {
   const navigate = useNavigate();
-  const [seconds, setSeconds] = useState(3);
+  const [seconds, setSeconds] = useState(5);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

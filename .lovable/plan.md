@@ -1,82 +1,66 @@
+# Plano: Nova versão do QAP, QRV! — Foco em Consulta de Escala
 
-# QAPQRV — Plano do MVP
+## Visão geral
 
-App web (TanStack Start) com layout mobile-first, pronto para empacotar em Capacitor e gerar APK. Sem login. Cada ferramenta é um módulo plugável que você expande depois.
+O projeto já possui a base montada (TanStack Start, Splash com AdSlot, tela `/inicio` com grid de cards, ferramenta "Minha Localização" funcional, header, bottom nav, favoritos e histórico). Esta entrega adiciona a ferramenta principal **Consulta de Escala DEJEM / Delegada** e prepara os demais cards como "Em desenvolvimento", mantendo a arquitetura modular para crescer sem refatorar.
 
-## Escopo do MVP
+## Escopo desta entrega
 
-1. **Tela inicial (Início)** — header escuro com logo "QAP, QRV!" (QAP branco, QRV azul), subtítulo, sino de notificações, botão de menu lateral, busca de ferramenta e grid 2 colunas de cards de ferramentas (ícone colorido + título + descrição + seta).
-2. **Bottom nav fixo** — Início, Favoritos, Histórico, Sobre.
-3. **Splash com anúncio** — tela de abertura que simula o slot do anúncio (placeholder visual). Botão "Continuar" libera o app. No Capacitor, esse slot será substituído pelo AdMob (App Open Ad ou Interstitial).
-4. **Páginas de ferramentas (stubs)** — cada card abre uma rota dedicada com header, breadcrumb e área de conteúdo vazia pronta para você implementar a lógica depois.
-5. **Favoritos** — usuário marca estrela no card; lista persistida em `localStorage`.
-6. **Histórico** — últimas ferramentas abertas, persistido em `localStorage`.
-7. **Sobre** — versão do app, créditos, contato, política de privacidade (necessária para Play Store + AdMob).
-8. **Menu lateral (drawer)** — links rápidos (Início, Favoritos, Histórico, Sobre, Compartilhar app, Avaliar na Play Store).
+1. **Splash Screen**: ajustar contagem regressiva de 3s → **5s** (requisito do briefing).
+2. **Tela inicial**: garantir que **Consulta de Escala seja o primeiro card**, seguido por Minha Localização (já pronta) e demais cards marcados como "Em desenvolvimento".
+3. **Ferramenta Consulta de Escala** (nova rota `/ferramenta/consulta-escala`):
+   - Campo numérico para ID da escala (somente dígitos, validação com Zod).
+   - Botão "Consultar".
+   - Stub da lógica de consulta (`consultarEscala(id)` em `src/lib/escala.ts`) retornando dado mock por enquanto — pronto para plugar API real depois.
+   - Área de resultado em cartões: ID, Tipo, Data, Horário inicial, Horário final, Qtd. horas, Unidade, Valor da hora, Valor total previsto.
+   - Persistência em **IndexedDB** (via `idb-keyval`) das consultas realizadas.
+   - Seção "Consultas Recentes" abaixo do formulário com ações: reabrir, favoritar, excluir.
+   - Sistema de favoritos integrado ao `/favoritos` existente.
+4. **Cards "Em desenvolvimento"**: BOPM Token, Bloco de Notas, Telefones Úteis, Códigos Q, Escalas, Checklist Operacional, CTB Rápido, Hospitais Próximos, Delegacias Próximas — todos passando pela rota genérica `/ferramenta/$slug` que já exibe estado de "em construção".
+5. **PWA-ready / Capacitor-ready**: adicionar `manifest.webmanifest` simples (ícone, nome, `display: standalone`, theme color) — sem service worker, conforme diretriz. Deixar o projeto pronto para `npx cap add android` futuramente (sem instalar Capacitor agora).
 
-Não inclui: backend, login, banco de dados, push real, AdMob real. Tudo isso entra na fase Capacitor.
+## Estrutura de arquivos
 
-## Ferramentas iniciais no grid (todas como stub clicável)
-
-- Mapa
-- ID de Agenda Ligada
-- Biopem-Token (BOPM Token)
-- Checklist
-- Consultas
-- Pessoas
-- Escalas
-- Documentos
-- Relatórios
-- Configurações
-- Bloco de Notas (novo)
-- Minha Localização / GPS (novo)
-
-Cada uma com ícone próprio e cor distinta, seguindo o estilo da imagem.
-
-## Estrutura de rotas
-
+```text
+src/
+  lib/
+    tools.ts                 (atualizar ordem + flags em-desenvolvimento)
+    escala.ts                (novo: tipos + consultarEscala stub)
+    escala-storage.ts        (novo: IndexedDB via idb-keyval)
+  hooks/
+    use-escala-historico.ts  (novo: histórico + favoritos reativos)
+  routes/
+    index.tsx                (splash: 3s → 5s)
+    ferramenta.consulta-escala.tsx  (novo)
+    ferramenta.$slug.tsx     (já trata "em desenvolvimento")
+public/
+  manifest.webmanifest       (novo)
 ```
-/                       -> Splash + anúncio (primeira visita da sessão)
-/inicio                 -> Grid de ferramentas (home real)
-/favoritos              -> Lista de favoritos
-/historico              -> Últimas abertas
-/sobre                  -> Sobre + política
-/ferramenta/$slug       -> Página genérica de cada ferramenta (stub)
-```
-
-A rota `/ferramenta/$slug` lê um registry central de ferramentas. Para adicionar uma ferramenta nova você só edita 1 arquivo (registry) e cria o componente da ferramenta.
-
-## Design
-
-- Tema: header azul-marinho escuro (`#0a1230` aprox.), corpo claro com cards brancos arredondados e sombra suave, ícones em gradient colorido, tipografia bold no título "QAP, QRV!" (QAP branco, QRV azul vibrante). Bottom nav branco com indicador azul no item ativo.
-- Mobile-first (390px), expansível para tablet.
-- Tokens semânticos em `src/styles.css` (oklch) — sem cores hardcoded nos componentes.
-
-## Persistência
-
-- Favoritos e histórico em `localStorage` (chaves `qapqrv:favorites`, `qapqrv:history`).
-- Flag `qapqrv:ad-seen-session` em `sessionStorage` para mostrar o splash/anúncio apenas 1x por abertura.
-
-## Preparação para Capacitor (estrutura, não instalação ainda)
-
-- Slot do anúncio isolado em um componente `<AdSlot type="app-open" />` — depois você troca o placeholder pelo plugin `@capacitor-community/admob`.
-- Slot de notificação (sininho) liga a um stub `notifications.ts` — depois conecta `@capacitor/push-notifications`.
-- Sem rotas absolutas, sem cookies, sem dependência de servidor — funciona offline empacotado.
 
 ## Detalhes técnicos
 
-- TanStack Start + React 19 + Tailwind v4 (já no template).
-- File-based routing em `src/routes/` (sem `src/pages/`).
-- Registry de ferramentas: `src/lib/tools.ts` exportando array tipado `{ slug, name, description, icon, gradient, component? }`.
-- Cada card renderizado a partir do registry — adicionar ferramenta = adicionar 1 item.
-- Componentes shadcn já disponíveis (Card, Input, Button, Sheet para drawer).
-- `framer-motion` para transição suave do splash → home e hover dos cards.
-- SEO básico por rota (title/description) mesmo sendo app — útil pra versão web/iPhone via link.
+- **Armazenamento**: `idb-keyval` (leve, ~600B) com chaves `escala:historico` e `escala:favoritos`. Limite de 50 itens no histórico (FIFO).
+- **Validação**: Zod schema `z.string().regex(/^\d+$/).min(1).max(12)`.
+- **UI**: Reutiliza tokens semânticos de `src/styles.css` (`brand-navy`, `brand-blue`, `--shadow-card`). Cards com `rounded-2xl`, sombras suaves, ícone `CalendarClock` (lucide).
+- **Resultado**: Componente `<EscalaResultCard>` exibindo os 9 campos em duas colunas; botão "Favoritar" e "Nova consulta".
+- **Recentes**: Lista com swipe-actions simples (botões inline reabrir / ★ / 🗑) — sem libs adicionais.
+- **Consulta stub**: retorna `Promise<Escala | null>` com `setTimeout` de 600ms simulando rede; documentado onde plugar a API real depois.
+- **Favoritos globais**: `/favoritos` lista todas as ferramentas favoritadas + consultas favoritadas (mescla as duas fontes).
+- **SEO**: `head()` por rota com title e description específicos.
 
-## O que NÃO entra agora (próximas fases)
+## Fora de escopo (próximas iterações)
 
-- Implementação real de cada ferramenta (você fará uma por uma).
-- Empacotamento Capacitor + AdMob + Push (fase 2, quando o MVP web estiver aprovado).
-- Política de privacidade real (texto placeholder; você substitui antes de publicar na Play Store).
+- Integração real da API de Consulta de Escala (apenas stub agora).
+- Implementação efetiva dos demais módulos (ficam como "Em desenvolvimento").
+- Capacitor / AdMob / Firebase Push / AdSense — apenas estrutura preparada, sem instalação.
+- Service worker / offline cache.
 
-Aprove para eu construir o MVP com essa estrutura.
+## Critérios de aceitação
+
+- Splash conta 5s e habilita "Continuar".
+- Card "Consulta de Escala" aparece em primeiro na tela inicial.
+- Inserir ID numérico + consultar exibe resultado mockado nos 9 campos.
+- Consulta aparece em "Consultas Recentes" e persiste após reload.
+- Favoritar/desfavoritar e excluir funcionam.
+- Demais cards abrem a página genérica "Em desenvolvimento".
+- Nenhum erro de console; build passa.
