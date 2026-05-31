@@ -14,7 +14,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 z-40 -translate-x-1/2 w-full max-w-[430px] bg-[#ffffff] pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-1/2 z-40 -translate-x-1/2 w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl bg-[#ffffff] pb-[env(safe-area-inset-bottom)]"
       style={{ borderTop: "1px solid #d5e3ee", height: 64 }}
     >
       <ul className="flex h-full items-stretch">
