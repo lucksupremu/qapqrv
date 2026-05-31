@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Smartphone } from "lucide-react";
+import { openAnyConnect } from "@/lib/open-anyconnect";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({ meta: [{ title: "Configurar AnyConnect — Atividade D" }] }),
