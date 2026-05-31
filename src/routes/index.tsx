@@ -14,7 +14,6 @@ import {
   ArrowRight,
   type LucideIcon,
 } from "lucide-react";
-import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { openAnyConnect } from "@/lib/open-anyconnect";
