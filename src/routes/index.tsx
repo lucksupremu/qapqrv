@@ -17,7 +17,7 @@ import {
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { openAnyConnect } from "@/lib/open-anyconnect";
-import { openInAppBrowser } from "@/lib/in-app-browser";
+import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { upsertEscala, baixarPdfEmBackground } from "@/lib/escalas-baixadas";
 
 export const Route = createFileRoute("/")({
