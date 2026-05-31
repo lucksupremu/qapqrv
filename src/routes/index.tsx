@@ -350,35 +350,8 @@ function HomeScreen() {
             )}
           </button>
         </div>
-
-        {vpnAviso && (
-          <div
-            className="mt-3 flex items-start gap-3 rounded-[12px] border p-3 animate-in fade-in slide-in-from-top-1 duration-200"
-            style={{ background: "#3d2f00", borderColor: "#f59e0b" }}
-          >
-            <AlertTriangle
-              size={20}
-              className="mt-0.5 shrink-0"
-              style={{ color: "#fbbf24" }}
-            />
-            <div className="flex-1">
-              <p
-                className="text-[13px] font-semibold"
-                style={{ color: "#fbbf24" }}
-              >
-                Conecte-se à VPN da PMESP (AnyConnect) e tente novamente.
-              </p>
-              <button
-                onClick={openAnyConnect}
-                className="mt-2 rounded-[10px] px-3 py-1.5 text-[12px] font-bold text-white"
-                style={{ background: "#2e6b8a" }}
-              >
-                Abrir AnyConnect
-              </button>
-            </div>
-          </div>
-        )}
       </section>
+
 
 
       {/* FOOTER */}
