@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 const searchSchema = z.object({
-  url: z.string().url().max(2048),
+  url: z.string().max(2048).default("http://ms.policiamilitar.sp.gov.br/login.aspx"),
   titulo: z.string().min(1).max(120).default("Intranet PMESP"),
 });
 
