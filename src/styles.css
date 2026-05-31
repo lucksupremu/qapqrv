@@ -2,6 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 @import "maplibre-gl/dist/maplibre-gl.css";
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -39,6 +40,17 @@
 
 :root {
   --radius: 1rem;
+
+  /* Atividade D — paleta PMESP */
+  --bg: #E8EEF4;
+  --primary: #1B3A6B;
+  --primary-dark: #142D54;
+  --card-field: #2A4F8A;
+  --text-white: #FFFFFF;
+  --text-dark: #1A1A2E;
+  --success: #2ECC71;
+  --danger: #E74C3C;
+
 
   --background: oklch(0.985 0.005 250);
   --foreground: oklch(0.18 0.04 265);
@@ -104,9 +116,13 @@
   * {
     border-color: var(--color-border);
   }
+  html,
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    font-family: "Nunito", system-ui, -apple-system, sans-serif;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text-dark);
     -webkit-tap-highlight-color: transparent;
   }
 }
