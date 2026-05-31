@@ -188,6 +188,61 @@
 .dark img { filter: brightness(0.92); }
 .dark img.no-dark-filter { filter: none; }
 
+/* ===== Color scheme: makes native form widgets (datetime-local, number,
+   date pickers, scrollbars) render with the correct theme. Without this
+   the text inside <input type="datetime-local"> stays black on a dark
+   background and becomes invisible. ===== */
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
+
+/* ===== Force-readable form fields in dark mode regardless of inline
+   styles set by components (e.g. style={{ color: "#0f2535" }} on inputs
+   inside the "Nova marca" modal). ===== */
+.dark input,
+.dark textarea,
+.dark select {
+  color: #e8eef5 !important;
+  background-color: #1f2d3d !important;
+  border-color: #2a4a64 !important;
+  color-scheme: dark;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #8aa5b8 !important;
+  opacity: 1;
+}
+/* datetime-local / time / date internals */
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+}
+.dark input[type="datetime-local"]::-webkit-datetime-edit,
+.dark input[type="date"]::-webkit-datetime-edit,
+.dark input[type="time"]::-webkit-datetime-edit { color: #e8eef5 !important; }
+.dark input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper,
+.dark input[type="datetime-local"]::-webkit-datetime-edit-text,
+.dark input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+.dark input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+.dark input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+.dark input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+.dark input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
+  color: #e8eef5 !important;
+}
+
+/* Dialog / Popover / Select content from shadcn — ensure readable text */
+.dark [role="dialog"],
+.dark [role="alertdialog"],
+.dark [data-radix-popper-content-wrapper] [role="menu"],
+.dark [data-radix-popper-content-wrapper] [role="listbox"] {
+  color: #e8eef5;
+}
+.dark [role="dialog"] label,
+.dark [role="dialog"] span,
+.dark [role="dialog"] p {
+  color: inherit;
+}
+
 
 @layer base {
   * {
