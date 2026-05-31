@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -125,10 +125,7 @@ export function MarcarModal({ open, onOpenChange, onSave }: MarcarModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-[420px] gap-0 rounded-[20px] p-0"
-      >
+      <DialogContent className="max-w-[420px] gap-0 rounded-[20px] p-0">
         {/* Header */}
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
           <DialogTitle
@@ -137,15 +134,9 @@ export function MarcarModal({ open, onOpenChange, onSave }: MarcarModalProps) {
           >
             Nova marca
           </DialogTitle>
-          <button
-            aria-label="Fechar"
-            onClick={() => onOpenChange(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-full"
-            style={{ background: "#D5DCE8", color: "#1B3A6B" }}
-          >
-            <X size={18} />
-          </button>
+          <span className="h-9 w-9" aria-hidden />
         </div>
+
 
         {/* Form */}
         <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
