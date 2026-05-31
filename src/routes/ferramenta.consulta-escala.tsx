@@ -127,6 +127,8 @@ function ConsultaEscalaPage() {
       </header>
 
       <main className="px-4 -mt-6 space-y-5">
+        <VpnBadge status={vpnStatus} onRecheck={checkVpn} />
+
         <form
           onSubmit={handleSubmit}
           className="rounded-2xl bg-card p-4"
