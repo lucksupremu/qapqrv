@@ -34,7 +34,7 @@ function HomeScreen() {
     saveMarcas(marcas);
   }, [marcas]);
 
-  }, [marcas]);
+
 
   // Mês atual e janelas
   const { mesesRecentes, mesesValores } = useMemo(() => {
