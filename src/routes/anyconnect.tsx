@@ -2,40 +2,52 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Smartphone } from "lucide-react";
 import { openAnyConnect } from "@/lib/open-anyconnect";
+import passo1 from "@/assets/anyconnect/passo-1.jpg";
+import passo2 from "@/assets/anyconnect/passo-2.jpg";
+import passo3 from "@/assets/anyconnect/passo-3.jpg";
+import passo4 from "@/assets/anyconnect/passo-4.jpg";
+import passo5 from "@/assets/anyconnect/passo-5.jpg";
+import passo6 from "@/assets/anyconnect/passo-6.jpg";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({ meta: [{ title: "Configurar AnyConnect — Atividade D" }] }),
   component: AnyConnectGuideScreen,
 });
 
-const PASSOS: { texto: string; imagem: string }[] = [
+const PASSOS: { src: string; alt: string; texto: string }[] = [
   {
-    imagem: "Tela inicial do Cisco Secure Client",
+    src: passo1,
+    alt: "Tela inicial do Cisco Secure Client com seta apontando para os 3 pontos no canto superior direito",
     texto:
-      "Abra o Cisco Secure Client e toque nos 3 pontos (⋮) no canto superior direito",
+      "Abra o Cisco Secure Client e toque nos 3 pontos (⋮) no canto superior direito.",
   },
   {
-    imagem: "Menu superior aberto",
-    texto: "No menu que aparece, toque em Configurações",
+    src: passo2,
+    alt: "Menu suspenso aberto com a opção Configurações destacada",
+    texto: "No menu que aparece, toque em Configurações.",
   },
   {
-    imagem: "Tela de configurações avançadas",
+    src: passo3,
+    alt: "Tela de Configurações com todas as opções desmarcadas (padrão)",
     texto:
-      "Verifique se as configurações avançadas estão como padrão (não altere nada)",
+      "Confirme que as opções estão no padrão (todas desmarcadas). Não altere nada e volte.",
   },
   {
-    imagem: "Lista de conexões",
-    texto: "Volte à tela inicial e toque em Conexões → PMESP",
+    src: passo4,
+    alt: "Tela inicial com seta apontando para Conexões / PMESP",
+    texto: "De volta à tela inicial, toque em Conexões → PMESP.",
   },
   {
-    imagem: "Detalhes da conexão PMESP",
+    src: passo5,
+    alt: "Editor de conexão mostrando Descrição PMESP, servidor extranet.policiamilitar.sp.gov.br e Preferências avançadas",
     texto:
-      "Confirme: Descrição = PMESP | Servidor = extranet.policiamilitar.sp.gov.br | Toque em Preferências avançadas",
+      "Confirme: Descrição = PMESP | Servidor = extranet.policiamilitar.sp.gov.br | depois toque em Preferências avançadas.",
   },
   {
-    imagem: "Preferências avançadas",
+    src: passo6,
+    alt: "Tela de Preferências avançadas com Certificado Desabilitado, Autenticação EAP-AnyConnect e botão Concluído",
     texto:
-      "Confirme: Certificado = Desabilitado | Autenticação = EAP-AnyConnect | Toque em Concluído ✓",
+      "Confirme: Certificado = Desabilitado | Autenticação = EAP-AnyConnect | toque em Concluído ✓.",
   },
 ];
 
