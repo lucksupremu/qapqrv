@@ -217,30 +217,25 @@ function HomeScreen() {
           </button>
         </div>
 
-        {/* Passo a passo rápido */}
-        <div className="mt-4 flex items-center justify-center gap-2">
-          {[
-            { icon: Globe, label: "Acesse o site" },
-            { icon: KeyRound, label: "Conecte no AnyConnect" },
-            { icon: Search, label: "Informe o ID e pesquise" },
-          ].map((passo, i, arr) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className="flex flex-col items-center gap-1">
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-white"
-                  style={{ background: "var(--gradient-primary)" }}
-                >
-                  <passo.icon size={14} />
-                </div>
-                <span className="text-center text-[10px] font-semibold" style={{ color: "#5b7a8f" }}>
-                  {passo.label}
-                </span>
-              </div>
-              {i < arr.length - 1 && (
-                <ArrowRight size={12} style={{ color: "#6ba3c8" }} />
-              )}
-            </div>
-          ))}
+        {/* Aviso VPN */}
+        <div
+          className="mt-4 flex items-center gap-3 rounded-[14px] border bg-[#e8f0f8] px-4 py-3"
+          style={{ borderColor: "#6ba3c8" }}
+        >
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            <KeyRound size={18} />
+          </div>
+          <div className="flex-1">
+            <p className="text-[13px] font-bold" style={{ color: "#0f2535" }}>
+              Conecte o AnyConnect primeiro
+            </p>
+            <p className="text-[12px] font-medium" style={{ color: "#5b7a8f" }}>
+              Sem a VPN ativa, a consulta da escala não funcionará.
+            </p>
+          </div>
         </div>
       </section>
 
