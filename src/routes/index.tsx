@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
-import { openAnyConnect } from "@/lib/open-anyconnect";
+
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
 
