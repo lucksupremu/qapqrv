@@ -9,38 +9,135 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as InicioRouteImport } from './routes/inicio'
+import { Route as HistoricoRouteImport } from './routes/historico'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InicioRoute = InicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoricoRoute = HistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FerramentaSlugRoute = FerramentaSlugRouteImport.update({
+  id: '/ferramenta/$slug',
+  path: '/ferramenta/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/favoritos': typeof FavoritosRoute
+  '/historico': typeof HistoricoRoute
+  '/inicio': typeof InicioRoute
+  '/sobre': typeof SobreRoute
+  '/ferramenta/$slug': typeof FerramentaSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/favoritos': typeof FavoritosRoute
+  '/historico': typeof HistoricoRoute
+  '/inicio': typeof InicioRoute
+  '/sobre': typeof SobreRoute
+  '/ferramenta/$slug': typeof FerramentaSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/favoritos': typeof FavoritosRoute
+  '/historico': typeof HistoricoRoute
+  '/inicio': typeof InicioRoute
+  '/sobre': typeof SobreRoute
+  '/ferramenta/$slug': typeof FerramentaSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/favoritos'
+    | '/historico'
+    | '/inicio'
+    | '/sobre'
+    | '/ferramenta/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/favoritos'
+    | '/historico'
+    | '/inicio'
+    | '/sobre'
+    | '/ferramenta/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/favoritos'
+    | '/historico'
+    | '/inicio'
+    | '/sobre'
+    | '/ferramenta/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FavoritosRoute: typeof FavoritosRoute
+  HistoricoRoute: typeof HistoricoRoute
+  InicioRoute: typeof InicioRoute
+  SobreRoute: typeof SobreRoute
+  FerramentaSlugRoute: typeof FerramentaSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inicio': {
+      id: '/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof InicioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historico': {
+      id: '/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof HistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +145,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ferramenta/$slug': {
+      id: '/ferramenta/$slug'
+      path: '/ferramenta/$slug'
+      fullPath: '/ferramenta/$slug'
+      preLoaderRoute: typeof FerramentaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FavoritosRoute: FavoritosRoute,
+  HistoricoRoute: HistoricoRoute,
+  InicioRoute: InicioRoute,
+  SobreRoute: SobreRoute,
+  FerramentaSlugRoute: FerramentaSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
