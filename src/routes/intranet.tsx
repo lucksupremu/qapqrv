@@ -32,7 +32,7 @@ function IntranetWebviewScreen() {
   const [error, setError] = useState(false);
   const [currentUrl, setCurrentUrl] = useState(url);
 
-  const isInsecure = url.startsWith("http://");
+  
 
   const handleShare = async () => {
     try {
@@ -149,7 +149,7 @@ function IntranetWebviewScreen() {
           </div>
         )}
 
-        {(error || isInsecure) && (
+        {error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#ffffff] px-6 text-center">
             <div
               className="flex h-20 w-20 items-center justify-center rounded-full"
