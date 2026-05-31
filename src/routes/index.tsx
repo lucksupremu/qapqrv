@@ -8,6 +8,8 @@ import {
   KeyRound,
   Info,
   Loader2,
+  Search,
+  ArrowRight,
 } from "lucide-react";
 import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
@@ -349,6 +351,32 @@ function HomeScreen() {
               "Consultar"
             )}
           </button>
+        </div>
+
+        {/* Passo a passo rápido */}
+        <div className="mt-4 flex items-center gap-2">
+          {[
+            { icon: Globe, label: "Acesse o site" },
+            { icon: KeyRound, label: "Conecte no NConnect" },
+            { icon: Search, label: "Informe o ID e pesquise" },
+          ].map((passo, i, arr) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="flex flex-col items-center gap-1">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-white"
+                  style={{ background: "var(--gradient-primary)" }}
+                >
+                  <passo.icon size={14} />
+                </div>
+                <span className="text-center text-[10px] font-semibold" style={{ color: "#5b7a8f" }}>
+                  {passo.label}
+                </span>
+              </div>
+              {i < arr.length - 1 && (
+                <ArrowRight size={12} style={{ color: "#6ba3c8" }} />
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
