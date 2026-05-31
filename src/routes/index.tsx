@@ -39,6 +39,8 @@ export const Route = createFileRoute("/")({
 type ActionBlock = {
   label: string;
   icon: LucideIcon;
+  gradient: string;
+  shadow: string;
   onClick: () => void;
 };
 
