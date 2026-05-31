@@ -22,7 +22,7 @@ import {
 } from "@/lib/escalas-baixadas";
 
 export const Route = createFileRoute("/escalas-baixadas")({
-  head: () => ({ meta: [{ title: "Escalas baixadas — Atividade D" }] }),
+  head: () => ({ meta: [{ title: "Escalas baixadas — QAP, QRV!" }] }),
   component: DownloadedReportsScreen,
 });
 

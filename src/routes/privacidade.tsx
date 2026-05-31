@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/privacidade")({
-  head: () => ({ meta: [{ title: "Política de Privacidade — Atividade D" }] }),
+  head: () => ({ meta: [{ title: "Política de Privacidade — QAP, QRV!" }] }),
   component: PrivacidadeScreen,
 });
 
@@ -38,14 +38,14 @@ function PrivacidadeScreen() {
 
       <div className="mx-4 mt-2 rounded-[20px] bg-[#ffffff] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-2 duration-300">
         <h1 className="text-[20px] font-extrabold" style={{ color: "#2e6b8a" }}>
-          Política de Privacidade — Atividade D
+          Política de Privacidade — QAP, QRV!
         </h1>
         <p className="mt-1 text-[13px]" style={{ color: "#5b7a8f" }}>
           Última atualização: 2025
         </p>
 
         <Section title="1. Sobre o aplicativo">
-          O Atividade D é uma ferramenta de apoio pessoal para policiais militares
+          O QAP, QRV! é uma ferramenta de apoio pessoal para policiais militares
           do Estado de São Paulo acompanharem suas escalas de Dejem e Delegada.
           O app funciona localmente, sem cadastro e sem envio de dados para
           servidores externos.
@@ -64,7 +64,7 @@ function PrivacidadeScreen() {
         </Section>
 
         <Section title="4. Responsabilidade sobre escalas">
-          O Atividade D é uma ferramenta de apoio. Não nos responsabilizamos por
+          O QAP, QRV! é uma ferramenta de apoio. Não nos responsabilizamos por
           atrasos, faltas ou quaisquer consequências decorrentes do uso do app.
         </Section>
 

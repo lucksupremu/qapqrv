@@ -21,7 +21,7 @@ import { upsertEscala, baixarPdfEmBackground } from "@/lib/escalas-baixadas";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Atividade D — Escalas PMESP" },
+      { title: "QAP, QRV! — Escalas PMESP" },
       {
         name: "description",
         content:
@@ -149,7 +149,7 @@ function HomeScreen() {
       <header className="flex items-center justify-between px-4 pt-6 pb-2">
         <div>
           <h1 className="text-[32px] font-extrabold leading-none tracking-tight text-[#0f2535]">
-            Atividade D
+            QAP, QRV!
           </h1>
           <p className="mt-1 text-[12px] font-medium tracking-wide text-[#5b7a8f]">
             Escalas PMESP

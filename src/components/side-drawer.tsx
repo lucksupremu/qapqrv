@@ -135,7 +135,7 @@ function SideDrawer() {
       >
         <div className="flex items-start justify-between p-6" style={{ background: "var(--gradient-primary)", borderRadius: "20px 0 0 0", boxShadow: "var(--shadow-glow)" }}>
           <div>
-            <h2 className="text-[22px] font-bold text-white">Atividade D</h2>
+            <h2 className="text-[22px] font-bold text-white">QAP, QRV!</h2>
             <p className="text-[14px] text-white/70">PMESP</p>
           </div>
           <button

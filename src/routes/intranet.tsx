@@ -19,7 +19,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/intranet")({
-  head: () => ({ meta: [{ title: "Intranet — Atividade D" }] }),
+  head: () => ({ meta: [{ title: "Intranet — QAP, QRV!" }] }),
   validateSearch: (s) => searchSchema.parse(s),
   component: IntranetWebviewScreen,
 });
