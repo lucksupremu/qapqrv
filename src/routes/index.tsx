@@ -253,7 +253,7 @@ function HomeScreen() {
         {/* AnyConnect + info */}
         <div className="mt-3 flex gap-2">
           <button
-            onClick={() => navigate({ to: "/anyconnect" })}
+            onClick={openAnyConnect}
             className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-[14px] border-2 bg-white font-bold active:scale-[0.99]"
             style={{ borderColor: "#1B3A6B", color: "#1B3A6B" }}
           >
