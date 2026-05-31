@@ -130,12 +130,22 @@ function DownloadedReportsScreen() {
                 >
                   ID {e.id}
                 </span>
-                <span
-                  className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
-                  style={{ background: "#e8f0f8", color: "#2e6b8a" }}
-                >
-                  Intranet PMESP
-                </span>
+                {e.hasPdf ? (
+                  <span
+                    className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold"
+                    style={{ background: "#dcfce7", color: "#166534" }}
+                  >
+                    <FileDown size={12} />
+                    PDF {formatBytes(e.pdfSize)}
+                  </span>
+                ) : (
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
+                    style={{ background: "#e8f0f8", color: "#2e6b8a" }}
+                  >
+                    Intranet PMESP
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-[13px]" style={{ color: "#5b7a8f" }}>
                 Salvo em {formatBR(e.dataSalva ?? e.savedAt)}
