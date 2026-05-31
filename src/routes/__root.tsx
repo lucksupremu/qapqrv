@@ -131,6 +131,21 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const shown = sessionStorage.getItem("splash_shown");
+      const path = window.location.pathname;
+      if (!shown && path === "/") {
+        router.navigate({ to: "/splash", replace: true });
+      }
+    } catch {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
