@@ -50,9 +50,25 @@ export type MarcarModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (marca: Marca) => void;
+  initialMarca?: Marca | null;
+  initialDate?: string | null; // ISO; usado quando criando a partir do calendário
 };
 
-export function MarcarModal({ open, onOpenChange, onSave }: MarcarModalProps) {
+function isoToLocalInput(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function MarcarModal({
+  open,
+  onOpenChange,
+  onSave,
+  initialMarca,
+  initialDate,
+}: MarcarModalProps) {
+  const isEdit = !!initialMarca;
   const [tipo, setTipo] = useState<TipoMarca | "">("");
   const [data, setData] = useState("");
   const [valor, setValor] = useState("");
@@ -63,20 +79,36 @@ export function MarcarModal({ open, onOpenChange, onSave }: MarcarModalProps) {
   const [reminderAt, setReminderAt] = useState("");
   const [errors, setErrors] = useState<{ tipo?: string; data?: string }>({});
 
-  // Reset ao abrir
+  // Reset / preenche ao abrir
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+    if (initialMarca) {
+      setTipo(initialMarca.tipo);
+      setData(isoToLocalInput(initialMarca.data));
+      setValor(initialMarca.valor ? String(initialMarca.valor) : "");
+      setDelegadaArea(initialMarca.delegadaArea ?? "");
+      setDelegadaStartHour(initialMarca.delegadaStartHour ?? "");
+      setDelegadaBaseHourAmount(
+        initialMarca.delegadaBaseHourAmount
+          ? String(initialMarca.delegadaBaseHourAmount)
+          : "",
+      );
+      setReminderOn(!!initialMarca.reminderAt);
+      setReminderAt(
+        initialMarca.reminderAt ? isoToLocalInput(initialMarca.reminderAt) : "",
+      );
+    } else {
       setTipo("");
-      setData("");
+      setData(initialDate ? isoToLocalInput(initialDate) : "");
       setValor("");
       setDelegadaArea("");
       setDelegadaStartHour("");
       setDelegadaBaseHourAmount("");
       setReminderOn(false);
       setReminderAt("");
-      setErrors({});
     }
-  }, [open]);
+    setErrors({});
+  }, [open, initialMarca, initialDate]);
 
   const showDelegadaFields =
     tipo === "delegada_capital" || tipo === "delegada_outras";
@@ -101,7 +133,7 @@ export function MarcarModal({ open, onOpenChange, onSave }: MarcarModalProps) {
       reminderOn && reminderAt ? new Date(reminderAt).toISOString() : null;
 
     const marca: Marca = {
-      id: Date.now().toString(),
+      id: initialMarca?.id ?? Date.now().toString(),
       tipo: parsed.data.tipo,
       data: isoData,
       valor: valorNum,
@@ -109,19 +141,20 @@ export function MarcarModal({ open, onOpenChange, onSave }: MarcarModalProps) {
       delegadaStartHour: delegadaStartHour.trim().slice(0, 10),
       delegadaBaseHourAmount: baseHourNum,
       reminderAt: isoReminder,
-      criado: new Date().toISOString(),
+      criado: initialMarca?.criado ?? new Date().toISOString(),
     };
 
     onSave(marca);
     onOpenChange(false);
 
-    toast.success("Marca salva com sucesso!");
+    toast.success(isEdit ? "Marca atualizada com sucesso!" : "Marca salva com sucesso!");
     if (isoReminder) {
       setTimeout(() => {
         toast.info(`Lembrete agendado para ${formatBRDate(isoReminder)}`);
       }, 350);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -132,7 +165,7 @@ export function MarcarModal({ open, onOpenChange, onSave }: MarcarModalProps) {
             className="text-[20px] font-bold"
             style={{ color: "#1B3A6B" }}
           >
-            Nova marca
+            {isEdit ? "Editar marca" : "Nova marca"}
           </DialogTitle>
           <span className="h-9 w-9" aria-hidden />
         </div>
