@@ -77,8 +77,8 @@ function IntranetWebviewScreen() {
       const m = currentUrl.match(/nuesc=(\d+)/i);
       const id = m?.[1] ?? Date.now().toString();
       const raw = window.localStorage.getItem("escalas_baixadas");
-      const list = raw ? (JSON.parse(raw) as Array<{ id: string; url: string; savedAt: string }>) : [];
-      const novo = { id, url: currentUrl, savedAt: new Date().toISOString() };
+      const list = raw ? (JSON.parse(raw) as Array<{ id: string; url: string; titulo?: string; dataSalva?: string }>) : [];
+      const novo = { id, url: currentUrl, titulo, dataSalva: new Date().toISOString() };
       const dedup = [novo, ...list.filter((x) => x.id !== id)].slice(0, 100);
       window.localStorage.setItem("escalas_baixadas", JSON.stringify(dedup));
       toast.success("Escala salva!");
