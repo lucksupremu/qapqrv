@@ -44,7 +44,6 @@ function HomeScreen() {
   const navigate = useNavigate();
   const { setOpen: setDrawerOpen } = useDrawer();
   const [idEscala, setIdEscala] = useState("");
-  const [marcarOpen, setMarcarOpen] = useState(false);
   const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
   const [consultando, setConsultando] = useState(false);
 
