@@ -61,6 +61,17 @@ function HomeScreen() {
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
+    // Abre o link primeiro — esse é o objetivo principal.
+    try {
+      await openInAppBrowser(url, { titulo: `Escala ${id}` });
+    } catch (e) {
+      console.error("Erro ao abrir escala:", e);
+      toast.error("Não foi possível abrir a escala.");
+      setConsultando(false);
+      return;
+    }
+
+    // Salva em "Escalas baixadas" em segundo plano, sem bloquear nem quebrar.
     try {
       upsertEscala({
         id,
@@ -68,15 +79,11 @@ function HomeScreen() {
         titulo: `Escala ${id}`,
         dataSalva: new Date().toISOString(),
       });
-      // Tenta baixar o PDF em segundo plano (requer VPN/sessão ativa).
       void baixarPdfEmBackground(id, url).then((ok) => {
         if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
       });
-      toast.success("Escala adicionada em Escalas baixadas.");
-      // Abre no navegador interno (mantém sessão da VPN/intranet).
-      await openInAppBrowser(url, { titulo: `Escala ${id}` });
-    } catch {
-      toast.error("Não foi possível abrir a escala.");
+    } catch (e) {
+      console.warn("Falha ao salvar escala localmente:", e);
     } finally {
       setConsultando(false);
     }
