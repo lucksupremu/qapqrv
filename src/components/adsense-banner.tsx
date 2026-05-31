@@ -12,14 +12,14 @@ type Props = {
 
 /**
  * Componente para exibir anúncios do Google AdSense.
- * 
+ *
  * Uso:
  *   <AdSenseBanner adSlot="1234567890" adFormat="auto" />
- * 
+ *
  * Requer VITE_ADSENSE_CLIENT configurado (ca-pub-XXXXXXXXXXXXXXXX).
  */
 export function AdSenseBanner({ adSlot, adFormat = "auto", style, className }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
 
   useEffect(() => {
