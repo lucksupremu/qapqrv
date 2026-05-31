@@ -18,21 +18,6 @@ import { BottomNav } from "@/components/bottom-nav";
 /** Google AdSense client ID */
 const ADSENSE_CLIENT = "ca-pub-4966192764194561";
 
-function getAdSenseScript(): { type: "text/javascript"; children: string } | undefined {
-  if (!ADSENSE_CLIENT) return undefined;
-  return {
-    type: "text/javascript",
-    children: `
-      (function() {
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}';
-        s.crossOrigin = 'anonymous';
-        document.head.appendChild(s);
-      })();
-    `,
-  };
-}
 
 function NotFoundComponent() {
   return (
