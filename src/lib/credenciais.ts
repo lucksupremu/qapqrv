@@ -117,9 +117,9 @@ export async function loadCredenciais(pin: string): Promise<Credenciais | null> 
     const salt = await getOrCreateSalt();
     const key = await deriveKey(pin, salt);
     const plain = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: ub64(iv) },
+      { name: "AES-GCM", iv: buf(ub64(iv)) },
       key,
-      ub64(ct),
+      buf(ub64(ct)),
     );
     return JSON.parse(new TextDecoder().decode(plain)) as Credenciais;
   } catch {
