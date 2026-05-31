@@ -6,6 +6,7 @@ import {
   CalendarPlus,
   Menu,
   Globe,
+  Mail,
   KeyRound,
   BookOpen,
   FolderDown,
@@ -144,9 +145,12 @@ function HomeScreen() {
       onClick: () => navigate({ to: "/anyconnect" }),
     },
     {
-      label: "Intranet PMESP",
-      icon: Globe,
-      onClick: () => navigate({ to: "/intranet" }),
+      label: "Email iNotes",
+      icon: Mail,
+      onClick: () =>
+        openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
+          titulo: "Email iNotes",
+        }),
     },
   ];
 
