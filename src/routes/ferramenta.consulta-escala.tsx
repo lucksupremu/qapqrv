@@ -13,11 +13,15 @@ import {
   ShieldAlert,
   ShieldCheck,
   Loader,
+  WifiOff,
+  Wifi,
+  ChevronRight,
 } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { consultarEscala, formatBRL, formatDateBR, type Escala } from "@/lib/escala";
 import { useEscalaHistorico } from "@/hooks/use-escala-historico";
 import { isIntranetReachable } from "@/lib/check-vpn";
+import { openAnyConnect } from "@/lib/open-anyconnect";
 
 const idSchema = z
   .string()
