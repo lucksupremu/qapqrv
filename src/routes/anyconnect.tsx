@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Smartphone } from "lucide-react";
+import { openAnyConnect } from "@/lib/open-anyconnect";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({ meta: [{ title: "Configurar AnyConnect — Atividade D" }] }),
@@ -48,10 +49,7 @@ function AnyConnectGuideScreen() {
     if (!isLast) setStep((s) => s + 1);
   };
 
-  const abrirAnyConnect = () => {
-    if (typeof window === "undefined") return;
-    window.location.href = "anyconnect://";
-  };
+  const abrirAnyConnect = () => openAnyConnect();
 
   return (
     <div

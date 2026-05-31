@@ -13,6 +13,7 @@ import {
 import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
+import { openAnyConnect } from "@/lib/open-anyconnect";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -252,7 +253,7 @@ function HomeScreen() {
         {/* AnyConnect + info */}
         <div className="mt-3 flex gap-2">
           <button
-            onClick={() => navigate({ to: "/anyconnect" })}
+            onClick={openAnyConnect}
             className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-[14px] border-2 bg-white font-bold active:scale-[0.99]"
             style={{ borderColor: "#1B3A6B", color: "#1B3A6B" }}
           >
@@ -325,7 +326,7 @@ function HomeScreen() {
                 Conecte-se à VPN da PMESP (AnyConnect) e tente novamente.
               </p>
               <button
-                onClick={() => navigate({ to: "/anyconnect" })}
+                onClick={openAnyConnect}
                 className="mt-2 rounded-[10px] px-3 py-1.5 text-[12px] font-bold text-white"
                 style={{ background: "#1B3A6B" }}
               >

@@ -1,76 +1,31 @@
-## Plano — Fase 1: "QAP,QRV! "
+## Plano: Deep Link direto para AnyConnect
 
-Reestruturação do app atual para um novo conceito: **"QAP, QRV! "**, voltado para policiais da PMESP acompanharem escalas Dejem e Delegada.
+### Contexto
+Hoje o botão "Abrir AnyConnect" na tela inicial navega para a rota `/anyconnect`, que contém um guia de configuração e um botão que tenta `window.location.href = "anyconnect://"`. O usuário quer pular essa etapa intermediária e abrir o app diretamente (ou redirecionar para a loja se não estiver instalado).
 
-## Observação importante sobre stack
+### O que será feito
 
-O projeto atual usa **TanStack Router** (não React Router DOM) sobre TanStack Start. Vou manter TanStack Router (trocar agora quebraria todo o template SSR). As rotas funcionarão igualmente (`/`, `/calendario`, etc.). Tailwind + shadcn já estão prontos. Se preferir, posso forçar React Router DOM depois — mas recomendo manter.
+1. **Criar utilitário de deep link** (`src/lib/open-anyconnect.ts`):
+   - Detecta a plataforma via `navigator.userAgent` (Android / iOS / desktop)
+   - **Android**: usa Intent URL `intent://#Intent;scheme=anyconnect;package=com.cisco.anyconnect.vpn.android.avf;S.browser_fallback_url=...;end` que abre o app se instalado ou cai na Play Store automaticamente
+   - **iOS**: tenta `anyconnect://` e, após um timeout curto (1.5s), redireciona para a App Store como fallback
+   - **Desktop**: exibe um toast informativo orientando a instalar o app no celular
 
-## O que será feito nesta fase
+2. **Alterar o botão na Home** (`src/routes/index.tsx`):
+   - O botão principal "Abrir AnyConnect" chamará a função do utilitário em vez de `navigate({ to: "/anyconnect" })`
+   - O botão de info (?) continua navegando para `/anyconnect` para quem quer ver o guia de configuração
+   - O link no aviso de VPN também será atualizado para usar o utilitário
 
-### 1. Design tokens e fonte
+3. **Atualizar a página de guia** (`src/routes/anyconnect.tsx`):
+   - Substituir o `abrirAnyConnect` local pela função do utilitário compartilhado
 
-- Adicionar import da fonte **Nunito** (Google Fonts) em `src/routes/__root.tsx` (head).
-- Em `src/styles.css`, adicionar as variáveis solicitadas (`--bg`, `--primary`, `--primary-dark`, `--card-field`, `--success`, `--danger`) como tokens oklch/hex sob `:root`, e aplicar `font-family: 'Nunito', sans-serif` no body. Fundo global = `var(--bg)`.
+### Detalhes técnicos
 
-### 2. Nova tela inicial (`src/routes/index.tsx`)
+- Package Android: `com.cisco.anyconnect.vpn.android.avf`
+- Play Store: `https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf`
+- App Store: `https://apps.apple.com/us/app/cisco-secure-client/id1135064690`
+- URL scheme: `anyconnect://`
+- A função será envolvida em `if (typeof window !== 'undefined')` para não quebrar SSR
 
-Substituir totalmente a splash atual pela **HomeScreen "QAP, WRV! "** com o layout especificado:
-
-- **Header**: título "QAP, QRV! " (32px bold, azul PMESP) + botão hamburguer circular (48px, #D5DCE8) à direita.
-- **Card azul "Valores a receber"** (`#1B3A6B`, radius 20, padding 20, margin 16):
-  - Linha 1: título branco + botão calendário circular branco (40px) → navega para `/calendario`.
-  - Linha 2: 2 campos `valoresMensais` (mês atual + próximo).
-  - Linha 3: seção **Dejem** com 3 campos (3 meses mais recentes).
-  - Linha 4: seção **Delegada** com 3 campos.
-- **Card branco de ações** (radius 20, shadow):
-  - Botão "🌐 Marcar/Desmarcar" (primary) → navega para `/escalas-baixadas` (placeholder).
-  - Botão "🔑 Abrir AnyConnect" (outline) + botão circular "!" → `/anyconnect`.
-  - Campo "ID da escala" + botão "Consultar" → reutiliza fluxo existente (`/ferramenta/consulta-escala`) passando o ID.
-- **Footer**: link "Política de Privacidade" → `/privacidade`.
-
-### 3. Estado e cálculo automático
-
-- `idEscala` (string) + `marcas` (array) persistidos em `localStorage` na chave `marcas_atividade_d`.
-- `useEffect` recalcula `dejemContagens`, `delegadaContagens` e `valoresMensais` a partir de `marcas` sempre que muda.
-- Os 3 meses exibidos são os **3 mais recentes** terminando no mês atual (ex.: hoje MAI/2026 → MAR, ABR, MAI). Valores a receber = mês atual + próximo.
-- Como `marcas` começa vazio, todos os contadores e valores aparecem como `0` / `R$ 0,00` (estado inicial conforme solicitado).
-
-Tipo das marcas (definido agora para suportar Fase 2):
-
-```ts
-type Marca = { id: string; tipo: 'dejem' | 'delegada'; data: string /* ISO */; valor: number };
-```
-
-### 4. Rotas placeholder "Em construção"
-
-Criar arquivos com header (botão voltar + título "Em construção"):
-
-- `src/routes/calendario.tsx`
-- `src/routes/escalas-baixadas.tsx`
-- `src/routes/intranet.tsx`
-- `src/routes/anyconnect.tsx`
-- `src/routes/privacidade.tsx`
-
-Componente compartilhado `src/components/em-construcao.tsx` para o conteúdo.
-
-### 5. Limpeza
-
-- Remover/ocultar componentes da home antiga que não fazem mais sentido nesta tela (bottom-nav, splash, ad-slot na home). **Manter** os arquivos existentes (`ferramenta.consulta-escala.tsx`, `inicio.tsx`, `favoritos.tsx`, `historico.tsx`, `sobre.tsx`) por enquanto — serão revisitados nas próximas fases.
-- Atualizar `src/routes/__root.tsx` para fundo `var(--bg)` e fonte Nunito.
-
-### 6. Itens explicitamente fora desta fase
-
-- Lógica de marcar/desmarcar escalas no calendário.
-- Integração real com AnyConnect/Intranet.
-- Conteúdo das telas placeholder.
-- Mudança de stack para React Router DOM (mantemos TanStack Router).
-
-## Critérios de aceite
-
-- Home renderiza exatamente o layout descrito com fonte Nunito e paleta correta.
-- Todos os campos numéricos mostram `0` e valores `R$ 0,00` no estado inicial.
-- Os 3 meses exibidos correspondem aos 3 mais recentes (terminando no mês atual).
-- `marcas` persiste em `localStorage` (chave `marcas_atividade_d`).
-- Navegação para `/calendario`, `/anyconnect`, `/privacidade`, etc. mostra "Em construção".
-- Sem erros no console, build passa.
+### Resultado esperado
+Ao tocar em "Abrir AnyConnect" na tela inicial, o usuário será levado diretamente ao app (se instalado) ou à loja de apps do seu sistema. A página de guia continua acessível via botão de informações.
