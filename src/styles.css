@@ -151,38 +151,78 @@
 .dark .text-\[\#2e6b8a\] { color: #6bb0dc !important; }
 .dark .text-\[\#5b7a8f\] { color: #8aa5b8 !important; }
 
-/* Override the most common inline-style hex values via attribute selectors */
+/* Override the most common inline-style hex values via attribute selectors.
+   IMPORTANT: browsers normalize React's inline style hex values to rgb()
+   in the serialized `style` attribute, so we must match BOTH forms. */
+
+/* backgrounds: white #ffffff = rgb(255, 255, 255) */
 .dark [style*="background: #ffffff"],
 .dark [style*="background:#ffffff"],
 .dark [style*="background-color: #ffffff"],
-.dark [style*="background-color:#ffffff"] { background-color: #15202e !important; background-image: none !important; }
+.dark [style*="background-color:#ffffff"],
+.dark [style*="background: rgb(255, 255, 255)"],
+.dark [style*="background-color: rgb(255, 255, 255)"] { background-color: #15202e !important; background-image: none !important; }
 
+/* #e8f0f8 = rgb(232, 240, 248) */
 .dark [style*="background: #e8f0f8"],
-.dark [style*="background:#e8f0f8"] { background-color: #1f2d3d !important; background-image: none !important; }
+.dark [style*="background:#e8f0f8"],
+.dark [style*="background-color: #e8f0f8"],
+.dark [style*="background: rgb(232, 240, 248)"],
+.dark [style*="background-color: rgb(232, 240, 248)"] { background-color: #1f2d3d !important; background-image: none !important; }
 
+/* #f4f8fc = rgb(244, 248, 252) */
 .dark [style*="background: #f4f8fc"],
-.dark [style*="background:#f4f8fc"] { background-color: #0a1422 !important; background-image: none !important; }
+.dark [style*="background:#f4f8fc"],
+.dark [style*="background-color: #f4f8fc"],
+.dark [style*="background: rgb(244, 248, 252)"],
+.dark [style*="background-color: rgb(244, 248, 252)"] { background-color: #0a1422 !important; background-image: none !important; }
 
-.dark [style*="background: #fee2e2"] { background-color: #4a1c1c !important; background-image: none !important; }
-.dark [style*="background: #dcfce7"] { background-color: #1a3a25 !important; background-image: none !important; }
+/* #fee2e2 = rgb(254, 226, 226); #dcfce7 = rgb(220, 252, 231) */
+.dark [style*="background: #fee2e2"],
+.dark [style*="background-color: rgb(254, 226, 226)"] { background-color: #4a1c1c !important; background-image: none !important; }
+.dark [style*="background: #dcfce7"],
+.dark [style*="background-color: rgb(220, 252, 231)"] { background-color: #1a3a25 !important; background-image: none !important; }
 
-.dark [style*='color: "#0f2535"'],
+/* text colors */
+/* #0f2535 = rgb(15, 37, 53) */
 .dark [style*="color: #0f2535"],
-.dark [style*="color:#0f2535"] { color: #e8eef5 !important; }
+.dark [style*="color:#0f2535"],
+.dark [style*="color: rgb(15, 37, 53)"] { color: #e8eef5 !important; }
 
+/* #2e6b8a = rgb(46, 107, 138) */
 .dark [style*="color: #2e6b8a"],
-.dark [style*="color:#2e6b8a"] { color: #6bb0dc !important; }
+.dark [style*="color:#2e6b8a"],
+.dark [style*="color: rgb(46, 107, 138)"] { color: #6bb0dc !important; }
 
+/* #5b7a8f = rgb(91, 122, 143) */
 .dark [style*="color: #5b7a8f"],
-.dark [style*="color:#5b7a8f"] { color: #8aa5b8 !important; }
+.dark [style*="color:#5b7a8f"],
+.dark [style*="color: rgb(91, 122, 143)"] { color: #8aa5b8 !important; }
 
-.dark [style*="color: #3A4A60"] { color: #b8c4d6 !important; }
+/* #3A4A60 = rgb(58, 74, 96) */
+.dark [style*="color: #3A4A60"],
+.dark [style*="color: #3a4a60"],
+.dark [style*="color: rgb(58, 74, 96)"] { color: #b8c4d6 !important; }
 
-.dark [style*="borderColor: \"#d5e3ee\""],
-.dark [style*="border-color: #d5e3ee"] { border-color: #2a3a4f !important; }
+/* #1a5276 = rgb(26, 82, 118) (brand navy used in headings) */
+.dark [style*="color: #1a5276"],
+.dark [style*="color: rgb(26, 82, 118)"] { color: #7fb8e0 !important; }
 
-.dark [style*="borderColor: \"#e8f0f8\""],
-.dark [style*="border-color: #e8f0f8"] { border-color: #1f2d3d !important; }
+/* #C0C8D5 = rgb(192, 200, 213) (muted) — keep readable */
+.dark [style*="color: #C0C8D5"],
+.dark [style*="color: #c0c8d5"],
+.dark [style*="color: rgb(192, 200, 213)"] { color: #9aa6bb !important; }
+
+/* borders */
+/* #d5e3ee = rgb(213, 227, 238) */
+.dark [style*="border-color: #d5e3ee"],
+.dark [style*="border-color: rgb(213, 227, 238)"],
+.dark [style*="borderColor: \"#d5e3ee\""] { border-color: #2a3a4f !important; }
+
+/* #e8f0f8 borders */
+.dark [style*="border-color: #e8f0f8"],
+.dark [style*="border-color: rgb(232, 240, 248)"],
+.dark [style*="borderColor: \"#e8f0f8\""] { border-color: #1f2d3d !important; }
 
 /* Slightly soften white-text-on-primary so it doesn't glare on dark surfaces */
 .dark img { filter: brightness(0.92); }
