@@ -116,6 +116,9 @@
   * {
     border-color: var(--color-border);
   }
+  html {
+    scroll-behavior: smooth;
+  }
   html,
   body {
     font-family: "Nunito", system-ui, -apple-system, sans-serif;
@@ -125,7 +128,26 @@
     color: var(--text-dark);
     -webkit-tap-highlight-color: transparent;
   }
+  button {
+    transition: all 0.2s ease;
+  }
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-fade-in { animation: fadeIn 0.25s ease-out; }
+.animate-slide-up { animation: slideUp 0.3s ease-out; }
+.animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
 
 /* MapLibre live-location marker */
 .maplibre-user-marker {
