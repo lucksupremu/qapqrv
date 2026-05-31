@@ -127,6 +127,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
+    scripts: getAdSenseScript() ? [getAdSenseScript()!] : undefined,
   }),
   shellComponent: RootShell,
   component: RootComponent,
