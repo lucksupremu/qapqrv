@@ -66,6 +66,16 @@ const grupo3: Item[] = [
 function SideDrawer() {
   const { open, setOpen } = useDrawer();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const [theme, setTheme] = useState<Theme>("light");
+  useEffect(() => {
+    setTheme(getStoredTheme());
+  }, []);
+  const handleToggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setTheme(next);
+  };
+
 
   const renderItem = (it: Item) => {
     const Icon = it.icon;
