@@ -100,11 +100,45 @@ function HomeScreen() {
 
   const valoresMensais = mesesValores.map((x) => somar(x.ano, x.mes));
 
-  const handleConsultar = () => {
+  const [consultando, setConsultando] = useState(false);
+  const [vpnAviso, setVpnAviso] = useState(false);
+
+  const handleConsultar = async () => {
     const id = idEscala.trim();
-    if (!id) return;
-    navigate({ to: "/ferramenta/consulta-escala", search: { id } as never });
+    if (!id) {
+      toast.error("Informe o ID da escala.");
+      return;
+    }
+    setVpnAviso(false);
+    setConsultando(true);
+
+    const url = `http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelpreesc.aspx?nuesc=${encodeURIComponent(id)}`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        mode: "no-cors",
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (res.status >= 500) throw new Error("server");
+
+      navigate({
+        to: "/intranet",
+        search: { url, titulo: `Escala ${id}` },
+      });
+    } catch {
+      clearTimeout(timeout);
+      setVpnAviso(true);
+      toast.error("Ligue a VPN para consultar a escala.");
+    } finally {
+      setConsultando(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
