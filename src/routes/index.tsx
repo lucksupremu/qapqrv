@@ -186,20 +186,20 @@ function HomeScreen() {
       {/* CONSULTA DE ESCALA */}
       <section
         className="mx-4 mt-4 rounded-[20px] border bg-[#ffffff] p-5"
-        style={{ borderColor: "#d5e3ee", boxShadow: "var(--shadow-card)" }}
+        style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
       >
-        <h2 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
+        <h2 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: "var(--primary)" }}>
           Consultar escala
         </h2>
 
         <div className="mt-3 flex items-stretch gap-2">
           <div
             className="relative flex-1 rounded-[14px] border px-3 pt-[18px] pb-1"
-            style={{ borderColor: "#d5e3ee", background: "#e8f0f8", height: 52 }}
+            style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)", height: 52 }}
           >
             <label
               className="absolute left-3 top-1 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: "#6ba3c8" }}
+              style={{ color: "var(--primary-light)" }}
             >
               ID da escala
             </label>
@@ -209,7 +209,7 @@ function HomeScreen() {
               onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
               onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
               className="w-full bg-transparent text-[16px] font-semibold outline-none"
-              style={{ color: "#0f2535" }}
+              style={{ color: "var(--text-dark)" }}
             />
           </div>
           <button
@@ -231,8 +231,8 @@ function HomeScreen() {
 
         {/* Aviso VPN */}
         <div
-          className="mt-4 flex items-center gap-3 rounded-[14px] border bg-[#e8f0f8] px-4 py-3"
-          style={{ borderColor: "#6ba3c8" }}
+          className="mt-4 flex items-center gap-3 rounded-[14px] border px-4 py-3"
+          style={{ borderColor: "var(--primary-light)", background: "var(--surface-2)" }}
         >
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
@@ -241,10 +241,10 @@ function HomeScreen() {
             <KeyRound size={18} />
           </div>
           <div className="flex-1">
-            <p className="text-[13px] font-bold" style={{ color: "#0f2535" }}>
+            <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
               Conecte o AnyConnect primeiro
             </p>
-            <p className="text-[12px] font-medium" style={{ color: "#5b7a8f" }}>
+            <p className="text-[12px] font-medium" style={{ color: "var(--muted-fg)" }}>
               Sem a VPN ativa, a consulta da escala não funcionará.
             </p>
           </div>
@@ -253,7 +253,7 @@ function HomeScreen() {
 
       {/* GRID DE BLOCOS DE AÇÃO */}
       <section className="mx-4 mt-4">
-        <h2 className="mb-3 text-[14px] font-bold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
+        <h2 className="mb-3 text-[14px] font-bold uppercase tracking-wider" style={{ color: "var(--primary)" }}>
           Acesso rápido
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -262,17 +262,17 @@ function HomeScreen() {
               key={b.label}
               onClick={b.onClick}
               className="flex aspect-square flex-col items-center justify-center gap-3 rounded-[20px] border bg-[#ffffff] p-3 transition active:scale-[0.98]"
-              style={{ borderColor: "#d5e3ee", boxShadow: "var(--shadow-card)" }}
+              style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
             >
               <div
                 className="flex h-[60px] w-[60px] items-center justify-center rounded-full text-white"
-                style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+                style={{ background: b.gradient, boxShadow: b.shadow }}
               >
                 <b.icon size={28} />
               </div>
               <span
                 className="text-center text-[13px] font-bold leading-tight"
-                style={{ color: "#0f2535" }}
+                style={{ color: "var(--text-dark)" }}
               >
                 {b.label}
               </span>
@@ -286,7 +286,7 @@ function HomeScreen() {
         <button
           onClick={() => navigate({ to: "/privacidade" })}
           className="text-[13px] underline"
-          style={{ color: "#5b7a8f" }}
+          style={{ color: "var(--muted-fg)" }}
         >
           Política de Privacidade
         </button>
