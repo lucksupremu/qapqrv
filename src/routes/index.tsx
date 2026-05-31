@@ -124,6 +124,23 @@ function HomeScreen() {
     await openInAppBrowser(url, { titulo });
   };
 
+  const checarVpn = async (): Promise<boolean> => {
+    // Faz um ping rápido a um host só acessível pela intranet PMESP.
+    // Se falhar (ou der timeout), assumimos que a VPN não está ativa.
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 3500);
+      await fetch(
+        "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/favicon.ico?_=" + Date.now(),
+        { method: "GET", mode: "no-cors", cache: "no-store", signal: ctrl.signal },
+      );
+      clearTimeout(t);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleConsultar = async () => {
     const id = idEscala.trim();
     if (!id) {
@@ -136,9 +153,13 @@ function HomeScreen() {
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
     try {
-      // Não dá para pré-checar via fetch: navegador bloqueia HTTP a partir de origem HTTPS
-      // (mixed-content). Abrimos direto — se a VPN não estiver ativa, o navegador
-      // interno mostrará o erro de carregamento real.
+      const vpnOk = await checarVpn();
+      if (!vpnOk) {
+        setVpnAviso(true);
+        toast.error("VPN não detectada. Abrindo o AnyConnect…");
+        openAnyConnect();
+        return;
+      }
       await abrirComCredenciais(url, `Escala ${id}`);
     } catch {
       setVpnAviso(true);
