@@ -120,6 +120,8 @@ function HomeScreen() {
     {
       label: "Marcar / Desmarcar",
       icon: CalendarPlus,
+      gradient: "linear-gradient(135deg, #1a5276 0%, #3498db 100%)",
+      shadow: "0 0 24px -8px rgba(26,82,118,0.45)",
       onClick: () =>
         openInAppBrowser(
           "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
@@ -129,6 +131,8 @@ function HomeScreen() {
     {
       label: "Email iNotes",
       icon: Mail,
+      gradient: "linear-gradient(135deg, #8e44ad 0%, #c39bd3 100%)",
+      shadow: "0 0 24px -8px rgba(142,68,173,0.45)",
       onClick: () =>
         openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
           titulo: "Email iNotes",
@@ -137,16 +141,22 @@ function HomeScreen() {
     {
       label: "Calendário",
       icon: Calendar,
+      gradient: "linear-gradient(135deg, #d35400 0%, #f39c12 100%)",
+      shadow: "0 0 24px -8px rgba(211,84,0,0.45)",
       onClick: () => navigate({ to: "/calendario" }),
     },
     {
       label: "Escalas baixadas",
       icon: FolderDown,
+      gradient: "linear-gradient(135deg, #27ae60 0%, #58d68d 100%)",
+      shadow: "0 0 24px -8px rgba(39,174,96,0.45)",
       onClick: () => navigate({ to: "/escalas-baixadas" }),
     },
     {
       label: "Guia AnyConnect",
       icon: BookOpen,
+      gradient: "linear-gradient(135deg, #c0392b 0%, #ec7063 100%)",
+      shadow: "0 0 24px -8px rgba(192,57,43,0.45)",
       onClick: () => navigate({ to: "/anyconnect" }),
     },
   ];
