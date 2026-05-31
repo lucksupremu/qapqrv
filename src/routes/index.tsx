@@ -14,6 +14,9 @@ import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { openAnyConnect } from "@/lib/open-anyconnect";
+import { openInAppBrowser } from "@/lib/in-app-browser";
+import { hasCredenciais, getSessionPin, setSessionPin, loadCredenciais } from "@/lib/credenciais";
+import { PinModal } from "@/components/pin-modal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
