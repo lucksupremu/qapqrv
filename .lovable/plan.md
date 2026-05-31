@@ -1,40 +1,54 @@
+# Splash com anúncio na abertura do app
+
 ## Objetivo
 
-Redesenhar a tela inicial (`src/routes/index.tsx`) trocando o card azul de estatísticas e o bloco vertical de ações por uma **grid de blocos quadrados com ícone grande + título**, no estilo "menu de app", mantendo a identidade azul PMESP.
+Mostrar um anúncio em tela cheia toda vez que o app abrir, com countdown e botão "Pular", funcionando tanto no app nativo (Capacitor iOS/Android) quanto na versão web/PWA.
 
-## Nova estrutura da home
+## Comportamento
 
-1. **Header** (mantém) — "QAP, QRV!" + botão de menu.
-2. **Bloco de consulta de escala** (mantém, no topo) — campo "ID da escala" + botão "Consultar". É a função mais usada e precisa do input, então fica destacado fora da grid.
-3. **Passo a passo rápido** (mantém) — os 3 passinhos com ícones (Acesse → Conecte → Pesquise).
-4. **Grid de blocos de ação** (novo) — 2 colunas, blocos quadrados com ícone grande centralizado e título embaixo:
-   - **Marcar / Desmarcar** (ícone `CalendarPlus`) — abre o modal de marcar.
-   - **Calendário** (ícone `Calendar`) — vai para `/calendario`.
-   - **Escalas baixadas** (ícone `FolderDown`) — vai para `/escalas-baixadas`.
-   - **Abrir AnyConnect** (ícone `KeyRound`) — chama `openAnyConnect()`.
-   - **Guia AnyConnect** (ícone `BookOpen`) — vai para `/anyconnect`.
-   - **Intranet PMESP** (ícone `Globe`) — vai para `/intranet`.
-5. **Footer** (mantém) — link Política de Privacidade.
+1. Ao abrir o app (cold start ou retomar do background após >30min), aparece uma tela cheia com:
+   - Logo PMESP no topo
+   - Espaço do anúncio no centro (banner/imagem ou AdMob)
+   - Countdown de 5 segundos no canto superior direito
+   - Botão "Pular" que aparece após 5s
+2. Após o tempo OU clique em "Pular", redireciona para a home (`/`).
+3. Frequência: 1x por sessão (não aparece em navegação interna entre telas).
 
-O card azul de "Valores a receber / Dejem / Delegada" sai da home conforme escolhido. Os dados continuam acessíveis via Calendário, que já lista marcas.
+## Estrutura técnica
 
-## Estilo dos blocos
+### Camada web (funciona já, sem plugin)
+- **Nova rota** `src/routes/splash.tsx` — tela cheia com:
+  - Estado de countdown (5s → 0)
+  - `<div>` placeholder para o anúncio (substituível por AdSense depois)
+  - Botão "Pular" habilitado quando countdown chega a 0
+  - `navigate({ to: "/" })` ao fim
+- **Lógica de exibição** em `src/routes/__root.tsx` (ou novo hook `useSplashGate`):
+  - Verifica `sessionStorage.getItem("splash_shown")` 
+  - Se não mostrado E rota atual é `/`, redireciona para `/splash`
+  - Após splash, marca `sessionStorage.setItem("splash_shown", "1")`
+- Funciona em web/PWA sem dependências extras.
 
-- Grid `grid-cols-2 gap-3`.
-- Cada bloco: `aspect-square`, cantos arredondados (`rounded-[20px]`), fundo branco com borda sutil, sombra `var(--shadow-card)`.
-- Ícone grande (28–32px) dentro de um círculo com gradiente azul PMESP (`var(--gradient-primary)`), centralizado.
-- Título em negrito abaixo do ícone, cor `#0f2535`.
-- Pressed state: `active:scale-[0.98]` para feedback tátil.
-- Paleta mantida (azul PMESP): `#0c2340`, `#1a4a6e`, `#2e6b8a`, `#6ba3c8`.
+### Camada nativa (Capacitor — preparação)
+- Adicionar comentário/TODO no `splash.tsx` indicando onde plugar `@capacitor-community/admob` no futuro:
+  ```ts
+  // TODO nativo: if (Capacitor.isNativePlatform()) { AdMob.showAppOpenAd(...) }
+  ```
+- **Não instalar AdMob agora** — requer conta AdMob, App ID, configuração em `capacitor.config.ts` e build nativo. Fica como passo separado quando o usuário tiver as credenciais.
+- A tela de splash web serve como fallback no nativo até o AdMob ser configurado.
 
-## Limpeza de código
+## Arquivos a criar/editar
 
-- Remover do `index.tsx` os cálculos de `mesesRecentes`, `mesesValores`, `contarTipo`, `somar`, `dejemContagens`, `delegadaContagens`, `valoresMensais`, `formatBRL` e o `useMemo` correspondente (não são mais usados na home).
-- `marcas`/`setMarcas` permanecem só para alimentar o `MarcarModal` (onSave).
-- Imports não usados (`Calendar` permanece, mas `formatBRL` e helpers de mês saem).
+- **Criar** `src/routes/splash.tsx` — tela de splash com countdown, placeholder de anúncio e botão pular
+- **Criar** `src/hooks/use-splash-gate.ts` — hook que decide se mostra splash
+- **Editar** `src/routes/__root.tsx` — chamar o gate na montagem
+- **Editar** `src/components/ad-slot.tsx` — reaproveitar componente existente para o slot de anúncio do splash (se compatível)
 
-## Arquivos alterados
+## Fora do escopo (próximos passos quando o usuário quiser)
 
-- `src/routes/index.tsx` — reescrita do `HomeScreen` com a nova grid de blocos e remoção das estatísticas.
+- Conta Google AdMob + App ID/Ad Unit IDs
+- Instalação de `@capacitor-community/admob` e configuração nativa
+- Conta Google AdSense + script no `__root.tsx` para a versão web
 
-Nenhum outro arquivo precisa mudar: rotas, drawer, modal e libs já existem.
+## Resultado
+
+Ao abrir o app (web ou nativo), o usuário vê uma tela com anúncio por 5s, pode pular e entra na home. Estrutura pronta para plugar AdMob/AdSense reais depois.
