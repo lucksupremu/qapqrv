@@ -135,23 +135,14 @@ function HomeScreen() {
 
     const url = `http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelpreesc.aspx?nuesc=${encodeURIComponent(id)}`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-
     try {
-      const res = await fetch(url, {
-        method: "GET",
-        mode: "no-cors",
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      if (res.status >= 500) throw new Error("server");
-
+      // Não dá para pré-checar via fetch: navegador bloqueia HTTP a partir de origem HTTPS
+      // (mixed-content). Abrimos direto — se a VPN não estiver ativa, o navegador
+      // interno mostrará o erro de carregamento real.
       await abrirComCredenciais(url, `Escala ${id}`);
     } catch {
-      clearTimeout(timeout);
       setVpnAviso(true);
-      toast.error("Ligue a VPN para consultar a escala.");
+      toast.error("Não foi possível abrir a escala.");
     } finally {
       setConsultando(false);
     }
