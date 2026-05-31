@@ -160,7 +160,9 @@ function HomeScreen() {
         openAnyConnect();
         return;
       }
+      salvarEscalaBaixada(id, url);
       await abrirComCredenciais(url, `Escala ${id}`);
+      toast.success("Escala salva em Escalas baixadas.");
     } catch {
       setVpnAviso(true);
       toast.error("Não foi possível abrir a escala.");
