@@ -1,6 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, Menu, Globe, KeyRound, Info } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Calendar,
+  Menu,
+  Globe,
+  KeyRound,
+  Info,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
 import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 
@@ -91,11 +100,45 @@ function HomeScreen() {
 
   const valoresMensais = mesesValores.map((x) => somar(x.ano, x.mes));
 
-  const handleConsultar = () => {
+  const [consultando, setConsultando] = useState(false);
+  const [vpnAviso, setVpnAviso] = useState(false);
+
+  const handleConsultar = async () => {
     const id = idEscala.trim();
-    if (!id) return;
-    navigate({ to: "/ferramenta/consulta-escala", search: { id } as never });
+    if (!id) {
+      toast.error("Informe o ID da escala.");
+      return;
+    }
+    setVpnAviso(false);
+    setConsultando(true);
+
+    const url = `http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelpreesc.aspx?nuesc=${encodeURIComponent(id)}`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        mode: "no-cors",
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (res.status >= 500) throw new Error("server");
+
+      navigate({
+        to: "/intranet",
+        search: { url, titulo: `Escala ${id}` },
+      });
+    } catch {
+      clearTimeout(timeout);
+      setVpnAviso(true);
+      toast.error("Ligue a VPN para consultar a escala.");
+    } finally {
+      setConsultando(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
@@ -246,13 +289,50 @@ function HomeScreen() {
           </div>
           <button
             onClick={handleConsultar}
-            className="h-[52px] rounded-[14px] px-5 font-bold text-white active:scale-[0.99]"
+            disabled={consultando}
+            className="flex h-[52px] items-center justify-center gap-2 rounded-[14px] px-5 font-bold text-white transition active:scale-[0.99] disabled:opacity-70"
             style={{ background: "#1B3A6B" }}
           >
-            Consultar
+            {consultando ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Consultando...
+              </>
+            ) : (
+              "Consultar"
+            )}
           </button>
         </div>
+
+        {vpnAviso && (
+          <div
+            className="mt-3 flex items-start gap-3 rounded-[12px] border p-3 animate-in fade-in slide-in-from-top-1 duration-200"
+            style={{ background: "#FFF3CD", borderColor: "#FFC107" }}
+          >
+            <AlertTriangle
+              size={20}
+              className="mt-0.5 shrink-0"
+              style={{ color: "#B07D00" }}
+            />
+            <div className="flex-1">
+              <p
+                className="text-[13px] font-semibold"
+                style={{ color: "#5A4400" }}
+              >
+                Conecte-se à VPN da PMESP (AnyConnect) e tente novamente.
+              </p>
+              <button
+                onClick={() => navigate({ to: "/anyconnect" })}
+                className="mt-2 rounded-[10px] px-3 py-1.5 text-[12px] font-bold text-white"
+                style={{ background: "#1B3A6B" }}
+              >
+                Abrir AnyConnect
+              </button>
+            </div>
+          </div>
+        )}
       </section>
+
 
       {/* FOOTER */}
       <footer className="mt-8 text-center">
