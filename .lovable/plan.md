@@ -1,28 +1,57 @@
-## Plano: Carrossel do Guia AnyConnect com as imagens reais
+# Redesign da interface — Midnight Indigo
 
-### O que será feito
+Atualização visual completa do app mantendo todas as funcionalidades atuais (home, guia AnyConnect, credenciais, navegador interno, drawer lateral). Foco em uma estética moderna, escura, profissional, mobile-first, com tipografia Sora/Manrope e paleta indigo profundo.
 
-1. **Copiar as 6 imagens** de `user-uploads://` para `src/assets/anyconnect/`:
-   - `passo-1.jpg` … `passo-6.jpg`
+## Direção visual
 
-2. **Limpeza leve (sem IA generativa)** com ImageMagick:
-   - `convert <in> -trim +repage -resize 720x -strip -quality 88 <out>` em cada imagem.
-   - Remove bordas pretas uniformes em volta, padroniza largura em 720px e mantém proporção. Texto e setas vermelhas ficam **intactos**.
+- **Paleta (oklch em `src/styles.css`)**
+  - `--background`: indigo quase-preto `#0a0a1a`
+  - `--card` / superfícies elevadas: `#141432` com leve gradiente
+  - `--border`: indigo translúcido sobre superfície
+  - `--primary`: `#4f46e5` com `--primary-glow` mais claro para gradientes
+  - `--accent`: variante indigo `#1e1e5a`
+  - `--muted-foreground`: cinza-azulado para textos secundários
+  - Tokens novos: `--gradient-primary`, `--gradient-surface`, `--shadow-elegant`, `--shadow-glow`
+- **Tipografia**
+  - Sora (600/700) para títulos via `<link>` Google Fonts no `__root.tsx`
+  - Manrope (400/500/600) para corpo
+  - Mapear em `src/styles.css` como `--font-display` e `--font-sans` e aplicar via Tailwind v4 `@theme`
+- **Composição**: layout single-column centrado, largura máx ~520px no mobile, generoso espaçamento vertical, hierarquia clara
+- **Profundidade**: cards com borda 1px translúcida + sombra suave + gradiente sutil de superfície; botão primário com gradiente indigo e glow no hover
+- **Motion**: micro animações com framer-motion (já instalado) — fade/slide-up dos cards na entrada da home, tap scale nos botões, transição suave do drawer
 
-3. **Atualizar `src/routes/anyconnect.tsx`**:
-   - Importar as 6 imagens como módulos (`import passo1 from "@/assets/anyconnect/passo-1.jpg"` …).
-   - Trocar o array `PASSOS` para `{ src, alt, texto }`.
-   - Substituir o bloco placeholder colorido por um `<img>` real (mantendo o container 280px de altura, com `object-contain` e fundo claro).
-   - Adicionar `alt` descritivo para acessibilidade.
+## Telas afetadas
 
-4. **Textos dos 6 passos** (revisados conforme as setas das imagens):
-   1. Abra o Cisco Secure Client e toque nos 3 pontos (⋮) no canto superior direito.
-   2. No menu, toque em **Configurações**.
-   3. Confirme as opções padrão (todas desmarcadas) — não altere nada e volte.
-   4. De volta à tela inicial, toque em **Conexões → PMESP**.
-   5. No Editor de conexão, confirme **Descrição: PMESP** e **Servidor: extranet.policiamilitar.sp.gov.br**, depois toque em **Preferências avançadas**.
-   6. Em Preferências avançadas, confirme **Certificado: Desabilitado** e **Autenticação: EAP‑AnyConnect**, então toque em **Concluído** ✓.
+1. **Home (`src/routes/index.tsx`)**
+   - Header com logo/título em Sora, subtítulo discreto
+   - Card hero com botão primário grande (conectar/ação principal) com gradiente
+   - Lista de atalhos como cards uniformes em coluna única (AnyConnect, Credenciais, etc.)
+   - Animação de entrada escalonada
+2. **Drawer lateral (`src/components/side-drawer.tsx`)**
+   - Fundo `--card` com blur, borda indigo, itens com ícone + label em Manrope, item ativo com pill indigo
+3. **Guia AnyConnect (`src/routes/anyconnect.tsx`)**
+   - Mantém imagens do passo a passo (sem alteração de conteúdo)
+   - Atualiza chrome: header sticky translúcido, indicador de passo redesenhado (dots + número), botões de navegação com novo estilo, texto do passo em card com tipografia nova
+4. **Credenciais (`src/routes/credenciais.tsx`)**
+   - Inputs com novo estilo (fundo `--card`, borda sutil, foco com ring indigo)
+   - Botões com gradiente primário
+5. **PIN modal (`src/components/pin-modal.tsx`)**
+   - Visual atualizado com mesma linguagem (card escuro, dots de PIN destacados, botões numéricos com hover/tap states)
+6. **Root layout (`src/routes/__root.tsx`)**
+   - `<link>` Google Fonts (Sora + Manrope)
+   - Meta theme-color = `#0a0a1a`
+   - Body com background base e classe de fonte padrão
 
-### Fora do escopo
-- Não regenerar imagens com IA (risco de quebrar texto/ícones).
-- Não mudar o layout do carrossel nem a navegação por passos.
+## Fora do escopo
+
+- Nenhuma mudança de lógica, rotas, backend, navegador interno, Capacitor, fluxo de credenciais ou conteúdo do guia
+- Sem regenerar imagens do AnyConnect
+- Sem adicionar novas páginas ou funcionalidades
+
+## Detalhes técnicos
+
+- Tokens em `oklch()` no `:root` de `src/styles.css`; expor utilitários via `@theme` do Tailwind v4 (`--color-primary`, `--color-card`, `--font-display`, etc.)
+- Reaproveitar componentes shadcn existentes; criar variante `premium` no Button (gradiente + shadow-glow) via `cva`
+- Não usar classes de cor cruas (`bg-black`, `text-white`); somente tokens semânticos
+- Garantir contraste AA em fundo escuro
+- framer-motion já está nas deps; usar `motion.div` com `initial/animate` discretos para não pesar

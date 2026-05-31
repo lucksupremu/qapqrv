@@ -9,7 +9,7 @@ export const Route = createFileRoute("/privacidade")({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-6">
-      <h2 className="text-[17px] font-bold" style={{ color: "#1B3A6B" }}>
+      <h2 className="text-[17px] font-bold" style={{ color: "#4f46e5" }}>
         {title}
       </h2>
       <div className="mt-2 text-[15px] leading-[1.6]" style={{ color: "#3A4A60" }}>
@@ -27,20 +27,20 @@ function PrivacidadeScreen() {
           to="/"
           aria-label="Voltar"
           className="flex h-12 w-12 items-center justify-center rounded-full transition active:scale-95"
-          style={{ background: "#D5DCE8", color: "#1B3A6B" }}
+          style={{ background: "#1e1e3a", color: "#4f46e5" }}
         >
           <ArrowLeft size={22} />
         </Link>
-        <h1 className="text-xl font-bold" style={{ color: "#1B3A6B" }}>
+        <h1 className="text-xl font-bold" style={{ color: "#4f46e5" }}>
           Política de Privacidade
         </h1>
       </header>
 
-      <div className="mx-4 mt-2 rounded-[20px] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.08)] animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <h1 className="text-[20px] font-extrabold" style={{ color: "#1B3A6B" }}>
+      <div className="mx-4 mt-2 rounded-[20px] bg-[#141432] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <h1 className="text-[20px] font-extrabold" style={{ color: "#4f46e5" }}>
           Política de Privacidade — Atividade D
         </h1>
-        <p className="mt-1 text-[13px]" style={{ color: "#8A9BB5" }}>
+        <p className="mt-1 text-[13px]" style={{ color: "#8b8db5" }}>
           Última atualização: 2025
         </p>
 
@@ -79,7 +79,7 @@ function PrivacidadeScreen() {
           <a
             href="mailto:Suporte.qapqrv@gmail.com"
             className="font-semibold underline"
-            style={{ color: "#1B3A6B" }}
+            style={{ color: "#4f46e5" }}
           >
             Suporte.qapqrv@gmail.com
           </a>

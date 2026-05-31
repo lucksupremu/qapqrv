@@ -98,7 +98,7 @@ function IntranetWebviewScreen() {
       {/* Header */}
       <header
         className="flex items-center gap-2 px-3 py-3"
-        style={{ background: "#1B3A6B", color: "#fff" }}
+        style={{ background: "#4f46e5", color: "#fff" }}
       >
         <button
           aria-label="Voltar"
@@ -120,7 +120,7 @@ function IntranetWebviewScreen() {
       </header>
 
       {/* Body */}
-      <div className="relative flex-1 overflow-hidden bg-white">
+      <div className="relative flex-1 overflow-hidden bg-[#141432]">
         {!error && (
           <iframe
             ref={iframeRef}
@@ -144,37 +144,37 @@ function IntranetWebviewScreen() {
         )}
 
         {loading && !error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white">
-            <Loader2 size={32} className="animate-spin" style={{ color: "#1B3A6B" }} />
+          <div className="absolute inset-0 flex items-center justify-center bg-[#141432]">
+            <Loader2 size={32} className="animate-spin" style={{ color: "#4f46e5" }} />
           </div>
         )}
 
         {(error || isInsecure) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white px-6 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#141432] px-6 text-center">
             <div
               className="flex h-20 w-20 items-center justify-center rounded-full"
-              style={{ background: "#E8EEF4", color: "#1B3A6B" }}
+              style={{ background: "#1e1e3a", color: "#4f46e5" }}
             >
               <Lock size={36} />
             </div>
-            <p className="text-[18px] font-bold" style={{ color: "#1B3A6B" }}>
+            <p className="text-[18px] font-bold" style={{ color: "#4f46e5" }}>
               Sem acesso à intranet
             </p>
-            <p className="max-w-xs text-[14px]" style={{ color: "#5A6B85" }}>
+            <p className="max-w-xs text-[14px]" style={{ color: "#8b8db5" }}>
               Ligue a VPN AnyConnect para acessar este sistema.
             </p>
             <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
               <button
                 onClick={openAnyConnect}
                 className="h-12 rounded-[14px] font-bold text-white"
-                style={{ background: "#1B3A6B" }}
+                style={{ background: "#4f46e5" }}
               >
                 Abrir AnyConnect
               </button>
               <button
                 onClick={() => navigate({ to: "/" })}
-                className="h-12 rounded-[14px] border-2 bg-white font-bold"
-                style={{ borderColor: "#1B3A6B", color: "#1B3A6B" }}
+                className="h-12 rounded-[14px] border-2 bg-[#141432] font-bold"
+                style={{ borderColor: "#4f46e5", color: "#4f46e5" }}
               >
                 Voltar
               </button>
@@ -185,13 +185,13 @@ function IntranetWebviewScreen() {
 
       {/* Barra inferior */}
       <nav
-        className="grid grid-cols-4 border-t bg-white"
-        style={{ borderColor: "#D5DCE8" }}
+        className="grid grid-cols-4 border-t bg-[#141432]"
+        style={{ borderColor: "#1e1e3a" }}
       >
         <button
           onClick={goBack}
           className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold"
-          style={{ color: "#1B3A6B" }}
+          style={{ color: "#4f46e5" }}
         >
           <ChevronLeft size={20} />
           Voltar
@@ -199,7 +199,7 @@ function IntranetWebviewScreen() {
         <button
           onClick={goForward}
           className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold"
-          style={{ color: "#1B3A6B" }}
+          style={{ color: "#4f46e5" }}
         >
           <ChevronRight size={20} />
           Avançar
@@ -207,7 +207,7 @@ function IntranetWebviewScreen() {
         <button
           onClick={reload}
           className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold"
-          style={{ color: "#1B3A6B" }}
+          style={{ color: "#4f46e5" }}
         >
           <RotateCw size={18} />
           Recarregar
@@ -215,7 +215,7 @@ function IntranetWebviewScreen() {
         <button
           onClick={salvarEscala}
           className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold"
-          style={{ color: "#1B3A6B" }}
+          style={{ color: "#4f46e5" }}
         >
           <Save size={18} />
           Salvar escala
