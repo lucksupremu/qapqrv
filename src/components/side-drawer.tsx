@@ -8,6 +8,7 @@ import {
   Wallet,
   BookOpen,
   Lock,
+  KeyRound,
   X,
 } from "lucide-react";
 import { createContext, useContext, useState, type ReactNode } from "react";
