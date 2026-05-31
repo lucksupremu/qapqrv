@@ -164,9 +164,18 @@ function HomeScreen() {
         openAnyConnect();
         return;
       }
-      salvarEscalaBaixada(id, url);
+      upsertEscala({
+        id,
+        url,
+        titulo: `Escala ${id}`,
+        dataSalva: new Date().toISOString(),
+      });
+      // Download em segundo plano (não bloqueia a abertura do navegador interno)
+      void baixarPdfEmBackground(id, url).then((ok) => {
+        if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
+      });
       await abrirComCredenciais(url, `Escala ${id}`);
-      toast.success("Escala salva em Escalas baixadas.");
+      toast.success("Escala adicionada em Escalas baixadas.");
     } catch {
       setVpnAviso(true);
       toast.error("Não foi possível abrir a escala.");
