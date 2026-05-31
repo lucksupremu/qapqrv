@@ -148,15 +148,23 @@ function RootComponent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const shown = sessionStorage.getItem("splash_shown");
-      const path = window.location.pathname;
-      if (!shown && path === "/") {
-        router.navigate({ to: "/splash", replace: true });
-      }
-    } catch {
-      // ignore
-    }
+
+    // Lazy-load AdSense after first paint to avoid blocking initial render.
+    const loadAds = () => {
+      if (document.querySelector('script[data-adsense]')) return;
+      const s = document.createElement("script");
+      s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
+      s.async = true;
+      s.crossOrigin = "anonymous";
+      s.setAttribute("data-adsense", "1");
+      document.head.appendChild(s);
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ric: any = (window as any).requestIdleCallback;
+    const adTimer = ric
+      ? ric(loadAds, { timeout: 3000 })
+      : window.setTimeout(loadAds, 1500);
+
     // Rehydrate reminder timers and re-check every hour for distant reminders.
     import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
       rehydrateReminders();
@@ -166,7 +174,12 @@ function RootComponent() {
         rehydrateReminders();
       });
     }, 60 * 60 * 1000);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (ric && (window as any).cancelIdleCallback) (window as any).cancelIdleCallback(adTimer);
+      else clearTimeout(adTimer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
