@@ -226,28 +226,7 @@ function HomeScreen() {
           </button>
         </div>
 
-        {/* Lembrete passivo de VPN (não há como detectar VPN do navegador) */}
-        <div className="mt-4 flex items-center gap-3 rounded-[14px] border px-4 py-3"
-          style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)" }}
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15">
-            <ShieldCheck size={18} className="text-amber-600 dark:text-amber-400" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
-              Precisa de VPN AnyConnect
-            </p>
-            <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--muted-fg)" }}>
-              Conecte antes de consultar a escala.
-            </p>
-          </div>
-          <button
-            onClick={() => openAnyConnect()}
-            className="shrink-0 rounded-lg bg-amber-600 px-3 py-2 text-[12px] font-bold text-white shadow-sm active:scale-[0.97] hover:bg-amber-700"
-          >
-            Abrir
-          </button>
-        </div>
+        <VpnBadge />
       </section>
 
       {/* GRID DE BLOCOS DE AÇÃO */}
