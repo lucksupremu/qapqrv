@@ -15,6 +15,7 @@ import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
+import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 
 const SobreRoute = SobreRouteImport.update({
@@ -48,6 +49,12 @@ const FerramentaMinhaLocalizacaoRoute =
     path: '/ferramenta/minha-localizacao',
     getParentRoute: () => rootRouteImport,
   } as any)
+const FerramentaConsultaEscalaRoute =
+  FerramentaConsultaEscalaRouteImport.update({
+    id: '/ferramenta/consulta-escala',
+    path: '/ferramenta/consulta-escala',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const FerramentaSlugRoute = FerramentaSlugRouteImport.update({
   id: '/ferramenta/$slug',
   path: '/ferramenta/$slug',
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
   '/inicio': typeof InicioRoute
   '/sobre': typeof SobreRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
+  '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
 }
 export interface FileRoutesByTo {
@@ -70,6 +78,7 @@ export interface FileRoutesByTo {
   '/inicio': typeof InicioRoute
   '/sobre': typeof SobreRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
+  '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
 }
 export interface FileRoutesById {
@@ -80,6 +89,7 @@ export interface FileRoutesById {
   '/inicio': typeof InicioRoute
   '/sobre': typeof SobreRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
+  '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
 }
 export interface FileRouteTypes {
@@ -91,6 +101,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/sobre'
     | '/ferramenta/$slug'
+    | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -100,6 +111,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/sobre'
     | '/ferramenta/$slug'
+    | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
   id:
     | '__root__'
@@ -109,6 +121,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/sobre'
     | '/ferramenta/$slug'
+    | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
   fileRoutesById: FileRoutesById
 }
@@ -119,6 +132,7 @@ export interface RootRouteChildren {
   InicioRoute: typeof InicioRoute
   SobreRoute: typeof SobreRoute
   FerramentaSlugRoute: typeof FerramentaSlugRoute
+  FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
   FerramentaMinhaLocalizacaoRoute: typeof FerramentaMinhaLocalizacaoRoute
 }
 
@@ -166,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FerramentaMinhaLocalizacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ferramenta/consulta-escala': {
+      id: '/ferramenta/consulta-escala'
+      path: '/ferramenta/consulta-escala'
+      fullPath: '/ferramenta/consulta-escala'
+      preLoaderRoute: typeof FerramentaConsultaEscalaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ferramenta/$slug': {
       id: '/ferramenta/$slug'
       path: '/ferramenta/$slug'
@@ -183,6 +204,7 @@ const rootRouteChildren: RootRouteChildren = {
   InicioRoute: InicioRoute,
   SobreRoute: SobreRoute,
   FerramentaSlugRoute: FerramentaSlugRoute,
+  FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
   FerramentaMinhaLocalizacaoRoute: FerramentaMinhaLocalizacaoRoute,
 }
 export const routeTree = rootRouteImport
