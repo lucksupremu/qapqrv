@@ -8,7 +8,6 @@ import {
   KeyRound,
   Info,
   Loader2,
-  AlertTriangle,
 } from "lucide-react";
 import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
