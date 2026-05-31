@@ -9,8 +9,11 @@ import {
   BookOpen,
   Lock,
   X,
+  Sun,
+  Moon,
 } from "lucide-react";
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 
 type Ctx = { open: boolean; setOpen: (v: boolean) => void };
 const DrawerCtx = createContext<Ctx | null>(null);
@@ -63,6 +66,16 @@ const grupo3: Item[] = [
 function SideDrawer() {
   const { open, setOpen } = useDrawer();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const [theme, setTheme] = useState<Theme>("light");
+  useEffect(() => {
+    setTheme(getStoredTheme());
+  }, []);
+  const handleToggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setTheme(next);
+  };
+
 
   const renderItem = (it: Item) => {
     const Icon = it.icon;
@@ -152,6 +165,19 @@ function SideDrawer() {
           {grupo2.map(renderItem)}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo3.map(renderItem)}
+          <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
+          <button
+            onClick={handleToggleTheme}
+            className="flex items-center gap-3 px-6 py-4 text-[15px] transition-all duration-200 hover:bg-[#e8f0f8]"
+            style={{ color: "#0f2535" }}
+          >
+            {theme === "dark" ? (
+              <Sun size={20} style={{ color: "#f59e0b" }} />
+            ) : (
+              <Moon size={20} style={{ color: "#5b7a8f" }} />
+            )}
+            <span>{theme === "dark" ? "Modo claro" : "Modo escuro"}</span>
+          </button>
         </nav>
       </aside>
     </>
