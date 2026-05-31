@@ -103,7 +103,7 @@ function AnyConnectGuideScreen() {
             {PASSOS.map((p, i) => (
               <div key={i} className="w-full shrink-0 px-1">
                 <div
-                  className="flex h-[280px] w-full items-center justify-center overflow-hidden rounded-[16px]"
+                  className="flex h-[520px] w-full items-center justify-center overflow-hidden rounded-[16px]"
                   style={{ background: "#f4f8fc" }}
                 >
                   <img
