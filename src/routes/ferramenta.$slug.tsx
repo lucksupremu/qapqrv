@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft, FileSearch, Star } from "lucide-react";
 import { getTool } from "@/lib/tools";
 import { BottomNav } from "@/components/bottom-nav";
 import { useFavorites, useHistory } from "@/hooks/use-local-list";
@@ -9,7 +9,14 @@ export const Route = createFileRoute("/ferramenta/$slug")({
   loader: ({ params }) => {
     const tool = getTool(params.slug);
     if (!tool) throw notFound();
-    return { tool };
+    return {
+      tool: {
+        slug: tool.slug,
+        name: tool.name,
+        description: tool.description,
+        gradient: tool.gradient,
+      },
+    };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -42,7 +49,8 @@ export const Route = createFileRoute("/ferramenta/$slug")({
 
 function ToolPage() {
   const { tool } = Route.useLoaderData();
-  const Icon = tool.icon;
+  const fullTool = getTool(tool.slug);
+  const Icon = fullTool?.icon ?? FileSearch;
   const { push } = useHistory();
   const { isFav, toggle } = useFavorites();
 
