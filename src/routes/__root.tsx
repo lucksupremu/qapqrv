@@ -15,6 +15,25 @@ import { Toaster } from "@/components/ui/sonner";
 import { DrawerProvider } from "@/components/side-drawer";
 import { BottomNav } from "@/components/bottom-nav";
 
+/** Google AdSense client ID — preencha com seu ca-pub-XXXXXXXXXXXXXXXX */
+const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT ?? ""; // <-- SUBSTITUA AQUI OU USE .env
+
+function getAdSenseScript(): { type: "text/javascript"; children: string } | undefined {
+  if (!ADSENSE_CLIENT) return undefined;
+  return {
+    type: "text/javascript",
+    children: `
+      (function() {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}';
+        s.crossOrigin = 'anonymous';
+        document.head.appendChild(s);
+      })();
+    `,
+  };
+}
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
