@@ -14,6 +14,9 @@ import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { openAnyConnect } from "@/lib/open-anyconnect";
+import { openInAppBrowser } from "@/lib/in-app-browser";
+import { hasCredenciais, getSessionPin, setSessionPin, loadCredenciais } from "@/lib/credenciais";
+import { PinModal } from "@/components/pin-modal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -105,6 +108,21 @@ function HomeScreen() {
 
   const [consultando, setConsultando] = useState(false);
   const [vpnAviso, setVpnAviso] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinTitulo, setPinTitulo] = useState("");
+  const pendingUrlRef = (globalThis as { _pendingUrl?: string });
+
+  const abrirComCredenciais = async (url: string, titulo: string) => {
+    if (await hasCredenciais()) {
+      if (!getSessionPin()) {
+        pendingUrlRef._pendingUrl = url;
+        setPinTitulo(titulo);
+        setPinOpen(true);
+        return;
+      }
+    }
+    await openInAppBrowser(url, { titulo });
+  };
 
   const handleConsultar = async () => {
     const id = idEscala.trim();
@@ -129,10 +147,7 @@ function HomeScreen() {
       clearTimeout(timeout);
       if (res.status >= 500) throw new Error("server");
 
-      navigate({
-        to: "/intranet",
-        search: { url, titulo: `Escala ${id}` },
-      });
+      await abrirComCredenciais(url, `Escala ${id}`);
     } catch {
       clearTimeout(timeout);
       setVpnAviso(true);
@@ -141,6 +156,19 @@ function HomeScreen() {
       setConsultando(false);
     }
   };
+
+  const onPinConfirm = async (pin: string) => {
+    const cred = await loadCredenciais(pin);
+    if (!cred) throw new Error("PIN incorreto.");
+    setSessionPin(pin);
+    setPinOpen(false);
+    const url = pendingUrlRef._pendingUrl;
+    if (url) {
+      pendingUrlRef._pendingUrl = undefined;
+      await openInAppBrowser(url, { titulo: pinTitulo });
+    }
+  };
+
 
 
   return (
@@ -353,6 +381,13 @@ function HomeScreen() {
         open={marcarOpen}
         onOpenChange={setMarcarOpen}
         onSave={(marca) => setMarcas((prev) => [marca, ...prev])}
+      />
+
+      <PinModal
+        open={pinOpen}
+        modo="informar"
+        onClose={() => setPinOpen(false)}
+        onConfirm={onPinConfirm}
       />
     </div>
   );

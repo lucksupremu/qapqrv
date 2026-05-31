@@ -8,6 +8,7 @@ import {
   Wallet,
   BookOpen,
   Lock,
+  KeyRound,
   X,
 } from "lucide-react";
 import { createContext, useContext, useState, type ReactNode } from "react";
@@ -56,6 +57,7 @@ const grupo2: Item[] = [
   },
 ];
 const grupo3: Item[] = [
+  { type: "route", to: "/credenciais", label: "Credenciais PMESP", icon: KeyRound },
   { type: "route", to: "/anyconnect", label: "Guia AnyConnect", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
 ];

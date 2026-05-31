@@ -1,31 +1,55 @@
-## Plano: Deep Link direto para AnyConnect
+## Plano: Empacotar como app Android nativo com navegador interno e autofill
 
-### Contexto
-Hoje o botão "Abrir AnyConnect" na tela inicial navega para a rota `/anyconnect`, que contém um guia de configuração e um botão que tenta `window.location.href = "anyconnect://"`. O usuário quer pular essa etapa intermediária e abrir o app diretamente (ou redirecionar para a loja se não estiver instalado).
+### Como vai funcionar
+- O projeto Lovable continua sendo o mesmo app web (React/TanStack).
+- Adicionamos o **Capacitor** (wrapper nativo da Ionic) que embrulha o build do Vite num app Android real.
+- Para o navegador interno usamos o plugin **`@capacitor/inappbrowser`** (WebView nativa), que aceita **injeção de JavaScript** no site carregado — é isso que permite preencher login/senha do `login.aspx` da intranet PMESP, algo impossível no iframe do browser.
+- Salvamos as credenciais do usuário no `localStorage` do app, protegidas por **PIN de 4 dígitos**. Ao abrir um link da intranet, perguntamos o PIN uma vez por sessão, e o WebView injeta o login automaticamente quando a página de autenticação carrega.
 
-### O que será feito
+### O que será criado no projeto
 
-1. **Criar utilitário de deep link** (`src/lib/open-anyconnect.ts`):
-   - Detecta a plataforma via `navigator.userAgent` (Android / iOS / desktop)
-   - **Android**: usa Intent URL `intent://#Intent;scheme=anyconnect;package=com.cisco.anyconnect.vpn.android.avf;S.browser_fallback_url=...;end` que abre o app se instalado ou cai na Play Store automaticamente
-   - **iOS**: tenta `anyconnect://` e, após um timeout curto (1.5s), redireciona para a App Store como fallback
-   - **Desktop**: exibe um toast informativo orientando a instalar o app no celular
+1. **Instalar dependências** (necessárias mesmo que o build nativo seja feito fora do Lovable):
+   - `@capacitor/core`, `@capacitor/cli`, `@capacitor/android`, `@capacitor/inappbrowser`, `@capacitor/preferences`
 
-2. **Alterar o botão na Home** (`src/routes/index.tsx`):
-   - O botão principal "Abrir AnyConnect" chamará a função do utilitário em vez de `navigate({ to: "/anyconnect" })`
-   - O botão de info (?) continua navegando para `/anyconnect` para quem quer ver o guia de configuração
-   - O link no aviso de VPN também será atualizado para usar o utilitário
+2. **`capacitor.config.ts`** na raiz com `appId` (ex.: `br.com.qapqrv.app`), `appName: "QAP, QRV!"`, `webDir: "dist"` e `server.androidScheme: "https"`.
 
-3. **Atualizar a página de guia** (`src/routes/anyconnect.tsx`):
-   - Substituir o `abrirAnyConnect` local pela função do utilitário compartilhado
+3. **`src/lib/credenciais.ts`** — cofre local:
+   - Funções `saveCredenciais({usuario, senha})`, `loadCredenciais(pin)`, `hasCredenciais()`, `clearCredenciais()`.
+   - Criptografia simétrica simples (AES via `crypto.subtle`) usando o PIN como chave derivada (PBKDF2). Persistido em `Capacitor Preferences` quando nativo / `localStorage` no web.
 
-### Detalhes técnicos
+4. **`src/lib/in-app-browser.ts`** — abertura unificada:
+   - Detecta plataforma via `Capacitor.isNativePlatform()`.
+   - **No app nativo**: abre `InAppBrowser` com script de autofill que detecta os campos da intranet (`input[name*='usuario'], input[type='password']`), preenche e (opcional) submete o form.
+   - **No navegador web**: fallback para a rota atual `/intranet` (iframe) ou abre nova aba, já que injeção não é possível.
 
-- Package Android: `com.cisco.anyconnect.vpn.android.avf`
-- Play Store: `https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf`
-- App Store: `https://apps.apple.com/us/app/cisco-secure-client/id1135064690`
-- URL scheme: `anyconnect://`
-- A função será envolvida em `if (typeof window !== 'undefined')` para não quebrar SSR
+5. **Nova rota `src/routes/credenciais.tsx`** — tela "Minhas credenciais PMESP":
+   - Definir/alterar PIN (4 dígitos).
+   - Salvar usuário e senha (campos com botão "mostrar/ocultar").
+   - Botão "Apagar credenciais".
+   - Aviso claro: dados ficam apenas no aparelho, nunca enviados a servidor.
 
-### Resultado esperado
-Ao tocar em "Abrir AnyConnect" na tela inicial, o usuário será levado diretamente ao app (se instalado) ou à loja de apps do seu sistema. A página de guia continua acessível via botão de informações.
+6. **Modal "Digite o PIN"** (`src/components/pin-modal.tsx`) acionado antes de abrir o navegador interno quando houver credenciais salvas.
+
+7. **Integração nos pontos que abrem a intranet**:
+   - `src/routes/index.tsx` (botão Consultar) e qualquer outro lugar que hoje navegue para `/intranet` passam a chamar `openInAppBrowser(url, { titulo })`.
+   - Item novo no menu lateral (`side-drawer.tsx`): "Credenciais PMESP".
+
+### O que o usuário precisa fazer fora do Lovable (uma vez)
+
+```text
+git clone <repo do projeto exportado>
+npm install
+npx cap add android
+npm run build && npx cap sync
+npx cap open android   # abre Android Studio e gera o APK assinado
+```
+
+O Lovable Cloud/preview continua mostrando a versão web (com fallback de iframe). O autofill real só funciona dentro do APK instalado.
+
+### Limitações que serão comunicadas na UI
+- iOS exige Mac + conta Apple Developer; este plano cobre Android primeiro. iOS pode ser adicionado depois com `npx cap add ios`.
+- Se a intranet mudar os nomes dos campos do formulário, o seletor de autofill precisa ser ajustado em `in-app-browser.ts`.
+- No preview do Lovable nada muda visualmente: a tela de credenciais funciona, mas o "navegador interno" cai no fallback do iframe.
+
+### Resultado
+Depois de instalado o APK: usuário cadastra usuário/senha + PIN uma vez. Toca em qualquer link da intranet → digita PIN → WebView abre já logado.
