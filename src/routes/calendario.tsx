@@ -26,6 +26,7 @@ import {
   loadMarcas,
   saveMarcas,
 } from "@/lib/marcas";
+import { cancelForMarca } from "@/lib/notifications-adapter";
 
 export const Route = createFileRoute("/calendario")({
   head: () => ({ meta: [{ title: "Calendário — QAP, QRV!" }] }),
