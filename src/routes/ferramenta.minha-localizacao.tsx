@@ -3,13 +3,20 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Star,
-  Crosshair,
-  Layers,
+  Maximize2,
+  SunMedium,
+  LocateFixed,
   Share2,
+  MoreHorizontal,
   Gauge,
-  Navigation as NavIcon,
-  Compass,
+  Navigation2,
+  Crosshair,
   MapPin,
+  Trash2,
+  Copy,
+  ExternalLink,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import type { StyleSpecification, GeoJSONSource } from "maplibre-gl";
@@ -17,6 +24,13 @@ import { getTool } from "@/lib/tools";
 import { BottomNav } from "@/components/bottom-nav";
 import { useFavorites, useHistory } from "@/hooks/use-local-list";
 import { useLiveLocation } from "@/hooks/use-live-location";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
 const SLUG = "minha-localizacao";
@@ -102,6 +116,12 @@ function distance(a: [number, number], b: [number, number]) {
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 }
 
+function cardinal(heading: number | null): string {
+  if (heading == null) return "--";
+  const dirs = ["N", "NE", "L", "SE", "S", "SO", "O", "NO"];
+  return dirs[Math.round((heading % 360) / 45) % 8];
+}
+
 function MinhaLocalizacaoPage() {
   const tool = getTool(SLUG)!;
   const { push } = useHistory();
@@ -113,10 +133,14 @@ function MinhaLocalizacaoPage() {
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const markerElRef = useRef<HTMLDivElement | null>(null);
   const trailRef = useRef<[number, number][]>([]);
+  const maxSpeedRef = useRef<number>(0);
 
   const [layer, setLayer] = useState<MapLayer>("light");
   const [autoCenter, setAutoCenter] = useState(true);
   const [ready, setReady] = useState(false);
+  const [maxSpeed, setMaxSpeed] = useState(0);
+  const [showTrail, setShowTrail] = useState(true);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const {
     latitude,
@@ -135,7 +159,6 @@ function MinhaLocalizacaoPage() {
     push(SLUG);
   }, [push]);
 
-  // Init map (client only)
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!containerRef.current || mapRef.current) return;
@@ -221,7 +244,6 @@ function MinhaLocalizacaoPage() {
     };
   }, []);
 
-  // Switch map style
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
@@ -266,17 +288,34 @@ function MinhaLocalizacaoPage() {
           },
         });
       }
+      if (map.getLayer("trail-line")) {
+        map.setLayoutProperty(
+          "trail-line",
+          "visibility",
+          showTrail ? "visible" : "none",
+        );
+      }
     });
-  }, [layer, ready, longitude, latitude, accuracy]);
+  }, [layer, ready, longitude, latitude, accuracy, showTrail]);
 
-  // Update on new position
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    if (map.getLayer("trail-line")) {
+      map.setLayoutProperty(
+        "trail-line",
+        "visibility",
+        showTrail ? "visible" : "none",
+      );
+    }
+  }, [showTrail, ready]);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map || latitude == null || longitude == null) return;
 
     markerRef.current?.setLngLat([longitude, latitude]);
 
-    // Marker style: arrow when moving, pulse otherwise
     const el = markerElRef.current;
     if (el) {
       if (speed != null && speed > 2 && heading != null) {
@@ -284,6 +323,11 @@ function MinhaLocalizacaoPage() {
       } else if (!el.querySelector(".live-location-marker")) {
         el.innerHTML = '<div class="live-location-marker"></div>';
       }
+    }
+
+    if (speed != null && speed > maxSpeedRef.current) {
+      maxSpeedRef.current = speed;
+      setMaxSpeed(speed);
     }
 
     const acc = map.getSource("accuracy-circle") as GeoJSONSource | undefined;
@@ -338,143 +382,234 @@ function MinhaLocalizacaoPage() {
     }
   };
 
-  const addrLine = address
+  const clearTrail = () => {
+    trailRef.current = [];
+    const map = mapRef.current;
+    const trail = map?.getSource("trail") as GeoJSONSource | undefined;
+    if (trail) {
+      trail.setData({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "LineString", coordinates: [] },
+      });
+    }
+    toast.success("Trilha limpa");
+  };
+
+  const copyCoords = async () => {
+    if (latitude == null || longitude == null) {
+      toast.error("Sem posição ainda");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+      toast.success("Coordenadas copiadas");
+    } catch {
+      toast.error("Falha ao copiar");
+    }
+  };
+
+  const openInMaps = () => {
+    if (latitude == null || longitude == null) return;
+    window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, "_blank");
+  };
+
+  const addrPrimary = address?.street
+    ? address.number
+      ? `${address.street}, ${address.number}`
+      : address.street
+    : null;
+  const addrSecondary = address
     ? [
-        address.street && (address.number ? `${address.street}, ${address.number}` : address.street),
         address.neighborhood,
-        address.city && address.state ? `${address.city}/${address.state}` : address.city ?? address.state,
+        address.city && address.state
+          ? `${address.city} — ${address.state}`
+          : address.city ?? address.state,
       ]
         .filter(Boolean)
         .join(" — ")
     : null;
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
-      <header
-        className="relative px-5 pt-6 pb-5 text-brand-navy-foreground"
-        style={{ background: "var(--gradient-header)" }}
-      >
-        <div className="flex items-center justify-between">
-          <Link
-            to="/inicio"
-            className="rounded-lg p-1.5 -ml-1.5 hover:bg-white/10"
-            aria-label="Voltar"
-          >
-            <ArrowLeft className="size-6" />
-          </Link>
-          <button
-            onClick={() => toggle(SLUG)}
-            aria-label={fav ? "Remover dos favoritos" : "Favoritar"}
-            className="rounded-lg p-1.5 -mr-1.5 hover:bg-white/10"
-          >
-            <Star className={`size-6 ${fav ? "fill-amber-400 text-amber-400" : ""}`} />
-          </button>
-        </div>
-        <div className="mt-3 flex items-center gap-3">
-          <div className={`flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br ${tool.gradient} shadow-lg`}>
-            <MapPin className="size-6 text-white" strokeWidth={2.2} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold leading-tight">Minha Localização</h1>
-            <p className="text-xs text-white/70 mt-0.5">GPS em tempo real</p>
-          </div>
-        </div>
-      </header>
-
-      <main className="px-4 mt-4 space-y-4">
-        <div className="relative h-[58vh] min-h-[360px] w-full overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-card)] bg-muted">
-          <div ref={containerRef} className="absolute inset-0" />
-
-          {/* Map controls */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2">
-            <button
-              onClick={cycleLayer}
-              className="rounded-xl bg-white/95 backdrop-blur p-2.5 shadow-md hover:bg-white"
-              aria-label="Trocar camada do mapa"
-              title={`Camada: ${layer}`}
+    <div className="flex h-[100dvh] flex-col bg-background overflow-hidden">
+      {!fullscreen && (
+        <header
+          className="relative px-4 pt-4 pb-3 text-brand-navy-foreground shrink-0"
+          style={{ background: "var(--gradient-header)" }}
+        >
+          <div className="flex items-center justify-between">
+            <Link
+              to="/inicio"
+              className="rounded-lg p-1.5 -ml-1.5 hover:bg-white/10"
+              aria-label="Voltar"
             >
-              <Layers className="size-5 text-foreground" />
-            </button>
+              <ArrowLeft className="size-6" />
+            </Link>
+            <div className="flex items-center gap-2">
+              <div
+                className={`flex size-8 items-center justify-center rounded-xl bg-gradient-to-br ${tool.gradient}`}
+              >
+                <MapPin className="size-4 text-white" strokeWidth={2.4} />
+              </div>
+              <span className="text-base font-bold tracking-wide">SENTINELA</span>
+            </div>
             <button
-              onClick={recenter}
-              className="rounded-xl bg-white/95 backdrop-blur p-2.5 shadow-md hover:bg-white"
-              aria-label="Recentralizar"
+              onClick={() => toggle(SLUG)}
+              aria-label={fav ? "Remover dos favoritos" : "Favoritar"}
+              className="rounded-lg p-1.5 -mr-1.5 hover:bg-white/10"
             >
-              <Crosshair className={`size-5 ${autoCenter ? "text-brand-blue" : "text-foreground"}`} />
-            </button>
-            <button
-              onClick={share}
-              className="rounded-xl bg-white/95 backdrop-blur p-2.5 shadow-md hover:bg-white"
-              aria-label="Compartilhar"
-            >
-              <Share2 className="size-5 text-foreground" />
+              <Star
+                className={`size-6 ${fav ? "fill-amber-400 text-amber-400" : ""}`}
+              />
             </button>
           </div>
+        </header>
+      )}
 
-          {gpsDisabled && (
-            <div className="absolute top-3 left-3 right-16 rounded-xl bg-destructive/95 px-3 py-2 text-sm text-destructive-foreground shadow-md">
-              GPS desativado — ative no aparelho
-            </div>
-          )}
-          {error && !gpsDisabled && (
-            <div className="absolute top-3 left-3 right-16 rounded-xl bg-amber-500/95 px-3 py-2 text-sm text-white shadow-md">
-              {error}{" "}
-              <button onClick={startTracking} className="underline ml-1">
-                tentar novamente
-              </button>
-            </div>
-          )}
-        </div>
+      <main className="relative flex-1 overflow-hidden">
+        <div ref={containerRef} className="absolute inset-0" />
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2">
-          <Stat icon={Gauge} label="Velocidade" value={speed != null ? `${speed} km/h` : "--"} />
-          <Stat icon={NavIcon} label="Precisão" value={accuracy != null ? `±${Math.round(accuracy)} m` : "--"} />
-          <Stat icon={Compass} label="Direção" value={heading != null ? `${heading}°` : "--"} />
-        </div>
-
-        {/* Address */}
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex size-9 items-center justify-center rounded-xl bg-brand-blue/10">
-              <MapPin className="size-5 text-brand-blue" />
-            </div>
+        {/* Floating address card */}
+        <div className="pointer-events-none absolute top-3 left-3 right-3 z-10">
+          <div className="pointer-events-auto rounded-2xl border-l-4 border-brand-blue bg-brand-navy/90 backdrop-blur-md shadow-xl px-4 py-3 flex items-start gap-3">
+            <MapPin
+              className="size-7 text-brand-blue shrink-0 mt-0.5"
+              strokeWidth={2.4}
+            />
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-muted-foreground">Endereço aproximado</p>
-              <p className="mt-0.5 text-sm font-medium text-foreground break-words">
-                {addrLine ?? (isGeocoding ? "Buscando endereço..." : "Aguardando posição...")}
+              <p className="text-lg font-bold text-white leading-tight truncate">
+                {addrPrimary ??
+                  (isGeocoding ? "Buscando endereço..." : "Aguardando GPS...")}
               </p>
-              {latitude != null && longitude != null && (
-                <p className="mt-1 text-[11px] text-muted-foreground font-mono">
-                  {latitude.toFixed(6)}, {longitude.toFixed(6)}
+              {addrSecondary && (
+                <p className="text-xs text-white/70 mt-0.5 truncate">
+                  {addrSecondary}
                 </p>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* GPS / error banner */}
+        {gpsDisabled && (
+          <div className="absolute top-24 left-3 right-3 z-10 rounded-xl bg-destructive/95 px-3 py-2 text-sm text-destructive-foreground shadow-md">
+            GPS desativado — ative no aparelho
+          </div>
+        )}
+        {error && !gpsDisabled && (
+          <div className="absolute top-24 left-3 right-3 z-10 rounded-xl bg-amber-500/95 px-3 py-2 text-sm text-white shadow-md">
+            {error}{" "}
+            <button onClick={startTracking} className="underline ml-1">
+              tentar novamente
+            </button>
+          </div>
+        )}
+
+        {/* Bottom-left controls */}
+        <div className="absolute bottom-24 left-3 z-10 flex items-center gap-2">
+          <button
+            onClick={() => setFullscreen((v) => !v)}
+            className="size-11 rounded-full bg-brand-navy/85 backdrop-blur-md shadow-lg flex items-center justify-center text-white hover:bg-brand-navy"
+            aria-label="Tela cheia"
+          >
+            <Maximize2 className="size-5" />
+          </button>
+          <button
+            onClick={cycleLayer}
+            className="size-11 rounded-full bg-brand-navy/85 backdrop-blur-md shadow-lg flex items-center justify-center text-white hover:bg-brand-navy"
+            aria-label={`Camada: ${layer}`}
+            title={`Camada: ${layer}`}
+          >
+            <SunMedium className="size-5" />
+          </button>
+        </div>
+
+        {/* Bottom-right recenter */}
+        <button
+          onClick={recenter}
+          className={`absolute bottom-24 right-3 z-10 size-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-95 ${
+            autoCenter ? "bg-brand-blue text-white" : "bg-white text-brand-blue"
+          }`}
+          aria-label="Recentralizar"
+        >
+          <LocateFixed className="size-6" strokeWidth={2.4} />
+        </button>
+
+        {/* Bottom stats bar */}
+        <div className="absolute bottom-3 left-3 right-3 z-10">
+          <div className="rounded-2xl bg-brand-navy/85 backdrop-blur-md shadow-xl px-3 py-2.5 flex items-center gap-2 text-white text-sm">
+            <div className="flex items-center gap-1.5 tabular-nums">
+              <Gauge className="size-4 text-brand-blue" />
+              <span className="font-bold">{speed != null ? speed : 0}</span>
+              <span className="text-[10px] text-white/60">km/h</span>
+              <span className="text-[10px] text-white/40">
+                /{Math.round(maxSpeed)}
+              </span>
+            </div>
+            <span className="text-white/20">·</span>
+            <div className="flex items-center gap-1">
+              <Navigation2
+                className="size-4 text-rose-400"
+                style={{
+                  transform: heading != null ? `rotate(${heading}deg)` : undefined,
+                }}
+              />
+              <span className="font-semibold text-xs">{cardinal(heading)}</span>
+            </div>
+            <span className="text-white/20">·</span>
+            <div className="flex items-center gap-1">
+              <Crosshair className="size-4 text-white/70" />
+              <span className="text-xs tabular-nums">
+                ±{accuracy != null ? Math.round(accuracy) : "--"}m
+              </span>
+            </div>
+            <div className="ml-auto flex items-center gap-1.5">
+              <button
+                onClick={share}
+                className="flex items-center gap-1.5 rounded-full bg-white/15 hover:bg-white/25 px-3 py-1.5 text-xs font-semibold"
+              >
+                <Share2 className="size-3.5" />
+                Enviar
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="size-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center"
+                    aria-label="Mais opções"
+                  >
+                    <MoreHorizontal className="size-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" side="top" className="w-56">
+                  <DropdownMenuItem onClick={() => setShowTrail((v) => !v)}>
+                    {showTrail ? (
+                      <EyeOff className="size-4 mr-2" />
+                    ) : (
+                      <Eye className="size-4 mr-2" />
+                    )}
+                    {showTrail ? "Ocultar trilha" : "Mostrar trilha"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={clearTrail}>
+                    <Trash2 className="size-4 mr-2" />
+                    Limpar trilha
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={copyCoords}>
+                    <Copy className="size-4 mr-2" />
+                    Copiar coordenadas
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={openInMaps}>
+                    <ExternalLink className="size-4 mr-2" />
+                    Abrir no Google Maps
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
       </main>
 
       <BottomNav />
-    </div>
-  );
-}
-
-function Stat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Gauge;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-card)]">
-      <div className="flex items-center gap-1.5 text-muted-foreground">
-        <Icon className="size-3.5" />
-        <span className="text-[11px] uppercase tracking-wide">{label}</span>
-      </div>
-      <p className="mt-1 text-base font-bold text-foreground tabular-nums">{value}</p>
     </div>
   );
 }
