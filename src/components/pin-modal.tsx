@@ -43,29 +43,29 @@ export function PinModal({ open, modo, onClose, onConfirm }: Props) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-sm rounded-[20px] bg-[#141432] p-5 shadow-2xl">
+      <div className="w-full max-w-sm rounded-[20px] bg-[#ffffff] p-5 shadow-2xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full"
-              style={{ background: "#1e1e3a", color: "#4f46e5" }}
+              style={{ background: "#e8f0f8", color: "#2e6b8a" }}
             >
               <Lock size={18} />
             </div>
-            <h3 className="text-[16px] font-bold" style={{ color: "#4f46e5" }}>
+            <h3 className="text-[16px] font-bold" style={{ color: "#2e6b8a" }}>
               {modo === "definir" ? "Definir PIN" : "Digite seu PIN"}
             </h3>
           </div>
           <button
             aria-label="Fechar"
             onClick={onClose}
-            className="rounded-full p-1 text-[#8b8db5] hover:bg-black/5"
+            className="rounded-full p-1 text-[#5b7a8f] hover:bg-black/5"
           >
             <X size={18} />
           </button>
         </div>
 
-        <p className="mt-3 text-[13px]" style={{ color: "#8b8db5" }}>
+        <p className="mt-3 text-[13px]" style={{ color: "#5b7a8f" }}>
           {modo === "definir"
             ? "Crie um PIN de 4 dígitos para proteger suas credenciais. Você precisará dele para abrir a intranet."
             : "Informe o PIN para desbloquear suas credenciais salvas."}
@@ -80,7 +80,7 @@ export function PinModal({ open, modo, onClose, onConfirm }: Props) {
           onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
           onKeyDown={(e) => e.key === "Enter" && submit()}
           className="mt-4 w-full rounded-[12px] border-2 px-4 py-3 text-center text-[24px] font-bold tracking-[0.5em] outline-none"
-          style={{ borderColor: "#4f46e5", color: "#e8eaf6" }}
+          style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
           placeholder="••••"
         />
 
@@ -92,7 +92,7 @@ export function PinModal({ open, modo, onClose, onConfirm }: Props) {
           onClick={submit}
           disabled={loading || pin.length < 4}
           className="mt-4 h-12 w-full rounded-[14px] font-bold text-white disabled:opacity-60"
-          style={{ background: "#4f46e5" }}
+          style={{ background: "#2e6b8a" }}
         >
           {loading ? "Validando..." : modo === "definir" ? "Salvar PIN" : "Desbloquear"}
         </button>

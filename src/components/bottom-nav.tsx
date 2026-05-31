@@ -14,8 +14,8 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 z-40 -translate-x-1/2 w-full max-w-[430px] bg-[#141432] pb-[env(safe-area-inset-bottom)]"
-      style={{ borderTop: "1px solid #23234a", height: 64 }}
+      className="fixed bottom-0 left-1/2 z-40 -translate-x-1/2 w-full max-w-[430px] bg-[#ffffff] pb-[env(safe-area-inset-bottom)]"
+      style={{ borderTop: "1px solid #d5e3ee", height: 64 }}
     >
       <ul className="flex h-full items-stretch">
         {items.map(({ to, label, icon: Icon }) => {
@@ -25,7 +25,7 @@ export function BottomNav() {
               <Link
                 to={to}
                 className="relative flex h-full flex-col items-center justify-center gap-1 transition active:scale-95"
-                style={{ color: active ? "#a5b4fc" : "#8b8db5" }}
+                style={{ color: active ? "#6ba3c8" : "#5b7a8f" }}
               >
                 {active && (
                   <span
@@ -44,7 +44,7 @@ export function BottomNav() {
           <button
             onClick={() => setOpen(true)}
             className="flex h-full w-full flex-col items-center justify-center gap-1 transition active:scale-95"
-            style={{ color: "#8b8db5" }}
+            style={{ color: "#5b7a8f" }}
           >
             <Menu size={24} />
             <span className="text-[10px] font-semibold">Menu</span>

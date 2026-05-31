@@ -80,11 +80,11 @@ function CredenciaisScreen() {
           aria-label="Voltar"
           onClick={() => navigate({ to: "/" })}
           className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "#1e1e3a", color: "#4f46e5" }}
+          style={{ background: "#e8f0f8", color: "#2e6b8a" }}
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="flex-1 text-center text-[18px] font-bold" style={{ color: "#4f46e5" }}>
+        <h1 className="flex-1 text-center text-[18px] font-bold" style={{ color: "#2e6b8a" }}>
           Credenciais PMESP
         </h1>
         <span className="h-10 w-10" />
@@ -92,7 +92,7 @@ function CredenciaisScreen() {
 
       <section
         className="mx-4 mt-2 flex items-start gap-3 rounded-[16px] p-4"
-        style={{ background: "#1e1e3a", color: "#4f46e5" }}
+        style={{ background: "#e8f0f8", color: "#2e6b8a" }}
       >
         <Shield size={20} className="mt-0.5 shrink-0" />
         <p className="text-[13px] leading-relaxed">
@@ -102,10 +102,10 @@ function CredenciaisScreen() {
         </p>
       </section>
 
-      <section className="mx-4 mt-4 rounded-[20px] bg-[#141432] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
+      <section className="mx-4 mt-4 rounded-[20px] bg-[#ffffff] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
         {existe && !destravado && (
           <>
-            <label className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#4f46e5" }}>
+            <label className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
               PIN
             </label>
             <input
@@ -115,13 +115,13 @@ function CredenciaisScreen() {
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
               className="mt-1 w-full rounded-[12px] border-2 px-4 py-3 text-center text-[22px] font-bold tracking-[0.4em] outline-none"
-              style={{ borderColor: "#4f46e5", color: "#e8eaf6" }}
+              style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
               placeholder="••••"
             />
             <button
               onClick={destravar}
               className="mt-4 h-12 w-full rounded-[14px] font-bold text-white"
-              style={{ background: "#4f46e5" }}
+              style={{ background: "#2e6b8a" }}
             >
               Desbloquear
             </button>
@@ -137,7 +137,7 @@ function CredenciaisScreen() {
 
         {podeEditar && (
           <>
-            <label className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#4f46e5" }}>
+            <label className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
               Usuário PMESP
             </label>
             <input
@@ -145,11 +145,11 @@ function CredenciaisScreen() {
               onChange={(e) => setUsuario(e.target.value)}
               autoComplete="off"
               className="mt-1 w-full rounded-[12px] border-2 px-4 py-3 text-[16px] outline-none"
-              style={{ borderColor: "#4f46e5", color: "#e8eaf6" }}
+              style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
               placeholder="Ex.: 123456-7"
             />
 
-            <label className="mt-4 block text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#4f46e5" }}>
+            <label className="mt-4 block text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
               Senha
             </label>
             <div className="relative">
@@ -159,12 +159,12 @@ function CredenciaisScreen() {
                 onChange={(e) => setSenha(e.target.value)}
                 autoComplete="off"
                 className="mt-1 w-full rounded-[12px] border-2 px-4 py-3 pr-12 text-[16px] outline-none"
-                style={{ borderColor: "#4f46e5", color: "#e8eaf6" }}
+                style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
               />
               <button
                 aria-label="Mostrar senha"
                 onClick={() => setShowSenha((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#8b8db5]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#5b7a8f]"
                 type="button"
               >
                 {showSenha ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -173,7 +173,7 @@ function CredenciaisScreen() {
 
             {!existe && (
               <>
-                <label className="mt-4 block text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#4f46e5" }}>
+                <label className="mt-4 block text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
                   Criar PIN (4 dígitos)
                 </label>
                 <input
@@ -183,10 +183,10 @@ function CredenciaisScreen() {
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                   className="mt-1 w-full rounded-[12px] border-2 px-4 py-3 text-center text-[22px] font-bold tracking-[0.4em] outline-none"
-                  style={{ borderColor: "#4f46e5", color: "#e8eaf6" }}
+                  style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
                   placeholder="••••"
                 />
-                <label className="mt-3 block text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#4f46e5" }}>
+                <label className="mt-3 block text-[12px] font-semibold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
                   Confirmar PIN
                 </label>
                 <input
@@ -196,7 +196,7 @@ function CredenciaisScreen() {
                   value={pin2}
                   onChange={(e) => setPin2(e.target.value.replace(/\D/g, ""))}
                   className="mt-1 w-full rounded-[12px] border-2 px-4 py-3 text-center text-[22px] font-bold tracking-[0.4em] outline-none"
-                  style={{ borderColor: "#4f46e5", color: "#e8eaf6" }}
+                  style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
                   placeholder="••••"
                 />
               </>
@@ -205,7 +205,7 @@ function CredenciaisScreen() {
             <button
               onClick={salvar}
               className="mt-5 h-12 w-full rounded-[14px] font-bold text-white"
-              style={{ background: "#4f46e5" }}
+              style={{ background: "#2e6b8a" }}
             >
               Salvar credenciais
             </button>

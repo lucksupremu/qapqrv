@@ -73,20 +73,20 @@ function SideDrawer() {
       "flex items-center gap-3 px-6 py-4 text-[15px] transition-all duration-200 relative";
     const activeCls = isActive
       ? "font-bold"
-      : "hover:bg-[#1e1e3a]";
+      : "hover:bg-[#e8f0f8]";
     const style = isActive
-      ? { background: "#1e1e3a", color: "#4f46e5" }
-      : { color: "#e8eaf6" };
+      ? { background: "#e8f0f8", color: "#2e6b8a" }
+      : { color: "#0f2535" };
 
     const content = (
       <>
         {isActive && (
           <span
             className="absolute left-0 top-0 bottom-0 w-[3px]"
-            style={{ background: "#4f46e5" }}
+            style={{ background: "#2e6b8a" }}
           />
         )}
-        <Icon size={20} style={{ color: isActive ? "#4f46e5" : "#8b8db5" }} />
+        <Icon size={20} style={{ color: isActive ? "#2e6b8a" : "#5b7a8f" }} />
         <span>{it.label}</span>
       </>
     );
@@ -130,7 +130,7 @@ function SideDrawer() {
       />
       {/* drawer */}
       <aside
-        className={`fixed right-0 top-0 z-50 h-full w-[280px] bg-[#141432] shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 z-50 h-full w-[280px] bg-[#ffffff] shadow-2xl transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ borderRadius: "20px 0 0 20px" }}
@@ -150,9 +150,9 @@ function SideDrawer() {
         </div>
         <nav className="flex flex-col overflow-y-auto" style={{ maxHeight: "calc(100% - 110px)" }}>
           {grupo1.map(renderItem)}
-          <div className="my-2 mx-6 border-t" style={{ borderColor: "#23234a" }} />
+          <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo2.map(renderItem)}
-          <div className="my-2 mx-6 border-t" style={{ borderColor: "#23234a" }} />
+          <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo3.map(renderItem)}
         </nav>
       </aside>

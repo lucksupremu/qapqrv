@@ -189,13 +189,13 @@ function CalendarScreen() {
           aria-label="Voltar"
           onClick={() => navigate({ to: "/" })}
           className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "#1e1e3a", color: "#4f46e5" }}
+          style={{ background: "#e8f0f8", color: "#2e6b8a" }}
         >
           <ArrowLeft size={20} />
         </button>
         <h1
           className="flex-1 text-center text-[18px] font-bold"
-          style={{ color: "#4f46e5" }}
+          style={{ color: "#2e6b8a" }}
         >
           Calendário
         </h1>
@@ -208,13 +208,13 @@ function CalendarScreen() {
           aria-label="Mês anterior"
           onClick={goPrev}
           className="flex h-9 w-9 items-center justify-center rounded-full"
-          style={{ background: "#1e1e3a", color: "#4f46e5" }}
+          style={{ background: "#e8f0f8", color: "#2e6b8a" }}
         >
           <ChevronLeft size={20} />
         </button>
         <span
           className="min-w-[160px] text-center text-[18px] font-bold"
-          style={{ color: "#4f46e5" }}
+          style={{ color: "#2e6b8a" }}
         >
           {MESES[cursor.getMonth()]} {cursor.getFullYear()}
         </span>
@@ -222,20 +222,20 @@ function CalendarScreen() {
           aria-label="Próximo mês"
           onClick={goNext}
           className="flex h-9 w-9 items-center justify-center rounded-full"
-          style={{ background: "#1e1e3a", color: "#4f46e5" }}
+          style={{ background: "#e8f0f8", color: "#2e6b8a" }}
         >
           <ChevronRight size={20} />
         </button>
       </div>
 
       {/* Grid */}
-      <div className="mx-3 mt-2 rounded-[20px] bg-[#141432] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
+      <div className="mx-3 mt-2 rounded-[20px] bg-[#ffffff] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
         <div className="grid grid-cols-7 gap-1 pb-2">
           {DIAS.map((d) => (
             <div
               key={d}
               className="text-center text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "#8b8db5" }}
+              style={{ color: "#5b7a8f" }}
             >
               {d}
             </div>
@@ -253,14 +253,14 @@ function CalendarScreen() {
                 onClick={() => handleDayClick(cell)}
                 className="relative mx-auto flex h-11 w-11 flex-col items-center justify-center rounded-full text-[14px] font-semibold transition"
                 style={{
-                  background: isSelected ? "#4f46e5" : "transparent",
+                  background: isSelected ? "#2e6b8a" : "transparent",
                   color: isSelected
                     ? "#fff"
                     : cell.inMonth
-                      ? "#e8eaf6"
+                      ? "#0f2535"
                       : "#C0C8D5",
                   border:
-                    isToday && !isSelected ? "2px solid #4f46e5" : "2px solid transparent",
+                    isToday && !isSelected ? "2px solid #2e6b8a" : "2px solid transparent",
                 }}
               >
                 <span className="leading-none">{cell.date.getDate()}</span>
@@ -288,7 +288,7 @@ function CalendarScreen() {
             {selectedMarcas.map((m) => (
               <li
                 key={m.id}
-                className="flex overflow-hidden rounded-[14px] bg-[#141432] shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+                className="flex overflow-hidden rounded-[14px] bg-[#ffffff] shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
               >
                 <div
                   className="w-1.5 shrink-0"
@@ -297,18 +297,18 @@ function CalendarScreen() {
                 <div className="flex-1 p-3">
                   <div
                     className="text-[15px] font-bold"
-                    style={{ color: "#4f46e5" }}
+                    style={{ color: "#2e6b8a" }}
                   >
                     {TIPO_LABEL[m.tipo]}
                     {m.delegadaArea ? ` · ${m.delegadaArea}` : ""}
                   </div>
-                  <div className="text-[12px]" style={{ color: "#8b8db5" }}>
+                  <div className="text-[12px]" style={{ color: "#5b7a8f" }}>
                     {formatBR(m.data)}
                   </div>
                   {m.valor > 0 && (
                     <div
                       className="mt-0.5 text-[13px] font-bold"
-                      style={{ color: "#e8eaf6" }}
+                      style={{ color: "#0f2535" }}
                     >
                       {formatBRL(m.valor)}
                     </div>
@@ -316,8 +316,8 @@ function CalendarScreen() {
                   <div className="mt-2 flex gap-2">
                     <button
                       onClick={() => openEdit(m)}
-                      className="rounded-[10px] border-2 bg-[#141432] px-3 py-1 text-[12px] font-bold"
-                      style={{ borderColor: "#4f46e5", color: "#4f46e5" }}
+                      className="rounded-[10px] border-2 bg-[#ffffff] px-3 py-1 text-[12px] font-bold"
+                      style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
                     >
                       Editar
                     </button>
@@ -335,10 +335,10 @@ function CalendarScreen() {
           </ul>
         ) : (
           <div className="flex flex-col items-center justify-center py-10 text-center">
-            <CalendarX size={40} style={{ color: "#8b8db5" }} />
+            <CalendarX size={40} style={{ color: "#5b7a8f" }} />
             <p
               className="mt-2 text-[14px] font-semibold"
-              style={{ color: "#8b8db5" }}
+              style={{ color: "#5b7a8f" }}
             >
               Nenhuma marca neste dia
             </p>
@@ -351,7 +351,7 @@ function CalendarScreen() {
         aria-label="Nova marca"
         onClick={openNew}
         className="fixed right-5 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_8px_24px_rgba(79,70,229,0.5)] active:scale-95"
-        style={{ background: "#4f46e5", bottom: 80 }}
+        style={{ background: "#2e6b8a", bottom: 80 }}
       >
         <Plus size={26} />
       </button>
@@ -370,7 +370,7 @@ function CalendarScreen() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle style={{ color: "#4f46e5" }}>
+            <AlertDialogTitle style={{ color: "#2e6b8a" }}>
               Excluir escala
             </AlertDialogTitle>
             <AlertDialogDescription>

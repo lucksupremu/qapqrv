@@ -73,13 +73,13 @@ function AnyConnectGuideScreen() {
           aria-label="Voltar"
           onClick={() => navigate({ to: "/" })}
           className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "#1e1e3a", color: "#4f46e5" }}
+          style={{ background: "#e8f0f8", color: "#2e6b8a" }}
         >
           <ArrowLeft size={20} />
         </button>
         <h1
           className="flex-1 text-center text-[18px] font-bold"
-          style={{ color: "#4f46e5" }}
+          style={{ color: "#2e6b8a" }}
         >
           Configurar AnyConnect
         </h1>
@@ -87,10 +87,10 @@ function AnyConnectGuideScreen() {
       </header>
 
       {/* Carrossel */}
-      <div className="mx-3 mt-2 overflow-hidden rounded-[20px] bg-[#141432] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
+      <div className="mx-3 mt-2 overflow-hidden rounded-[20px] bg-[#ffffff] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
         <p
           className="text-center text-[13px] font-semibold"
-          style={{ color: "#8b8db5" }}
+          style={{ color: "#5b7a8f" }}
         >
           Passo {step + 1} de {PASSOS.length}
         </p>
@@ -104,7 +104,7 @@ function AnyConnectGuideScreen() {
               <div key={i} className="w-full shrink-0 px-1">
                 <div
                   className="flex h-[280px] w-full items-center justify-center overflow-hidden rounded-[16px]"
-                  style={{ background: "#0a0a1a" }}
+                  style={{ background: "#f4f8fc" }}
                 >
                   <img
                     src={p.src}
@@ -115,7 +115,7 @@ function AnyConnectGuideScreen() {
                 </div>
                 <p
                   className="mt-4 px-2 text-center text-[15px] font-semibold leading-relaxed"
-                  style={{ color: "#e8eaf6" }}
+                  style={{ color: "#0f2535" }}
                 >
                   {p.texto}
                 </p>
@@ -133,7 +133,7 @@ function AnyConnectGuideScreen() {
               onClick={() => setStep(i)}
               className="h-2 w-2 rounded-full transition"
               style={{
-                background: i === step ? "#4f46e5" : "#1e1e3a",
+                background: i === step ? "#2e6b8a" : "#e8f0f8",
                 transform: i === step ? "scale(1.2)" : "scale(1)",
               }}
             />
@@ -145,15 +145,15 @@ function AnyConnectGuideScreen() {
           <button
             onClick={goPrev}
             disabled={step === 0}
-            className="flex items-center gap-1 rounded-[12px] border-2 bg-[#141432] px-4 py-2 text-[13px] font-bold disabled:opacity-40"
-            style={{ borderColor: "#4f46e5", color: "#4f46e5" }}
+            className="flex items-center gap-1 rounded-[12px] border-2 bg-[#ffffff] px-4 py-2 text-[13px] font-bold disabled:opacity-40"
+            style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
           >
             <ChevronLeft size={16} /> Anterior
           </button>
           <button
             onClick={isLast ? () => navigate({ to: "/" }) : goNext}
             className="flex items-center gap-1 rounded-[12px] px-4 py-2 text-[13px] font-bold text-white"
-            style={{ background: "#4f46e5" }}
+            style={{ background: "#2e6b8a" }}
           >
             {isLast ? "Concluído" : (<>Próximo <ChevronRight size={16} /></>)}
           </button>
@@ -168,7 +168,7 @@ function AnyConnectGuideScreen() {
         <button
           onClick={abrirAnyConnect}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] font-bold text-white active:scale-[0.99]"
-          style={{ background: "#4f46e5" }}
+          style={{ background: "#2e6b8a" }}
         >
           <Smartphone size={18} />
           Abrir AnyConnect
