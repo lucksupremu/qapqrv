@@ -49,10 +49,7 @@ function AnyConnectGuideScreen() {
     if (!isLast) setStep((s) => s + 1);
   };
 
-  const abrirAnyConnect = () => {
-    if (typeof window === "undefined") return;
-    window.location.href = "anyconnect://";
-  };
+  const abrirAnyConnect = () => openAnyConnect();
 
   return (
     <div
