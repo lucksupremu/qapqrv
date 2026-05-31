@@ -73,8 +73,8 @@ function HomeScreen() {
         if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
       });
       toast.success("Escala adicionada em Escalas baixadas.");
-      // Abre dentro do app para manter sessão e permitir salvar o PDF.
-      navigate({ to: "/intranet", search: { url, titulo: `Escala ${id}` } });
+      // Abre no navegador interno (mantém sessão da VPN/intranet).
+      await openInAppBrowser(url, { titulo: `Escala ${id}` });
     } catch {
       toast.error("Não foi possível abrir a escala.");
     } finally {
