@@ -405,3 +405,93 @@ function HomeScreen() {
     </div>
   );
 }
+
+function VpnBadge() {
+  const [status, setStatus] = useState<"checking" | "on" | "off" | "unknown">("checking");
+
+  const refresh = async () => {
+    setStatus("checking");
+    const { isVpnActive } = await import("@/lib/vpn-status");
+    const r = await isVpnActive();
+    setStatus(r === null ? "unknown" : r ? "on" : "off");
+  };
+
+  useEffect(() => {
+    void refresh();
+    const onFocus = () => void refresh();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, []);
+
+  if (status === "on") {
+    return (
+      <div className="mt-4 flex items-center gap-3 rounded-[14px] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+          <ShieldCheck size={18} className="text-emerald-700 dark:text-emerald-300" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-bold text-emerald-800 dark:text-emerald-200">
+            VPN AnyConnect ativa
+          </p>
+          <p className="text-[12px] font-medium text-emerald-700/90 dark:text-emerald-300/90">
+            Tudo pronto para consultar escalas.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "off") {
+    return (
+      <div className="mt-4 flex items-center gap-3 rounded-[14px] border-2 border-amber-500/50 bg-amber-500/10 px-4 py-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+          <ShieldCheck size={18} className="text-amber-700 dark:text-amber-300" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-bold text-amber-800 dark:text-amber-200">
+            VPN desconectada
+          </p>
+          <p className="text-[12px] font-medium text-amber-700/90 dark:text-amber-300/90">
+            Conecte o AnyConnect antes de consultar.
+          </p>
+        </div>
+        <button
+          onClick={() => openAnyConnect()}
+          className="shrink-0 rounded-lg bg-amber-600 px-3 py-2 text-[12px] font-bold text-white shadow-sm active:scale-[0.97] hover:bg-amber-700"
+        >
+          Abrir
+        </button>
+      </div>
+    );
+  }
+
+  // unknown (web) ou checking: lembrete passivo
+  return (
+    <div
+      className="mt-4 flex items-center gap-3 rounded-[14px] border px-4 py-3"
+      style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)" }}
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15">
+        <ShieldCheck size={18} className="text-amber-600 dark:text-amber-400" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
+          Precisa de VPN AnyConnect
+        </p>
+        <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--muted-fg)" }}>
+          {status === "checking" ? "Verificando…" : "Conecte antes de consultar a escala."}
+        </p>
+      </div>
+      <button
+        onClick={() => openAnyConnect()}
+        className="shrink-0 rounded-lg bg-amber-600 px-3 py-2 text-[12px] font-bold text-white shadow-sm active:scale-[0.97] hover:bg-amber-700"
+      >
+        Abrir
+      </button>
+    </div>
+  );
+}
