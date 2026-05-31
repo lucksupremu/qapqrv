@@ -20,6 +20,7 @@ import { useDrawer } from "@/components/side-drawer";
 
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
+import { guardIntranet } from "@/lib/vpn-guard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
