@@ -289,13 +289,50 @@ function HomeScreen() {
           </div>
           <button
             onClick={handleConsultar}
-            className="h-[52px] rounded-[14px] px-5 font-bold text-white active:scale-[0.99]"
+            disabled={consultando}
+            className="flex h-[52px] items-center justify-center gap-2 rounded-[14px] px-5 font-bold text-white transition active:scale-[0.99] disabled:opacity-70"
             style={{ background: "#1B3A6B" }}
           >
-            Consultar
+            {consultando ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Consultando...
+              </>
+            ) : (
+              "Consultar"
+            )}
           </button>
         </div>
+
+        {vpnAviso && (
+          <div
+            className="mt-3 flex items-start gap-3 rounded-[12px] border p-3 animate-in fade-in slide-in-from-top-1 duration-200"
+            style={{ background: "#FFF3CD", borderColor: "#FFC107" }}
+          >
+            <AlertTriangle
+              size={20}
+              className="mt-0.5 shrink-0"
+              style={{ color: "#B07D00" }}
+            />
+            <div className="flex-1">
+              <p
+                className="text-[13px] font-semibold"
+                style={{ color: "#5A4400" }}
+              >
+                Conecte-se à VPN da PMESP (AnyConnect) e tente novamente.
+              </p>
+              <button
+                onClick={() => navigate({ to: "/anyconnect" })}
+                className="mt-2 rounded-[10px] px-3 py-1.5 text-[12px] font-bold text-white"
+                style={{ background: "#1B3A6B" }}
+              >
+                Abrir AnyConnect
+              </button>
+            </div>
+          </div>
+        )}
       </section>
+
 
       {/* FOOTER */}
       <footer className="mt-8 text-center">
