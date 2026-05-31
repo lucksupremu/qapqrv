@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as Char91indexChar93RouteImport } from './routes/[index]'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as IntranetRouteImport } from './routes/intranet'
@@ -23,6 +24,11 @@ import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferrame
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 
+const Char91indexChar93Route = Char91indexChar93RouteImport.update({
+  id: '/index',
+  path: '/index',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
+  '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
+  '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
+  '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
+    | '/index'
     | '/inicio'
     | '/intranet'
     | '/privacidade'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
+    | '/index'
     | '/inicio'
     | '/intranet'
     | '/privacidade'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
+    | '/index'
     | '/inicio'
     | '/intranet'
     | '/privacidade'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FavoritosRoute: typeof FavoritosRoute
   HistoricoRoute: typeof HistoricoRoute
+  Char91indexChar93Route: typeof Char91indexChar93Route
   InicioRoute: typeof InicioRoute
   IntranetRoute: typeof IntranetRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -203,6 +216,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/index': {
+      id: '/index'
+      path: '/index'
+      fullPath: '/index'
+      preLoaderRoute: typeof Char91indexChar93RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sobre': {
       id: '/sobre'
       path: '/sobre'
@@ -304,6 +324,7 @@ const rootRouteChildren: RootRouteChildren = {
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FavoritosRoute: FavoritosRoute,
   HistoricoRoute: HistoricoRoute,
+  Char91indexChar93Route: Char91indexChar93Route,
   InicioRoute: InicioRoute,
   IntranetRoute: IntranetRoute,
   PrivacidadeRoute: PrivacidadeRoute,
@@ -315,3 +336,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
