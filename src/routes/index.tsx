@@ -56,6 +56,19 @@ function HomeScreen() {
   const [idEscala, setIdEscala] = useState("");
   const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
   const [consultando, setConsultando] = useState(false);
+  const [vpnStatus, setVpnStatus] = useState<"checking" | "ok" | "off">("checking");
+
+  const checkVpn = useCallback(async () => {
+    setVpnStatus("checking");
+    const ok = await isIntranetReachable(3000);
+    setVpnStatus(ok ? "ok" : "off");
+  }, []);
+
+  useEffect(() => {
+    void checkVpn();
+    const interval = setInterval(() => void checkVpn(), 30000);
+    return () => clearInterval(interval);
+  }, [checkVpn]);
 
   useEffect(() => {
     saveMarcas(marcas);
