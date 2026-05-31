@@ -61,9 +61,15 @@ function HomeScreen() {
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
-    // Abre o link primeiro — esse é o objetivo principal.
+    // Abre o link conforme a plataforma — esse é o objetivo principal.
     try {
-      await openInAppBrowser(url, { titulo: `Escala ${id}` });
+      if (isNativeApp()) {
+        // APK: navegador interno do Capacitor
+        await openInAppBrowser(url, { titulo: `Escala ${id}` });
+      } else {
+        // Web: abrir em nova aba de forma SÍNCRONA para não ser bloqueado
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
     } catch (e) {
       console.error("Erro ao abrir escala:", e);
       toast.error("Não foi possível abrir a escala.");
