@@ -112,7 +112,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
-    scripts: getAdSenseScript() ? [getAdSenseScript()!] : undefined,
+    scripts: [
+      {
+        src: `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`,
+        async: true,
+        crossOrigin: "anonymous",
+      },
+    ],
+
   }),
   shellComponent: RootShell,
   component: RootComponent,
