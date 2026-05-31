@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Calendar,
@@ -7,12 +7,15 @@ import {
   Menu,
   Globe,
   Mail,
-  KeyRound,
   BookOpen,
   FolderDown,
   Loader2,
   Search,
   ArrowRight,
+  WifiOff,
+  Wifi,
+  ShieldCheck,
+  Loader,
   type LucideIcon,
 } from "lucide-react";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
@@ -21,6 +24,8 @@ import { useDrawer } from "@/components/side-drawer";
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
 import { guardIntranet } from "@/lib/vpn-guard";
+import { isIntranetReachable } from "@/lib/check-vpn";
+import { openAnyConnect } from "@/lib/open-anyconnect";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,6 +55,19 @@ function HomeScreen() {
   const [idEscala, setIdEscala] = useState("");
   const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
   const [consultando, setConsultando] = useState(false);
+  const [vpnStatus, setVpnStatus] = useState<"checking" | "ok" | "off">("checking");
+
+  const checkVpn = useCallback(async () => {
+    setVpnStatus("checking");
+    const ok = await isIntranetReachable(3000);
+    setVpnStatus(ok ? "ok" : "off");
+  }, []);
+
+  useEffect(() => {
+    void checkVpn();
+    const interval = setInterval(() => void checkVpn(), 30000);
+    return () => clearInterval(interval);
+  }, [checkVpn]);
 
   useEffect(() => {
     saveMarcas(marcas);
@@ -225,26 +243,76 @@ function HomeScreen() {
           </button>
         </div>
 
-        {/* Aviso VPN */}
-        <div
-          className="mt-4 flex items-center gap-3 rounded-[14px] border px-4 py-3"
-          style={{ borderColor: "var(--primary-light)", background: "var(--surface-2)" }}
-        >
+        {/* Status VPN */}
+        {vpnStatus === "checking" && (
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-            style={{ background: "var(--gradient-primary)" }}
+            className="mt-4 flex items-center gap-3 rounded-[14px] border px-4 py-3"
+            style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)" }}
           >
-            <KeyRound size={18} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+              <Loader size={18} className="animate-spin text-muted-foreground" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
+                Verificando VPN…
+              </p>
+              <p className="text-[12px] font-medium" style={{ color: "var(--muted-fg)" }}>
+                Testando conexão com a intranet PMESP.
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
-              Conecte o AnyConnect primeiro
-            </p>
-            <p className="text-[12px] font-medium" style={{ color: "var(--muted-fg)" }}>
-              Sem a VPN ativa, a consulta da escala não funcionará.
-            </p>
+        )}
+        {vpnStatus === "ok" && (
+          <div
+            className="mt-4 flex items-center gap-3 rounded-[14px] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+              <Wifi size={18} className="text-emerald-700 dark:text-emerald-300" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[13px] font-bold text-emerald-800 dark:text-emerald-200">
+                VPN conectada
+              </p>
+              <p className="text-[12px] font-medium text-emerald-700/80 dark:text-emerald-300/80">
+                Intranet acessível — tudo pronto!
+              </p>
+            </div>
+            <ShieldCheck size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
           </div>
-        </div>
+        )}
+        {vpnStatus === "off" && (
+          <div className="mt-4 flex flex-col gap-3 rounded-[14px] border-2 border-amber-500/50 bg-amber-500/10 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+                <WifiOff size={18} className="text-amber-700 dark:text-amber-300" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[13px] font-bold text-amber-800 dark:text-amber-200">
+                  VPN AnyConnect desconectada
+                </p>
+                <p className="text-[12px] font-medium leading-relaxed text-amber-700/90 dark:text-amber-300/90">
+                  A intranet da PMESP não está acessível. Conecte a VPN antes de consultar escalas.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pl-[52px]">
+              <button
+                onClick={() => openAnyConnect()}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition active:scale-[0.97] hover:bg-amber-700"
+              >
+                <ShieldCheck size={14} />
+                Abrir AnyConnect
+              </button>
+              <button
+                onClick={() => void checkVpn()}
+                className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-200 transition active:scale-[0.97] hover:bg-amber-500/20"
+              >
+                <Wifi size={14} />
+                Verificar
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* GRID DE BLOCOS DE AÇÃO */}

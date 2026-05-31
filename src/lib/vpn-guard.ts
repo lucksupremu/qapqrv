@@ -16,15 +16,15 @@ export async function guardIntranet(open: () => void, label = "link da intranet"
     return;
   }
 
-  toast.warning("VPN AnyConnect parece desconectada", {
-    description: `Não conseguimos acessar a intranet para abrir ${label}.`,
-    duration: 8000,
+  toast.warning("VPN AnyConnect está desligada", {
+    description: `Sem conexão com a intranet, ${label} não vai carregar. Conecte a VPN primeiro.`,
+    duration: 10000,
     action: {
       label: "Abrir AnyConnect",
       onClick: () => openAnyConnect(),
     },
     cancel: {
-      label: "Tentar mesmo assim",
+      label: "Abrir mesmo assim",
       onClick: () => open(),
     },
   });
