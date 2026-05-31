@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { DrawerProvider } from "@/components/side-drawer";
 import { BottomNav } from "@/components/bottom-nav";
 import { PrivacyConsent } from "@/components/privacy-consent";
+import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 
 /** Google AdSense client ID */
 const ADSENSE_CLIENT = "ca-pub-4966192764194561";
