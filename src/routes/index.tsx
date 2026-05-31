@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, Menu, Globe, KeyRound, Info } from "lucide-react";
+import { MarcarModal } from "@/components/marcar-modal";
+import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,13 +18,6 @@ export const Route = createFileRoute("/")({
   component: HomeScreen,
 });
 
-type Marca = {
-  id: string;
-  tipo: "dejem" | "delegada";
-  data: string; // ISO yyyy-mm-dd
-  valor: number;
-};
-
 const MESES_PT = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
 
 function formatBRL(n: number) {
@@ -32,22 +27,13 @@ function formatBRL(n: number) {
 function HomeScreen() {
   const navigate = useNavigate();
   const [idEscala, setIdEscala] = useState("");
-  const [marcas, setMarcas] = useState<Marca[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const saved = window.localStorage.getItem("marcas_atividade_d");
-      return saved ? (JSON.parse(saved) as Marca[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [marcarOpen, setMarcarOpen] = useState(false);
+  const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem("marcas_atividade_d", JSON.stringify(marcas));
-    } catch {
-      /* ignore */
-    }
+    saveMarcas(marcas);
+  }, [marcas]);
+
   }, [marcas]);
 
   // Mês atual e janelas
