@@ -9,8 +9,11 @@ import {
   BookOpen,
   Lock,
   X,
+  Sun,
+  Moon,
 } from "lucide-react";
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 
 type Ctx = { open: boolean; setOpen: (v: boolean) => void };
 const DrawerCtx = createContext<Ctx | null>(null);
