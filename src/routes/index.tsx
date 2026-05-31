@@ -17,6 +17,7 @@ import { openAnyConnect } from "@/lib/open-anyconnect";
 import { openInAppBrowser } from "@/lib/in-app-browser";
 import { hasCredenciais, getSessionPin, setSessionPin, loadCredenciais } from "@/lib/credenciais";
 import { PinModal } from "@/components/pin-modal";
+import { upsertEscala, baixarPdfEmBackground } from "@/lib/escalas-baixadas";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,23 +39,8 @@ function formatBRL(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-const ESCALAS_KEY = "escalas_baixadas";
-function salvarEscalaBaixada(id: string, url: string) {
-  if (typeof window === "undefined") return;
-  try {
-    const raw = window.localStorage.getItem(ESCALAS_KEY);
-    const list: Array<{ id: string; url: string; titulo?: string; dataSalva?: string }> =
-      raw ? JSON.parse(raw) : [];
-    const semDup = list.filter((x) => x.id !== id);
-    const next = [
-      { id, url, titulo: `Escala ${id}`, dataSalva: new Date().toISOString() },
-      ...semDup,
-    ].slice(0, 100);
-    window.localStorage.setItem(ESCALAS_KEY, JSON.stringify(next));
-  } catch {
-    /* ignore */
-  }
-}
+
+
 
 function HomeScreen() {
   const navigate = useNavigate();
@@ -178,9 +164,18 @@ function HomeScreen() {
         openAnyConnect();
         return;
       }
-      salvarEscalaBaixada(id, url);
+      upsertEscala({
+        id,
+        url,
+        titulo: `Escala ${id}`,
+        dataSalva: new Date().toISOString(),
+      });
+      // Download em segundo plano (não bloqueia a abertura do navegador interno)
+      void baixarPdfEmBackground(id, url).then((ok) => {
+        if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
+      });
       await abrirComCredenciais(url, `Escala ${id}`);
-      toast.success("Escala salva em Escalas baixadas.");
+      toast.success("Escala adicionada em Escalas baixadas.");
     } catch {
       setVpnAviso(true);
       toast.error("Não foi possível abrir a escala.");
