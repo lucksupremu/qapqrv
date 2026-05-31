@@ -166,10 +166,10 @@ function HomeScreen() {
       {/* HEADER */}
       <header className="flex items-center justify-between px-4 pt-6 pb-2">
         <div>
-          <h1 className="text-[32px] font-extrabold leading-none tracking-tight text-[#0f2535]">
+          <h1 className="text-[32px] font-extrabold leading-none tracking-tight" style={{ color: "var(--text-dark)" }}>
             QAP, QRV!
           </h1>
-          <p className="mt-1 text-[12px] font-medium tracking-wide text-[#5b7a8f]">
+          <p className="mt-1 text-[12px] font-medium tracking-wide" style={{ color: "var(--muted-fg)" }}>
             Escalas PMESP
           </p>
         </div>
@@ -177,7 +177,7 @@ function HomeScreen() {
           aria-label="Menu"
           onClick={() => setDrawerOpen(true)}
           className="flex h-12 w-12 items-center justify-center rounded-2xl border transition active:scale-95"
-          style={{ background: "#e8f0f8", color: "#6ba3c8", borderColor: "#d5e3ee" }}
+          style={{ background: "var(--surface-2)", color: "var(--primary-light)", borderColor: "var(--border-soft)" }}
         >
           <Menu size={22} />
         </button>
