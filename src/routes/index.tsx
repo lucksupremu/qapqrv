@@ -6,6 +6,7 @@ import {
   CalendarPlus,
   Menu,
   Globe,
+  Mail,
   KeyRound,
   BookOpen,
   FolderDown,
