@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
+import { useDrawer } from "@/components/side-drawer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,6 +36,7 @@ function formatBRL(n: number) {
 
 function HomeScreen() {
   const navigate = useNavigate();
+  const { setOpen: setDrawerOpen } = useDrawer();
   const [idEscala, setIdEscala] = useState("");
   const [marcarOpen, setMarcarOpen] = useState(false);
   const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
@@ -149,7 +151,8 @@ function HomeScreen() {
         </h1>
         <button
           aria-label="Menu"
-          className="flex h-12 w-12 items-center justify-center rounded-full"
+          onClick={() => setDrawerOpen(true)}
+          className="flex h-12 w-12 items-center justify-center rounded-full transition active:scale-95"
           style={{ background: "#D5DCE8", color: "#1B3A6B" }}
         >
           <Menu size={22} />
