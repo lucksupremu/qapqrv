@@ -1,66 +1,76 @@
-# Plano: Nova versão do QAP, QRV! — Foco em Consulta de Escala
+## Plano — Fase 1: "QAP,QRV! "
 
-## Visão geral
+Reestruturação do app atual para um novo conceito: **"QAP, QRV! "**, voltado para policiais da PMESP acompanharem escalas Dejem e Delegada.
 
-O projeto já possui a base montada (TanStack Start, Splash com AdSlot, tela `/inicio` com grid de cards, ferramenta "Minha Localização" funcional, header, bottom nav, favoritos e histórico). Esta entrega adiciona a ferramenta principal **Consulta de Escala DEJEM / Delegada** e prepara os demais cards como "Em desenvolvimento", mantendo a arquitetura modular para crescer sem refatorar.
+## Observação importante sobre stack
 
-## Escopo desta entrega
+O projeto atual usa **TanStack Router** (não React Router DOM) sobre TanStack Start. Vou manter TanStack Router (trocar agora quebraria todo o template SSR). As rotas funcionarão igualmente (`/`, `/calendario`, etc.). Tailwind + shadcn já estão prontos. Se preferir, posso forçar React Router DOM depois — mas recomendo manter.
 
-1. **Splash Screen**: ajustar contagem regressiva de 3s → **5s** (requisito do briefing).
-2. **Tela inicial**: garantir que **Consulta de Escala seja o primeiro card**, seguido por Minha Localização (já pronta) e demais cards marcados como "Em desenvolvimento".
-3. **Ferramenta Consulta de Escala** (nova rota `/ferramenta/consulta-escala`):
-   - Campo numérico para ID da escala (somente dígitos, validação com Zod).
-   - Botão "Consultar".
-   - Stub da lógica de consulta (`consultarEscala(id)` em `src/lib/escala.ts`) retornando dado mock por enquanto — pronto para plugar API real depois.
-   - Área de resultado em cartões: ID, Tipo, Data, Horário inicial, Horário final, Qtd. horas, Unidade, Valor da hora, Valor total previsto.
-   - Persistência em **IndexedDB** (via `idb-keyval`) das consultas realizadas.
-   - Seção "Consultas Recentes" abaixo do formulário com ações: reabrir, favoritar, excluir.
-   - Sistema de favoritos integrado ao `/favoritos` existente.
-4. **Cards "Em desenvolvimento"**: BOPM Token, Bloco de Notas, Telefones Úteis, Códigos Q, Escalas, Checklist Operacional, CTB Rápido, Hospitais Próximos, Delegacias Próximas — todos passando pela rota genérica `/ferramenta/$slug` que já exibe estado de "em construção".
-5. **PWA-ready / Capacitor-ready**: adicionar `manifest.webmanifest` simples (ícone, nome, `display: standalone`, theme color) — sem service worker, conforme diretriz. Deixar o projeto pronto para `npx cap add android` futuramente (sem instalar Capacitor agora).
+## O que será feito nesta fase
 
-## Estrutura de arquivos
+### 1. Design tokens e fonte
 
-```text
-src/
-  lib/
-    tools.ts                 (atualizar ordem + flags em-desenvolvimento)
-    escala.ts                (novo: tipos + consultarEscala stub)
-    escala-storage.ts        (novo: IndexedDB via idb-keyval)
-  hooks/
-    use-escala-historico.ts  (novo: histórico + favoritos reativos)
-  routes/
-    index.tsx                (splash: 3s → 5s)
-    ferramenta.consulta-escala.tsx  (novo)
-    ferramenta.$slug.tsx     (já trata "em desenvolvimento")
-public/
-  manifest.webmanifest       (novo)
+- Adicionar import da fonte **Nunito** (Google Fonts) em `src/routes/__root.tsx` (head).
+- Em `src/styles.css`, adicionar as variáveis solicitadas (`--bg`, `--primary`, `--primary-dark`, `--card-field`, `--success`, `--danger`) como tokens oklch/hex sob `:root`, e aplicar `font-family: 'Nunito', sans-serif` no body. Fundo global = `var(--bg)`.
+
+### 2. Nova tela inicial (`src/routes/index.tsx`)
+
+Substituir totalmente a splash atual pela **HomeScreen "QAP, WRV! "** com o layout especificado:
+
+- **Header**: título "QAP, QRV! " (32px bold, azul PMESP) + botão hamburguer circular (48px, #D5DCE8) à direita.
+- **Card azul "Valores a receber"** (`#1B3A6B`, radius 20, padding 20, margin 16):
+  - Linha 1: título branco + botão calendário circular branco (40px) → navega para `/calendario`.
+  - Linha 2: 2 campos `valoresMensais` (mês atual + próximo).
+  - Linha 3: seção **Dejem** com 3 campos (3 meses mais recentes).
+  - Linha 4: seção **Delegada** com 3 campos.
+- **Card branco de ações** (radius 20, shadow):
+  - Botão "🌐 Marcar/Desmarcar" (primary) → navega para `/escalas-baixadas` (placeholder).
+  - Botão "🔑 Abrir AnyConnect" (outline) + botão circular "!" → `/anyconnect`.
+  - Campo "ID da escala" + botão "Consultar" → reutiliza fluxo existente (`/ferramenta/consulta-escala`) passando o ID.
+- **Footer**: link "Política de Privacidade" → `/privacidade`.
+
+### 3. Estado e cálculo automático
+
+- `idEscala` (string) + `marcas` (array) persistidos em `localStorage` na chave `marcas_atividade_d`.
+- `useEffect` recalcula `dejemContagens`, `delegadaContagens` e `valoresMensais` a partir de `marcas` sempre que muda.
+- Os 3 meses exibidos são os **3 mais recentes** terminando no mês atual (ex.: hoje MAI/2026 → MAR, ABR, MAI). Valores a receber = mês atual + próximo.
+- Como `marcas` começa vazio, todos os contadores e valores aparecem como `0` / `R$ 0,00` (estado inicial conforme solicitado).
+
+Tipo das marcas (definido agora para suportar Fase 2):
+
+```ts
+type Marca = { id: string; tipo: 'dejem' | 'delegada'; data: string /* ISO */; valor: number };
 ```
 
-## Detalhes técnicos
+### 4. Rotas placeholder "Em construção"
 
-- **Armazenamento**: `idb-keyval` (leve, ~600B) com chaves `escala:historico` e `escala:favoritos`. Limite de 50 itens no histórico (FIFO).
-- **Validação**: Zod schema `z.string().regex(/^\d+$/).min(1).max(12)`.
-- **UI**: Reutiliza tokens semânticos de `src/styles.css` (`brand-navy`, `brand-blue`, `--shadow-card`). Cards com `rounded-2xl`, sombras suaves, ícone `CalendarClock` (lucide).
-- **Resultado**: Componente `<EscalaResultCard>` exibindo os 9 campos em duas colunas; botão "Favoritar" e "Nova consulta".
-- **Recentes**: Lista com swipe-actions simples (botões inline reabrir / ★ / 🗑) — sem libs adicionais.
-- **Consulta stub**: retorna `Promise<Escala | null>` com `setTimeout` de 600ms simulando rede; documentado onde plugar a API real depois.
-- **Favoritos globais**: `/favoritos` lista todas as ferramentas favoritadas + consultas favoritadas (mescla as duas fontes).
-- **SEO**: `head()` por rota com title e description específicos.
+Criar arquivos com header (botão voltar + título "Em construção"):
 
-## Fora de escopo (próximas iterações)
+- `src/routes/calendario.tsx`
+- `src/routes/escalas-baixadas.tsx`
+- `src/routes/intranet.tsx`
+- `src/routes/anyconnect.tsx`
+- `src/routes/privacidade.tsx`
 
-- Integração real da API de Consulta de Escala (apenas stub agora).
-- Implementação efetiva dos demais módulos (ficam como "Em desenvolvimento").
-- Capacitor / AdMob / Firebase Push / AdSense — apenas estrutura preparada, sem instalação.
-- Service worker / offline cache.
+Componente compartilhado `src/components/em-construcao.tsx` para o conteúdo.
 
-## Critérios de aceitação
+### 5. Limpeza
 
-- Splash conta 5s e habilita "Continuar".
-- Card "Consulta de Escala" aparece em primeiro na tela inicial.
-- Inserir ID numérico + consultar exibe resultado mockado nos 9 campos.
-- Consulta aparece em "Consultas Recentes" e persiste após reload.
-- Favoritar/desfavoritar e excluir funcionam.
-- Demais cards abrem a página genérica "Em desenvolvimento".
-- Nenhum erro de console; build passa.
+- Remover/ocultar componentes da home antiga que não fazem mais sentido nesta tela (bottom-nav, splash, ad-slot na home). **Manter** os arquivos existentes (`ferramenta.consulta-escala.tsx`, `inicio.tsx`, `favoritos.tsx`, `historico.tsx`, `sobre.tsx`) por enquanto — serão revisitados nas próximas fases.
+- Atualizar `src/routes/__root.tsx` para fundo `var(--bg)` e fonte Nunito.
+
+### 6. Itens explicitamente fora desta fase
+
+- Lógica de marcar/desmarcar escalas no calendário.
+- Integração real com AnyConnect/Intranet.
+- Conteúdo das telas placeholder.
+- Mudança de stack para React Router DOM (mantemos TanStack Router).
+
+## Critérios de aceite
+
+- Home renderiza exatamente o layout descrito com fonte Nunito e paleta correta.
+- Todos os campos numéricos mostram `0` e valores `R$ 0,00` no estado inicial.
+- Os 3 meses exibidos correspondem aos 3 mais recentes (terminando no mês atual).
+- `marcas` persiste em `localStorage` (chave `marcas_atividade_d`).
+- Navegação para `/calendario`, `/anyconnect`, `/privacidade`, etc. mostra "Em construção".
+- Sem erros no console, build passa.
