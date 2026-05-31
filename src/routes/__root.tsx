@@ -15,8 +15,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { DrawerProvider } from "@/components/side-drawer";
 import { BottomNav } from "@/components/bottom-nav";
 
-/** Google AdSense client ID — preencha com seu ca-pub-XXXXXXXXXXXXXXXX */
-const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT ?? ""; // <-- SUBSTITUA AQUI OU USE .env
+/** Google AdSense client ID */
+const ADSENSE_CLIENT = "ca-pub-4966192764194561";
 
 function getAdSenseScript(): { type: "text/javascript"; children: string } | undefined {
   if (!ADSENSE_CLIENT) return undefined;
