@@ -125,6 +125,14 @@ function HomeScreen() {
         ),
     },
     {
+      label: "Email iNotes",
+      icon: Mail,
+      onClick: () =>
+        openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
+          titulo: "Email iNotes",
+        }),
+    },
+    {
       label: "Calendário",
       icon: Calendar,
       onClick: () => navigate({ to: "/calendario" }),
@@ -135,22 +143,9 @@ function HomeScreen() {
       onClick: () => navigate({ to: "/escalas-baixadas" }),
     },
     {
-      label: "Abrir AnyConnect",
-      icon: KeyRound,
-      onClick: () => openAnyConnect(),
-    },
-    {
       label: "Guia AnyConnect",
       icon: BookOpen,
       onClick: () => navigate({ to: "/anyconnect" }),
-    },
-    {
-      label: "Email iNotes",
-      icon: Mail,
-      onClick: () =>
-        openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
-          titulo: "Email iNotes",
-        }),
     },
   ];
 
