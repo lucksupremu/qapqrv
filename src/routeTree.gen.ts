@@ -17,7 +17,6 @@ import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
-import { Route as CredenciaisRouteImport } from './routes/credenciais'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AnyconnectRouteImport } from './routes/anyconnect'
 import { Route as IndexRouteImport } from './routes/index'
@@ -65,11 +64,6 @@ const EscalasBaixadasRoute = EscalasBaixadasRouteImport.update({
   path: '/escalas-baixadas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CredenciaisRoute = CredenciaisRouteImport.update({
-  id: '/credenciais',
-  path: '/credenciais',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CalendarioRoute = CalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
@@ -107,7 +101,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
-  '/credenciais': typeof CredenciaisRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
@@ -124,7 +117,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
-  '/credenciais': typeof CredenciaisRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
@@ -142,7 +134,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
-  '/credenciais': typeof CredenciaisRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/historico': typeof HistoricoRoute
@@ -161,7 +152,6 @@ export interface FileRouteTypes {
     | '/'
     | '/anyconnect'
     | '/calendario'
-    | '/credenciais'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
@@ -178,7 +168,6 @@ export interface FileRouteTypes {
     | '/'
     | '/anyconnect'
     | '/calendario'
-    | '/credenciais'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
@@ -195,7 +184,6 @@ export interface FileRouteTypes {
     | '/'
     | '/anyconnect'
     | '/calendario'
-    | '/credenciais'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/historico'
@@ -213,7 +201,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnyconnectRoute: typeof AnyconnectRoute
   CalendarioRoute: typeof CalendarioRoute
-  CredenciaisRoute: typeof CredenciaisRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FavoritosRoute: typeof FavoritosRoute
   HistoricoRoute: typeof HistoricoRoute
@@ -285,13 +272,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalasBaixadasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/credenciais': {
-      id: '/credenciais'
-      path: '/credenciais'
-      fullPath: '/credenciais'
-      preLoaderRoute: typeof CredenciaisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/calendario': {
       id: '/calendario'
       path: '/calendario'
@@ -341,7 +321,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnyconnectRoute: AnyconnectRoute,
   CalendarioRoute: CalendarioRoute,
-  CredenciaisRoute: CredenciaisRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FavoritosRoute: FavoritosRoute,
   HistoricoRoute: HistoricoRoute,
@@ -357,3 +336,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

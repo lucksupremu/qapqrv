@@ -57,7 +57,6 @@ const grupo2: Item[] = [
   },
 ];
 const grupo3: Item[] = [
-  { type: "route", to: "/credenciais", label: "Credenciais PMESP", icon: KeyRound },
   { type: "route", to: "/anyconnect", label: "Guia AnyConnect", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
 ];
