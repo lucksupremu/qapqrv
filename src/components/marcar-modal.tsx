@@ -165,7 +165,7 @@ export function MarcarModal({
             className="text-[20px] font-bold"
             style={{ color: "#1B3A6B" }}
           >
-            Nova marca
+            {isEdit ? "Editar marca" : "Nova marca"}
           </DialogTitle>
           <span className="h-9 w-9" aria-hidden />
         </div>
