@@ -22,9 +22,12 @@ export function openAnyConnect() {
   const platform = detectPlatform();
 
   if (platform === "android") {
-    // Intent URL: abre o app se instalado, ou cai na Play Store via fallback
+    // Intent URL: abre o app se instalado, ou cai na Play Store via fallback.
+    // Usa scheme=android-app + package como host (formato comprovadamente
+    // funcional na tela /intranet) — o formato com scheme=anyconnect causava
+    // "página não encontrada" no Chrome quando o app não registrava o esquema.
     const fallback = encodeURIComponent(PLAY_STORE_URL);
-    window.location.href = `intent://#Intent;scheme=anyconnect;package=${ANDROID_PACKAGE};S.browser_fallback_url=${fallback};end`;
+    window.location.href = `intent://${ANDROID_PACKAGE}#Intent;scheme=android-app;package=${ANDROID_PACKAGE};S.browser_fallback_url=${fallback};end`;
     return;
   }
 
