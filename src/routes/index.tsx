@@ -65,7 +65,7 @@ function HomeScreen() {
 
   useEffect(() => {
     void checkVpn();
-    const interval = setInterval(() => void checkVpn(), 30000);
+    const interval = setInterval(() => void checkVpn(), 5000);
     return () => clearInterval(interval);
   }, [checkVpn]);
 
