@@ -26,6 +26,7 @@ import {
   loadMarcas,
   saveMarcas,
 } from "@/lib/marcas";
+import { cancelForMarca } from "@/lib/notifications-adapter";
 
 export const Route = createFileRoute("/calendario")({
   head: () => ({ meta: [{ title: "Calendário — QAP, QRV!" }] }),
@@ -51,12 +52,14 @@ const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 const TIPO_LABEL: Record<TipoMarca, string> = {
   dejem: "Dejem",
+  delegada: "Delegada",
   delegada_capital: "Delegada Capital",
   delegada_outras: "Outras Delegadas",
 };
 
 const TIPO_COR: Record<TipoMarca, string> = {
   dejem: "#3498DB",
+  delegada: "#2ECC71",
   delegada_capital: "#2ECC71",
   delegada_outras: "#E67E22",
 };
@@ -173,6 +176,7 @@ function CalendarScreen() {
 
   const handleDelete = () => {
     if (!confirmDelete) return;
+    cancelForMarca(confirmDelete.id);
     setMarcas((prev) => prev.filter((m) => m.id !== confirmDelete.id));
     setConfirmDelete(null);
     toast.success("Escala excluída com sucesso.");

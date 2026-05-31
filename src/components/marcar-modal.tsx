@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 
 import { toast } from "sonner";
 import { z } from "zod";
+import { Plus, X, Bell } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -13,15 +13,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Marca, TipoMarca } from "@/lib/marcas";
+import { TIPO_LABEL_SHORT } from "@/lib/marcas";
+import {
+  requestNotificationPermission,
+  scheduleRemindersForMarca,
+  getPermission,
+} from "@/lib/notifications-adapter";
 
 const tipoOptions: { value: TipoMarca; label: string }[] = [
   { value: "dejem", label: "Dejem" },
-  { value: "delegada_capital", label: "Delegada Capital" },
-  { value: "delegada_outras", label: "Outras Delegadas" },
+  { value: "delegada", label: "Delegada" },
 ];
 
 const formSchema = z.object({
-  tipo: z.enum(["dejem", "delegada_capital", "delegada_outras"], {
+  tipo: z.enum(["dejem", "delegada"], {
     message: "Selecione o tipo de escala",
   }),
   data: z.string().min(1, { message: "Informe a data e hora da escala" }),
@@ -51,12 +56,23 @@ export type MarcarModalProps = {
   onOpenChange: (open: boolean) => void;
   onSave: (marca: Marca) => void;
   initialMarca?: Marca | null;
-  initialDate?: string | null; // ISO; usado quando criando a partir do calendário
+  initialDate?: string | null;
 };
 
 function isoToLocalInput(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function defaultReminderForDate(dataLocal: string): string {
+  // 1 day before, at 09:00
+  if (!dataLocal) return "";
+  const d = new Date(dataLocal);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() - 1);
+  d.setHours(9, 0, 0, 0);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
@@ -72,48 +88,74 @@ export function MarcarModal({
   const [tipo, setTipo] = useState<TipoMarca | "">("");
   const [data, setData] = useState("");
   const [valor, setValor] = useState("");
-  const [delegadaArea, setDelegadaArea] = useState("");
-  const [delegadaStartHour, setDelegadaStartHour] = useState("");
-  const [delegadaBaseHourAmount, setDelegadaBaseHourAmount] = useState("");
-  const [reminderOn, setReminderOn] = useState(false);
-  const [reminderAt, setReminderAt] = useState("");
+  const [reminders, setReminders] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ tipo?: string; data?: string }>({});
+  const [perm, setPerm] = useState<NotificationPermission>("default");
 
-  // Reset / preenche ao abrir
   useEffect(() => {
     if (!open) return;
+    setPerm(getPermission());
     if (initialMarca) {
-      setTipo(initialMarca.tipo);
+      const t =
+        initialMarca.tipo === "delegada_capital" ||
+        initialMarca.tipo === "delegada_outras"
+          ? "delegada"
+          : initialMarca.tipo;
+      setTipo(t);
       setData(isoToLocalInput(initialMarca.data));
       setValor(initialMarca.valor ? String(initialMarca.valor) : "");
-      setDelegadaArea(initialMarca.delegadaArea ?? "");
-      setDelegadaStartHour(initialMarca.delegadaStartHour ?? "");
-      setDelegadaBaseHourAmount(
-        initialMarca.delegadaBaseHourAmount
-          ? String(initialMarca.delegadaBaseHourAmount)
-          : "",
-      );
-      setReminderOn(!!initialMarca.reminderAt);
-      setReminderAt(
-        initialMarca.reminderAt ? isoToLocalInput(initialMarca.reminderAt) : "",
-      );
+      const r =
+        initialMarca.reminders && initialMarca.reminders.length > 0
+          ? initialMarca.reminders.map(isoToLocalInput)
+          : initialMarca.reminderAt
+            ? [isoToLocalInput(initialMarca.reminderAt)]
+            : [];
+      setReminders(r);
     } else {
       setTipo("");
-      setData(initialDate ? isoToLocalInput(initialDate) : "");
+      const startLocal = initialDate ? isoToLocalInput(initialDate) : "";
+      setData(startLocal);
       setValor("");
-      setDelegadaArea("");
-      setDelegadaStartHour("");
-      setDelegadaBaseHourAmount("");
-      setReminderOn(false);
-      setReminderAt("");
+      setReminders(startLocal ? [defaultReminderForDate(startLocal)] : []);
     }
     setErrors({});
   }, [open, initialMarca, initialDate]);
 
-  const showDelegadaFields =
-    tipo === "delegada_capital" || tipo === "delegada_outras";
+  // Manter o lembrete automático em sincronia quando o usuário muda a data
+  // (apenas em criação, e se o primeiro lembrete ainda for o padrão).
+  useEffect(() => {
+    if (isEdit) return;
+    if (!data) return;
+    setReminders((prev) => {
+      if (prev.length === 0) return [defaultReminderForDate(data)];
+      // se houver pelo menos um, recalcula o primeiro
+      const next = [...prev];
+      next[0] = defaultReminderForDate(data);
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
-  const handleSave = () => {
+  const handleAddReminder = () => {
+    setReminders((prev) => [...prev, ""]);
+  };
+
+  const handleRemoveReminder = (idx: number) => {
+    setReminders((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateReminder = (idx: number, v: string) => {
+    setReminders((prev) => prev.map((r, i) => (i === idx ? v : r)));
+  };
+
+  const handleEnableNotifications = async () => {
+    const p = await requestNotificationPermission();
+    setPerm(p);
+    if (p === "granted") toast.success("Notificações ativadas!");
+    else if (p === "denied") toast.error("Permissão negada. Ative nas configurações do navegador.");
+  };
+
+  const handleSave = async () => {
     const parsed = formSchema.safeParse({ tipo, data });
     if (!parsed.success) {
       const errs: { tipo?: string; data?: string } = {};
@@ -126,52 +168,55 @@ export function MarcarModal({
     }
 
     const valorNum = parseFloat(valor.replace(",", ".")) || 0;
-    const baseHourNum =
-      parseFloat(delegadaBaseHourAmount.replace(",", ".")) || 0;
     const isoData = new Date(data).toISOString();
-    const isoReminder =
-      reminderOn && reminderAt ? new Date(reminderAt).toISOString() : null;
+    const isoReminders = reminders
+      .filter((r) => !!r)
+      .map((r) => new Date(r).toISOString());
 
     const marca: Marca = {
       id: initialMarca?.id ?? Date.now().toString(),
       tipo: parsed.data.tipo,
       data: isoData,
       valor: valorNum,
-      delegadaArea: delegadaArea.trim().slice(0, 120),
-      delegadaStartHour: delegadaStartHour.trim().slice(0, 10),
-      delegadaBaseHourAmount: baseHourNum,
-      reminderAt: isoReminder,
+      reminders: isoReminders,
+      reminderAt: isoReminders[0] ?? null,
       criado: initialMarca?.criado ?? new Date().toISOString(),
     };
 
     onSave(marca);
-    onOpenChange(false);
 
-    toast.success(isEdit ? "Marca atualizada com sucesso!" : "Marca salva com sucesso!");
-    if (isoReminder) {
-      setTimeout(() => {
-        toast.info(`Lembrete agendado para ${formatBRDate(isoReminder)}`);
-      }, 350);
+    // Agendar push (web). Pede permissão silenciosamente se ainda não decidida.
+    if (isoReminders.length > 0) {
+      if (getPermission() === "default") {
+        await requestNotificationPermission();
+      }
+      scheduleRemindersForMarca(marca.id, isoReminders, (whenISO) => ({
+        title: `Lembrete — ${TIPO_LABEL_SHORT[marca.tipo] ?? "Escala"}`,
+        body: `Escala em ${formatBRDate(marca.data)}${
+          marca.valor > 0
+            ? ` · ${marca.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+            : ""
+        }\n(Aviso de ${formatBRDate(whenISO)})`,
+      }));
+    } else {
+      // sem lembretes — limpa qualquer agendamento prévio
+      scheduleRemindersForMarca(marca.id, [], () => ({ title: "", body: "" }));
     }
-  };
 
+    onOpenChange(false);
+    toast.success(isEdit ? "Marca atualizada!" : "Marca salva!");
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[420px] gap-0 rounded-[20px] p-0">
-        {/* Header */}
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
-          <DialogTitle
-            className="text-[20px] font-bold"
-            style={{ color: "#2e6b8a" }}
-          >
+          <DialogTitle className="text-[20px] font-bold" style={{ color: "#2e6b8a" }}>
             {isEdit ? "Editar marca" : "Nova marca"}
           </DialogTitle>
           <span className="h-9 w-9" aria-hidden />
         </div>
 
-
-        {/* Form */}
         <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
           {/* Tipo */}
           <div>
@@ -203,68 +248,9 @@ export function MarcarModal({
               </SelectContent>
             </Select>
             {errors.tipo && (
-              <p className="mt-1 text-[12px] font-semibold text-red-600">
-                {errors.tipo}
-              </p>
+              <p className="mt-1 text-[12px] font-semibold text-red-600">{errors.tipo}</p>
             )}
           </div>
-
-          {/* Campos delegada (fade-in) */}
-          {showDelegadaFields && (
-            <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
-              <div>
-                <label
-                  className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                  style={{ color: "#2e6b8a" }}
-                >
-                  Área / Nome da delegada
-                </label>
-                <input
-                  value={delegadaArea}
-                  onChange={(e) => setDelegadaArea(e.target.value)}
-                  maxLength={120}
-                  className={fieldClass}
-                  style={fieldStyle}
-                  placeholder="Ex: 5º DP – Aclimação"
-                />
-              </div>
-              <div>
-                <label
-                  className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                  style={{ color: "#2e6b8a" }}
-                >
-                  Horário de início (ex: 07:00)
-                </label>
-                <input
-                  value={delegadaStartHour}
-                  onChange={(e) => setDelegadaStartHour(e.target.value)}
-                  maxLength={10}
-                  className={fieldClass}
-                  style={fieldStyle}
-                  placeholder="07:00"
-                />
-              </div>
-              <div>
-                <label
-                  className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                  style={{ color: "#2e6b8a" }}
-                >
-                  Valor base por hora (R$)
-                </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min="0"
-                  value={delegadaBaseHourAmount}
-                  onChange={(e) => setDelegadaBaseHourAmount(e.target.value)}
-                  className={fieldClass}
-                  style={fieldStyle}
-                  placeholder="0,00"
-                />
-              </div>
-            </div>
-          )}
 
           {/* Data */}
           <div>
@@ -272,7 +258,7 @@ export function MarcarModal({
               className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
               style={{ color: "#2e6b8a" }}
             >
-              Data e hora da escala
+              Dia e hora
             </label>
             <input
               type="datetime-local"
@@ -285,19 +271,17 @@ export function MarcarModal({
               style={fieldStyle}
             />
             {errors.data && (
-              <p className="mt-1 text-[12px] font-semibold text-red-600">
-                {errors.data}
-              </p>
+              <p className="mt-1 text-[12px] font-semibold text-red-600">{errors.data}</p>
             )}
           </div>
 
-          {/* Valor total */}
+          {/* Valor */}
           <div>
             <label
               className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
               style={{ color: "#2e6b8a" }}
             >
-              Informe o valor
+              Valor (R$)
             </label>
             <input
               type="number"
@@ -312,39 +296,69 @@ export function MarcarModal({
             />
           </div>
 
-          {/* Lembrete */}
-          <div
-            className="flex items-center justify-between rounded-[12px] border-2 px-3 py-3"
-            style={{ borderColor: "#2e6b8a" }}
-          >
-            <span
-              className="text-[14px] font-bold"
-              style={{ color: "#2e6b8a" }}
-            >
-              Agendar lembrete
-            </span>
-            <Switch checked={reminderOn} onCheckedChange={setReminderOn} />
-          </div>
-          {reminderOn && (
-            <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-              <label
-                className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                style={{ color: "#2e6b8a" }}
+          {/* Lembretes */}
+          <div className="rounded-[12px] border-2 p-3" style={{ borderColor: "#2e6b8a" }}>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell size={16} style={{ color: "#2e6b8a" }} />
+                <span className="text-[13px] font-bold" style={{ color: "#2e6b8a" }}>
+                  Lembretes
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddReminder}
+                className="flex items-center gap-1 rounded-[8px] px-2 py-1 text-[12px] font-bold"
+                style={{ background: "#e8f0f8", color: "#2e6b8a" }}
               >
-                Quando notificar?
-              </label>
-              <input
-                type="datetime-local"
-                value={reminderAt}
-                onChange={(e) => setReminderAt(e.target.value)}
-                className={fieldClass}
-                style={fieldStyle}
-              />
+                <Plus size={14} /> Adicionar
+              </button>
             </div>
-          )}
+
+            {reminders.length === 0 && (
+              <p className="text-[12px]" style={{ color: "#5b7a8f" }}>
+                Nenhum lembrete. O padrão é 1 dia antes às 09:00.
+              </p>
+            )}
+
+            <div className="space-y-2">
+              {reminders.map((r, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="datetime-local"
+                    value={r}
+                    onChange={(e) => handleUpdateReminder(idx, e.target.value)}
+                    className="flex-1 rounded-[10px] border-2 bg-white px-2 py-2 text-[13px] font-semibold"
+                    style={fieldStyle}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveReminder(idx)}
+                    className="flex h-9 w-9 items-center justify-center rounded-[10px]"
+                    style={{ background: "#fee2e2", color: "#c81d1d" }}
+                    aria-label="Remover lembrete"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {perm !== "granted" && reminders.length > 0 && (
+              <button
+                type="button"
+                onClick={handleEnableNotifications}
+                className="mt-3 w-full rounded-[10px] px-3 py-2 text-[12px] font-bold text-white"
+                style={{ background: "#2e6b8a" }}
+              >
+                {perm === "denied"
+                  ? "Notificações bloqueadas — ativar no navegador"
+                  : "Ativar notificações push"}
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Footer */}
         <div className="flex gap-2 border-t border-[#e8f0f8] px-5 py-4">
           <button
             onClick={() => onOpenChange(false)}
@@ -358,7 +372,7 @@ export function MarcarModal({
             className="h-[48px] flex-1 rounded-[14px] font-bold text-white active:scale-[0.99]"
             style={{ background: "#2e6b8a" }}
           >
-            Salvar marca
+            Salvar
           </button>
         </div>
       </DialogContent>

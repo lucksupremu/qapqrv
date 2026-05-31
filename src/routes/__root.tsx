@@ -157,6 +157,16 @@ function RootComponent() {
     } catch {
       // ignore
     }
+    // Rehydrate reminder timers and re-check every hour for distant reminders.
+    import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
+      rehydrateReminders();
+    });
+    const id = setInterval(() => {
+      import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
+        rehydrateReminders();
+      });
+    }, 60 * 60 * 1000);
+    return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
