@@ -14,7 +14,6 @@ import {
   ArrowRight,
   type LucideIcon,
 } from "lucide-react";
-import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { openAnyConnect } from "@/lib/open-anyconnect";
@@ -45,7 +44,6 @@ function HomeScreen() {
   const navigate = useNavigate();
   const { setOpen: setDrawerOpen } = useDrawer();
   const [idEscala, setIdEscala] = useState("");
-  const [marcarOpen, setMarcarOpen] = useState(false);
   const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
   const [consultando, setConsultando] = useState(false);
 
@@ -86,7 +84,11 @@ function HomeScreen() {
     {
       label: "Marcar / Desmarcar",
       icon: CalendarPlus,
-      onClick: () => setMarcarOpen(true),
+      onClick: () =>
+        openInAppBrowser(
+          "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
+          { titulo: "Marcar / Desmarcar" }
+        ),
     },
     {
       label: "Calendário",
@@ -250,12 +252,6 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
-
-      <MarcarModal
-        open={marcarOpen}
-        onOpenChange={setMarcarOpen}
-        onSave={(marca) => setMarcas((prev) => [marca, ...prev])}
-      />
     </div>
   );
 }
