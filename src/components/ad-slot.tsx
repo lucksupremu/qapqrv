@@ -1,12 +1,30 @@
+import { AdSenseBanner } from "./adsense-banner";
+
 /**
- * AdSlot — placeholder do anúncio.
- * No build com Capacitor + AdMob, substituir o conteúdo por:
- *   import { AdMob } from "@capacitor-community/admob"
- *   AdMob.showInterstitial() / showAppOpen()
+ * AdSlot — seletor de anúncio conforme a plataforma.
+ * - Web:      usa Google AdSense via AdSenseBanner
+ * - Nativo:   placeholder para AdMob (integrar com Capacitor)
  */
 type Props = { type?: "app-open" | "interstitial" | "banner" };
 
 export function AdSlot({ type = "app-open" }: Props) {
+  const isNative =
+    typeof window !== "undefined" &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).Capacitor?.isNativePlatform?.() === true;
+
+  if (!isNative) {
+    return (
+      <div className="w-full max-w-sm">
+        <AdSenseBanner
+          adSlot="SUA_AD_SLOT_AQUI"          {/* <-- substitua pelo seu data-ad-slot */}
+          adFormat={type === "banner" ? "auto" : "rectangle"}
+          className="w-full"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full rounded-xl border border-dashed border-border bg-muted/60 p-6 text-center">
       <p className="text-xs uppercase tracking-widest text-muted-foreground">
