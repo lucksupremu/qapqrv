@@ -37,10 +37,11 @@ async function baixarNoNativo(id: string, url: string): Promise<boolean> {
     const data: string = resp.data;
     if (!data || typeof data !== "string") return false;
 
-    let Filesystem: typeof import("@capacitor/filesystem").Filesystem;
-    let Directory: typeof import("@capacitor/filesystem").Directory;
+    let Filesystem: any;
+    let Directory: any;
     try {
-      const mod = await import("@capacitor/filesystem");
+      // @ts-ignore — plugin opcional, instalar com: bun add @capacitor/filesystem
+      const mod = await import(/* @vite-ignore */ "@capacitor/filesystem");
       Filesystem = mod.Filesystem;
       Directory = mod.Directory;
     } catch {
