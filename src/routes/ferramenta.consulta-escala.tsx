@@ -345,36 +345,53 @@ function VpnBadge({
 }) {
   if (status === "checking") {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-xs text-muted-foreground">
-        <Loader className="size-3.5 animate-spin" />
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card/60 px-3.5 py-2.5 text-xs text-muted-foreground">
+        <Loader className="size-4 animate-spin" />
         Verificando conexão com a intranet…
       </div>
     );
   }
   if (status === "ok") {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300">
-        <ShieldCheck className="size-3.5" />
+      <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 text-xs text-emerald-700 dark:text-emerald-300">
+        <Wifi className="size-4" />
         Intranet acessível — pronto para consultar.
       </div>
     );
   }
   return (
-    <div className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
-      <ShieldAlert className="size-4 mt-0.5 shrink-0" />
-      <div className="flex-1">
-        <p className="font-semibold">Intranet não detectada</p>
-        <p className="opacity-90">
-          Verifique se a VPN AnyConnect está conectada. Você ainda pode tentar consultar.
-        </p>
+    <div className="flex flex-col gap-3 rounded-xl border-2 border-amber-500/50 bg-amber-500/10 px-4 py-3">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+          <WifiOff className="size-4 text-amber-700 dark:text-amber-300" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
+            VPN AnyConnect desconectada
+          </p>
+          <p className="mt-0.5 text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/90">
+            A intranet da PMESP não está acessível. Conecte a VPN antes de consultar escalas.
+          </p>
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={onRecheck}
-        className="rounded-md px-2 py-1 text-[11px] font-semibold underline-offset-2 hover:underline"
-      >
-        Verificar
-      </button>
+      <div className="flex items-center gap-2 pl-11">
+        <button
+          type="button"
+          onClick={() => openAnyConnect()}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition active:scale-[0.97] hover:bg-amber-700"
+        >
+          <ShieldCheck className="size-3.5" />
+          Abrir AnyConnect
+        </button>
+        <button
+          type="button"
+          onClick={onRecheck}
+          className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-200 transition active:scale-[0.97] hover:bg-amber-500/20"
+        >
+          <Wifi className="size-3.5" />
+          Verificar novamente
+        </button>
+      </div>
     </div>
   );
 }
