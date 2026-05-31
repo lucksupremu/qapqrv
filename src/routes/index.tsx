@@ -279,13 +279,16 @@ function HomeScreen() {
         </div>
       </section>
 
-      {/* CARD BRANCO */}
-      <section className="mx-4 mt-4 rounded-[20px] bg-[#141432] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
+      {/* CARD AÇÕES */}
+      <section
+        className="mx-4 mt-4 rounded-[20px] border bg-[#141432] p-5"
+        style={{ borderColor: "#23234a", boxShadow: "var(--shadow-card)" }}
+      >
         {/* Marcar/Desmarcar */}
         <button
           onClick={() => setMarcarOpen(true)}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] font-bold text-white active:scale-[0.99]"
-          style={{ background: "#4f46e5" }}
+          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
         >
           <Globe size={20} />
           Marcar/Desmarcar
@@ -295,8 +298,8 @@ function HomeScreen() {
         <div className="mt-3 flex gap-2">
           <button
             onClick={openAnyConnect}
-            className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-[14px] border-2 bg-[#141432] font-bold active:scale-[0.99]"
-            style={{ borderColor: "#4f46e5", color: "#4f46e5" }}
+            className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-[14px] border bg-transparent font-bold active:scale-[0.99]"
+            style={{ borderColor: "#4f46e5", color: "#a5b4fc" }}
           >
             <KeyRound size={20} />
             Abrir AnyConnect
@@ -304,8 +307,8 @@ function HomeScreen() {
           <button
             aria-label="Informações sobre AnyConnect"
             onClick={() => navigate({ to: "/anyconnect" })}
-            className="flex h-10 w-10 items-center justify-center self-center rounded-full border-2"
-            style={{ borderColor: "#4f46e5", color: "#4f46e5" }}
+            className="flex h-10 w-10 items-center justify-center self-center rounded-full border"
+            style={{ borderColor: "#4f46e5", color: "#a5b4fc" }}
           >
             <Info size={18} />
           </button>
@@ -314,12 +317,12 @@ function HomeScreen() {
         {/* Consulta de escala */}
         <div className="mt-3 flex items-stretch gap-2">
           <div
-            className="relative flex-1 rounded-[14px] border-2 px-3 pt-[18px] pb-1"
-            style={{ borderColor: "#4f46e5", height: 52 }}
+            className="relative flex-1 rounded-[14px] border px-3 pt-[18px] pb-1"
+            style={{ borderColor: "#23234a", background: "#1e1e3a", height: 52 }}
           >
             <label
               className="absolute left-3 top-1 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: "#4f46e5" }}
+              style={{ color: "#a5b4fc" }}
             >
               ID da escala
             </label>
@@ -336,7 +339,7 @@ function HomeScreen() {
             onClick={handleConsultar}
             disabled={consultando}
             className="flex h-[52px] items-center justify-center gap-2 rounded-[14px] px-5 font-bold text-white transition active:scale-[0.99] disabled:opacity-70"
-            style={{ background: "#4f46e5" }}
+            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
           >
             {consultando ? (
               <>
