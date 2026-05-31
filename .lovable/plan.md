@@ -1,20 +1,40 @@
-## Problema
+## Objetivo
 
-A função `checarVpn()` em `src/routes/index.tsx` faz um `fetch(..., { mode: "no-cors" })` ao domínio da intranet. Em WebView/navegador, essa requisição falha em muitos cenários mesmo com a VPN ativa (certificado interno, CSP, mixed content, bloqueios de rede do WebView). O resultado é um falso negativo: o app pensa que a VPN está offline e abre o AnyConnect, mesmo quando o usuário já está conectado.
+Redesenhar a tela inicial (`src/routes/index.tsx`) trocando o card azul de estatísticas e o bloco vertical de ações por uma **grid de blocos quadrados com ícone grande + título**, no estilo "menu de app", mantendo a identidade azul PMESP.
 
-## Solução
+## Nova estrutura da home
 
-Remover a verificação prévia de VPN. Tentar abrir a escala diretamente — se a VPN estiver ativa, o navegador interno carrega a página normalmente; se não estiver, o próprio site falhará e o usuário tem o botão "Abrir AnyConnect" sempre disponível no card de ações.
+1. **Header** (mantém) — "QAP, QRV!" + botão de menu.
+2. **Bloco de consulta de escala** (mantém, no topo) — campo "ID da escala" + botão "Consultar". É a função mais usada e precisa do input, então fica destacado fora da grid.
+3. **Passo a passo rápido** (mantém) — os 3 passinhos com ícones (Acesse → Conecte → Pesquise).
+4. **Grid de blocos de ação** (novo) — 2 colunas, blocos quadrados com ícone grande centralizado e título embaixo:
+   - **Marcar / Desmarcar** (ícone `CalendarPlus`) — abre o modal de marcar.
+   - **Calendário** (ícone `Calendar`) — vai para `/calendario`.
+   - **Escalas baixadas** (ícone `FolderDown`) — vai para `/escalas-baixadas`.
+   - **Abrir AnyConnect** (ícone `KeyRound`) — chama `openAnyConnect()`.
+   - **Guia AnyConnect** (ícone `BookOpen`) — vai para `/anyconnect`.
+   - **Intranet PMESP** (ícone `Globe`) — vai para `/intranet`.
+5. **Footer** (mantém) — link Política de Privacidade.
 
-## Mudanças em `src/routes/index.tsx`
+O card azul de "Valores a receber / Dejem / Delegada" sai da home conforme escolhido. Os dados continuam acessíveis via Calendário, que já lista marcas.
 
-1. Remover a função `checarVpn()`.
-2. Em `handleConsultar()`:
-   - Remover o bloco `if (!vpnOk) { ... openAnyConnect(); return; }`.
-   - Chamar direto `upsertEscala(...)`, `baixarPdfEmBackground(...)` e `abrirComCredenciais(url, ...)`.
-3. Remover o estado `vpnAviso` e o bloco JSX do aviso amarelo (não é mais acionado automaticamente). O botão "Abrir AnyConnect" do card continua disponível para quando o usuário perceber que precisa conectar.
-4. Limpar imports não usados (`AlertTriangle`, `openAnyConnect` continua sendo usado pelo botão do card).
+## Estilo dos blocos
 
-## Resultado
+- Grid `grid-cols-2 gap-3`.
+- Cada bloco: `aspect-square`, cantos arredondados (`rounded-[20px]`), fundo branco com borda sutil, sombra `var(--shadow-card)`.
+- Ícone grande (28–32px) dentro de um círculo com gradiente azul PMESP (`var(--gradient-primary)`), centralizado.
+- Título em negrito abaixo do ícone, cor `#0f2535`.
+- Pressed state: `active:scale-[0.98]` para feedback tátil.
+- Paleta mantida (azul PMESP): `#0c2340`, `#1a4a6e`, `#2e6b8a`, `#6ba3c8`.
 
-Consultar escala passa a abrir a intranet diretamente, sem precheck que pode falhar. O usuário decide se precisa do AnyConnect pelo botão dedicado.
+## Limpeza de código
+
+- Remover do `index.tsx` os cálculos de `mesesRecentes`, `mesesValores`, `contarTipo`, `somar`, `dejemContagens`, `delegadaContagens`, `valoresMensais`, `formatBRL` e o `useMemo` correspondente (não são mais usados na home).
+- `marcas`/`setMarcas` permanecem só para alimentar o `MarcarModal` (onSave).
+- Imports não usados (`Calendar` permanece, mas `formatBRL` e helpers de mês saem).
+
+## Arquivos alterados
+
+- `src/routes/index.tsx` — reescrita do `HomeScreen` com a nova grid de blocos e remoção das estatísticas.
+
+Nenhum outro arquivo precisa mudar: rotas, drawer, modal e libs já existem.

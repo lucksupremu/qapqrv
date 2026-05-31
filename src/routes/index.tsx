@@ -1,15 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Calendar,
+  CalendarPlus,
   Menu,
   Globe,
   KeyRound,
-  Info,
+  BookOpen,
+  FolderDown,
   Loader2,
   Search,
   ArrowRight,
+  type LucideIcon,
 } from "lucide-react";
 import { MarcarModal } from "@/components/marcar-modal";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
@@ -32,14 +35,11 @@ export const Route = createFileRoute("/")({
   component: HomeScreen,
 });
 
-const MESES_PT = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-
-function formatBRL(n: number) {
-  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-
-
+type ActionBlock = {
+  label: string;
+  icon: LucideIcon;
+  onClick: () => void;
+};
 
 function HomeScreen() {
   const navigate = useNavigate();
@@ -47,69 +47,11 @@ function HomeScreen() {
   const [idEscala, setIdEscala] = useState("");
   const [marcarOpen, setMarcarOpen] = useState(false);
   const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
+  const [consultando, setConsultando] = useState(false);
 
   useEffect(() => {
     saveMarcas(marcas);
   }, [marcas]);
-
-
-
-  // Mês atual e janelas
-  const { mesesRecentes, mesesValores } = useMemo(() => {
-    const hoje = new Date();
-    const y = hoje.getFullYear();
-    const m = hoje.getMonth();
-    const recentes = [
-      { y, m: m - 2 },
-      { y, m: m - 1 },
-      { y, m },
-    ].map(({ y, m }) => {
-      const d = new Date(y, m, 1);
-      return { ano: d.getFullYear(), mes: d.getMonth() };
-    });
-    const valores = [
-      { y, m },
-      { y, m: m + 1 },
-    ].map(({ y, m }) => {
-      const d = new Date(y, m, 1);
-      return { ano: d.getFullYear(), mes: d.getMonth() };
-    });
-    return { mesesRecentes: recentes, mesesValores: valores };
-  }, []);
-
-  const contarTipo = (
-    match: (t: Marca["tipo"]) => boolean,
-    ano: number,
-    mes: number,
-  ) =>
-    marcas.filter((mk) => {
-      if (!match(mk.tipo)) return false;
-      const d = new Date(mk.data);
-      return d.getFullYear() === ano && d.getMonth() === mes;
-    }).length;
-
-  const somar = (ano: number, mes: number) =>
-    marcas
-      .filter((mk) => {
-        const d = new Date(mk.data);
-        return d.getFullYear() === ano && d.getMonth() === mes;
-      })
-      .reduce((acc, mk) => acc + (mk.valor || 0), 0);
-
-  const dejemContagens = mesesRecentes.map((x) =>
-    contarTipo((t) => t === "dejem", x.ano, x.mes),
-  );
-  const delegadaContagens = mesesRecentes.map((x) =>
-    contarTipo(
-      (t) => t === "delegada_capital" || t === "delegada_outras",
-      x.ano,
-      x.mes,
-    ),
-  );
-
-  const valoresMensais = mesesValores.map((x) => somar(x.ano, x.mes));
-
-  const [consultando, setConsultando] = useState(false);
 
   const handleConsultar = async () => {
     const id = idEscala.trim();
@@ -140,8 +82,38 @@ function HomeScreen() {
     }
   };
 
-
-
+  const blocos: ActionBlock[] = [
+    {
+      label: "Marcar / Desmarcar",
+      icon: CalendarPlus,
+      onClick: () => setMarcarOpen(true),
+    },
+    {
+      label: "Calendário",
+      icon: Calendar,
+      onClick: () => navigate({ to: "/calendario" }),
+    },
+    {
+      label: "Escalas baixadas",
+      icon: FolderDown,
+      onClick: () => navigate({ to: "/escalas-baixadas" }),
+    },
+    {
+      label: "Abrir AnyConnect",
+      icon: KeyRound,
+      onClick: () => openAnyConnect(),
+    },
+    {
+      label: "Guia AnyConnect",
+      icon: BookOpen,
+      onClick: () => navigate({ to: "/anyconnect" }),
+    },
+    {
+      label: "Intranet PMESP",
+      icon: Globe,
+      onClick: () => navigate({ to: "/intranet" }),
+    },
+  ];
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
@@ -165,128 +137,15 @@ function HomeScreen() {
         </button>
       </header>
 
-      {/* CARD AZUL */}
-      <section
-        className="relative mx-4 mt-4 overflow-hidden rounded-[24px] p-5 text-white"
-        style={{
-          background: "var(--gradient-primary)",
-          boxShadow: "var(--shadow-glow), var(--shadow-elegant)",
-        }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl"
-          style={{ background: "#6ba3c8" }}
-        />
-        <div className="relative flex items-center justify-between">
-          <h2 className="text-[18px] font-bold tracking-tight">Valores a receber</h2>
-          <button
-            aria-label="Abrir calendário"
-            onClick={() => navigate({ to: "/calendario" })}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm transition active:scale-95 hover:bg-white/25"
-            style={{ color: "#ffffff" }}
-          >
-            <Calendar size={18} />
-          </button>
-        </div>
-
-        {/* Valores mensais */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          {mesesValores.map((x, i) => (
-            <div
-              key={`val-${i}`}
-              className="rounded-xl p-3"
-              style={{ background: "#1f4e68" }}
-            >
-              <div className="text-[11px] font-semibold uppercase tracking-wider opacity-90">
-                {MESES_PT[x.mes]}
-              </div>
-              <div className="mt-1 text-[16px] font-bold">
-                {formatBRL(valoresMensais[i] || 0)}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Dejem */}
-        <div className="mt-5">
-          <h3 className="text-[20px] font-bold">Dejem</h3>
-          <div className="mt-2 flex gap-2">
-            {mesesRecentes.map((x, i) => (
-              <div
-                key={`dej-${i}`}
-                className="flex-1 rounded-xl p-[10px]"
-                style={{ background: "#1f4e68" }}
-              >
-                <div className="text-[11px] font-semibold uppercase tracking-wider opacity-90">
-                  {MESES_PT[x.mes]}
-                </div>
-                <div className="mt-1 text-center text-[22px] font-bold">
-                  {dejemContagens[i] || 0}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Delegada */}
-        <div className="mt-5">
-          <h3 className="text-[20px] font-bold">Delegada</h3>
-          <div className="mt-2 flex gap-2">
-            {mesesRecentes.map((x, i) => (
-              <div
-                key={`del-${i}`}
-                className="flex-1 rounded-xl p-[10px]"
-                style={{ background: "#1f4e68" }}
-              >
-                <div className="text-[11px] font-semibold uppercase tracking-wider opacity-90">
-                  {MESES_PT[x.mes]}
-                </div>
-                <div className="mt-1 text-center text-[22px] font-bold">
-                  {delegadaContagens[i] || 0}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CARD AÇÕES */}
+      {/* CONSULTA DE ESCALA */}
       <section
         className="mx-4 mt-4 rounded-[20px] border bg-[#ffffff] p-5"
         style={{ borderColor: "#d5e3ee", boxShadow: "var(--shadow-card)" }}
       >
-        {/* Marcar/Desmarcar */}
-        <button
-          onClick={() => setMarcarOpen(true)}
-          className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] font-bold text-white active:scale-[0.99]"
-          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-        >
-          <Globe size={20} />
-          Marcar/Desmarcar
-        </button>
+        <h2 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
+          Consultar escala
+        </h2>
 
-        {/* AnyConnect + info */}
-        <div className="mt-3 flex gap-2">
-          <button
-            onClick={openAnyConnect}
-            className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-[14px] border bg-transparent font-bold active:scale-[0.99]"
-            style={{ borderColor: "#2e6b8a", color: "#6ba3c8" }}
-          >
-            <KeyRound size={20} />
-            Abrir AnyConnect
-          </button>
-          <button
-            aria-label="Informações sobre AnyConnect"
-            onClick={() => navigate({ to: "/anyconnect" })}
-            className="flex h-10 w-10 items-center justify-center self-center rounded-full border"
-            style={{ borderColor: "#2e6b8a", color: "#6ba3c8" }}
-          >
-            <Info size={18} />
-          </button>
-        </div>
-
-        {/* Consulta de escala */}
         <div className="mt-3 flex items-stretch gap-2">
           <div
             className="relative flex-1 rounded-[14px] border px-3 pt-[18px] pb-1"
@@ -325,7 +184,7 @@ function HomeScreen() {
         </div>
 
         {/* Passo a passo rápido */}
-        <div className="mt-4 flex items-center gap-2">
+        <div className="mt-4 flex items-center justify-center gap-2">
           {[
             { icon: Globe, label: "Acesse o site" },
             { icon: KeyRound, label: "Conecte no AnyConnect" },
@@ -351,7 +210,35 @@ function HomeScreen() {
         </div>
       </section>
 
-
+      {/* GRID DE BLOCOS DE AÇÃO */}
+      <section className="mx-4 mt-4">
+        <h2 className="mb-3 text-[14px] font-bold uppercase tracking-wider" style={{ color: "#2e6b8a" }}>
+          Acesso rápido
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          {blocos.map((b) => (
+            <button
+              key={b.label}
+              onClick={b.onClick}
+              className="flex aspect-square flex-col items-center justify-center gap-3 rounded-[20px] border bg-[#ffffff] p-3 transition active:scale-[0.98]"
+              style={{ borderColor: "#d5e3ee", boxShadow: "var(--shadow-card)" }}
+            >
+              <div
+                className="flex h-[60px] w-[60px] items-center justify-center rounded-full text-white"
+                style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+              >
+                <b.icon size={28} />
+              </div>
+              <span
+                className="text-center text-[13px] font-bold leading-tight"
+                style={{ color: "#0f2535" }}
+              >
+                {b.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* FOOTER */}
       <footer className="mt-8 text-center">
@@ -369,7 +256,6 @@ function HomeScreen() {
         onOpenChange={setMarcarOpen}
         onSave={(marca) => setMarcas((prev) => [marca, ...prev])}
       />
-
     </div>
   );
 }
