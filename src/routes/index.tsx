@@ -110,21 +110,6 @@ function HomeScreen() {
   const valoresMensais = mesesValores.map((x) => somar(x.ano, x.mes));
 
   const [consultando, setConsultando] = useState(false);
-  const [pinOpen, setPinOpen] = useState(false);
-  const [pinTitulo, setPinTitulo] = useState("");
-  const pendingUrlRef = (globalThis as { _pendingUrl?: string });
-
-  const abrirComCredenciais = async (url: string, titulo: string) => {
-    if (await hasCredenciais()) {
-      if (!getSessionPin()) {
-        pendingUrlRef._pendingUrl = url;
-        setPinTitulo(titulo);
-        setPinOpen(true);
-        return;
-      }
-    }
-    await openInAppBrowser(url, { titulo });
-  };
 
   const handleConsultar = async () => {
     const id = idEscala.trim();
@@ -146,7 +131,7 @@ function HomeScreen() {
       void baixarPdfEmBackground(id, url).then((ok) => {
         if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
       });
-      await abrirComCredenciais(url, `Escala ${id}`);
+      await openInAppBrowser(url, { titulo: `Escala ${id}` });
       toast.success("Escala adicionada em Escalas baixadas.");
     } catch {
       toast.error("Não foi possível abrir a escala.");
@@ -155,18 +140,6 @@ function HomeScreen() {
     }
   };
 
-
-  const onPinConfirm = async (pin: string) => {
-    const cred = await loadCredenciais(pin);
-    if (!cred) throw new Error("PIN incorreto.");
-    setSessionPin(pin);
-    setPinOpen(false);
-    const url = pendingUrlRef._pendingUrl;
-    if (url) {
-      pendingUrlRef._pendingUrl = undefined;
-      await openInAppBrowser(url, { titulo: pinTitulo });
-    }
-  };
 
 
 
