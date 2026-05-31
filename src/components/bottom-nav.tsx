@@ -24,11 +24,18 @@ export function BottomNav() {
             <li key={to} className="flex-1">
               <Link
                 to={to}
-                className="flex h-full flex-col items-center justify-center gap-1 transition active:scale-95"
-                style={{ color: active ? "#4f46e5" : "#8b8db5" }}
+                className="relative flex h-full flex-col items-center justify-center gap-1 transition active:scale-95"
+                style={{ color: active ? "#a5b4fc" : "#8b8db5" }}
               >
-                <Icon size={24} />
-                <span className="text-[10px] font-semibold">{label}</span>
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute top-0 h-[3px] w-10 rounded-b-full"
+                    style={{ background: "var(--gradient-primary)" }}
+                  />
+                )}
+                <Icon size={22} />
+                <span className="text-[10px] font-semibold tracking-wide">{label}</span>
               </Link>
             </li>
           );
