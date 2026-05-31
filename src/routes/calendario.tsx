@@ -176,6 +176,7 @@ function CalendarScreen() {
 
   const handleDelete = () => {
     if (!confirmDelete) return;
+    cancelForMarca(confirmDelete.id);
     setMarcas((prev) => prev.filter((m) => m.id !== confirmDelete.id));
     setConfirmDelete(null);
     toast.success("Escala excluída com sucesso.");
