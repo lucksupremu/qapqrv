@@ -54,6 +54,29 @@ function HomeScreen() {
     saveMarcas(marcas);
   }, [marcas]);
 
+  // Recarrega marcas ao voltar para a aba/rota (ex.: depois de adicionar
+  // uma escala em /calendario) sem precisar recarregar a página.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const refresh = () => setMarcas(loadMarcas());
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || e.key === "marcas_atividade_d") refresh();
+    };
+    window.addEventListener("focus", refresh);
+    window.addEventListener("pageshow", refresh);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("pageshow", refresh);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
   const handleConsultar = () => {
     const id = idEscala.trim();
     if (!id) {
