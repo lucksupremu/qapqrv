@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Calendar,
@@ -13,6 +13,10 @@ import {
   Loader2,
   Search,
   ArrowRight,
+  WifiOff,
+  Wifi,
+  ShieldCheck,
+  Loader,
   type LucideIcon,
 } from "lucide-react";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
@@ -21,6 +25,8 @@ import { useDrawer } from "@/components/side-drawer";
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
 import { guardIntranet } from "@/lib/vpn-guard";
+import { isIntranetReachable } from "@/lib/check-vpn";
+import { openAnyConnect } from "@/lib/open-anyconnect";
 
 export const Route = createFileRoute("/")({
   head: () => ({
