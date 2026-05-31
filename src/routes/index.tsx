@@ -382,6 +382,13 @@ function HomeScreen() {
         onOpenChange={setMarcarOpen}
         onSave={(marca) => setMarcas((prev) => [marca, ...prev])}
       />
+
+      <PinModal
+        open={pinOpen}
+        modo="informar"
+        onClose={() => setPinOpen(false)}
+        onConfirm={onPinConfirm}
+      />
     </div>
   );
 }
