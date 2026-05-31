@@ -20,6 +20,7 @@ import { useDrawer } from "@/components/side-drawer";
 
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
+import { guardIntranet } from "@/lib/vpn-guard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -86,19 +87,20 @@ function HomeScreen() {
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
-    // Trilha A — abre AGORA, no clique, sem await: evita popup blocker e
-    // qualquer conflito de sessão com a aba do usuário.
-    if (isNativeApp()) {
-      void openInAppBrowser(url, { titulo: `Escala ${id}` });
-    } else if (typeof window !== "undefined") {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-
-    // Trilha B — fire-and-forget, completamente desacoplada.
     setConsultando(true);
-    setTimeout(() => {
-      void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
-    }, 0);
+    void guardIntranet(() => {
+      if (isNativeApp()) {
+        void openInAppBrowser(url, { titulo: `Escala ${id}` });
+      } else if (typeof window !== "undefined") {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+      setTimeout(() => {
+        void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
+      }, 0);
+    }, `a escala #${id}`).finally(() => {
+      // se o guard recusou (toast), libera o botão
+      setTimeout(() => setConsultando(false), 300);
+    });
   };
 
 
@@ -109,9 +111,13 @@ function HomeScreen() {
       gradient: "linear-gradient(135deg, #1a5276 0%, #3498db 100%)",
       shadow: "0 0 24px -8px rgba(26,82,118,0.45)",
       onClick: () =>
-        openInAppBrowser(
-          "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
-          { titulo: "Marcar / Desmarcar" }
+        void guardIntranet(
+          () =>
+            openInAppBrowser(
+              "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
+              { titulo: "Marcar / Desmarcar" },
+            ),
+          "Marcar / Desmarcar",
         ),
     },
     {
@@ -120,9 +126,13 @@ function HomeScreen() {
       gradient: "linear-gradient(135deg, #8e44ad 0%, #c39bd3 100%)",
       shadow: "0 0 24px -8px rgba(142,68,173,0.45)",
       onClick: () =>
-        openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
-          titulo: "Email iNotes",
-        }),
+        void guardIntranet(
+          () =>
+            openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
+              titulo: "Email iNotes",
+            }),
+          "o Email iNotes",
+        ),
     },
     {
       label: "Calendário",
