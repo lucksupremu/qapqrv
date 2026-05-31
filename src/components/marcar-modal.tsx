@@ -28,8 +28,8 @@ const formSchema = z.object({
 });
 
 const fieldClass =
-  "w-full rounded-[12px] border-2 bg-[#141432] px-3 py-3 text-[15px] font-semibold outline-none transition focus:ring-2";
-const fieldStyle = { borderColor: "#4f46e5", color: "#e8eaf6" } as const;
+  "w-full rounded-[12px] border-2 bg-[#ffffff] px-3 py-3 text-[15px] font-semibold outline-none transition focus:ring-2";
+const fieldStyle = { borderColor: "#2e6b8a", color: "#0f2535" } as const;
 
 function formatBRDate(iso: string) {
   try {
@@ -163,7 +163,7 @@ export function MarcarModal({
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
           <DialogTitle
             className="text-[20px] font-bold"
-            style={{ color: "#4f46e5" }}
+            style={{ color: "#2e6b8a" }}
           >
             {isEdit ? "Editar marca" : "Nova marca"}
           </DialogTitle>
@@ -177,7 +177,7 @@ export function MarcarModal({
           <div>
             <label
               className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: "#4f46e5" }}
+              style={{ color: "#2e6b8a" }}
             >
               Tipo de escala
             </label>
@@ -189,7 +189,7 @@ export function MarcarModal({
               }}
             >
               <SelectTrigger
-                className="h-[52px] w-full rounded-[12px] border-2 bg-[#141432] px-3 text-[15px] font-semibold"
+                className="h-[52px] w-full rounded-[12px] border-2 bg-[#ffffff] px-3 text-[15px] font-semibold"
                 style={fieldStyle}
               >
                 <SelectValue placeholder="Selecione…" />
@@ -215,7 +215,7 @@ export function MarcarModal({
               <div>
                 <label
                   className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                  style={{ color: "#4f46e5" }}
+                  style={{ color: "#2e6b8a" }}
                 >
                   Área / Nome da delegada
                 </label>
@@ -231,7 +231,7 @@ export function MarcarModal({
               <div>
                 <label
                   className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                  style={{ color: "#4f46e5" }}
+                  style={{ color: "#2e6b8a" }}
                 >
                   Horário de início (ex: 07:00)
                 </label>
@@ -247,7 +247,7 @@ export function MarcarModal({
               <div>
                 <label
                   className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                  style={{ color: "#4f46e5" }}
+                  style={{ color: "#2e6b8a" }}
                 >
                   Valor base por hora (R$)
                 </label>
@@ -270,7 +270,7 @@ export function MarcarModal({
           <div>
             <label
               className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: "#4f46e5" }}
+              style={{ color: "#2e6b8a" }}
             >
               Data e hora da escala
             </label>
@@ -295,7 +295,7 @@ export function MarcarModal({
           <div>
             <label
               className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: "#4f46e5" }}
+              style={{ color: "#2e6b8a" }}
             >
               Informe o valor
             </label>
@@ -315,11 +315,11 @@ export function MarcarModal({
           {/* Lembrete */}
           <div
             className="flex items-center justify-between rounded-[12px] border-2 px-3 py-3"
-            style={{ borderColor: "#4f46e5" }}
+            style={{ borderColor: "#2e6b8a" }}
           >
             <span
               className="text-[14px] font-bold"
-              style={{ color: "#4f46e5" }}
+              style={{ color: "#2e6b8a" }}
             >
               Agendar lembrete
             </span>
@@ -329,7 +329,7 @@ export function MarcarModal({
             <div className="animate-in fade-in slide-in-from-top-1 duration-200">
               <label
                 className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-                style={{ color: "#4f46e5" }}
+                style={{ color: "#2e6b8a" }}
               >
                 Quando notificar?
               </label>
@@ -345,18 +345,18 @@ export function MarcarModal({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-2 border-t border-[#1e1e3a] px-5 py-4">
+        <div className="flex gap-2 border-t border-[#e8f0f8] px-5 py-4">
           <button
             onClick={() => onOpenChange(false)}
-            className="h-[48px] flex-1 rounded-[14px] border-2 bg-[#141432] font-bold active:scale-[0.99]"
-            style={{ borderColor: "#4f46e5", color: "#4f46e5" }}
+            className="h-[48px] flex-1 rounded-[14px] border-2 bg-[#ffffff] font-bold active:scale-[0.99]"
+            style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
             className="h-[48px] flex-1 rounded-[14px] font-bold text-white active:scale-[0.99]"
-            style={{ background: "#4f46e5" }}
+            style={{ background: "#2e6b8a" }}
           >
             Salvar marca
           </button>

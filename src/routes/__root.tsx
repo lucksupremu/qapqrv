@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no",
       },
-      { name: "theme-color", content: "#0a0a1a" },
+      { name: "theme-color", content: "#f4f8fc" },
       { title: "QAP, QRV! — Ferramentas operacionais" },
       {
         name: "description",

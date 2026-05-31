@@ -92,13 +92,13 @@ function DownloadedReportsScreen() {
           aria-label="Voltar"
           onClick={() => navigate({ to: "/" })}
           className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "#1e1e3a", color: "#4f46e5" }}
+          style={{ background: "#e8f0f8", color: "#2e6b8a" }}
         >
           <ArrowLeft size={20} />
         </button>
         <h1
           className="flex-1 text-center text-[18px] font-bold"
-          style={{ color: "#4f46e5" }}
+          style={{ color: "#2e6b8a" }}
         >
           Escalas baixadas
         </h1>
@@ -107,14 +107,14 @@ function DownloadedReportsScreen() {
 
       {escalas.length === 0 ? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-          <FolderOpen size={60} style={{ color: "#8b8db5" }} />
+          <FolderOpen size={60} style={{ color: "#5b7a8f" }} />
           <p
             className="mt-3 text-[18px] font-bold"
-            style={{ color: "#4f46e5" }}
+            style={{ color: "#2e6b8a" }}
           >
             Nenhuma escala baixada
           </p>
-          <p className="mt-1 text-[14px]" style={{ color: "#8b8db5" }}>
+          <p className="mt-1 text-[14px]" style={{ color: "#5b7a8f" }}>
             As escalas que você consultar aparecerão aqui
           </p>
         </div>
@@ -123,30 +123,30 @@ function DownloadedReportsScreen() {
           {escalas.map((e) => (
             <li
               key={e.id}
-              className="mx-2 rounded-[16px] bg-[#141432] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+              className="mx-2 rounded-[16px] bg-[#ffffff] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
             >
               <div className="flex items-center justify-between gap-2">
                 <span
                   className="text-[16px] font-bold"
-                  style={{ color: "#e8eaf6" }}
+                  style={{ color: "#0f2535" }}
                 >
                   ID {e.id}
                 </span>
                 <span
                   className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
-                  style={{ background: "#1e1e3a", color: "#4f46e5" }}
+                  style={{ background: "#e8f0f8", color: "#2e6b8a" }}
                 >
                   Intranet PMESP
                 </span>
               </div>
-              <p className="mt-1 text-[13px]" style={{ color: "#8b8db5" }}>
+              <p className="mt-1 text-[13px]" style={{ color: "#5b7a8f" }}>
                 Salvo em {formatBR(e.dataSalva ?? e.savedAt)}
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => handleAbrir(e)}
                   className="rounded-[10px] px-5 py-2 text-[13px] font-bold text-white"
-                  style={{ background: "#4f46e5" }}
+                  style={{ background: "#2e6b8a" }}
                 >
                   Abrir
                 </button>
@@ -169,7 +169,7 @@ function DownloadedReportsScreen() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle style={{ color: "#4f46e5" }}>
+            <AlertDialogTitle style={{ color: "#2e6b8a" }}>
               Excluir escala baixada
             </AlertDialogTitle>
             <AlertDialogDescription>
