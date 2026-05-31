@@ -110,7 +110,6 @@ function HomeScreen() {
   const valoresMensais = mesesValores.map((x) => somar(x.ano, x.mes));
 
   const [consultando, setConsultando] = useState(false);
-  const [vpnAviso, setVpnAviso] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [pinTitulo, setPinTitulo] = useState("");
   const pendingUrlRef = (globalThis as { _pendingUrl?: string });
@@ -127,61 +126,35 @@ function HomeScreen() {
     await openInAppBrowser(url, { titulo });
   };
 
-  const checarVpn = async (): Promise<boolean> => {
-    // Faz um ping rápido a um host só acessível pela intranet PMESP.
-    // Se falhar (ou der timeout), assumimos que a VPN não está ativa.
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 3500);
-      await fetch(
-        "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/favicon.ico?_=" + Date.now(),
-        { method: "GET", mode: "no-cors", cache: "no-store", signal: ctrl.signal },
-      );
-      clearTimeout(t);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   const handleConsultar = async () => {
     const id = idEscala.trim();
     if (!id) {
       toast.error("Informe o ID da escala.");
       return;
     }
-    setVpnAviso(false);
     setConsultando(true);
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
     try {
-      const vpnOk = await checarVpn();
-      if (!vpnOk) {
-        setVpnAviso(true);
-        toast.error("VPN não detectada. Abrindo o AnyConnect…");
-        openAnyConnect();
-        return;
-      }
       upsertEscala({
         id,
         url,
         titulo: `Escala ${id}`,
         dataSalva: new Date().toISOString(),
       });
-      // Download em segundo plano (não bloqueia a abertura do navegador interno)
       void baixarPdfEmBackground(id, url).then((ok) => {
         if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
       });
       await abrirComCredenciais(url, `Escala ${id}`);
       toast.success("Escala adicionada em Escalas baixadas.");
     } catch {
-      setVpnAviso(true);
       toast.error("Não foi possível abrir a escala.");
     } finally {
       setConsultando(false);
     }
   };
+
 
   const onPinConfirm = async (pin: string) => {
     const cred = await loadCredenciais(pin);
