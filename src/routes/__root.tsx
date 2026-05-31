@@ -12,8 +12,6 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { DrawerProvider } from "@/components/side-drawer";
-import { BottomNav } from "@/components/bottom-nav";
 
 function NotFoundComponent() {
   return (
@@ -90,13 +88,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "description",
         content: "Central de ferramentas operacionais para o policial militar.",
       },
-      { property: "og:title", content: "QAP, QRV!" },
+      { property: "og:title", content: "QAP, QRV! — Ferramentas operacionais" },
       {
         property: "og:description",
         content: "Ferramentas operacionais em um só lugar.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "QAP, QRV! — Ferramentas operacionais" },
+      { name: "description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
+      { property: "og:description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
+      { name: "twitter:description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0fa5b7f-428d-457d-96fa-3dceb4d0abe4/id-preview-49580de1--c4ba12ae-de4d-4739-b500-bee9ca5bb9e9.lovable.app-1780237479015.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0fa5b7f-428d-457d-96fa-3dceb4d0abe4/id-preview-49580de1--c4ba12ae-de4d-4739-b500-bee9ca5bb9e9.lovable.app-1780237479015.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -128,14 +132,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DrawerProvider>
-        <div className="mx-auto w-full max-w-[430px] min-h-screen pb-[72px] scroll-smooth" style={{ background: "var(--bg)" }}>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </div>
-        <BottomNav />
-        <Toaster />
-      </DrawerProvider>
+      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <Outlet />
+      <Toaster />
     </QueryClientProvider>
   );
 }
