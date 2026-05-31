@@ -68,11 +68,13 @@ function HomeScreen() {
         titulo: `Escala ${id}`,
         dataSalva: new Date().toISOString(),
       });
+      // Tenta baixar o PDF em segundo plano (requer VPN/sessão ativa).
       void baixarPdfEmBackground(id, url).then((ok) => {
         if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
       });
-      await openInAppBrowser(url, { titulo: `Escala ${id}` });
       toast.success("Escala adicionada em Escalas baixadas.");
+      // Abre dentro do app para manter sessão e permitir salvar o PDF.
+      navigate({ to: "/intranet", search: { url, titulo: `Escala ${id}` } });
     } catch {
       toast.error("Não foi possível abrir a escala.");
     } finally {
