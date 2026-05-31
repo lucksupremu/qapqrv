@@ -16,8 +16,6 @@ import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import { openInAppBrowser } from "@/lib/in-app-browser";
-import { hasCredenciais, getSessionPin, setSessionPin, loadCredenciais } from "@/lib/credenciais";
-import { PinModal } from "@/components/pin-modal";
 import { upsertEscala, baixarPdfEmBackground } from "@/lib/escalas-baixadas";
 
 export const Route = createFileRoute("/")({
@@ -112,21 +110,6 @@ function HomeScreen() {
   const valoresMensais = mesesValores.map((x) => somar(x.ano, x.mes));
 
   const [consultando, setConsultando] = useState(false);
-  const [pinOpen, setPinOpen] = useState(false);
-  const [pinTitulo, setPinTitulo] = useState("");
-  const pendingUrlRef = (globalThis as { _pendingUrl?: string });
-
-  const abrirComCredenciais = async (url: string, titulo: string) => {
-    if (await hasCredenciais()) {
-      if (!getSessionPin()) {
-        pendingUrlRef._pendingUrl = url;
-        setPinTitulo(titulo);
-        setPinOpen(true);
-        return;
-      }
-    }
-    await openInAppBrowser(url, { titulo });
-  };
 
   const handleConsultar = async () => {
     const id = idEscala.trim();
@@ -148,7 +131,7 @@ function HomeScreen() {
       void baixarPdfEmBackground(id, url).then((ok) => {
         if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
       });
-      await abrirComCredenciais(url, `Escala ${id}`);
+      await openInAppBrowser(url, { titulo: `Escala ${id}` });
       toast.success("Escala adicionada em Escalas baixadas.");
     } catch {
       toast.error("Não foi possível abrir a escala.");
@@ -157,18 +140,6 @@ function HomeScreen() {
     }
   };
 
-
-  const onPinConfirm = async (pin: string) => {
-    const cred = await loadCredenciais(pin);
-    if (!cred) throw new Error("PIN incorreto.");
-    setSessionPin(pin);
-    setPinOpen(false);
-    const url = pendingUrlRef._pendingUrl;
-    if (url) {
-      pendingUrlRef._pendingUrl = undefined;
-      await openInAppBrowser(url, { titulo: pinTitulo });
-    }
-  };
 
 
 
@@ -399,12 +370,6 @@ function HomeScreen() {
         onSave={(marca) => setMarcas((prev) => [marca, ...prev])}
       />
 
-      <PinModal
-        open={pinOpen}
-        modo="informar"
-        onClose={() => setPinOpen(false)}
-        onConfirm={onPinConfirm}
-      />
     </div>
   );
 }
