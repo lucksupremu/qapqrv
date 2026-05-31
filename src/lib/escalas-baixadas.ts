@@ -10,6 +10,8 @@ export type EscalaSalva = {
   hasPdf?: boolean;
   pdfSize?: number;
   pdfMime?: string;
+  /** Caminho relativo dentro de Directory.Data (apenas APK). */
+  localPath?: string;
 };
 
 const STORAGE_KEY = "escalas_baixadas";

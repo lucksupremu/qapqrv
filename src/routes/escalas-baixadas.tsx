@@ -58,12 +58,30 @@ function DownloadedReportsScreen() {
   }, [escalas]);
 
   const handleAbrir = async (e: EscalaSalva) => {
+    // APK: se tiver arquivo salvo no Filesystem, abre por URI nativa.
+    if (e.localPath) {
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (Capacitor.isNativePlatform()) {
+          // @ts-ignore — plugin opcional
+          const fs: any = await import(/* @vite-ignore */ "@capacitor/filesystem");
+          const { uri } = await fs.Filesystem.getUri({
+            path: e.localPath,
+            directory: fs.Directory.Data,
+          });
+          window.open(uri, "_blank");
+          return;
+        }
+      } catch (err) {
+        console.warn("Falha ao abrir PDF nativo, caindo para intranet", err);
+      }
+    }
+    // Web: blob salvo no IndexedDB.
     if (e.hasPdf) {
       const blob = await lerPdfBlob(e.id);
       if (blob) {
         const objUrl = URL.createObjectURL(blob);
         window.open(objUrl, "_blank", "noopener,noreferrer");
-        // Libera após algum tempo
         setTimeout(() => URL.revokeObjectURL(objUrl), 60_000);
         return;
       }
@@ -73,6 +91,7 @@ function DownloadedReportsScreen() {
       search: { url: e.url, titulo: e.titulo ?? `Escala ${e.id}` },
     });
   };
+
 
   const handleDelete = async () => {
     if (!confirmDelete) return;

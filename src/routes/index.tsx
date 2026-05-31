@@ -17,10 +17,9 @@ import {
 } from "lucide-react";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
-import { openAnyConnect } from "@/lib/open-anyconnect";
+
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
-import { upsertEscala, baixarPdfEmBackground } from "@/lib/escalas-baixadas";
-import { isIntranetReachable } from "@/lib/check-vpn";
+import { salvarEscalaEmBackground } from "@/lib/escala-download";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -55,66 +54,30 @@ function HomeScreen() {
     saveMarcas(marcas);
   }, [marcas]);
 
-  const handleConsultar = async () => {
+  const handleConsultar = () => {
     const id = idEscala.trim();
     if (!id) {
       toast.error("Informe o ID da escala.");
       return;
     }
-    setConsultando(true);
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
-    // No web, abre uma aba em branco já no clique para não ser bloqueado.
-    // Será preenchida ou fechada depois do teste de VPN.
-    const novaAba =
-      !isNativeApp() && typeof window !== "undefined"
-        ? window.open("about:blank", "_blank", "noopener,noreferrer")
-        : null;
-
-    try {
-      const vpnOk = await isIntranetReachable();
-
-      if (!vpnOk) {
-        if (novaAba) novaAba.close();
-        toast.error("VPN AnyConnect não está conectada. Abrindo o app...");
-        openAnyConnect();
-        setConsultando(false);
-        return;
-      }
-
-      if (isNativeApp()) {
-        await openInAppBrowser(url, { titulo: `Escala ${id}` });
-      } else if (novaAba) {
-        novaAba.location.href = url;
-      } else {
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
-    } catch (e) {
-      console.error("Erro ao abrir escala:", e);
-      if (novaAba) novaAba.close();
-      toast.error("Não foi possível abrir a escala.");
-      setConsultando(false);
-      return;
+    // Trilha A — abre AGORA, no clique, sem await: evita popup blocker e
+    // qualquer conflito de sessão com a aba do usuário.
+    if (isNativeApp()) {
+      void openInAppBrowser(url, { titulo: `Escala ${id}` });
+    } else if (typeof window !== "undefined") {
+      window.open(url, "_blank", "noopener,noreferrer");
     }
 
-    // Salva em "Escalas baixadas" em segundo plano, sem bloquear nem quebrar.
-    try {
-      upsertEscala({
-        id,
-        url,
-        titulo: `Escala ${id}`,
-        dataSalva: new Date().toISOString(),
-      });
-      void baixarPdfEmBackground(id, url).then((ok) => {
-        if (ok) toast.success(`PDF da escala ${id} salvo offline.`);
-      });
-    } catch (e) {
-      console.warn("Falha ao salvar escala localmente:", e);
-    } finally {
-      setConsultando(false);
-    }
+    // Trilha B — fire-and-forget, completamente desacoplada.
+    setConsultando(true);
+    setTimeout(() => {
+      void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
+    }, 0);
   };
+
 
   const blocos: ActionBlock[] = [
     {
