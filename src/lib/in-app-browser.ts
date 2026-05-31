@@ -57,7 +57,7 @@ function buildAutofillScript(cred: Credenciais): string {
 }
 
 export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
-  const titulo = opts.titulo ?? "Intranet PMESP";
+  void opts.titulo; // reservado para futura customização da toolbar
   const wantAutofill = opts.autofill ?? true;
 
   if (await isNative()) {
