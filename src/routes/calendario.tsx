@@ -89,13 +89,14 @@ function formatBRL(n: number) {
 type CellDay = { date: Date; inMonth: boolean };
 
 function buildGrid(year: number, month: number): CellDay[] {
-  const first = new Date(year, month, 1);
+  // Usa 12:00 (meio-dia) como âncora para evitar pulos de dia causados por
+  // mudanças de fuso/horário de verão — qualquer ajuste de até ~12h ainda
+  // cai no mesmo dia civil.
+  const first = new Date(year, month, 1, 12, 0, 0, 0);
   const startWeekday = first.getDay(); // 0 = Sun
-  const start = new Date(year, month, 1 - startWeekday);
   const cells: CellDay[] = [];
   for (let i = 0; i < 42; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
+    const d = new Date(year, month, 1 - startWeekday + i, 12, 0, 0, 0);
     cells.push({ date: d, inMonth: d.getMonth() === month });
   }
   return cells;
