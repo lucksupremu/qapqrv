@@ -1,29 +1,31 @@
 // Abre links externos em um navegador interno.
 // - No app nativo (Capacitor): usa @capacitor/inappbrowser
 // - No web (navegador comum): abre nova aba
-
-import { Capacitor } from "@capacitor/core";
+//
+// Importes do Capacitor são DINÂMICOS para evitar quebrar o SSR — o
+// pacote toca `window`/`navigator` no carregamento.
 
 export type AbrirOpts = {
   titulo?: string;
 };
 
 export function isNativeApp(): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    return Capacitor.isNativePlatform();
+    // require síncrono não funciona em ESM; usamos a global que o Capacitor
+    // injeta no runtime nativo. Em web, retorna false.
+    // @ts-ignore
+    const cap = (window as any).Capacitor;
+    return !!cap?.isNativePlatform?.();
   } catch {
     return false;
   }
 }
 
-async function isNative() {
-  return isNativeApp();
-}
-
 export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
   void opts.titulo; // reservado para futura customização da toolbar
 
-  if (await isNative()) {
+  if (isNativeApp()) {
     try {
       const mod = await import("@capacitor/inappbrowser");
       // @ts-expect-error tipos do pacote variam por versão
@@ -32,6 +34,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
       await InAppBrowser.openInWebView({
         url,
         options: {
+          // @ts-ignore
           ...mod.DefaultWebViewOptions,
           showURL: true,
           showNavigationButtons: true,
