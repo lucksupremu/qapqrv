@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft, FileSearch, Star } from "lucide-react";
 import { getTool } from "@/lib/tools";
 import { BottomNav } from "@/components/bottom-nav";
 import { useFavorites, useHistory } from "@/hooks/use-local-list";
