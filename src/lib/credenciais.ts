@@ -102,7 +102,7 @@ export async function saveCredenciais(cred: Credenciais, pin: string) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plain = new TextEncoder().encode(JSON.stringify(cred));
   const ct = new Uint8Array(
-    await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plain),
+    await crypto.subtle.encrypt({ name: "AES-GCM", iv: buf(iv) }, key, buf(plain)),
   );
   const payload = JSON.stringify({ iv: b64(iv), ct: b64(ct) });
   await storageSet(STORAGE_KEY, payload);
