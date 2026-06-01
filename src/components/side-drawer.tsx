@@ -79,6 +79,8 @@ function SideDrawer() {
   const native = useIsNative();
   const grupo1 = native ? [...grupo1Base, ...grupo1NativeOnly] : grupo1Base;
   const [theme, setTheme] = useState<Theme>("light");
+  const pwa = usePwaInstall();
+  const [showPwaModal, setShowPwaModal] = useState(false);
   useEffect(() => {
     setTheme(getStoredTheme());
   }, []);
@@ -86,6 +88,13 @@ function SideDrawer() {
     const next: Theme = theme === "dark" ? "light" : "dark";
     applyTheme(next);
     setTheme(next);
+  };
+  const handleInstallClick = async () => {
+    if (pwa.canPrompt) {
+      await pwa.promptInstall();
+    } else {
+      setShowPwaModal(true);
+    }
   };
 
 
