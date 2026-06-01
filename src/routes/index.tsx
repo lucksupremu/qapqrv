@@ -64,6 +64,18 @@ function HomeScreen() {
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
   const native = useIsNative();
+  const [theme, setThemeState] = useState<Theme>("light");
+
+  useEffect(() => {
+    setThemeState(getStoredTheme());
+  }, []);
+
+  const toggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setThemeState(next);
+  };
+
 
   useEffect(() => {
     setMarcas(loadMarcas());
