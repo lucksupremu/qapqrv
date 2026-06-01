@@ -1,6 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Smartphone } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Smartphone,
+} from "lucide-react";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import passo1 from "@/assets/anyconnect/passo-1.jpg";
 import passo2 from "@/assets/anyconnect/passo-2.jpg";
@@ -14,54 +21,164 @@ export const Route = createFileRoute("/anyconnect")({
   component: AnyConnectGuideScreen,
 });
 
-const PASSOS: { src: string; alt: string; texto: string }[] = [
+const SERVIDOR = "extranet.policiamilitar.sp.gov.br";
+
+type Chip = { label: string; value: string; mono?: boolean };
+
+type Passo = {
+  src: string;
+  alt: string;
+  titulo: string;
+  descricao: string;
+  chips?: Chip[];
+  destaqueServidor?: boolean;
+};
+
+const PASSOS: Passo[] = [
   {
     src: passo1,
     alt: "Tela inicial do Cisco Secure Client com seta apontando para os 3 pontos no canto superior direito",
-    texto:
-      "Abra o Cisco Secure Client e toque nos 3 pontos (⋮) no canto superior direito.",
+    titulo: "Abra o menu",
+    descricao: "Toque nos 3 pontos (⋮) no canto superior direito.",
   },
   {
     src: passo2,
     alt: "Menu suspenso aberto com a opção Configurações destacada",
-    texto: "No menu que aparece, toque em Configurações.",
+    titulo: "Vá em Configurações",
+    descricao: "Toque na opção Configurações.",
   },
   {
     src: passo3,
     alt: "Tela de Configurações com todas as opções desmarcadas (padrão)",
-    texto:
-      "Confirme que as opções estão no padrão (todas desmarcadas). Não altere nada e volte.",
+    titulo: "Mantenha o padrão",
+    descricao: "Não altere nada — todas as opções devem ficar desmarcadas.",
   },
   {
     src: passo4,
     alt: "Tela inicial com seta apontando para Conexões / PMESP",
-    texto: "De volta à tela inicial, toque em Conexões → PMESP.",
+    titulo: "Acesse PMESP",
+    descricao: "Toque em Conexões → PMESP.",
   },
   {
     src: passo5,
     alt: "Editor de conexão mostrando Descrição PMESP, servidor extranet.policiamilitar.sp.gov.br e Preferências avançadas",
-    texto:
-      "Confirme: Descrição = PMESP | Servidor = extranet.policiamilitar.sp.gov.br | depois toque em Preferências avançadas.",
+    titulo: "Confira o servidor",
+    descricao: "Cole o endereço abaixo e toque em Preferências avançadas.",
+    destaqueServidor: true,
+    chips: [{ label: "Descrição", value: "PMESP" }],
   },
   {
     src: passo6,
     alt: "Tela de Preferências avançadas com Certificado Desabilitado, Autenticação EAP-AnyConnect e botão Concluído",
-    texto:
-      "Confirme: Certificado = Desabilitado | Autenticação = EAP-AnyConnect | toque em Concluído ✓.",
+    titulo: "Preferências avançadas",
+    descricao: "Confirme os valores e toque em Concluído ✓.",
+    chips: [
+      { label: "Certificado", value: "Desabilitado" },
+      { label: "Autenticação", value: "EAP-AnyConnect" },
+    ],
   },
 ];
+
+function CopyServerButton({ compact = false }: { compact?: boolean }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(SERVIDOR);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = SERVIDOR;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch {
+        /* noop */
+      }
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-[14px] border bg-white ${
+        compact ? "p-2" : "p-3"
+      }`}
+      style={{ borderColor: "#cfe0ec" }}
+    >
+      <div className="min-w-0 flex-1">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-wide"
+          style={{ color: "#5b7a8f" }}
+        >
+          Servidor
+        </p>
+        <p
+          className="truncate font-mono text-[13px] font-semibold"
+          style={{ color: "#0f2535" }}
+          title={SERVIDOR}
+        >
+          {SERVIDOR}
+        </p>
+      </div>
+      <button
+        onClick={handleCopy}
+        aria-label={copied ? "Endereço copiado" : "Copiar endereço do servidor"}
+        className="flex shrink-0 items-center gap-1 rounded-[10px] px-3 py-2 text-[12px] font-bold text-white transition active:scale-[0.97]"
+        style={{ background: copied ? "#2d8a5f" : "#2e6b8a" }}
+      >
+        {copied ? <Check size={14} /> : <Copy size={14} />}
+        {copied ? "Copiado!" : "Copiar"}
+      </button>
+    </div>
+  );
+}
 
 function AnyConnectGuideScreen() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const isLast = step === PASSOS.length - 1;
+  const touchStartX = useRef<number | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
   const goPrev = () => setStep((s) => Math.max(0, s - 1));
   const goNext = () => {
     if (!isLast) setStep((s) => s + 1);
   };
 
+  // Teclado ← →
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") goPrev();
+      else if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isLast]);
+
+  // Scroll suave ao topo do card ao trocar de passo
+  useEffect(() => {
+    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [step]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current == null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) > 50) {
+      if (delta < 0) goNext();
+      else goPrev();
+    }
+    touchStartX.current = null;
+  };
+
   const abrirAnyConnect = () => openAnyConnect();
+  const passo = PASSOS[step];
+  const progresso = ((step + 1) / PASSOS.length) * 100;
 
   return (
     <div
@@ -86,15 +203,38 @@ function AnyConnectGuideScreen() {
         <span className="h-10 w-10" aria-hidden />
       </header>
 
-      {/* Carrossel */}
-      <div className="mx-3 mt-2 overflow-hidden rounded-[20px] bg-[#ffffff] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
-        <p
-          className="text-center text-[13px] font-semibold"
-          style={{ color: "#5b7a8f" }}
-        >
-          Passo {step + 1} de {PASSOS.length}
-        </p>
+      {/* Bloco fixo de copiar servidor (sempre visível) */}
+      <div className="mx-3 mt-1">
+        <CopyServerButton />
+      </div>
 
+      {/* Carrossel */}
+      <div
+        ref={cardRef}
+        className="mx-3 mt-3 overflow-hidden rounded-[20px] bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* Header passo + progresso */}
+        <div className="flex items-center justify-between gap-3">
+          <span
+            className="flex h-8 items-center justify-center rounded-full px-3 text-[12px] font-bold text-white"
+            style={{ background: "#2e6b8a" }}
+          >
+            {step + 1}/{PASSOS.length}
+          </span>
+          <div
+            className="h-1.5 flex-1 overflow-hidden rounded-full"
+            style={{ background: "#e8f0f8" }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${progresso}%`, background: "#2e6b8a" }}
+            />
+          </div>
+        </div>
+
+        {/* Imagem */}
         <div className="mt-3 overflow-hidden">
           <div
             className="flex transition-transform duration-300 ease-out"
@@ -103,7 +243,7 @@ function AnyConnectGuideScreen() {
             {PASSOS.map((p, i) => (
               <div key={i} className="w-full shrink-0 px-1">
                 <div
-                  className="flex h-[520px] w-full items-center justify-center overflow-hidden rounded-[16px]"
+                  className="flex h-[420px] w-full items-center justify-center overflow-hidden rounded-[16px]"
                   style={{ background: "#f4f8fc" }}
                 >
                   <img
@@ -113,15 +253,50 @@ function AnyConnectGuideScreen() {
                     className="h-full w-full object-contain"
                   />
                 </div>
-                <p
-                  className="mt-4 px-2 text-center text-[15px] font-semibold leading-relaxed"
-                  style={{ color: "#0f2535" }}
-                >
-                  {p.texto}
-                </p>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Conteúdo do passo atual com animação */}
+        <div
+          key={step}
+          aria-live="polite"
+          className="mt-4 animate-fade-in px-1"
+        >
+          <h2
+            className="text-[17px] font-extrabold leading-tight"
+            style={{ color: "#0f2535" }}
+          >
+            {passo.titulo}
+          </h2>
+          <p
+            className="mt-1 text-[14px] leading-relaxed"
+            style={{ color: "#3b556b" }}
+          >
+            {passo.descricao}
+          </p>
+
+          {passo.destaqueServidor && (
+            <div className="mt-3">
+              <CopyServerButton compact />
+            </div>
+          )}
+
+          {passo.chips && passo.chips.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {passo.chips.map((c) => (
+                <div
+                  key={c.label}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold"
+                  style={{ background: "#e8f0f8", color: "#0f2535" }}
+                >
+                  <span style={{ color: "#5b7a8f" }}>{c.label}:</span>
+                  <span className={c.mono ? "font-mono" : ""}>{c.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Dots */}
@@ -131,10 +306,10 @@ function AnyConnectGuideScreen() {
               key={i}
               aria-label={`Ir ao passo ${i + 1}`}
               onClick={() => setStep(i)}
-              className="h-2 w-2 rounded-full transition"
+              className="h-2 rounded-full transition-all"
               style={{
-                background: i === step ? "#2e6b8a" : "#e8f0f8",
-                transform: i === step ? "scale(1.2)" : "scale(1)",
+                width: i === step ? 20 : 8,
+                background: i === step ? "#2e6b8a" : "#cfe0ec",
               }}
             />
           ))}
@@ -145,17 +320,25 @@ function AnyConnectGuideScreen() {
           <button
             onClick={goPrev}
             disabled={step === 0}
-            className="flex items-center gap-1 rounded-[12px] border-2 bg-[#ffffff] px-4 py-2 text-[13px] font-bold disabled:opacity-40"
+            className="flex items-center gap-1 rounded-[12px] border-2 bg-white px-4 py-2 text-[13px] font-bold disabled:opacity-40"
             style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
           >
             <ChevronLeft size={16} /> Anterior
           </button>
           <button
-            onClick={isLast ? () => navigate({ to: "/" }) : goNext}
-            className="flex items-center gap-1 rounded-[12px] px-4 py-2 text-[13px] font-bold text-white"
+            onClick={isLast ? abrirAnyConnect : goNext}
+            className="flex items-center gap-1 rounded-[12px] px-4 py-2 text-[13px] font-bold text-white active:scale-[0.98]"
             style={{ background: "#2e6b8a" }}
           >
-            {isLast ? "Concluído" : (<>Próximo <ChevronRight size={16} /></>)}
+            {isLast ? (
+              <>
+                <Smartphone size={16} /> Abrir AnyConnect
+              </>
+            ) : (
+              <>
+                Próximo <ChevronRight size={16} />
+              </>
+            )}
           </button>
         </div>
       </div>
