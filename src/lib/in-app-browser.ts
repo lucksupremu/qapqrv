@@ -85,11 +85,11 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
 
       let loaded = false;
       let closed = false;
-      let fallbackTimer: number | undefined;
+      const fallbackTimer: { current?: number } = {};
       const removeHandles: Array<{ remove: () => Promise<void> }> = [];
 
       const cleanup = () => {
-        if (fallbackTimer) window.clearTimeout(fallbackTimer);
+        if (fallbackTimer.current) window.clearTimeout(fallbackTimer.current);
         void Promise.allSettled(removeHandles.map((handle) => handle.remove()));
       };
 
@@ -113,7 +113,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
         }),
       );
 
-      fallbackTimer = window.setTimeout(() => {
+      fallbackTimer.current = window.setTimeout(() => {
         if (loaded || closed) return;
         closed = true;
         void InAppBrowser.close()
