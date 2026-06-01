@@ -110,14 +110,14 @@ function CopyServerButton({ compact = false }: { compact?: boolean }) {
     >
       <div className="min-w-0 flex-1">
         <p
-          className="text-[11px] font-semibold uppercase tracking-wide"
-          style={{ color: "#5b7a8f" }}
+          className="text-[11px] font-bold uppercase tracking-wide"
+          style={{ color: "#05101a" }}
         >
           Servidor
         </p>
         <p
-          className="truncate font-mono text-[13px] font-semibold"
-          style={{ color: "#0f2535" }}
+          className="truncate font-mono text-[13px] font-bold"
+          style={{ color: "#02080d" }}
           title={SERVIDOR}
         >
           {SERVIDOR}
@@ -265,14 +265,14 @@ function AnyConnectGuideScreen() {
           className="mt-4 animate-fade-in px-1"
         >
           <h2
-            className="text-[17px] font-extrabold leading-tight"
-            style={{ color: "#0f2535" }}
+            className="text-[18px] font-extrabold leading-tight"
+            style={{ color: "#02080d" }}
           >
             {passo.titulo}
           </h2>
           <p
-            className="mt-1 text-[14px] leading-relaxed"
-            style={{ color: "#3b556b" }}
+            className="mt-1.5 text-[15px] font-semibold leading-relaxed"
+            style={{ color: "#0a1922" }}
           >
             {passo.descricao}
           </p>
@@ -288,10 +288,10 @@ function AnyConnectGuideScreen() {
               {passo.chips.map((c) => (
                 <div
                   key={c.label}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold"
-                  style={{ background: "#e8f0f8", color: "#0f2535" }}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold"
+                  style={{ background: "#e8f0f8", color: "#02080d" }}
                 >
-                  <span style={{ color: "#5b7a8f" }}>{c.label}:</span>
+                  <span style={{ color: "#0a1922" }}>{c.label}:</span>
                   <span className={c.mono ? "font-mono" : ""}>{c.value}</span>
                 </div>
               ))}

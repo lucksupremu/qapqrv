@@ -222,6 +222,31 @@
 .dark [style*="color: #3a4a60"],
 .dark [style*="color: rgb(58, 74, 96)"] { color: #b8c4d6 !important; }
 
+/* #1a3348 — texto escuro usado no AnyConnect guide */
+.dark [style*="color: #1a3348"],
+.dark [style*="color:#1a3348"],
+.dark [style*="color: rgb(26, 51, 72)"] { color: #c8d8e8 !important; }
+
+/* #0a1620 — texto muito escuro usado no AnyConnect guide */
+.dark [style*="color: #0a1620"],
+.dark [style*="color:#0a1620"],
+.dark [style*="color: rgb(10, 22, 32)"] { color: #e8eef5 !important; }
+
+/* #05101a — texto mais escuro usado no AnyConnect guide */
+.dark [style*="color: #05101a"],
+.dark [style*="color:#05101a"],
+.dark [style*="color: rgb(5, 16, 26)"] { color: #c8d8e8 !important; }
+
+/* #02080d — quase preto usado no AnyConnect guide */
+.dark [style*="color: #02080d"],
+.dark [style*="color:#02080d"],
+.dark [style*="color: rgb(2, 8, 13)"] { color: #e8eef5 !important; }
+
+/* #0a1922 — texto escuro usado no AnyConnect guide */
+.dark [style*="color: #0a1922"],
+.dark [style*="color:#0a1922"],
+.dark [style*="color: rgb(10, 25, 34)"] { color: #c8d8e8 !important; }
+
 /* #1a5276 = rgb(26, 82, 118) (brand navy used in headings) */
 .dark [style*="color: #1a5276"],
 .dark [style*="color: rgb(26, 82, 118)"] { color: #7fb8e0 !important; }
