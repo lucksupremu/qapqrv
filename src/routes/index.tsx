@@ -443,8 +443,10 @@ function HomeScreen() {
 }
 
 function InlineVpnChip() {
+  const isNative = useIsNative();
   const [status, setStatus] = useState<"checking" | "on" | "off" | "unknown">("checking");
   useEffect(() => {
+    if (!isNative) return;
     let active = true;
     void (async () => {
       const { isVpnActive } = await import("@/lib/vpn-status");
@@ -455,7 +457,9 @@ function InlineVpnChip() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isNative]);
+
+  if (!isNative) return null;
 
   if (status === "checking") {
     return (
