@@ -553,7 +553,7 @@ function VpnDetailRow() {
       {expanded && (
         <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-red-700 bg-red-50 px-3 py-2.5 animate-fade-in dark:border-red-400/50 dark:bg-red-950/80">
           <p className="text-[11px] font-semibold leading-snug text-red-950 dark:text-red-50">
-            Abra o Cisco AnyConnect, toque em <span className="font-bold">Conectar</span> e aguarde o cadeado verde.
+            Conecte ao Cisco AnyConnect para liberar o acesso às escalas.
           </p>
           <div className="flex items-center gap-2">
             <button
