@@ -120,11 +120,10 @@ function DownloadedReportsScreen() {
       try {
         const { Capacitor } = await import("@capacitor/core");
         if (Capacitor.isNativePlatform()) {
-          // @ts-ignore — plugin opcional
-          const fs: any = await import(/* @vite-ignore */ "@capacitor/filesystem");
-          const { uri } = await fs.Filesystem.getUri({
+          const { Filesystem, Directory } = await import("@capacitor/filesystem");
+          const { uri } = await Filesystem.getUri({
             path: e.localPath,
-            directory: fs.Directory.Data,
+            directory: Directory.Data,
           });
           window.open(uri, "_blank");
           return;
