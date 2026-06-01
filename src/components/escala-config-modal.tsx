@@ -22,12 +22,23 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   ESCALA_CORES,
   type EscalaRegra,
   newEscalaId,
 } from "@/lib/escala-trabalho";
+import {
+  ESCALA_PRESETS,
+  detectarPreset,
+} from "@/lib/escala-presets";
 
 type Props = {
   open: boolean;
@@ -60,13 +71,14 @@ function parseHHMM(s: string): { h: number; m: number } {
 }
 
 export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props) {
+  const [preset, setPreset] = useState<string>("12x24-12x48");
   const [local, setLocal] = useState("");
   const [cor, setCor] = useState(ESCALA_CORES[0]!.value);
   const [trabalho, setTrabalho] = useState(12);
   const [folga, setFolga] = useState(24);
   const [horaInicio, setHoraInicio] = useState(7);
   const [minutoInicio, setMinutoInicio] = useState(0);
-  const [alternada, setAlternada] = useState(false);
+  const [alternada, setAlternada] = useState(true);
   const [trabalhoB, setTrabalhoB] = useState(12);
   const [folgaB, setFolgaB] = useState(48);
   const [horaInicioB, setHoraInicioB] = useState(19);
@@ -77,6 +89,28 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
     d.setMonth(d.getMonth() + 6);
     return d;
   });
+
+  const presetAtual = ESCALA_PRESETS.find((p) => p.id === preset);
+  const presetForcaAlternada = !!presetAtual?.alternada;
+
+  const aplicarPreset = (id: string) => {
+    setPreset(id);
+    const p = ESCALA_PRESETS.find((x) => x.id === id);
+    if (!p || p.id === "custom") return;
+    setTrabalho(p.turno.trabalho);
+    setFolga(p.turno.folga);
+    setHoraInicio(p.turno.horaInicio);
+    setMinutoInicio(p.turno.minutoInicio);
+    if (p.alternada) {
+      setAlternada(true);
+      setTrabalhoB(p.alternada.trabalho);
+      setFolgaB(p.alternada.folga);
+      setHoraInicioB(p.alternada.horaInicio);
+      setMinutoInicioB(p.alternada.minutoInicio);
+    } else {
+      setAlternada(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -94,24 +128,35 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       setMinutoInicioB(initial.alternada?.minutoInicio ?? 0);
       setDataInicial(fromISO(initial.dataInicial));
       setDataFinal(fromISO(initial.dataFinal));
+      setPreset(
+        detectarPreset(
+          initial.trabalho,
+          initial.folga,
+          initial.horaInicio,
+          initial.minutoInicio ?? 0,
+          initial.alternada
+            ? {
+                trabalho: initial.alternada.trabalho,
+                folga: initial.alternada.folga,
+                horaInicio: initial.alternada.horaInicio,
+                minutoInicio: initial.alternada.minutoInicio ?? 0,
+              }
+            : null,
+        ),
+      );
     } else {
       setLocal("");
       setCor(ESCALA_CORES[0]!.value);
-      setTrabalho(12);
-      setFolga(24);
-      setHoraInicio(7);
-      setMinutoInicio(0);
-      setAlternada(false);
-      setTrabalhoB(12);
-      setFolgaB(48);
-      setHoraInicioB(19);
-      setMinutoInicioB(0);
       setDataInicial(new Date());
       const f = new Date();
       f.setMonth(f.getMonth() + 6);
       setDataFinal(f);
+      // aplica o preset padrão (12x24/12x48)
+      aplicarPreset("12x24-12x48");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial]);
+
 
   const handleSubmit = () => {
     const localOk = local.trim();
@@ -208,9 +253,33 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
             </div>
           </div>
 
+          {/* Modelo de escala (preset) */}
+          <div className="space-y-1.5">
+            <Label>Modelo de escala</Label>
+            <Select value={preset} onValueChange={aplicarPreset}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ESCALA_PRESETS.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {presetAtual && (
+              <p className="text-[11px] text-muted-foreground">
+                {presetAtual.descricao}
+              </p>
+            )}
+          </div>
+
           {/* Turno 1 */}
           <div className="space-y-1.5">
-            <Label>Escala</Label>
+            <Label>
+              {presetForcaAlternada ? "Turno diurno" : "Trabalho × Folga · Início"}
+            </Label>
             <div className="grid grid-cols-[1fr_auto_1fr_1.4fr] items-center gap-2">
               <Input
                 type="number"
@@ -248,18 +317,32 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
             </p>
           </div>
 
-          {/* Alternada */}
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox
-              checked={alternada}
-              onCheckedChange={(v) => setAlternada(v === true)}
-            />
-            Escala alternada (segundo turno)
-          </label>
+          {/* Alternada — apenas em escalas personalizadas */}
+          {!presetForcaAlternada ? (
+            <label className="flex items-start gap-2 text-sm">
+              <Checkbox
+                checked={alternada}
+                onCheckedChange={(v) => setAlternada(v === true)}
+                className="mt-0.5"
+              />
+              <span className="flex-1">
+                Plantão alterna dia/noite no mesmo local
+                <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                  Marque quando o mesmo serviço intercala um turno diurno e um noturno
+                  (ex.: 12x24 / 12x48).
+                </span>
+              </span>
+            </label>
+          ) : (
+            <p className="rounded-md border border-dashed bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+              O modelo selecionado já alterna dia e noite automaticamente.
+            </p>
+          )}
+
 
           {alternada && (
             <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3">
-              <Label>Turno alternado</Label>
+              <Label>{presetForcaAlternada ? "Turno noturno" : "Turno alternado"}</Label>
               <div className="grid grid-cols-[1fr_auto_1fr_1.4fr] items-center gap-2">
                 <Input
                   type="number"
