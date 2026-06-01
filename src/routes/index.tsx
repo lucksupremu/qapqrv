@@ -504,9 +504,9 @@ function InlineVpnChip() {
     );
   }
   return (
-    <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1">
-      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-      <span className="text-[9px] font-black uppercase tracking-wider text-amber-400">VPN Off</span>
+    <div className="flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-1">
+      <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+      <span className="text-[9px] font-black uppercase tracking-wider text-rose-400">VPN Off</span>
     </div>
   );
 }
@@ -540,25 +540,25 @@ function VpnDetailRow() {
     <div className="mt-3">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/5 px-3 py-1.5 transition active:scale-[0.98]"
+        className="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 transition active:scale-[0.98]"
         aria-expanded={expanded}
       >
-        <ShieldCheck size={12} className="text-amber-400" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">
+        <ShieldCheck size={12} className="text-rose-400" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-300">
           Conecte a VPN para acessar a intranet
         </span>
-        <Info size={11} className="text-amber-400/70" />
+        <Info size={11} className="text-rose-400/70" />
       </button>
 
       {expanded && (
-        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 animate-fade-in">
-          <p className="text-[11px] leading-snug text-amber-200/90">
+        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-3 py-2.5 animate-fade-in">
+          <p className="text-[11px] leading-snug text-rose-200/90">
             Abra o Cisco AnyConnect, toque em <span className="font-bold">Conectar</span> e aguarde o cadeado verde.
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => openAnyConnect()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-black active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white active:scale-95"
             >
               <ShieldCheck size={12} />
               Abrir AnyConnect
@@ -566,7 +566,7 @@ function VpnDetailRow() {
             {isNative && (
               <button
                 onClick={refresh}
-                className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-300 active:scale-95"
+                className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-rose-300 active:scale-95"
               >
                 Verificar
               </button>
