@@ -3,7 +3,6 @@ import {
   Home,
   Calendar,
   FolderDown,
-  Globe,
   Mail,
   Wallet,
   BookOpen,
@@ -47,7 +46,12 @@ const grupo1NativeOnly: Item[] = [
   { type: "route", to: "/escalas-baixadas", label: "Escalas Baixadas", icon: FolderDown },
 ];
 const grupo2: Item[] = [
-  { type: "route", to: "/intranet", label: "Intranet PMESP", icon: Globe },
+  {
+    type: "external",
+    href: "https://correio.policiamilitar.sp.gov.br",
+    label: "Correio PMESP",
+    icon: Mail,
+  },
   {
     type: "external",
     href: "https://correio.policiamilitar.sp.gov.br",
