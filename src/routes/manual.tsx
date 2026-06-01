@@ -500,22 +500,53 @@ function Bloco({
   icone: LucideIcon;
   children: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const checkHash = () => {
+      if (window.location.hash === `#${id}`) {
+        setOpen(true);
+        // Garante que rola até a seção após expandir
+        requestAnimationFrame(() => {
+          document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+    };
+    checkHash();
+    window.addEventListener("hashchange", checkHash);
+    return () => window.removeEventListener("hashchange", checkHash);
+  }, [id]);
+
   return (
     <section
       id={id}
-      className="scroll-mt-20 rounded-3xl border border-slate-200 bg-white dark:border-white/5 dark:bg-slate-900/40 p-5 shadow-sm dark:shadow-none"
+      className="scroll-mt-20 overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-white/5 dark:bg-slate-900/40 shadow-sm dark:shadow-none"
     >
-      <header className="mb-3 flex items-center gap-3">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-3 p-5 text-left transition active:scale-[0.995] hover:bg-slate-50 dark:hover:bg-slate-900/70"
+      >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/15 text-amber-700 dark:text-amber-400">
           <Icone size={18} />
         </div>
-        <h2 className="text-[16px] font-extrabold text-slate-900 dark:text-white">
+        <h2 className="flex-1 text-[16px] font-extrabold text-slate-900 dark:text-white">
           {titulo}
         </h2>
-      </header>
-      <div className="space-y-3 text-[13.5px] leading-relaxed text-slate-700 dark:text-slate-300">
-        {children}
-      </div>
+        <ChevronRight
+          size={20}
+          className={`shrink-0 text-slate-400 transition-transform duration-200 dark:text-slate-500 ${
+            open ? "rotate-90" : ""
+          }`}
+        />
+      </button>
+      {open && (
+        <div className="space-y-3 px-5 pb-5 text-[13.5px] leading-relaxed text-slate-700 dark:text-slate-300 animate-fade-in">
+          {children}
+        </div>
+      )}
     </section>
   );
 }
