@@ -497,7 +497,7 @@ function CalendarScreen() {
                       color: isSelected
                         ? "#fff"
                         : !cell.inMonth
-                          ? "#C0C8D5"
+                          ? "#8896a8"
                           : isWeekend
                             ? "#c44569"
                             : "#0f2535",
