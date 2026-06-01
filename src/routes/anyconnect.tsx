@@ -278,14 +278,14 @@ function AnyConnectGuideScreen() {
           className="mt-4 animate-fade-in px-1"
         >
           <h2
-            className="text-[18px] font-extrabold leading-tight"
-            style={{ color: "#02080d" }}
+            className="text-[22px] font-extrabold leading-tight"
+            style={{ color: "#000000" }}
           >
             {passo.titulo}
           </h2>
           <p
-            className="mt-1.5 text-[15px] font-semibold leading-relaxed"
-            style={{ color: "#0a1922" }}
+            className="mt-2 text-[17px] font-bold leading-relaxed"
+            style={{ color: "#000000" }}
           >
             {passo.descricao}
           </p>
@@ -301,10 +301,10 @@ function AnyConnectGuideScreen() {
               {passo.chips.map((c) => (
                 <div
                   key={c.label}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold"
-                  style={{ background: "#e8f0f8", color: "#02080d" }}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[14px] font-bold"
+                  style={{ background: "#dbe9f5", color: "#000000" }}
                 >
-                  <span style={{ color: "#0a1922" }}>{c.label}:</span>
+                  <span style={{ color: "#1a3348" }}>{c.label}:</span>
                   <span className={c.mono ? "font-mono" : ""}>{c.value}</span>
                 </div>
               ))}
