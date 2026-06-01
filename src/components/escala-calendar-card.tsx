@@ -132,32 +132,43 @@ export function EscalaCalendarCard() {
   const COR_PRIMARY = "#2e6b8a";
   const COR_BG_SOFT = "#e8f0f8";
 
-  const cellRing = (cores: string[]) => {
-    if (cores.length === 1) {
-      return { background: "transparent", border: `3px solid ${cores[0]}` };
-    }
-    const step = 100 / cores.length;
-    const stops = cores
-      .map((c, i) => `${c} ${i * step}% ${(i + 1) * step}%`)
-      .join(", ");
-    return {
-      background: `conic-gradient(${stops})`,
-      WebkitMask:
-        "radial-gradient(circle, transparent 55%, #000 56%)",
-      mask: "radial-gradient(circle, transparent 55%, #000 56%)",
-    } as React.CSSProperties;
-  };
-
-  // Meia-lua superior: indica que o policial ainda está de serviço na manhã
-  // (plantão começou na noite anterior).
-  const cellContinuacao = (cor: string): React.CSSProperties => ({
-    background: "transparent",
-    border: `3px solid ${cor}`,
-    clipPath: "inset(0 0 50% 0)",
-  });
-
   const fmtHM = (h: number, m?: number) =>
     `${String(h).padStart(2, "0")}:${String(m ?? 0).padStart(2, "0")}`;
+
+  const fmtHora = (d: Date) => fmtHM(d.getHours(), d.getMinutes());
+  const fmtDataExtenso = (d: Date) => {
+    const semana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][d.getDay()];
+    const mes = MESES[d.getMonth()];
+    return `${semana}, ${d.getDate()} de ${mes.toLowerCase()}`;
+  };
+  const fmtDiaCurto = (d: Date) =>
+    `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+  type BarSeg = { cor: string; lado: "cheia" | "esq" | "dir" };
+  const barrasDoDia = (entries: PlantaoEntry[], date: Date): BarSeg[] => {
+    const segs: BarSeg[] = [];
+    for (const e of entries) {
+      const inicioSameDay = sameDay(e.inicio, date);
+      const fimSameDay = sameDay(e.fim, date);
+      let lado: BarSeg["lado"];
+      if (inicioSameDay && fimSameDay) lado = "cheia";
+      else if (inicioSameDay && !fimSameDay) lado = "dir";
+      else if (!inicioSameDay && fimSameDay) lado = "esq";
+      else lado = "cheia";
+      segs.push({ cor: e.regra.cor, lado });
+    }
+    // dedupe por cor+lado
+    const seen = new Set<string>();
+    return segs.filter((s) => {
+      const k = `${s.cor}-${s.lado}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  };
+
+  const [openKey, setOpenKey] = useState<string | null>(null);
+
 
 
   return (
