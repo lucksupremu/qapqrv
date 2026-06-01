@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
 import { ToolCard } from "@/components/tool-card";
+import { EscalaCalendarCard } from "@/components/escala-calendar-card";
 import { tools } from "@/lib/tools";
 
 export const Route = createFileRoute("/inicio")({
@@ -58,6 +59,8 @@ function Inicio() {
           </p>
         ) : null}
       </main>
+
+      {q.trim() === "" && <EscalaCalendarCard />}
 
       <BottomNav />
     </div>
