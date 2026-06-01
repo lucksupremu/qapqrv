@@ -304,27 +304,29 @@ export function EscalaCalendarCard() {
               </span>
 
 
-              {/* Faixas de plantão (estilo Google Agenda) */}
+              {/* Faixas verticais de plantão (estilo Google Agenda) */}
               {barrasVisiveis.length > 0 && (
                 <>
                   {barrasVisiveis.map((b, idx) => {
                     const total = barrasVisiveis.length;
-                    const cellH = 36; // 40 - 2*2 inset
-                    const slotH = total === 1 ? cellH : cellH / total;
-                    const top = 2 + idx * slotH;
-                    const height = slotH - (total > 1 ? 1 : 0);
+                    const cellW = 36; // 40 - 2*2 inset
+                    const slotW = total === 1 ? cellW : cellW / total;
+                    const left = 2 + idx * slotW;
+                    const width = slotW - (total > 1 ? 1 : 0);
                     const bg = `color-mix(in srgb, ${b.cor} 28%, transparent)`;
-                    let left = 2;
-                    let right = 2;
+                    let top = 2;
+                    let bottom = 2;
                     let borderRadius = "6px";
-                    let borderLeft = `3px solid ${b.cor}`;
+                    let borderTop = `3px solid ${b.cor}`;
                     if (b.lado === "dir") {
-                      left = 20; // metade de 40
-                      borderRadius = "0 6px 6px 0";
+                      // plantão noturno começa neste dia → metade inferior
+                      top = 20;
+                      borderRadius = "0 0 6px 6px";
+                      borderTop = "none";
                     } else if (b.lado === "esq") {
-                      right = 20;
-                      borderRadius = "6px 0 0 6px";
-                      borderLeft = `3px solid ${b.cor}`;
+                      // continuação no dia seguinte → metade superior
+                      bottom = 20;
+                      borderRadius = "6px 6px 0 0";
                     }
                     return (
                       <span
@@ -333,11 +335,11 @@ export function EscalaCalendarCard() {
                         className="pointer-events-none absolute"
                         style={{
                           left,
-                          right,
+                          width,
                           top,
-                          height,
+                          bottom,
                           background: bg,
-                          borderLeft,
+                          borderTop,
                           borderRadius,
                           zIndex: 0,
                         }}
