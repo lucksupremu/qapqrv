@@ -137,7 +137,7 @@ function HomeScreen() {
 
   const blocos: ActionBlock[] = [
     {
-      label: "Marcar / Desmarcar",
+      label: "Marcar / Desmarcar\nDejem/Delegada",
       icon: CalendarPlus,
       gradient: GRAD_PRIMARY,
       shadow: SHADOW_PRIMARY,
