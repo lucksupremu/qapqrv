@@ -261,48 +261,27 @@ export function EscalaCalendarCard() {
           const key = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}`;
           const dia = plantoes.get(key);
           const entries: PlantaoEntry[] = dia?.plantoes ?? [];
-          const barras = barrasDoDia(entries, cell.date);
-          const barrasVisiveis = barras.slice(0, 2);
-          const extras = barras.length - barrasVisiveis.length;
-          const temAlgo = barras.length > 0;
-          const isToday = sameDay(cell.date, today);
           const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
+          const colunas = cell.inMonth ? colunasDoDia(entries, marcasDia, cell.date) : [];
+          const MAX_COL = 3;
+          const colunasVisiveis = colunas.slice(0, MAX_COL);
+          const slotsVisiveis = colunasVisiveis.reduce((acc, c) => acc + c.slots.length, 0);
+          const slotsTotais = colunas.reduce((acc, c) => acc + c.slots.length, 0);
+          const extras = slotsTotais - slotsVisiveis;
+          const temPlantao = entries.length > 0;
           const temMarca = marcasDia.length > 0;
-          const corMarca = temMarca ? MARCA_COR[marcasDia[0]!.tipo] ?? "#3498DB" : null;
-          const interativo = cell.inMonth && (temAlgo || temMarca);
+          const temAlgo = temPlantao || temMarca;
+          const isToday = sameDay(cell.date, today);
+          const corMarca = temMarca ? MARCA_COR[marcasDia[marcasDia.length - 1]!.tipo] ?? "#3498DB" : null;
+          const interativo = cell.inMonth && temAlgo;
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
+          const totalCol = colunasVisiveis.length;
+          const cellW = 36; // 40 - 2*2 inset
+          const slotW = totalCol === 0 ? 0 : totalCol === 1 ? cellW : cellW / totalCol;
 
           const cellInner = (
             <>
-              {temMarca && (
-                <>
-                  <span
-                    aria-hidden
-                    className="absolute"
-                    style={{
-                      inset: "4px",
-                      background: "#FFE066",
-                      transform: "rotate(-4deg)",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
-                      borderRadius: "2px",
-                    }}
-                  />
-                  <span
-                    aria-hidden
-                    className="absolute"
-                    style={{
-                      right: 2,
-                      top: 2,
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: corMarca ?? "#3498DB",
-                      boxShadow: "0 0 0 1.5px #fff",
-                    }}
-                  />
-                </>
-              )}
-              {isToday && !temAlgo && !temMarca && (
+              {isToday && !temAlgo && (
                 <span
                   className="absolute inset-0 rounded-full"
                   style={{ background: COR_BG_SOFT }}
@@ -312,48 +291,39 @@ export function EscalaCalendarCard() {
               <span
                 className="relative text-[13px]"
                 style={{
-                  zIndex: 1,
+                  zIndex: 2,
                   color: !cell.inMonth
                     ? "#a8b5c2"
-                    : temAlgo || temMarca
+                    : temAlgo
                       ? "#1a1a1a"
                       : isToday
                         ? COR_PRIMARY
                         : "var(--text-dark, #02080d)",
-                  fontWeight: isToday || temAlgo || temMarca ? 800 : 500,
+                  fontWeight: isToday || temAlgo ? 800 : 500,
                 }}
               >
                 {cell.date.getDate()}
               </span>
 
-
-              {/* Faixas verticais de plantão (estilo Google Agenda) */}
-              {barrasVisiveis.length > 0 && (
-                <>
-                  {barrasVisiveis.map((b, idx) => {
-                    const total = barrasVisiveis.length;
-                    const cellW = 36; // 40 - 2*2 inset
-                    const slotW = total === 1 ? cellW : cellW / total;
-                    const left = 2 + idx * slotW;
-                    const width = slotW - (total > 1 ? 1 : 0);
-                    const bg = `color-mix(in srgb, ${b.cor} 28%, transparent)`;
-                    let top = 2;
-                    let bottom = 2;
-                    let borderRadius = "6px";
-                    let borderTop = `3px solid ${b.cor}`;
-                    if (b.lado === "dir") {
-                      // plantão noturno começa neste dia → metade inferior
-                      top = 20;
-                      borderRadius = "0 0 6px 6px";
-                      borderTop = "none";
-                    } else if (b.lado === "esq") {
-                      // continuação no dia seguinte → metade superior
-                      bottom = 20;
-                      borderRadius = "6px 6px 0 0";
-                    }
+              {/* Slots verticais (plantões + marcas) — estilo Google Agenda */}
+              {colunasVisiveis.map((col, ci) => {
+                const left = 2 + ci * slotW;
+                const width = slotW - (totalCol > 1 ? 1 : 0);
+                return col.slots.map((s, si) => {
+                  let top = 2;
+                  let bottom = 2;
+                  let borderRadius = "6px";
+                  if (s.lado === "bottom") {
+                    top = 20;
+                    borderRadius = s.kind === "marca" ? "0 0 4px 4px" : "0 0 6px 6px";
+                  } else if (s.lado === "top") {
+                    bottom = 20;
+                    borderRadius = s.kind === "marca" ? "4px 4px 0 0" : "6px 6px 0 0";
+                  }
+                  if (s.kind === "marca") {
                     return (
                       <span
-                        key={idx}
+                        key={`${ci}-${si}`}
                         aria-hidden
                         className="pointer-events-none absolute"
                         style={{
@@ -361,36 +331,75 @@ export function EscalaCalendarCard() {
                           width,
                           top,
                           bottom,
-                          background: bg,
-                          borderTop,
+                          background: "#FFE066",
+                          borderTop: `3px solid ${s.cor}`,
                           borderRadius,
-                          zIndex: 0,
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
+                          transform: "rotate(-3deg)",
+                          zIndex: 1,
                         }}
                       />
                     );
-                  })}
-                  {extras > 0 && (
+                  }
+                  const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
+                  const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
+                  return (
                     <span
+                      key={`${ci}-${si}`}
                       aria-hidden
                       className="pointer-events-none absolute"
                       style={{
-                        right: 3,
-                        bottom: 1,
-                        fontSize: 8,
-                        fontWeight: 700,
-                        color: "#5b7a8f",
-                        lineHeight: 1,
-                        zIndex: 2,
+                        left,
+                        width,
+                        top,
+                        bottom,
+                        background: bg,
+                        borderTop,
+                        borderRadius,
+                        zIndex: 0,
                       }}
-                    >
-                      +{extras}
-                    </span>
-                  )}
-                </>
+                    />
+                  );
+                });
+              })}
+
+              {temMarca && (
+                <span
+                  aria-hidden
+                  className="absolute"
+                  style={{
+                    right: 2,
+                    top: 2,
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: corMarca ?? "#3498DB",
+                    boxShadow: "0 0 0 1.5px #fff",
+                    zIndex: 3,
+                  }}
+                />
               )}
 
+              {extras > 0 && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute"
+                  style={{
+                    right: 3,
+                    bottom: 1,
+                    fontSize: 8,
+                    fontWeight: 700,
+                    color: "#5b7a8f",
+                    lineHeight: 1,
+                    zIndex: 3,
+                  }}
+                >
+                  +{extras}
+                </span>
+              )}
             </>
           );
+
 
           const baseClass = "relative mx-auto flex h-10 w-10 items-center justify-center";
           const ariaLabel = dia
