@@ -258,16 +258,23 @@ function ManualScreen() {
               o Cisco Secure Client instalado no seu celular.
             </li>
             <li>
-              Dentro do AnyConnect, toque em <strong>"Connect"</strong> e digite
-              seu RG funcional e senha da intranet.
+              Dentro do AnyConnect, toque em <strong>Connect</strong>, escolha o
+              <strong> Grupo 13 - DEJEM DELEGADA</strong> e faça login com:
             </li>
           </Lista>
+
+          <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-3 text-[12.5px] leading-relaxed text-blue-900 dark:text-blue-100">
+            <p><strong>Usuário:</strong> seu CPF (somente números)</p>
+            <p><strong>Senha:</strong> a mesma da aba <strong>Procedimentos</strong> da intranet PMESP</p>
+            <p><strong>Grupo:</strong> 13 - DEJEM DELEGADA</p>
+          </div>
 
           <Dica>
             No APK, um <strong>chip verde "VPN Ativa"</strong> aparece no topo do
             card de consulta quando a VPN está conectada. Se aparecer "VPN Off" em
             vermelho, conecte a VPN antes de tentar abrir as escalas.
           </Dica>
+
         </Bloco>
 
         <Bloco id="marcar" titulo="5. Marcar / Desmarcar Dejem-Delegada" icone={CalendarPlus}>
@@ -278,7 +285,7 @@ function ManualScreen() {
               <strong>"Marcar / Desmarcar Dejem/Delegada"</strong>.
             </li>
             <li>
-              A página oficial da PMESP abre dentro do app. Faça login com seu RG e senha.
+              A página oficial da PMESP abre dentro do app. Faça login com seu RG e senha da intranet.
             </li>
             <li>Escolha a data, o tipo (Dejem ou Delegada) e confirme a operação.</li>
             <li>Para sair, toque na seta de voltar no topo.</li>
