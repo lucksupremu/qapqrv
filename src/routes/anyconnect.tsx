@@ -291,7 +291,7 @@ function AnyConnectGuideScreen() {
                   className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold"
                   style={{ background: "#e8f0f8", color: "#0f2535" }}
                 >
-                  <span style={{ color: "#5b7a8f" }}>{c.label}:</span>
+                  <span style={{ color: "#1a3348" }}>{c.label}:</span>
                   <span className={c.mono ? "font-mono" : ""}>{c.value}</span>
                 </div>
               ))}
