@@ -53,11 +53,34 @@ function buildGrid(year: number, month: number) {
 export function EscalaCalendarCard() {
   const today = useMemo(() => new Date(), []);
   const [regras, setRegras] = useState<EscalaRegra[]>([]);
+  const [marcas, setMarcas] = useState<Marca[]>([]);
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     setRegras(loadEscalas());
+    setMarcas(loadMarcas());
+    if (typeof window === "undefined") return;
+    const refresh = () => {
+      setRegras(loadEscalas());
+      setMarcas(loadMarcas());
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || e.key === "marcas_atividade_d" || e.key === "qap-escalas-trabalho") {
+        refresh();
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("focus", refresh);
+    window.addEventListener("storage", onStorage);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   const grid = useMemo(
@@ -69,6 +92,22 @@ export function EscalaCalendarCard() {
     () => gerarPlantoesDoMes(regras, cursor.getFullYear(), cursor.getMonth()),
     [regras, cursor],
   );
+
+  const marcasPorDia = useMemo(() => {
+    const map = new Map<string, Marca[]>();
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth();
+    for (const mk of marcas) {
+      const d = new Date(mk.data);
+      if (Number.isNaN(d.getTime())) continue;
+      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const cur = map.get(key) ?? [];
+      cur.push(mk);
+      map.set(key, cur);
+    }
+    return map;
+  }, [marcas, cursor]);
 
   const goPrev = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() - 1, 1));
   const goNext = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() + 1, 1));
