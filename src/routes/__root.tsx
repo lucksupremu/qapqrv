@@ -4,25 +4,19 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
-
-
-import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { DrawerProvider } from "@/components/side-drawer";
 import { BottomNav } from "@/components/bottom-nav";
 import { PrivacyConsent } from "@/components/privacy-consent";
-import { THEME_BOOT_SCRIPT } from "@/lib/theme";
+import { isNativeApp } from "@/lib/in-app-browser";
 
 /** Google AdSense client ID */
 const ADSENSE_CLIENT = "ca-pub-4966192764194561";
-
 
 function NotFoundComponent() {
   return (
@@ -85,83 +79,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      {
-        name: "viewport",
-        content:
-          "width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no",
-      },
-      { name: "theme-color", content: "#f4f8fc" },
-      { title: "QAP, QRV! — Ferramentas operacionais" },
-      {
-        name: "description",
-        content: "Central de ferramentas operacionais para o policial militar.",
-      },
-      { property: "og:title", content: "QAP, QRV! — Ferramentas operacionais" },
-      {
-        property: "og:description",
-        content: "Ferramentas operacionais em um só lugar.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "QAP, QRV! — Ferramentas operacionais" },
-      { name: "description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
-      { property: "og:description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
-      { name: "twitter:description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
-      { property: "og:image", content: "/icon-512.png" },
-      { name: "twitter:image", content: "/icon-512.png" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
-      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap",
-      },
-    ],
-    // AdSense is injected lazily after first paint (see RootComponent) to keep
-    // it off the critical path.
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
-
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Lazy-load AdSense after first paint to avoid blocking initial render.
+    // Lazy-load AdSense after first paint (apenas no web, não no APK nativo).
     const loadAds = () => {
-      if (document.querySelector('script[data-adsense]')) return;
+      if (isNativeApp()) return;
+      if (document.querySelector("script[data-adsense]")) return;
       const s = document.createElement("script");
       s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
       s.async = true;
@@ -179,18 +111,21 @@ function RootComponent() {
     import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
       rehydrateReminders();
     });
-    const id = setInterval(() => {
-      import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
-        rehydrateReminders();
-      });
-    }, 60 * 60 * 1000);
+    const id = setInterval(
+      () => {
+        import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
+          rehydrateReminders();
+        });
+      },
+      60 * 60 * 1000,
+    );
     return () => {
       clearInterval(id);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (ric && (window as any).cancelIdleCallback) (window as any).cancelIdleCallback(adTimer);
+      if (ric && (window as any).cancelIdleCallback)
+        (window as any).cancelIdleCallback(adTimer);
       else clearTimeout(adTimer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -201,7 +136,6 @@ function RootComponent() {
             className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
             style={{ background: "var(--bg)" }}
           >
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
           </div>
           <BottomNav />
