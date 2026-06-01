@@ -458,18 +458,18 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          <span style={{ width: 16, height: 12, borderRadius: 4, borderLeft: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+          <span style={{ width: 8, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
           Plantão no dia
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 16, height: 12 }}>
-            <span style={{ position: "absolute", left: 8, top: 0, bottom: 0, right: 0, borderRadius: "0 4px 4px 0", borderLeft: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+          <span style={{ position: "relative", width: 8, height: 16 }}>
+            <span style={{ position: "absolute", top: 8, bottom: 0, left: 0, right: 0, borderRadius: "0 0 3px 3px", background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
           </span>
           Início noturno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 16, height: 12 }}>
-            <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, right: 8, borderRadius: "4px 0 0 4px", borderLeft: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+          <span style={{ position: "relative", width: 8, height: 16 }}>
+            <span style={{ position: "absolute", top: 0, bottom: 8, left: 0, right: 0, borderRadius: "3px 3px 0 0", borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
           </span>
           Continuação
         </span>
