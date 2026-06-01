@@ -59,6 +59,16 @@ function DownloadedReportsScreen() {
   const [hydrated, setHydrated] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<EscalaSalva | null>(null);
 
+  useEffect(() => {
+    setEscalas(lerLista());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    salvarLista(escalas);
+  }, [escalas, hydrated]);
+
   // Na web esse recurso não funciona (CORS da intranet impede salvar o PDF),
   // então mostramos uma tela orientando o uso do APK.
   if (mounted && !native) {
@@ -99,16 +109,6 @@ function DownloadedReportsScreen() {
     );
   }
 
-
-  useEffect(() => {
-    setEscalas(lerLista());
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    salvarLista(escalas);
-  }, [escalas, hydrated]);
 
   const handleAbrir = async (e: EscalaSalva) => {
     // APK: se tiver arquivo salvo no Filesystem, abre por URI nativa.
