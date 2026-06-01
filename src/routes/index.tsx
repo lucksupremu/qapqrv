@@ -390,10 +390,10 @@ function HomeScreen() {
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[14px] font-bold text-slate-100">
+                        <p className="truncate text-[14px] font-bold text-slate-900 dark:text-slate-100">
                           {TIPO_LABEL[m.tipo] ?? "Escala"}
                         </p>
-                        <p className="text-[12px] text-slate-500">
+                        <p className="text-[12px] text-slate-500 dark:text-slate-500">
                           {d.toLocaleString("pt-BR", {
                             day: "2-digit",
                             month: "2-digit",
