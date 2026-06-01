@@ -92,6 +92,18 @@ export function EscalaCalendarCard() {
     } as React.CSSProperties;
   };
 
+  // Meia-lua superior: indica que o policial ainda está de serviço na manhã
+  // (plantão começou na noite anterior).
+  const cellContinuacao = (cor: string): React.CSSProperties => ({
+    background: "transparent",
+    border: `3px solid ${cor}`,
+    clipPath: "inset(0 0 50% 0)",
+  });
+
+  const fmtHM = (h: number, m?: number) =>
+    `${String(h).padStart(2, "0")}:${String(m ?? 0).padStart(2, "0")}`;
+
+
   return (
     <div
       className="mx-4 mt-6 rounded-2xl bg-card p-3"
@@ -158,9 +170,19 @@ export function EscalaCalendarCard() {
         {grid.map((cell, i) => {
           const key = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}`;
           const dia = plantoes.get(key);
-          const cores = dia
-            ? Array.from(new Set(dia.plantoes.map((p) => p.regra.cor)))
+          const inicios = dia
+            ? dia.plantoes.filter((p) => p.tipo === "inicio")
             : [];
+          const continuacoes = dia
+            ? dia.plantoes.filter((p) => p.tipo === "continuacao")
+            : [];
+          const coresInicio = Array.from(
+            new Set(inicios.map((p) => p.regra.cor)),
+          );
+          const coresContinuacao = Array.from(
+            new Set(continuacoes.map((p) => p.regra.cor)),
+          );
+          const temAlgo = coresInicio.length + coresContinuacao.length > 0;
           const isToday = sameDay(cell.date, today);
 
           return (
@@ -173,13 +195,20 @@ export function EscalaCalendarCard() {
                   : `${cell.date.getDate()}`
               }
             >
-              {cores.length > 0 && (
+              {coresContinuacao.map((c, idx) => (
+                <span
+                  key={`cont-${idx}`}
+                  className="absolute inset-0 rounded-full"
+                  style={cellContinuacao(c)}
+                />
+              ))}
+              {coresInicio.length > 0 && (
                 <span
                   className="absolute inset-0 rounded-full"
-                  style={cellRing(cores)}
+                  style={cellRing(coresInicio)}
                 />
               )}
-              {isToday && cores.length === 0 && (
+              {isToday && !temAlgo && (
                 <span
                   className="absolute inset-0 rounded-full"
                   style={{ background: COR_BG_SOFT }}
@@ -193,7 +222,7 @@ export function EscalaCalendarCard() {
                     : isToday
                       ? COR_PRIMARY
                       : "var(--text-dark, #02080d)",
-                  fontWeight: isToday || cores.length > 0 ? 800 : 500,
+                  fontWeight: isToday || temAlgo ? 800 : 500,
                 }}
               >
                 {cell.date.getDate()}
@@ -202,6 +231,7 @@ export function EscalaCalendarCard() {
           );
         })}
       </div>
+
 
       {/* Legenda / Lista de regras */}
       {regras.length > 0 ? (
