@@ -169,6 +169,7 @@ function HomeScreen() {
       gradient: "linear-gradient(135deg, #27ae60 0%, #58d68d 100%)",
       shadow: "0 0 24px -8px rgba(39,174,96,0.45)",
       onClick: () => navigate({ to: "/escalas-baixadas" }),
+      nativeOnly: true,
     },
     {
       label: "Guia AnyConnect",
@@ -177,7 +178,7 @@ function HomeScreen() {
       shadow: "0 0 24px -8px rgba(192,57,43,0.45)",
       onClick: () => navigate({ to: "/anyconnect" }),
     },
-  ];
+  ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
