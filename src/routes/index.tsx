@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
+import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { toast } from "sonner";
 import {
   Calendar,
@@ -62,6 +64,18 @@ function HomeScreen() {
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
   const native = useIsNative();
+  const [theme, setThemeState] = useState<Theme>("light");
+
+  useEffect(() => {
+    setThemeState(getStoredTheme());
+  }, []);
+
+  const toggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setThemeState(next);
+  };
+
 
   useEffect(() => {
     setMarcas(loadMarcas());
@@ -205,7 +219,10 @@ function HomeScreen() {
   ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 
   return (
-    <div className="min-h-screen pb-8 text-slate-100" style={{ background: "#050b18", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div
+      className="min-h-screen pb-8 text-slate-900 dark:text-slate-100 bg-[#f1f5fb] dark:bg-[#050b18]"
+      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+    >
       {/* HEADER tático */}
       <header className="flex items-center justify-between px-5 pt-6 pb-3">
         <div className="flex items-center gap-3">
@@ -214,45 +231,55 @@ function HomeScreen() {
             <img
               src={appLogo}
               alt="QAP, QRV!"
-              className="relative h-11 w-11 rounded-full object-cover border border-amber-500/40"
+              className="relative h-11 w-11 rounded-full object-cover border border-amber-500/40 no-dark-filter"
             />
           </div>
           <div>
-            <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-white">
+            <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-slate-900 dark:text-white">
               QAP, QRV!
             </h1>
-            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-500">
+            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-500">
               Ferramentas Operacionais
             </span>
           </div>
         </div>
-        <button
-          aria-label="Menu"
-          onClick={() => setDrawerOpen(true)}
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/60 text-slate-300 transition active:scale-95"
-        >
-          <Menu size={22} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+            onClick={toggleTheme}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-amber-400 transition active:scale-95"
+          >
+            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            aria-label="Menu"
+            onClick={() => setDrawerOpen(true)}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300 transition active:scale-95"
+          >
+            <Menu size={22} />
+          </button>
+        </div>
       </header>
 
       {/* CONSULTA — card tático com glow dourado */}
       <section className="px-5 pt-2">
-        <div className="relative overflow-hidden rounded-[28px] border border-white/5 bg-gradient-to-br from-slate-900 to-slate-950 p-5">
+        <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white dark:border-white/5 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-5 shadow-sm dark:shadow-none">
           <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl" />
 
           <div className="mb-4 flex items-center justify-between">
             <label
               htmlFor="id-escala-input"
-              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"
+              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500"
             >
               Consulta Operacional
+
             </label>
             <InlineVpnChip />
           </div>
 
           <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               <input
                 id="id-escala-input"
                 inputMode="numeric"
@@ -260,8 +287,9 @@ function HomeScreen() {
                 value={idEscala}
                 onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
                 onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-                className="w-full rounded-2xl border border-slate-800/80 bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-white placeholder:font-normal placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
               />
+
             </div>
             <button
               onClick={handleConsultar}
@@ -280,12 +308,12 @@ function HomeScreen() {
       {/* PRÓXIMAS ESCALAS */}
       <section className="px-5 mt-6">
         <div className="mb-3 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
             Próximas Escalas
           </h2>
           <button
             onClick={() => navigate({ to: "/calendario" })}
-            className="text-[10px] font-bold uppercase tracking-wider text-amber-500"
+            className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500"
           >
             Ver tudo →
           </button>
@@ -302,13 +330,13 @@ function HomeScreen() {
 
           if (proximas.length === 0) {
             return (
-              <div className="flex items-center gap-4 rounded-3xl border border-slate-800 bg-slate-900/30 p-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800 bg-[#020617]">
-                  <Calendar size={18} className="text-slate-600" />
+              <div className="flex items-center gap-4 rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/30 p-4 shadow-sm dark:shadow-none">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#020617]">
+                  <Calendar size={18} className="text-slate-400 dark:text-slate-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[13px] font-bold text-slate-300">Sem escalas próximas</p>
-                  <p className="text-[11px] text-slate-600">Toque em "Ver tudo" para configurar.</p>
+                  <p className="text-[13px] font-bold text-slate-700 dark:text-slate-300">Sem escalas próximas</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-600">Toque em "Ver tudo" para configurar.</p>
                 </div>
               </div>
             );
@@ -346,7 +374,7 @@ function HomeScreen() {
                   <li
                     key={m.id}
                     onClick={() => navigate({ to: "/calendario" })}
-                    className="flex cursor-pointer overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 transition active:scale-[0.99]"
+                    className="flex cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/40 shadow-sm dark:shadow-none transition active:scale-[0.99]"
                   >
                     <div className="w-1.5 shrink-0" style={{ background: cor }} />
                     <div className="flex flex-1 items-center gap-3 p-3">
@@ -362,10 +390,10 @@ function HomeScreen() {
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[14px] font-bold text-slate-100">
+                        <p className="truncate text-[14px] font-bold text-slate-900 dark:text-slate-100">
                           {TIPO_LABEL[m.tipo] ?? "Escala"}
                         </p>
-                        <p className="text-[12px] text-slate-500">
+                        <p className="text-[12px] text-slate-500 dark:text-slate-500">
                           {d.toLocaleString("pt-BR", {
                             day: "2-digit",
                             month: "2-digit",
@@ -378,11 +406,12 @@ function HomeScreen() {
                         </p>
                       </div>
                       <span
-                        className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
-                        style={{
-                          background: diasFalta <= 1 ? cor : "#0f172a",
-                          color: diasFalta <= 1 ? "#fff" : "#cbd5e1",
-                        }}
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                          diasFalta <= 1
+                            ? "text-white"
+                            : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        }`}
+                        style={diasFalta <= 1 ? { background: cor } : undefined}
                       >
                         {label}
                       </span>
@@ -398,7 +427,7 @@ function HomeScreen() {
       {/* ACESSO RÁPIDO — grid tático */}
       <section className="px-5 mt-6">
         <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
             Acesso Rápido
           </h2>
         </div>
@@ -409,18 +438,18 @@ function HomeScreen() {
               <button
                 key={b.label}
                 onClick={b.onClick}
-                className="group flex flex-col items-start gap-3 rounded-3xl border border-white/5 bg-slate-900/40 p-4 text-left transition-all hover:bg-slate-900/70 active:scale-95"
+                className="group flex flex-col items-start gap-3 rounded-3xl border border-slate-200 bg-white dark:border-white/5 dark:bg-slate-900/40 p-4 text-left shadow-sm dark:shadow-none transition-all hover:bg-slate-50 dark:hover:bg-slate-900/70 active:scale-95"
               >
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
                     gold
-                      ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                      : "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                      ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500"
+                      : "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
                   }`}
                 >
                   <b.icon size={20} strokeWidth={2} />
                 </div>
-                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-200 whitespace-pre-line">
+                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-800 dark:text-slate-200 whitespace-pre-line">
                   {b.label}
                 </span>
               </button>
@@ -433,7 +462,7 @@ function HomeScreen() {
       <footer className="mt-8 text-center">
         <button
           onClick={() => navigate({ to: "/privacidade" })}
-          className="text-[11px] uppercase tracking-wider text-slate-600 underline underline-offset-4 decoration-slate-800"
+          className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-600 underline underline-offset-4 decoration-slate-300 dark:decoration-slate-800"
         >
           Política de Privacidade
         </button>
