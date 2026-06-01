@@ -271,7 +271,7 @@ function HomeScreen() {
               htmlFor="id-escala-input"
               className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500"
             >
-              Consulta Operacional
+              Consulta escala dejem/delegada
 
             </label>
             <InlineVpnChip />
