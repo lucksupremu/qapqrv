@@ -237,47 +237,20 @@ export function EscalaCalendarCard() {
         {grid.map((cell, i) => {
           const key = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}`;
           const dia = plantoes.get(key);
-          const inicios = dia
-            ? dia.plantoes.filter((p) => p.tipo === "inicio")
-            : [];
-          const continuacoes = dia
-            ? dia.plantoes.filter((p) => p.tipo === "continuacao")
-            : [];
-          const coresInicio = Array.from(
-            new Set(inicios.map((p) => p.regra.cor)),
-          );
-          const coresContinuacao = Array.from(
-            new Set(continuacoes.map((p) => p.regra.cor)),
-          );
-          const temAlgo = coresInicio.length + coresContinuacao.length > 0;
+          const entries: PlantaoEntry[] = dia?.plantoes ?? [];
+          const barras = barrasDoDia(entries, cell.date);
+          const barrasVisiveis = barras.slice(0, 2);
+          const extras = barras.length - barrasVisiveis.length;
+          const temAlgo = barras.length > 0;
           const isToday = sameDay(cell.date, today);
           const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
           const temMarca = marcasDia.length > 0;
           const corMarca = temMarca ? MARCA_COR[marcasDia[0]!.tipo] ?? "#3498DB" : null;
+          const interativo = cell.inMonth && (temAlgo || temMarca);
+          const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
 
-          return (
-            <div
-              key={i}
-              className="relative mx-auto flex h-10 w-10 items-center justify-center"
-              aria-label={
-                dia
-                  ? `${cell.date.getDate()} — ${dia.plantoes.length} plantão(ões)`
-                  : `${cell.date.getDate()}`
-              }
-            >
-              {coresContinuacao.map((c, idx) => (
-                <span
-                  key={`cont-${idx}`}
-                  className="absolute inset-0 rounded-full"
-                  style={cellContinuacao(c)}
-                />
-              ))}
-              {coresInicio.length > 0 && (
-                <span
-                  className="absolute inset-0 rounded-full"
-                  style={cellRing(coresInicio)}
-                />
-              )}
+          const cellInner = (
+            <>
               {temMarca && (
                 <>
                   <span
@@ -329,9 +302,179 @@ export function EscalaCalendarCard() {
                 {cell.date.getDate()}
               </span>
 
-            </div>
+              {/* Barras de plantão */}
+              {barrasVisiveis.length > 0 && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute"
+                  style={{
+                    left: 3,
+                    right: 3,
+                    bottom: 3,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                  }}
+                >
+                  {barrasVisiveis.map((b, idx) => {
+                    const baseStyle: React.CSSProperties = {
+                      height: 3,
+                      borderRadius: 2,
+                      background: b.cor,
+                    };
+                    if (b.lado === "cheia") {
+                      return <span key={idx} style={{ ...baseStyle, width: "100%" }} />;
+                    }
+                    return (
+                      <span
+                        key={idx}
+                        style={{
+                          position: "relative",
+                          height: 3,
+                          width: "100%",
+                          borderRadius: 2,
+                          background: "rgba(0,0,0,0.06)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            ...baseStyle,
+                            position: "absolute",
+                            top: 0,
+                            [b.lado === "esq" ? "left" : "right"]: 0,
+                            width: "50%",
+                          }}
+                        />
+                      </span>
+                    );
+                  })}
+                  {extras > 0 && (
+                    <span
+                      style={{
+                        fontSize: 8,
+                        fontWeight: 700,
+                        color: "#5b7a8f",
+                        lineHeight: 1,
+                        textAlign: "right",
+                      }}
+                    >
+                      +{extras}
+                    </span>
+                  )}
+                </span>
+              )}
+            </>
+          );
+
+          const baseClass = "relative mx-auto flex h-10 w-10 items-center justify-center";
+          const ariaLabel = dia
+            ? `${cell.date.getDate()} — ${dia.plantoes.length} plantão(ões)`
+            : `${cell.date.getDate()}`;
+
+          if (!interativo) {
+            return (
+              <div key={i} className={baseClass} aria-label={ariaLabel}>
+                {cellInner}
+              </div>
+            );
+          }
+
+          return (
+            <Popover
+              key={i}
+              open={openKey === cellKey}
+              onOpenChange={(o) => setOpenKey(o ? cellKey : null)}
+            >
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={`${baseClass} cursor-pointer rounded-full focus:outline-none focus-visible:ring-2`}
+                  aria-label={ariaLabel}
+                  aria-haspopup="dialog"
+                >
+                  {cellInner}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="center" className="w-72 p-3">
+                <p className="text-[13px] font-bold text-foreground">
+                  {fmtDataExtenso(cell.date)}
+                </p>
+                {entries.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {entries.map((e, idx) => {
+                      const cruza = !sameDay(e.inicio, e.fim);
+                      const isInicio = sameDay(e.inicio, cell.date);
+                      return (
+                        <div key={idx} className="flex gap-2">
+                          <span
+                            className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ background: e.regra.cor }}
+                          />
+                          <div className="min-w-0">
+                            <p className="truncate text-[12px] font-bold text-foreground">
+                              {e.regra.local}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {fmtHora(e.inicio)} → {fmtHora(e.fim)}
+                              {cruza ? (isInicio ? " (termina no dia seguinte)" : "") : ""}
+                            </p>
+                            <p className="text-[10px]" style={{ color: "#5b7a8f" }}>
+                              {isInicio
+                                ? cruza
+                                  ? "Início do plantão (noturno)"
+                                  : "Plantão no dia"
+                                : `Continuação (vem de ${fmtDiaCurto(e.inicio)})`}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {marcasDia.length > 0 && (
+                  <div className="mt-2 space-y-1 border-t pt-2" style={{ borderColor: COR_BG_SOFT }}>
+                    {marcasDia.map((mk, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{ background: MARCA_COR[mk.tipo] ?? "#3498DB" }}
+                        />
+                        <span className="text-[12px] text-foreground">
+                          {MARCA_LABEL[mk.tipo] ?? mk.tipo}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
           );
         })}
+      </div>
+
+      {/* Legenda das barras */}
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
+        <span className="flex items-center gap-1">
+          <span style={{ width: 14, height: 3, borderRadius: 2, background: COR_PRIMARY }} />
+          Plantão no dia
+        </span>
+        <span className="flex items-center gap-1">
+          <span style={{ position: "relative", width: 14, height: 3, borderRadius: 2, background: "rgba(0,0,0,0.08)" }}>
+            <span style={{ position: "absolute", right: 0, top: 0, width: 7, height: 3, borderRadius: 2, background: COR_PRIMARY }} />
+          </span>
+          Início noturno
+        </span>
+        <span className="flex items-center gap-1">
+          <span style={{ position: "relative", width: 14, height: 3, borderRadius: 2, background: "rgba(0,0,0,0.08)" }}>
+            <span style={{ position: "absolute", left: 0, top: 0, width: 7, height: 3, borderRadius: 2, background: COR_PRIMARY }} />
+          </span>
+          Continuação
+        </span>
+      </div>
+      <p className="mt-1 text-center text-[10px] text-muted-foreground">
+        Toque em um dia para ver detalhes.
+      </p>
+
       </div>
 
 
