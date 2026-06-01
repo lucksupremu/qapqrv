@@ -210,7 +210,7 @@ function HomeScreen() {
         void guardIntranet(
           () =>
             openInAppBrowser(
-              "https://www.ciaf.policiamilitar.sp.gov.br/folhadepagamento/autenticacaosegura.aspx",
+              "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
               { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
             ),
           "a Folha de Pagamento",
