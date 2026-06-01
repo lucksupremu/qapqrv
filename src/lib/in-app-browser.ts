@@ -71,8 +71,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
   if (isNativeApp()) {
     try {
       const mod = await import("@capacitor/inappbrowser");
-      // @ts-expect-error tipos do pacote variam por versão
-      const InAppBrowser = mod.InAppBrowser ?? mod.default;
+      const { InAppBrowser } = mod;
 
       if (opts.modo === "external") {
         await InAppBrowser.openInExternalBrowser({ url: targetUrl });
@@ -125,7 +124,6 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
       await InAppBrowser.openInWebView({
         url: targetUrl,
         options: {
-          // @ts-ignore
           ...mod.DefaultWebViewOptions,
           clearCache: false,
           clearSessionCache: false,
@@ -135,7 +133,6 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
           closeButtonText: "Fechar",
           customWebViewUserAgent: ANDROID_CHROME_UA,
           android: {
-            // @ts-ignore
             ...mod.DefaultAndroidWebViewOptions,
             allowZoom: true,
             hardwareBack: true,
@@ -143,7 +140,6 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
             isIsolated: false,
           },
           iOS: {
-            // @ts-ignore
             ...mod.DefaultiOSWebViewOptions,
             allowsBackForwardNavigationGestures: true,
             enableViewportScale: true,
