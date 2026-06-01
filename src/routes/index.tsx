@@ -451,6 +451,7 @@ function HomeScreen() {
 }
 
 function VpnBadge() {
+  const isNative = useIsNative();
   const [status, setStatus] = useState<"checking" | "on" | "off" | "unknown">("checking");
   const [expanded, setExpanded] = useState(false);
 
