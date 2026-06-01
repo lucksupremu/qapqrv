@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { openAnyConnect as launchAnyConnect } from "@/lib/open-anyconnect";
 import {
   ArrowLeft,
   Share2,
@@ -32,7 +33,14 @@ function IntranetWebviewScreen() {
   const [error, setError] = useState(false);
   const [currentUrl, setCurrentUrl] = useState(url);
 
-  
+  useEffect(() => {
+    if (!loading || error) return;
+    const timeout = window.setTimeout(() => {
+      setLoading(false);
+      setError(true);
+    }, 22000);
+    return () => window.clearTimeout(timeout);
+  }, [loading, error, currentUrl]);
 
   const handleShare = async () => {
     try {
@@ -95,9 +103,7 @@ function IntranetWebviewScreen() {
   };
 
   const openAnyConnect = () => {
-    if (typeof window === "undefined") return;
-    window.location.href =
-      "intent://com.cisco.anyconnect.vpn.android.avf#Intent;scheme=android-app;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.cisco.anyconnect.vpn.android.avf;end";
+    void launchAnyConnect();
   };
 
   return (
