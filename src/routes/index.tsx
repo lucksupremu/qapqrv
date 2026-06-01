@@ -374,7 +374,7 @@ function HomeScreen() {
                   <li
                     key={m.id}
                     onClick={() => navigate({ to: "/calendario" })}
-                    className="flex cursor-pointer overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 transition active:scale-[0.99]"
+                    className="flex cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/40 shadow-sm dark:shadow-none transition active:scale-[0.99]"
                   >
                     <div className="w-1.5 shrink-0" style={{ background: cor }} />
                     <div className="flex flex-1 items-center gap-3 p-3">
