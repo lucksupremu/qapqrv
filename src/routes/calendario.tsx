@@ -411,7 +411,7 @@ function CalendarScreen() {
               className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition"
               style={{
                 background: ativo ? "var(--surface)" : "transparent",
-                color: ativo ? "#0f2535" : "#5b7a8f",
+                color: ativo ? "var(--text-dark)" : "#5b7a8f",
                 border: `1.5px solid ${ativo ? TIPO_COR[t] : "#C0C8D5"}`,
                 opacity: ativo ? 1 : 0.6,
               }}
@@ -431,7 +431,7 @@ function CalendarScreen() {
             <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#5b7a8f" }}>
               Resumo do mês
             </div>
-            <div className="text-[13px] font-semibold" style={{ color: "#0f2535" }}>
+            <div className="text-[13px] font-semibold" style={{ color: "var(--text-dark)" }}>
               {resumoMes.count} {resumoMes.count === 1 ? "marca" : "marcas"}
             </div>
           </div>
@@ -558,12 +558,12 @@ function CalendarScreen() {
                           {TIPO_LABEL[m.tipo]}
                           {m.delegadaArea ? ` · ${m.delegadaArea}` : ""}
                         </div>
-                        <div className="text-[12px] font-bold" style={{ color: "#0f2535" }}>
+                        <div className="text-[12px] font-bold" style={{ color: "var(--text-dark)" }}>
                           {formatHora(m.data)}
                         </div>
                       </div>
                       {m.valor > 0 && (
-                        <div className="mt-0.5 text-[13px] font-bold" style={{ color: "#0f2535" }}>
+                        <div className="mt-0.5 text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
                           {formatBRL(m.valor)}
                         </div>
                       )}
@@ -641,12 +641,12 @@ function CalendarScreen() {
                         <div className="text-[14px] font-bold" style={{ color: COR_PRIMARY }}>
                           {TIPO_LABEL[m.tipo]}
                         </div>
-                        <div className="text-[12px] font-bold" style={{ color: "#0f2535" }}>
+                        <div className="text-[12px] font-bold" style={{ color: "var(--text-dark)" }}>
                           {formatHora(m.data)}
                         </div>
                       </div>
                       {m.valor > 0 && (
-                        <div className="text-[12px] font-bold" style={{ color: "#0f2535" }}>
+                        <div className="text-[12px] font-bold" style={{ color: "var(--text-dark)" }}>
                           {formatBRL(m.valor)}
                         </div>
                       )}
