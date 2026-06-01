@@ -107,6 +107,16 @@ function RootComponent() {
       ? ric(loadAds, { timeout: 3000 })
       : window.setTimeout(loadAds, 1500);
 
+    // Inicializa AdMob e mostra App Open ad (apenas no APK nativo).
+    if (isNativeApp()) {
+      import("@/lib/admob").then(({ initAdMob, showAppOpenAd, prepareInterstitial }) => {
+        initAdMob().then(() => {
+          showAppOpenAd();
+          prepareInterstitial();
+        });
+      });
+    }
+
     // Rehydrate reminder timers and re-check every hour for distant reminders.
     import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
       rehydrateReminders();

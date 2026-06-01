@@ -7,6 +7,11 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: "https",
   },
+  plugins: {
+    AdMob: {
+      appId: "ca-app-pub-4966192764194561~2515666476",
+    },
+  },
 };
 
 export default config;
