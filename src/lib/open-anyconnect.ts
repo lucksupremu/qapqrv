@@ -50,9 +50,17 @@ async function openViaCapacitor(platform: Platform): Promise<boolean> {
   return false;
 }
 
-export function openAnyConnect() {
+export async function openAnyConnect() {
   if (typeof window === "undefined") return;
   const platform = detectPlatform();
+
+  // Dentro do APK Capacitor: usa o plugin nativo (intent:// não funciona na WebView)
+  if (isNativeApp()) {
+    const ok = await openViaCapacitor(platform);
+    if (ok) return;
+    toast.error("Não foi possível abrir o Cisco Secure Client.");
+    return;
+  }
 
   if (platform === "android") {
     // Intent URL: abre o app se instalado, ou cai na Play Store via fallback.
