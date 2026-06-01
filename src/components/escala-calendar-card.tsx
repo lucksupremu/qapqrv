@@ -514,6 +514,10 @@ export function EscalaCalendarCard() {
           </span>
           Continuação
         </span>
+        <span className="flex items-center gap-1">
+          <span style={{ width: 8, height: 16, borderRadius: 3, background: "#FFE066", borderTop: "3px solid #3498DB", boxShadow: "0 1px 2px rgba(0,0,0,0.2)", transform: "rotate(-3deg)" }} />
+          Dejem/Delegada
+        </span>
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
