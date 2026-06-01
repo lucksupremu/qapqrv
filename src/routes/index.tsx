@@ -287,7 +287,7 @@ function HomeScreen() {
                 value={idEscala}
                 onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
                 onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
+                className="w-full rounded-2xl border border-slate-300 bg-white dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-500 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
               />
 
             </div>
