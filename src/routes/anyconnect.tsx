@@ -111,13 +111,13 @@ function CopyServerButton({ compact = false }: { compact?: boolean }) {
       <div className="min-w-0 flex-1">
         <p
           className="text-[11px] font-semibold uppercase tracking-wide"
-          style={{ color: "#5b7a8f" }}
+          style={{ color: "#1a3348" }}
         >
           Servidor
         </p>
         <p
           className="truncate font-mono text-[13px] font-semibold"
-          style={{ color: "#0f2535" }}
+          style={{ color: "#0a1620" }}
           title={SERVIDOR}
         >
           {SERVIDOR}
