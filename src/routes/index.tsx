@@ -443,8 +443,8 @@ function HomeScreen() {
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
                     gold
-                      ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500"
-                      : "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
+                      ? "bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-500"
+                      : "bg-blue-500/15 border-blue-500/30 text-blue-700 dark:text-blue-400"
                   }`}
                 >
                   <b.icon size={20} strokeWidth={2} />
