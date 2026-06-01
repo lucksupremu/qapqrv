@@ -475,7 +475,7 @@ export function EscalaCalendarCard() {
         Toque em um dia para ver detalhes.
       </p>
 
-      </div>
+
 
 
       {/* Legenda / Lista de regras */}
