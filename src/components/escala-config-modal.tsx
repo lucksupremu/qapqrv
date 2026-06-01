@@ -342,7 +342,7 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
 
           {alternada && (
             <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3">
-              <Label>Turno alternado</Label>
+              <Label>{presetForcaAlternada ? "Turno noturno" : "Turno alternado"}</Label>
               <div className="grid grid-cols-[1fr_auto_1fr_1.4fr] items-center gap-2">
                 <Input
                   type="number"
