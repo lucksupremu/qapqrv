@@ -410,7 +410,7 @@ function CalendarScreen() {
               onClick={() => toggleFiltro(t)}
               className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition"
               style={{
-                background: ativo ? "#ffffff" : "transparent",
+                background: ativo ? "var(--surface)" : "transparent",
                 color: ativo ? "#0f2535" : "#5b7a8f",
                 border: `1.5px solid ${ativo ? TIPO_COR[t] : "#C0C8D5"}`,
                 opacity: ativo ? 1 : 0.6,
@@ -426,7 +426,7 @@ function CalendarScreen() {
 
       {/* Resumo do mês */}
       {resumoMes.count > 0 && (
-        <div className="mx-3 mt-3 rounded-[14px] p-3 flex items-center justify-between bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+        <div className="mx-3 mt-3 rounded-[14px] p-3 flex items-center justify-between bg-[var(--surface)] shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#5b7a8f" }}>
               Resumo do mês
@@ -455,7 +455,7 @@ function CalendarScreen() {
             key={`${cursor.getFullYear()}-${cursor.getMonth()}`}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
-            className={`mx-3 mt-3 rounded-[20px] bg-white p-3 shadow-[0_2px_12px_rgba(0,0,0,0.4)] ${
+            className={`mx-3 mt-3 rounded-[20px] bg-[var(--surface)] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.4)] ${
               slideDir === "left"
                 ? "animate-in slide-in-from-right-4 fade-in duration-200"
                 : slideDir === "right"
@@ -549,7 +549,7 @@ function CalendarScreen() {
                 {selectedMarcas.map((m) => (
                   <li
                     key={m.id}
-                    className="flex overflow-hidden rounded-[14px] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.15)]"
+                    className="flex overflow-hidden rounded-[14px] bg-[var(--surface)] shadow-[0_2px_12px_rgba(0,0,0,0.15)]"
                   >
                     <div className="w-1.5 shrink-0" style={{ background: TIPO_COR[m.tipo] }} />
                     <div className="flex-1 p-3">
@@ -570,7 +570,7 @@ function CalendarScreen() {
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={() => openEdit(m)}
-                          className="rounded-[10px] border-2 bg-white px-3 py-1 text-[12px] font-bold"
+                          className="rounded-[10px] border-2 bg-[var(--surface)] px-3 py-1 text-[12px] font-bold"
                           style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
                         >
                           Editar
@@ -622,7 +622,7 @@ function CalendarScreen() {
                   <li
                     key={m.id}
                     onClick={() => openEdit(m)}
-                    className="flex overflow-hidden rounded-[14px] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.12)] active:scale-[0.99] transition cursor-pointer"
+                    className="flex overflow-hidden rounded-[14px] bg-[var(--surface)] shadow-[0_2px_12px_rgba(0,0,0,0.12)] active:scale-[0.99] transition cursor-pointer"
                   >
                     <div className="w-1.5 shrink-0" style={{ background: TIPO_COR[m.tipo] }} />
                     <div
