@@ -330,13 +330,13 @@ function HomeScreen() {
 
           if (proximas.length === 0) {
             return (
-              <div className="flex items-center gap-4 rounded-3xl border border-slate-800 bg-slate-900/30 p-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800 bg-[#020617]">
-                  <Calendar size={18} className="text-slate-600" />
+              <div className="flex items-center gap-4 rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/30 p-4 shadow-sm dark:shadow-none">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#020617]">
+                  <Calendar size={18} className="text-slate-400 dark:text-slate-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[13px] font-bold text-slate-300">Sem escalas próximas</p>
-                  <p className="text-[11px] text-slate-600">Toque em "Ver tudo" para configurar.</p>
+                  <p className="text-[13px] font-bold text-slate-700 dark:text-slate-300">Sem escalas próximas</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-600">Toque em "Ver tudo" para configurar.</p>
                 </div>
               </div>
             );
