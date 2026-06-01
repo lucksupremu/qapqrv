@@ -9,6 +9,21 @@ import {
   removeEscala,
   saveEscalas,
 } from "@/lib/escala-trabalho";
+import { loadMarcas, type Marca } from "@/lib/marcas";
+
+const MARCA_COR: Record<string, string> = {
+  dejem: "#3498DB",
+  delegada: "#2ECC71",
+  delegada_capital: "#2ECC71",
+  delegada_outras: "#E67E22",
+};
+const MARCA_LABEL: Record<string, string> = {
+  dejem: "Dejem",
+  delegada: "Delegada",
+  delegada_capital: "Delegada Cap.",
+  delegada_outras: "Delegada",
+};
+
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -38,11 +53,34 @@ function buildGrid(year: number, month: number) {
 export function EscalaCalendarCard() {
   const today = useMemo(() => new Date(), []);
   const [regras, setRegras] = useState<EscalaRegra[]>([]);
+  const [marcas, setMarcas] = useState<Marca[]>([]);
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     setRegras(loadEscalas());
+    setMarcas(loadMarcas());
+    if (typeof window === "undefined") return;
+    const refresh = () => {
+      setRegras(loadEscalas());
+      setMarcas(loadMarcas());
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || e.key === "marcas_atividade_d" || e.key === "qap-escalas-trabalho") {
+        refresh();
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("focus", refresh);
+    window.addEventListener("storage", onStorage);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   const grid = useMemo(
@@ -54,6 +92,22 @@ export function EscalaCalendarCard() {
     () => gerarPlantoesDoMes(regras, cursor.getFullYear(), cursor.getMonth()),
     [regras, cursor],
   );
+
+  const marcasPorDia = useMemo(() => {
+    const map = new Map<string, Marca[]>();
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth();
+    for (const mk of marcas) {
+      const d = new Date(mk.data);
+      if (Number.isNaN(d.getTime())) continue;
+      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const cur = map.get(key) ?? [];
+      cur.push(mk);
+      map.set(key, cur);
+    }
+    return map;
+  }, [marcas, cursor]);
 
   const goPrev = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() - 1, 1));
   const goNext = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() + 1, 1));
@@ -184,6 +238,9 @@ export function EscalaCalendarCard() {
           );
           const temAlgo = coresInicio.length + coresContinuacao.length > 0;
           const isToday = sameDay(cell.date, today);
+          const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
+          const temMarca = marcasDia.length > 0;
+          const corMarca = temMarca ? MARCA_COR[marcasDia[0]!.tipo] ?? "#3498DB" : null;
 
           return (
             <div
@@ -208,25 +265,57 @@ export function EscalaCalendarCard() {
                   style={cellRing(coresInicio)}
                 />
               )}
-              {isToday && !temAlgo && (
+              {temMarca && (
+                <>
+                  <span
+                    aria-hidden
+                    className="absolute"
+                    style={{
+                      inset: "4px",
+                      background: "#FFE066",
+                      transform: "rotate(-4deg)",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
+                      borderRadius: "2px",
+                    }}
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute"
+                    style={{
+                      right: 2,
+                      top: 2,
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: corMarca ?? "#3498DB",
+                      boxShadow: "0 0 0 1.5px #fff",
+                    }}
+                  />
+                </>
+              )}
+              {isToday && !temAlgo && !temMarca && (
                 <span
                   className="absolute inset-0 rounded-full"
                   style={{ background: COR_BG_SOFT }}
                 />
               )}
+
               <span
                 className="relative text-[13px]"
                 style={{
                   color: !cell.inMonth
                     ? "#a8b5c2"
-                    : isToday
-                      ? COR_PRIMARY
-                      : "var(--text-dark, #02080d)",
-                  fontWeight: isToday || temAlgo ? 800 : 500,
+                    : temMarca
+                      ? "#1a1a1a"
+                      : isToday
+                        ? COR_PRIMARY
+                        : "var(--text-dark, #02080d)",
+                  fontWeight: isToday || temAlgo || temMarca ? 800 : 500,
                 }}
               >
                 {cell.date.getDate()}
               </span>
+
             </div>
           );
         })}
