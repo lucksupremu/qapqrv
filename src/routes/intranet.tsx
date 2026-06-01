@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { openAnyConnect as launchAnyConnect } from "@/lib/open-anyconnect";
+import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import {
   ArrowLeft,
   Share2,
@@ -32,6 +33,14 @@ function IntranetWebviewScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [currentUrl, setCurrentUrl] = useState(url);
+
+  // No APK nativo, iframe não funciona com sites .gov.br (X-Frame-Options).
+  // Abrimos no Custom Tabs do sistema e voltamos para a home.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    void openInAppBrowser(url, { titulo, modo: "system" });
+    navigate({ to: "/" });
+  }, [url, titulo, navigate]);
 
   useEffect(() => {
     if (!loading || error) return;
