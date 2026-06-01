@@ -251,13 +251,29 @@ export function EscalaCalendarCard() {
                   <p className="truncate text-[13px] font-bold text-foreground">
                     {r.local}
                   </p>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {r.trabalho}×{r.folga} · início {String(r.horaInicio).padStart(2, "0")}h
-                    {r.alternada
-                      ? ` / ${r.alternada.trabalho}×${r.alternada.folga} · ${String(r.alternada.horaInicio).padStart(2, "0")}h`
-                      : ""}
-                  </p>
+                  {(() => {
+                    const descTurno = (
+                      trab: number,
+                      hi: number,
+                      mi: number | undefined,
+                    ) => {
+                      const ini = fmtHM(hi, mi);
+                      const fimMin = (hi * 60 + (mi ?? 0) + trab * 60) % (24 * 60);
+                      const fim = fmtHM(Math.floor(fimMin / 60), fimMin % 60);
+                      const cruzaNoite = hi * 60 + (mi ?? 0) + trab * 60 >= 24 * 60;
+                      return `${ini} → ${fim}${cruzaNoite ? " (dia seguinte)" : ""}`;
+                    };
+                    return (
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {r.trabalho}×{r.folga} · {descTurno(r.trabalho, r.horaInicio, r.minutoInicio)}
+                        {r.alternada
+                          ? ` / ${r.alternada.trabalho}×${r.alternada.folga} · ${descTurno(r.alternada.trabalho, r.alternada.horaInicio, r.alternada.minutoInicio)}`
+                          : ""}
+                      </p>
+                    );
+                  })()}
                 </div>
+
               </div>
               <button
                 aria-label={`Remover escala ${r.local}`}
