@@ -427,7 +427,7 @@ function HomeScreen() {
       {/* ACESSO RÁPIDO — grid tático */}
       <section className="px-5 mt-6">
         <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
             Acesso Rápido
           </h2>
         </div>
