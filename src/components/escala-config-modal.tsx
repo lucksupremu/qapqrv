@@ -22,13 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   ESCALA_CORES,
@@ -54,7 +47,17 @@ function fromISO(s: string): Date | undefined {
   return new Date(y, m - 1, d);
 }
 
-const HORAS = Array.from({ length: 24 }, (_, i) => i);
+function toHHMM(h: number, m: number): string {
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function parseHHMM(s: string): { h: number; m: number } {
+  const [hh, mm] = s.split(":").map((x) => Number(x));
+  return {
+    h: Number.isFinite(hh) ? Math.min(23, Math.max(0, hh)) : 0,
+    m: Number.isFinite(mm) ? Math.min(59, Math.max(0, mm)) : 0,
+  };
+}
 
 export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props) {
   const [local, setLocal] = useState("");
@@ -62,10 +65,12 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
   const [trabalho, setTrabalho] = useState(12);
   const [folga, setFolga] = useState(24);
   const [horaInicio, setHoraInicio] = useState(7);
+  const [minutoInicio, setMinutoInicio] = useState(0);
   const [alternada, setAlternada] = useState(false);
   const [trabalhoB, setTrabalhoB] = useState(12);
   const [folgaB, setFolgaB] = useState(48);
   const [horaInicioB, setHoraInicioB] = useState(19);
+  const [minutoInicioB, setMinutoInicioB] = useState(0);
   const [dataInicial, setDataInicial] = useState<Date | undefined>(new Date());
   const [dataFinal, setDataFinal] = useState<Date | undefined>(() => {
     const d = new Date();
@@ -81,10 +86,12 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       setTrabalho(initial.trabalho);
       setFolga(initial.folga);
       setHoraInicio(initial.horaInicio);
+      setMinutoInicio(initial.minutoInicio ?? 0);
       setAlternada(!!initial.alternada);
       setTrabalhoB(initial.alternada?.trabalho ?? 12);
       setFolgaB(initial.alternada?.folga ?? 48);
       setHoraInicioB(initial.alternada?.horaInicio ?? 19);
+      setMinutoInicioB(initial.alternada?.minutoInicio ?? 0);
       setDataInicial(fromISO(initial.dataInicial));
       setDataFinal(fromISO(initial.dataFinal));
     } else {
@@ -93,10 +100,12 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       setTrabalho(12);
       setFolga(24);
       setHoraInicio(7);
+      setMinutoInicio(0);
       setAlternada(false);
       setTrabalhoB(12);
       setFolgaB(48);
       setHoraInicioB(19);
+      setMinutoInicioB(0);
       setDataInicial(new Date());
       const f = new Date();
       f.setMonth(f.getMonth() + 6);
@@ -135,10 +144,16 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       trabalho,
       folga,
       horaInicio,
+      minutoInicio,
       dataInicial: toISO(dataInicial),
       dataFinal: toISO(dataFinal),
       alternada: alternada
-        ? { trabalho: trabalhoB, folga: folgaB, horaInicio: horaInicioB }
+        ? {
+            trabalho: trabalhoB,
+            folga: folgaB,
+            horaInicio: horaInicioB,
+            minutoInicio: minutoInicioB,
+          }
         : undefined,
     };
     onSave(regra);
@@ -196,7 +211,7 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
           {/* Turno 1 */}
           <div className="space-y-1.5">
             <Label>Escala</Label>
-            <div className="grid grid-cols-[1fr_auto_1fr_1.2fr] items-center gap-2">
+            <div className="grid grid-cols-[1fr_auto_1fr_1.4fr] items-center gap-2">
               <Input
                 type="number"
                 min={1}
@@ -216,24 +231,20 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
                 onChange={(e) => setFolga(Number(e.target.value))}
                 aria-label="Horas de folga"
               />
-              <Select
-                value={String(horaInicio)}
-                onValueChange={(v) => setHoraInicio(Number(v))}
-              >
-                <SelectTrigger aria-label="Hora de início">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {HORAS.map((h) => (
-                    <SelectItem key={h} value={String(h)}>
-                      {String(h).padStart(2, "0")}h
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                type="time"
+                step={60}
+                value={toHHMM(horaInicio, minutoInicio)}
+                onChange={(e) => {
+                  const { h, m } = parseHHMM(e.target.value);
+                  setHoraInicio(h);
+                  setMinutoInicio(m);
+                }}
+                aria-label="Hora de início"
+              />
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Trabalho × Folga (horas) · Hora de início
+              Trabalho × Folga (horas) · Hora de início (HH:MM)
             </p>
           </div>
 
@@ -249,7 +260,7 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
           {alternada && (
             <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3">
               <Label>Turno alternado</Label>
-              <div className="grid grid-cols-[1fr_auto_1fr_1.2fr] items-center gap-2">
+              <div className="grid grid-cols-[1fr_auto_1fr_1.4fr] items-center gap-2">
                 <Input
                   type="number"
                   min={1}
@@ -267,21 +278,17 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
                   value={folgaB}
                   onChange={(e) => setFolgaB(Number(e.target.value))}
                 />
-                <Select
-                  value={String(horaInicioB)}
-                  onValueChange={(v) => setHoraInicioB(Number(v))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {HORAS.map((h) => (
-                      <SelectItem key={h} value={String(h)}>
-                        {String(h).padStart(2, "0")}h
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  type="time"
+                  step={60}
+                  value={toHHMM(horaInicioB, minutoInicioB)}
+                  onChange={(e) => {
+                    const { h, m } = parseHHMM(e.target.value);
+                    setHoraInicioB(h);
+                    setMinutoInicioB(m);
+                  }}
+                  aria-label="Hora de início alternada"
+                />
               </div>
             </div>
           )}

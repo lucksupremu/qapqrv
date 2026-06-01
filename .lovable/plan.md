@@ -1,86 +1,69 @@
 ## Objetivo
 
-Na tela `/inicio`, logo abaixo do grid de ferramentas, adicionar um **card de Calendário de Escala** inspirado no app "Plantão Fácil": mini calendário do mês com bolinhas coloridas marcando os plantões, navegação entre meses e um botão para o policial cadastrar sua escala de trabalho recorrente (12x24, 12x48, alternada etc.), com data inicial, data final e horário de início.
+1. Permitir escolher hora **e minuto** de início (hoje só dá pra escolher hora cheia).
+2. Mostrar com clareza no calendário os plantões **noturnos** que viram a noite — o dia seguinte precisa indicar visualmente que o policial ainda está de serviço até a manhã, e só depois entra na folga.
 
-A partir das regras cadastradas, o app gera automaticamente as datas e pinta os dias correspondentes no mini calendário, facilitando enxergar os dias livres para agendar Dejem ou Delegada.
+---
 
-## Modelo de dados (novo: `src/lib/escala-trabalho.ts`)
+## 1. Hora + minuto no modal
 
-```ts
-type EscalaRegra = {
-  id: string;
-  local: string;          // "Polícia Militar", "Clínica", etc.
-  cor: string;            // hex da bolinha
-  trabalho: number;       // horas trabalhadas (ex: 12)
-  folga: number;          // horas de folga (ex: 24 / 48)
-  horaInicio: number;     // 0..23
-  dataInicial: string;    // ISO yyyy-mm-dd
-  dataFinal: string;      // ISO yyyy-mm-dd
-  alternada?: {           // segundo turno opcional (caso "Escala Alternada")
-    trabalho: number;
-    folga: number;
-    horaInicio: number;
-  };
-};
+**`src/lib/escala-trabalho.ts`**
+- Adicionar `minutoInicio: number` (0–59) em `EscalaRegra` e em `EscalaTurno`. Opcional, default `0` para regras antigas já salvas no `localStorage` (retrocompatível).
+- `gerarPlantoesDoMes` passa a usar `setHours(horaInicio, minutoInicio, 0, 0)`.
 
-loadEscalas(): EscalaRegra[]      // localStorage chave "qap-escalas-trabalho"
-saveEscalas(list: EscalaRegra[])
-removeEscala(id: string)
+**`src/components/escala-config-modal.tsx`**
+- Trocar o `Select` de hora por um `<Input type="time">` (teclado nativo no celular, com hora e minuto). Mantém o mesmo grid `Trabalho × Folga × Início`.
+- Mesma troca no bloco do turno alternado.
+- Estado: `horaInicio` (number) + `minutoInicio` (number); parse/format do valor `"HH:MM"`.
 
-// gerador puro: dado um mês, devolve { date: Date, plantoes: EscalaRegra[] }
-gerarPlantoesDoMes(regras: EscalaRegra[], year: number, month: number)
+**`src/components/escala-calendar-card.tsx`**
+- Legenda passa a mostrar `19:30` em vez de `19h` quando houver minuto.
+
+---
+
+## 2. Visualização de plantão noturno (que vira a noite)
+
+Hoje cada plantão só pinta o **dia em que começa**. Um plantão 19:00 × 12h aparece só no dia X, mesmo o policial ficando de serviço até 07:00 do dia X+1 — o usuário não enxerga que a manhã do dia seguinte ainda é trabalho.
+
+### Mudança no algoritmo (`gerarPlantoesDoMes`)
+
+Para cada plantão gerado, calcular `fimPlantao = inicio + trabalho horas`. Se `fimPlantao` cair em outro dia, registrar **duas entradas** no `Map`:
+
+- Dia do início → `tipo: "inicio"` (com horário de entrada e saída)
+- Dia(s) seguinte(s) até o fim → `tipo: "continuacao"` (com horário em que o serviço termina naquele dia)
+
+Estrutura nova de `DiaPlantao.plantoes[i]`:
+```
+{ regra, tipo: "inicio" | "continuacao", inicio: Date, fim: Date }
 ```
 
-Algoritmo: a partir de `dataInicial + horaInicio`, soma sucessivamente `(trabalho + folga)` horas até passar de `dataFinal`. Cada início que caia em dia do mês exibido marca esse dia com a cor da regra. Para escala alternada, intercala turno A e turno B.
+### Mudança visual no calendário
 
-## Novo componente: `src/components/escala-calendar-card.tsx`
+Cada célula do dia pode ter dois estados sobrepostos:
 
-Estrutura visual (segue a foto de referência, adaptada ao tema do app):
+- **Início de plantão** → anel completo colorido (como hoje).
+- **Continuação (manhã ainda de serviço)** → meia-lua na parte **superior** da célula, mesma cor, indicando "ainda no serviço da noite anterior".
 
-- Card branco arredondado com sombra suave
-- Header: `‹  Mês AAAA  ›` (navegação por mês) + botão "Hoje"
-- Linha de dias da semana (DOM SEG TER QUA QUI SEX SAB)
-- Grid 7×6 de dias:
-  - Dia sem plantão → número simples
-  - Dia com 1 plantão → número dentro de círculo na cor do `local`
-  - Dia com 2+ plantões → círculo com gradiente cônico segmentado nas cores dos locais (visual de "donut multi-color" da imagem)
-  - Dia de hoje → realce com fundo suave + número em negrito
-- Legenda compacta abaixo do grid: bolinha + `Local · Trabalho×Folga · Hora` para cada regra cadastrada (com botão lixeira para remover)
-- Botão CTA: **"Configurar escala"** (abre o modal)
-- Estado vazio (sem regras): mostra o calendário limpo do mês atual + ilustração leve "Nenhuma escala cadastrada" + mesmo botão "Configurar escala"
+Quando o dia tem só continuação (ex.: plantão começou ontem e termina hoje de manhã), a célula mostra a meia-lua superior + número do dia com peso forte; o resto do dia fica visualmente "livre" (folga).
 
-## Novo modal: `src/components/escala-config-modal.tsx`
+Quando o dia tem continuação **e** início de um novo plantão (escalas seguidas), mostra a meia-lua superior + anel embaixo.
 
-Reproduz a tela "Adicionar Plantão" da referência, mas integrada ao design system do projeto (shadcn `Dialog` + inputs estilizados):
+### Legenda de detalhe
 
-Campos:
-- **Local de trabalho** — input texto (placeholder "Ex: Polícia Militar")
-- **Cor** — seletor com 8 swatches pré-definidos (vermelho, azul, verde, magenta, laranja, ciano, roxo, amarelo)
-- **Escala (turno 1)** — dois inputs numéricos `trabalho` X `folga` + select `Hora de início` (0–23)
-- Checkbox **"Escala alternada"** — quando marcado, mostra um segundo bloco igual ao de cima para o turno alternado
-- **Data inicial** — DatePicker shadcn (`pointer-events-auto`)
-- **Data final** — DatePicker shadcn
-- Botões: **Cancelar** / **Salvar escala**
+Abaixo da grade, manter a lista de regras como hoje, mas adicionar uma linha curta de exemplo do horário (ex.: `19:00 → 07:00 do dia seguinte`) para deixar explícito que é serviço noturno.
 
-Validação com zod (campos obrigatórios, datas coerentes, números 1..168).
-
-## Integração em `src/routes/inicio.tsx`
-
-Renderizar `<EscalaCalendarCard />` logo abaixo do `<main>` com o grid de ferramentas (`px-4 mt-6`). O card só some quando o usuário está filtrando ferramentas (campo de busca preenchido), para não poluir o resultado da busca.
+---
 
 ## Detalhes técnicos
 
-- Apenas frontend, sem backend nem novas dependências
-- Persistência em `localStorage` (mesmo padrão de `src/lib/marcas.ts`)
-- Reaproveitar tokens de cor existentes (`#2e6b8a`, `#e8f0f8`, `--surface`, etc.) — sem cores fora do design system
-- shadcn `Dialog`, `Popover`, `Calendar`, `Checkbox`, `Input`, `Select`, `Button` já instalados
-- `date-fns` já no projeto para formatação
-- Acessibilidade: `aria-label` no botão de cada dia ("12 de abril — 2 plantões"), foco visível, modal com `aria-describedby`
-- Bolinhas multi-color: gerar `background: conic-gradient(...)` dinâmico em função das cores das regras do dia
-- Tema escuro: card usa `var(--surface)` e texto `var(--text-dark)` para manter legibilidade já corrigida em iterações anteriores
+- `EscalaRegra` ganha `minutoInicio?: number` (opcional para não quebrar dados salvos). Loader normaliza `?? 0` ao ler.
+- `<input type="time" step="60">` retorna `"HH:MM"`; helpers `parseHHMM` / `formatHHMM` no próprio componente.
+- Render da meia-lua: `clip-path: inset(0 0 50% 0)` aplicado a um anel colorido absoluto dentro da célula (`h-10 w-10`).
+- Z-index: continuação fica atrás do anel de início, para o caso de coexistirem no mesmo dia.
+- Algoritmo continua puro frontend, sem mudanças de storage além do campo novo opcional.
 
 ## Fora do escopo
 
-- Não mexe em `/calendario` (continua sendo a tela detalhada de Dejem/Delegada com cálculo de valores)
-- Não sincroniza com backend
-- Não gera notificações para os plantões cadastrados (pode ser próximo passo)
+- Notificações de início/fim de plantão.
+- Exibição em formato semanal/agenda.
+- Edição de regra direto pelo card (continua só criar + remover).
