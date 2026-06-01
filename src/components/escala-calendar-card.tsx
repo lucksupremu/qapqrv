@@ -373,12 +373,20 @@ export function EscalaCalendarCard() {
               </button>
             </div>
           ))}
+          <button
+            onClick={() => setModalOpen(true)}
+            className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-[12px] font-bold transition active:scale-[0.98]"
+            style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
+          >
+            <Plus size={14} /> Cadastrar outra escala
+          </button>
         </div>
       ) : (
         <p className="mt-3 border-t pt-3 text-center text-[12px] text-muted-foreground" style={{ borderColor: COR_BG_SOFT }}>
           Nenhuma escala cadastrada. Toque em <strong>Configurar</strong> para começar.
         </p>
       )}
+
 
       <EscalaConfigModal
         open={modalOpen}
