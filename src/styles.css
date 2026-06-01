@@ -58,10 +58,17 @@
   --success: #0d8a3c;
   --danger: #c81d1d;
 
+  /* Accent dourado derivado do logo — usado nos blocos secundários */
+  --accent-gold: #c9a23a;
+  --accent-gold-dark: #8a6e1f;
+  --accent-gold-light: #e6c66b;
+
   --gradient-primary: linear-gradient(135deg, #1a5276 0%, #3498db 100%);
+  --gradient-gold: linear-gradient(135deg, #8a6e1f 0%, #e6c66b 100%);
   --gradient-surface: linear-gradient(180deg, #ffffff 0%, #eef4f9 100%);
   --gradient-header: linear-gradient(180deg, #edf2f7 0%, #d5e3ee 100%);
   --shadow-glow: 0 0 32px -10px rgba(26, 82, 118, 0.45);
+  --shadow-glow-gold: 0 0 28px -10px rgba(201, 162, 58, 0.55);
   --shadow-elegant: 0 8px 28px -14px rgba(15, 48, 69, 0.3), 0 2px 8px -3px rgba(15, 48, 69, 0.15);
   --shadow-card: 0 4px 20px -10px rgba(15, 48, 69, 0.22);
 
@@ -114,10 +121,16 @@
   --success: #22c55e;
   --danger: #ef4444;
 
+  --accent-gold: #d4b14a;
+  --accent-gold-dark: #a07d22;
+  --accent-gold-light: #f0d27a;
+
   --gradient-primary: linear-gradient(135deg, #2e6b8a 0%, #4a90c2 100%);
+  --gradient-gold: linear-gradient(135deg, #a07d22 0%, #f0d27a 100%);
   --gradient-surface: linear-gradient(180deg, #15202e 0%, #0f1a26 100%);
   --gradient-header: linear-gradient(180deg, #0a1422 0%, #15202e 100%);
   --shadow-glow: 0 0 32px -10px rgba(74, 144, 194, 0.35);
+  --shadow-glow-gold: 0 0 28px -10px rgba(212, 177, 74, 0.45);
   --shadow-elegant: 0 8px 28px -14px rgba(0, 0, 0, 0.7), 0 2px 8px -3px rgba(0, 0, 0, 0.45);
   --shadow-card: 0 4px 20px -10px rgba(0, 0, 0, 0.6);
 
