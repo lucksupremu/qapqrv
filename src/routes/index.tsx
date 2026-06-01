@@ -19,6 +19,7 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
+import { useIsNative } from "@/hooks/use-is-native";
 import appLogo from "@/assets/app-logo.png";
 
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
@@ -58,6 +59,7 @@ function HomeScreen() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
+  const native = useIsNative();
 
   useEffect(() => {
     setMarcas(loadMarcas());
@@ -109,7 +111,13 @@ function HomeScreen() {
         window.open(url, "_blank", "noopener,noreferrer");
       }
       setTimeout(() => {
-        void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
+        // Salvar offline só faz sentido no APK (no web o fetch da intranet
+        // bate em CORS e a função não consegue persistir o PDF).
+        if (isNativeApp()) {
+          void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
+        } else {
+          setConsultando(false);
+        }
       }, 0);
     }, `a escala #${id}`).finally(() => {
       // se o guard recusou (toast), libera o botão
