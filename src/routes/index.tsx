@@ -479,7 +479,6 @@ function VpnBadge() {
             </p>
           </div>
         </div>
-        {/* Mensagem de ação passo a passo */}
         <div className="flex items-start gap-2 rounded-lg bg-amber-600/10 px-3 py-2">
           <Info size={16} className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-300" />
           <p className="text-[12px] leading-relaxed text-amber-800 dark:text-amber-200">
@@ -514,47 +513,51 @@ function VpnBadge() {
     );
   }
 
-  // unknown (web) ou checking: lembrete passivo
+  // status === "unknown" (web/iOS sem plugin) ou "checking":
+  // não há detecção confiável no navegador — apenas orienta o usuário.
   return (
-    <div
-      className="mt-4 flex items-center gap-3 rounded-[14px] border px-4 py-3"
-      style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)" }}
-    >
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex h-10 w-10 shrink-0 cursor-help items-center justify-center rounded-full bg-amber-500/15">
-            <ShieldCheck size={18} className="text-amber-600 dark:text-amber-400" />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          <p className="max-w-[200px]">
-            {status === "checking"
-              ? "Verificando se a intranet está acessível…"
-              : "Não foi possível confirmar o estado da VPN. Conecte o AnyConnect para garantir."}
+    <div className="mt-4 flex flex-col gap-3 rounded-[14px] border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+      <div className="flex items-start gap-3">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 cursor-help items-center justify-center rounded-full bg-amber-500/20">
+              <ShieldCheck size={18} className="text-amber-700 dark:text-amber-300" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="max-w-[220px]">
+              No navegador não é possível verificar a VPN automaticamente — conecte o AnyConnect
+              antes de consultar.
+            </p>
+          </TooltipContent>
+        </Tooltip>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-bold text-amber-800 dark:text-amber-200">
+            Conecte a VPN AnyConnect
           </p>
-        </TooltipContent>
-      </Tooltip>
-      <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
-          Precisa de VPN AnyConnect
-        </p>
-        <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--muted-fg)" }}>
-          {status === "checking" ? "Verificando…" : "Conecte antes de consultar a escala."}
-        </p>
+          <p className="text-[12px] font-medium leading-snug text-amber-700/90 dark:text-amber-300/90">
+            Para consultar escalas é necessário estar conectado à VPN da PMESP pelo Cisco
+            AnyConnect.
+          </p>
+        </div>
       </div>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={() => openAnyConnect()}
-            className="shrink-0 rounded-lg bg-amber-600 px-3 py-2 text-[12px] font-bold text-white shadow-sm active:scale-[0.97] hover:bg-amber-700"
-          >
-            Abrir
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          <p>Abre o app Cisco AnyConnect</p>
-        </TooltipContent>
-      </Tooltip>
+      <div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => openAnyConnect()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-[12px] font-bold text-white shadow-sm active:scale-[0.97] hover:bg-amber-700"
+            >
+              <ShieldCheck size={14} />
+              Abrir AnyConnect
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p>Abre o Cisco AnyConnect (Android ou iOS)</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
     </div>
   );
 }
+
