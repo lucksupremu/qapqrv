@@ -144,28 +144,51 @@ export function EscalaCalendarCard() {
   const fmtDiaCurto = (d: Date) =>
     `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 
-  type BarSeg = { cor: string; lado: "cheia" | "esq" | "dir" };
-  const barrasDoDia = (entries: PlantaoEntry[], date: Date): BarSeg[] => {
-    const segs: BarSeg[] = [];
+  type Slot = {
+    kind: "plantao" | "marca";
+    cor: string;
+    lado: "cheia" | "top" | "bottom";
+    marcaTipo?: string;
+  };
+  type Coluna = { slots: Slot[] };
+
+  const colunasDoDia = (entries: PlantaoEntry[], marcasDay: Marca[], date: Date): Coluna[] => {
+    // Plantões → uma coluna por plantão (com dedupe cor+lado)
+    const colunas: Coluna[] = [];
+    const seen = new Set<string>();
     for (const e of entries) {
       const inicioSameDay = sameDay(e.inicio, date);
       const fimSameDay = sameDay(e.fim, date);
-      let lado: BarSeg["lado"];
+      let lado: Slot["lado"];
       if (inicioSameDay && fimSameDay) lado = "cheia";
-      else if (inicioSameDay && !fimSameDay) lado = "dir";
-      else if (!inicioSameDay && fimSameDay) lado = "esq";
+      else if (inicioSameDay && !fimSameDay) lado = "bottom"; // noturno começa aqui
+      else if (!inicioSameDay && fimSameDay) lado = "top"; // continuação
       else lado = "cheia";
-      segs.push({ cor: e.regra.cor, lado });
-    }
-    // dedupe por cor+lado
-    const seen = new Set<string>();
-    return segs.filter((s) => {
-      const k = `${s.cor}-${s.lado}`;
-      if (seen.has(k)) return false;
+      const k = `${e.regra.cor}-${lado}`;
+      if (seen.has(k)) continue;
       seen.add(k);
-      return true;
-    });
+      colunas.push({ slots: [{ kind: "plantao", cor: e.regra.cor, lado }] });
+    }
+
+    // Marcas → tentam encaixar na metade livre de uma coluna de plantão
+    for (const mk of marcasDay) {
+      const d = new Date(mk.data);
+      const hora = Number.isNaN(d.getTime()) ? 12 : d.getHours();
+      const preferida: "top" | "bottom" = hora < 12 ? "top" : "bottom";
+      const oposta = preferida === "top" ? "bottom" : "top";
+      const cor = MARCA_COR[mk.tipo] ?? "#3498DB";
+      const slot: Slot = { kind: "marca", cor, lado: preferida, marcaTipo: mk.tipo };
+      const alvo = colunas.find(
+        (c) => c.slots.length === 1 && c.slots[0].kind === "plantao" && c.slots[0].lado === oposta,
+      );
+      if (alvo) alvo.slots.push(slot);
+      else colunas.push({ slots: [slot] });
+    }
+
+    return colunas;
   };
+
+
 
   const [openKey, setOpenKey] = useState<string | null>(null);
 
