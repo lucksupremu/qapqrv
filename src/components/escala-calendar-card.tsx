@@ -305,14 +305,17 @@ export function EscalaCalendarCard() {
                 style={{
                   color: !cell.inMonth
                     ? "#a8b5c2"
-                    : isToday
-                      ? COR_PRIMARY
-                      : "var(--text-dark, #02080d)",
-                  fontWeight: isToday || temAlgo ? 800 : 500,
+                    : temMarca
+                      ? "#1a1a1a"
+                      : isToday
+                        ? COR_PRIMARY
+                        : "var(--text-dark, #02080d)",
+                  fontWeight: isToday || temAlgo || temMarca ? 800 : 500,
                 }}
               >
                 {cell.date.getDate()}
               </span>
+
             </div>
           );
         })}
