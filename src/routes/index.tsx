@@ -219,7 +219,10 @@ function HomeScreen() {
   ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 
   return (
-    <div className="min-h-screen pb-8 text-slate-100" style={{ background: "#050b18", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div
+      className="min-h-screen pb-8 text-slate-900 dark:text-slate-100 bg-[#f1f5fb] dark:bg-[#050b18]"
+      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+    >
       {/* HEADER tático */}
       <header className="flex items-center justify-between px-5 pt-6 pb-3">
         <div className="flex items-center gap-3">
@@ -228,38 +231,48 @@ function HomeScreen() {
             <img
               src={appLogo}
               alt="QAP, QRV!"
-              className="relative h-11 w-11 rounded-full object-cover border border-amber-500/40"
+              className="relative h-11 w-11 rounded-full object-cover border border-amber-500/40 no-dark-filter"
             />
           </div>
           <div>
-            <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-white">
+            <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-slate-900 dark:text-white">
               QAP, QRV!
             </h1>
-            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-500">
+            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-500">
               Ferramentas Operacionais
             </span>
           </div>
         </div>
-        <button
-          aria-label="Menu"
-          onClick={() => setDrawerOpen(true)}
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/60 text-slate-300 transition active:scale-95"
-        >
-          <Menu size={22} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+            onClick={toggleTheme}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-amber-400 transition active:scale-95"
+          >
+            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            aria-label="Menu"
+            onClick={() => setDrawerOpen(true)}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300 transition active:scale-95"
+          >
+            <Menu size={22} />
+          </button>
+        </div>
       </header>
 
       {/* CONSULTA — card tático com glow dourado */}
       <section className="px-5 pt-2">
-        <div className="relative overflow-hidden rounded-[28px] border border-white/5 bg-gradient-to-br from-slate-900 to-slate-950 p-5">
+        <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white dark:border-white/5 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-5 shadow-sm dark:shadow-none">
           <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl" />
 
           <div className="mb-4 flex items-center justify-between">
             <label
               htmlFor="id-escala-input"
-              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"
+              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500"
             >
               Consulta Operacional
+
             </label>
             <InlineVpnChip />
           </div>
