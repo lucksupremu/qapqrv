@@ -10,10 +10,13 @@ import {
   X,
   Sun,
   Moon,
+  Download,
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { useIsNative } from "@/hooks/use-is-native";
+import { usePwaInstall } from "@/hooks/use-pwa-install";
+import { PwaInstallModal } from "@/components/pwa-install-modal";
 
 type Ctx = { open: boolean; setOpen: (v: boolean) => void };
 const DrawerCtx = createContext<Ctx | null>(null);
