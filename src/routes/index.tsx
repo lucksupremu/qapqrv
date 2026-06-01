@@ -545,7 +545,7 @@ function VpnDetailRow() {
       >
         <ShieldCheck size={12} className="text-white dark:text-red-100" />
         <span className="text-[10px] font-black uppercase tracking-wider text-white dark:text-red-50">
-          Conecte a VPN para acessar a intranet
+          Conectar VPN — acesso às escalas
         </span>
         <Info size={11} className="text-white/90 dark:text-red-100" />
       </button>
@@ -561,14 +561,14 @@ function VpnDetailRow() {
               className="inline-flex items-center gap-1.5 rounded-lg bg-red-700 px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-white active:scale-95 dark:bg-red-400 dark:text-red-950"
             >
               <ShieldCheck size={12} />
-              Abrir AnyConnect
+              Abrir Cisco AnyConnect
             </button>
             {isNative && (
               <button
                 onClick={refresh}
                 className="inline-flex items-center gap-1 rounded-lg border border-red-700 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-red-800 active:scale-95 dark:border-red-400/60 dark:bg-red-950 dark:text-red-50"
               >
-                Verificar
+                Verificar conexão
               </button>
             )}
           </div>
