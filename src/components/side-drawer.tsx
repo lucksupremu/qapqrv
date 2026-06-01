@@ -3,7 +3,6 @@ import {
   Home,
   Calendar,
   FolderDown,
-  Globe,
   Mail,
   Wallet,
   BookOpen,
