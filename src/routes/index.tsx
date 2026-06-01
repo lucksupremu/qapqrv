@@ -19,6 +19,7 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
+import appLogo from "@/assets/app-logo.png";
 
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
@@ -174,13 +175,21 @@ function HomeScreen() {
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
       {/* HEADER */}
       <header className="flex items-center justify-between px-4 pt-6 pb-2">
-        <div>
-          <h1 className="text-[32px] font-extrabold leading-none tracking-tight" style={{ color: "var(--text-dark)" }}>
-            QAP, QRV!
-          </h1>
-          <p className="mt-1 text-[12px] font-medium tracking-wide" style={{ color: "var(--muted-fg)" }}>
-            Escalas PMESP
-          </p>
+        <div className="flex items-center gap-3">
+          <img
+            src={appLogo}
+            alt="QAP, QRV! — Ferramentas Policiais"
+            className="h-14 w-14 rounded-2xl object-cover"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          />
+          <div>
+            <h1 className="text-[28px] font-extrabold leading-none tracking-tight" style={{ color: "var(--text-dark)" }}>
+              QAP, QRV!
+            </h1>
+            <p className="mt-1 text-[12px] font-medium tracking-wide" style={{ color: "var(--muted-fg)" }}>
+              Escalas PMESP
+            </p>
+          </div>
         </div>
         <button
           aria-label="Menu"
