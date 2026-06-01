@@ -205,114 +205,87 @@ function HomeScreen() {
   ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
-      {/* HEADER */}
-      <header className="flex items-center justify-between px-4 pt-6 pb-3">
+    <div className="min-h-screen pb-8 text-slate-100" style={{ background: "#050b18", fontFamily: "Inter, system-ui, sans-serif" }}>
+      {/* HEADER tático */}
+      <header className="flex items-center justify-between px-5 pt-6 pb-3">
         <div className="flex items-center gap-3">
-          <img
-            src={appLogo}
-            alt="QAP, QRV! — Ferramentas Policiais"
-            className="h-12 w-12 rounded-2xl object-cover"
-            style={{ boxShadow: "var(--shadow-card)" }}
-          />
-          <h1 className="text-[22px] font-extrabold leading-none tracking-tight" style={{ color: "var(--text-dark)" }}>
-            QAP, QRV!
-          </h1>
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-amber-500/25 blur-lg animate-pulse" />
+            <img
+              src={appLogo}
+              alt="QAP, QRV!"
+              className="relative h-11 w-11 rounded-full object-cover border border-amber-500/40"
+            />
+          </div>
+          <div>
+            <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-white">
+              QAP, QRV!
+            </h1>
+            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-500">
+              Central de Comando
+            </span>
+          </div>
         </div>
         <button
           aria-label="Menu"
           onClick={() => setDrawerOpen(true)}
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border transition active:scale-95"
-          style={{ background: "var(--surface-2)", color: "var(--primary-light)", borderColor: "var(--border-soft)" }}
+          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/60 text-slate-300 transition active:scale-95"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
       </header>
 
-      {/* CONSULTA DE ESCALA — layout compacto, label fora do campo */}
-      <section
-        className="mx-4 mt-2 rounded-[20px] border bg-[#ffffff] p-4"
-        style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
-      >
-        <label
-          htmlFor="id-escala-input"
-          className="block text-[11px] font-semibold uppercase tracking-wider"
-          style={{ color: "var(--primary)" }}
-        >
-          Consultar escala
-        </label>
+      {/* CONSULTA — card tático com glow dourado */}
+      <section className="px-5 pt-2">
+        <div className="relative overflow-hidden rounded-[28px] border border-white/5 bg-gradient-to-br from-slate-900 to-slate-950 p-5">
+          <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl" />
 
-        <div className="mt-2 flex items-stretch gap-2">
-          <div
-            className="flex flex-1 items-center gap-2 rounded-[12px] border px-3"
-            style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)", height: 46 }}
-          >
-            <Search size={16} style={{ color: "var(--primary-light)" }} />
-            <input
-              id="id-escala-input"
-              inputMode="numeric"
-              placeholder="ID da escala"
-              value={idEscala}
-              onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
-              onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-              className="w-full bg-transparent text-[15px] font-semibold outline-none placeholder:font-normal"
-              style={{ color: "var(--text-dark)" }}
-            />
-          </div>
-          <button
-            onClick={handleConsultar}
-            disabled={consultando}
-            aria-label="Consultar"
-            className="flex h-[46px] items-center justify-center gap-2 rounded-[12px] px-4 font-bold text-white transition active:scale-[0.97] disabled:opacity-70"
-            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-          >
-            {consultando ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
-          </button>
-        </div>
-
-        <VpnBadge />
-      </section>
-
-      {/* GRID DE BLOCOS DE AÇÃO */}
-      <section className="mx-4 mt-4">
-        <h2 className="mb-3 text-[14px] font-bold uppercase tracking-wider" style={{ color: "var(--primary)" }}>
-          Acesso rápido
-        </h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {blocos.map((b) => (
-            <button
-              key={b.label}
-              onClick={b.onClick}
-              className="flex aspect-square flex-col items-center justify-center gap-3 rounded-[20px] border bg-[#ffffff] p-3 transition active:scale-[0.98]"
-              style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
+          <div className="mb-4 flex items-center justify-between">
+            <label
+              htmlFor="id-escala-input"
+              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"
             >
-              <div
-                className="flex h-[60px] w-[60px] items-center justify-center rounded-full text-white"
-                style={{ background: b.gradient, boxShadow: b.shadow }}
-              >
-                <b.icon size={28} />
-              </div>
-              <span
-                className="text-center text-[13px] font-bold leading-tight whitespace-pre-line"
-                style={{ color: "var(--text-dark)" }}
-              >
-                {b.label}
-              </span>
+              Consulta Operacional
+            </label>
+            <InlineVpnChip />
+          </div>
+
+          <div className="relative flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                id="id-escala-input"
+                inputMode="numeric"
+                placeholder="Insira o ID da Escala"
+                value={idEscala}
+                onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
+                onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
+                className="w-full rounded-2xl border border-slate-800/80 bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-white placeholder:font-normal placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
+              />
+            </div>
+            <button
+              onClick={handleConsultar}
+              disabled={consultando}
+              aria-label="Consultar"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-black shadow-lg shadow-amber-500/20 transition active:scale-95 disabled:opacity-70"
+            >
+              {consultando ? <Loader2 size={20} className="animate-spin" strokeWidth={3} /> : <ArrowRight size={20} strokeWidth={3} />}
             </button>
-          ))}
+          </div>
+
+          <VpnDetailRow />
         </div>
       </section>
 
       {/* PRÓXIMAS ESCALAS */}
-      <section className="mx-4 mt-6">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: "var(--primary)" }}>
-            Próximas escalas
+      <section className="px-5 mt-6">
+        <div className="mb-3 flex items-center justify-between px-1">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+            Próximas Escalas
           </h2>
           <button
             onClick={() => navigate({ to: "/calendario" })}
-            className="text-[12px] font-bold"
-            style={{ color: "var(--primary)" }}
+            className="text-[10px] font-bold uppercase tracking-wider text-amber-500"
           >
             Ver tudo →
           </button>
@@ -329,18 +302,13 @@ function HomeScreen() {
 
           if (proximas.length === 0) {
             return (
-              <div
-                className="flex items-center gap-3 rounded-[16px] border bg-[#ffffff] p-4"
-                style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
-              >
-                <Calendar size={22} style={{ color: "var(--muted-fg)" }} />
-                <div className="flex-1">
-                  <p className="text-[13px] font-bold" style={{ color: "var(--text-dark)" }}>
-                    Nenhuma escala agendada
-                  </p>
-                  <p className="text-[12px]" style={{ color: "var(--muted-fg)" }}>
-                    Toque em "Ver tudo" para criar uma marcação.
-                  </p>
+              <div className="flex items-center gap-4 rounded-3xl border border-slate-800 bg-slate-900/30 p-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800 bg-[#020617]">
+                  <Calendar size={18} className="text-slate-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-bold text-slate-300">Sem escalas próximas</p>
+                  <p className="text-[11px] text-slate-600">Toque em "Ver tudo" para configurar.</p>
                 </div>
               </div>
             );
@@ -372,23 +340,18 @@ function HomeScreen() {
                 const d = new Date(m.data);
                 const diasFalta = Math.round((startOfDay(d) - today0) / 86400000);
                 const label =
-                  diasFalta === 0
-                    ? "Hoje"
-                    : diasFalta === 1
-                      ? "Amanhã"
-                      : `Em ${diasFalta} dias`;
+                  diasFalta === 0 ? "Hoje" : diasFalta === 1 ? "Amanhã" : `Em ${diasFalta} dias`;
                 const cor = TIPO_COR[m.tipo] ?? "#5b7a8f";
                 return (
                   <li
                     key={m.id}
                     onClick={() => navigate({ to: "/calendario" })}
-                    className="flex cursor-pointer overflow-hidden rounded-[14px] border bg-[#ffffff] transition active:scale-[0.99]"
-                    style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
+                    className="flex cursor-pointer overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 transition active:scale-[0.99]"
                   >
                     <div className="w-1.5 shrink-0" style={{ background: cor }} />
                     <div className="flex flex-1 items-center gap-3 p-3">
                       <div
-                        className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-[12px] text-white"
+                        className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl text-white"
                         style={{ background: cor }}
                       >
                         <span className="text-[16px] font-bold leading-none">
@@ -398,14 +361,11 @@ function HomeScreen() {
                           {d.toLocaleString("pt-BR", { month: "short" }).replace(".", "")}
                         </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className="truncate text-[14px] font-bold"
-                          style={{ color: "var(--text-dark)" }}
-                        >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[14px] font-bold text-slate-100">
                           {TIPO_LABEL[m.tipo] ?? "Escala"}
                         </p>
-                        <p className="text-[12px]" style={{ color: "var(--muted-fg)" }}>
+                        <p className="text-[12px] text-slate-500">
                           {d.toLocaleString("pt-BR", {
                             day: "2-digit",
                             month: "2-digit",
@@ -418,10 +378,10 @@ function HomeScreen() {
                         </p>
                       </div>
                       <span
-                        className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold"
+                        className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
                         style={{
-                          background: diasFalta <= 1 ? cor : "var(--surface-2)",
-                          color: diasFalta <= 1 ? "#fff" : "var(--text-dark)",
+                          background: diasFalta <= 1 ? cor : "#0f172a",
+                          color: diasFalta <= 1 ? "#fff" : "#cbd5e1",
                         }}
                       >
                         {label}
@@ -435,22 +395,93 @@ function HomeScreen() {
         })()}
       </section>
 
+      {/* ACESSO RÁPIDO — grid tático */}
+      <section className="px-5 mt-6">
+        <div className="mb-4 flex items-center justify-between px-1">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+            Acesso Rápido
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {blocos.map((b, i) => {
+            const gold = i % 2 === 0;
+            return (
+              <button
+                key={b.label}
+                onClick={b.onClick}
+                className="group flex flex-col items-start gap-3 rounded-3xl border border-white/5 bg-slate-900/40 p-4 text-left transition-all hover:bg-slate-900/70 active:scale-95"
+              >
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
+                    gold
+                      ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                      : "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                  }`}
+                >
+                  <b.icon size={20} strokeWidth={2} />
+                </div>
+                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-200 whitespace-pre-line">
+                  {b.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="mt-8 text-center">
         <button
           onClick={() => navigate({ to: "/privacidade" })}
-          className="text-[13px] underline"
-          style={{ color: "var(--muted-fg)" }}
+          className="text-[11px] uppercase tracking-wider text-slate-600 underline underline-offset-4 decoration-slate-800"
         >
           Política de Privacidade
         </button>
       </footer>
-
     </div>
   );
 }
 
-function VpnBadge() {
+function InlineVpnChip() {
+  const [status, setStatus] = useState<"checking" | "on" | "off" | "unknown">("checking");
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const { isVpnActive } = await import("@/lib/vpn-status");
+      const r = await isVpnActive();
+      if (!active) return;
+      setStatus(r === null ? "unknown" : r ? "on" : "off");
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (status === "checking") {
+    return (
+      <div className="flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-900/60 px-2.5 py-1">
+        <Loader2 size={10} className="animate-spin text-slate-500" />
+        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Verificando</span>
+      </div>
+    );
+  }
+  if (status === "on") {
+    return (
+      <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400">VPN Ativa</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1">
+      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+      <span className="text-[9px] font-black uppercase tracking-wider text-amber-400">VPN Off</span>
+    </div>
+  );
+}
+
+function VpnDetailRow() {
   const isNative = useIsNative();
   const [status, setStatus] = useState<"checking" | "on" | "off" | "unknown">("checking");
   const [expanded, setExpanded] = useState(false);
@@ -473,67 +504,39 @@ function VpnBadge() {
     };
   }, []);
 
-  // VPN ativa: chip verde fininho.
-  if (status === "on") {
-    return (
-      <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-        </span>
-        <span className="text-[12px] font-semibold text-emerald-700 dark:text-emerald-300">
-          VPN ativa
-        </span>
-      </div>
-    );
-  }
+  if (status === "on" || status === "checking") return null;
 
-  // Estado de verificação: chip neutro.
-  if (status === "checking") {
-    return (
-      <div className="mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5" style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)" }}>
-        <Loader2 size={12} className="animate-spin" style={{ color: "var(--muted-fg)" }} />
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-fg)" }}>
-          Verificando VPN…
-        </span>
-      </div>
-    );
-  }
-
-  // off / unknown: chip clicável que expande detalhes + ação.
-  const isOff = status === "off";
   return (
     <div className="mt-3">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 transition active:scale-[0.98]"
+        className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/5 px-3 py-1.5 transition active:scale-[0.98]"
         aria-expanded={expanded}
       >
-        <ShieldCheck size={14} className="text-amber-700 dark:text-amber-300" />
-        <span className="text-[12px] font-semibold text-amber-800 dark:text-amber-200">
-          {isOff ? "VPN desconectada" : "Conecte a VPN"}
+        <ShieldCheck size={12} className="text-amber-400" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">
+          Conecte a VPN para acessar a intranet
         </span>
-        <Info size={12} className="text-amber-700/70 dark:text-amber-300/70" />
+        <Info size={11} className="text-amber-400/70" />
       </button>
 
       {expanded && (
-        <div className="mt-2 flex flex-col gap-2 rounded-[12px] border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 animate-fade-in">
-          <p className="text-[12px] leading-snug text-amber-800 dark:text-amber-200">
-            Abra o Cisco AnyConnect, toque em <span className="font-semibold">Conectar</span> e
-            aguarde o cadeado verde. Depois volte aqui.
+        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 animate-fade-in">
+          <p className="text-[11px] leading-snug text-amber-200/90">
+            Abra o Cisco AnyConnect, toque em <span className="font-bold">Conectar</span> e aguarde o cadeado verde.
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => openAnyConnect()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-[12px] font-bold text-white shadow-sm active:scale-[0.97] hover:bg-amber-700"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-black active:scale-95"
             >
-              <ShieldCheck size={13} />
+              <ShieldCheck size={12} />
               Abrir AnyConnect
             </button>
             {isNative && (
               <button
                 onClick={refresh}
-                className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 px-3 py-1.5 text-[12px] font-semibold text-amber-800 dark:text-amber-200 transition active:scale-[0.97] hover:bg-amber-500/20"
+                className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-300 active:scale-95"
               >
                 Verificar
               </button>
@@ -544,5 +547,6 @@ function VpnBadge() {
     </div>
   );
 }
+
 
 
