@@ -238,7 +238,7 @@ function HomeScreen() {
             <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-slate-900 dark:text-white">
               QAP, QRV!
             </h1>
-            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-500">
+            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-500">
               Ferramentas Operacionais
             </span>
           </div>
