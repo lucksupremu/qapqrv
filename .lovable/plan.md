@@ -1,47 +1,88 @@
 ## Objetivo
 
-Trocar a barra fina embaixo do número por uma **faixa colorida translúcida que cobre o dia inteiro** (estilo Google Agenda) — o número continua visível por cima. Plantão diurno = faixa cheia. Plantão noturno = metade direita no dia de início + metade esquerda no dia seguinte.
+Hoje a **marca** (Dejem/Delegada) é desenhada como um post-it amarelo que **cobre o dia inteiro** e some por baixo qualquer faixa de plantão. A pedido: a marca passa a ocupar **apenas a metade livre** da barra vertical, escolhida a partir do **horário** dela, ficando lado a lado (ou empilhada) com a faixa do plantão. O visual de **post-it amarelo** continua, só que aplicado **apenas ao slot da marca**, para continuar fácil de identificar.
+
+Também garantir que toda marca cadastrada em qualquer tela (esta ou a tela de marcação `/historico` etc.) seja refletida aqui — isso já acontece via `loadMarcas()` + listener de `storage`/`focus`, então só precisa continuar funcionando após o refactor.
 
 ---
 
-## Mudanças em `src/components/escala-calendar-card.tsx`
+## Como decidir a metade que a marca ocupa
 
-1. **Substituir a barra fina** (atualmente `height: 3` posicionada `bottom: 3`) por uma **faixa translúcida que cobre toda a célula** atrás do número:
-   - Altura: ocupa a célula inteira (`inset: 2px` para respirar nas bordas).
-   - Cor: a cor da regra com **~28% de opacidade** (`color-mix(in srgb, <cor> 28%, transparent)`), para não competir com o número.
-   - Borda esquerda colorida sólida (3px) para reforçar a cor da escala, estilo Google Agenda.
-   - Cantos arredondados (`borderRadius: 6px`).
-   - `z-index` abaixo do número (que já é `relative`).
+Para cada marca do dia, classificar pelo **horário** (`new Date(marca.data).getHours()`):
 
-2. **Geometria da faixa por tipo**:
-   - `cheia` (plantão começa e termina no mesmo dia): cobre 100% da largura.
-   - `dir` (plantão noturno, começa neste dia, termina no próximo): cobre da metade até a direita (`left: 50%; right: 2px`), borda colorida do lado esquerdo da faixa.
-   - `esq` (continuação no dia seguinte do plantão noturno): cobre do início até a metade (`left: 2px; right: 50%`), borda colorida do lado esquerdo.
-   - Para meias-faixas, arredondar só o lado externo (lado direito de `dir` e lado esquerdo de `esq`) e deixar o lado interno reto, para sugerir "continua".
+- Hora < 12 → **metade superior** (manhã)
+- Hora ≥ 12 → **metade inferior** (tarde/noite)
 
-3. **Múltiplos plantões no mesmo dia**:
-   - Empilhar até 2 faixas verticalmente (cada uma ocupa metade da altura da célula), usando `top: 2/8/...` calculado.
-   - Se houver mais que 2, mostrar o "+N" pequeno no canto inferior direito (já existe lógica de `extras`).
+Em seguida, comparar com as faixas de plantão do mesmo dia:
 
-4. **Ajustes visuais relacionados**:
-   - Remover o fundo `rgba(0,0,0,0.06)` que servia de "trilho" da meia-barra antiga.
-   - O destaque de "hoje" continua sendo o círculo `COR_BG_SOFT` quando não há plantão.
-   - Quando houver post-it amarelo (Dejem/Delegada), a faixa colorida fica **por trás** do post-it (post-it sobrepõe). O número volta a usar a cor escura (já é).
-   - Aumentar o `font-weight` do número para `800` quando houver faixa (já é) e garantir contraste — número em `#1a1a1a` em vez de azul quando há faixa por baixo.
+| Plantão no dia                                      | Marca pela manhã (top) | Marca à tarde (bottom) |
+| --------------------------------------------------- | ---------------------- | ---------------------- |
+| `cheia` (dia inteiro)                               | empilha ao lado (coluna nova) | empilha ao lado (coluna nova) |
+| `dir` (noturno começa hoje, ocupa metade inferior)  | **top livre** → ocupa top | conflito → coluna nova |
+| `esq` (continuação de noturno, ocupa metade superior)| conflito → coluna nova | **bottom livre** → ocupa bottom |
+| sem plantão                                          | ocupa top              | ocupa bottom           |
 
-5. **Legenda** (rodapé do calendário): atualizar os 3 exemplos para mostrar a faixa translúcida em vez da barrinha fina:
-   - `[▮▮▮▮]` faixa cheia → "Plantão no dia"
-   - `[  ▮▮]` meia direita → "Início noturno"
-   - `[▮▮  ]` meia esquerda → "Continuação"
+Quando há conflito direto (mesma metade ocupada), a marca vira **uma coluna vertical extra** à direita das faixas de plantão, seguindo o mesmo esquema horizontal de múltiplos plantões que já existe (`slotW = cellW / total`).
 
-## Detalhes técnicos
+Limite visual: no máximo 3 colunas (plantões + marcas). O excedente continua agregado pelo contador `+N` no canto inferior direito (lógica de `extras` já existe — só estender para contar marcas).
 
-- Único arquivo alterado: `src/components/escala-calendar-card.tsx`.
-- Reescrever o bloco JSX das barras dentro do `cellInner` (sem mexer em `barrasDoDia`, que já retorna `{cor, lado}`).
-- Continuar usando `color-mix` em CSS inline (suportado em todos os browsers modernos onde o app já roda).
-- Sem mudanças no popover, no algoritmo de plantões ou no storage.
+---
+
+## Visual do slot da marca (post-it preservado)
+
+Cada slot de marca renderiza como um retângulo vertical com:
+
+- **Fundo amarelo** `#FFE066` (mesma cor do post-it atual)
+- **Sombra** `0 2px 4px rgba(0,0,0,0.25)` (idem)
+- Leve rotação `rotate(-3deg)` para manter o "feel" de post-it
+- **Borda superior 3px sólida** na cor do tipo (`MARCA_COR[tipo]` — azul Dejem / verde ou laranja Delegada), reforçando a identificação
+- Bolinha colorida 6px no canto superior direito do slot (como hoje)
+- `borderRadius` 4px
+
+A faixa de plantão ao lado mantém o visual translúcido vertical já implementado.
+
+O número do dia continua em `zIndex: 1`, por cima de tudo, com cor `#1a1a1a` quando há plantão ou marca.
+
+---
+
+## Múltiplas marcas no mesmo dia
+
+- 2 marcas no mesmo dia sem plantão → uma no top, uma no bottom (se horários permitirem); se ambas no mesmo período, uma vira coluna extra.
+- 2 marcas no mesmo dia com plantão cheio → uma coluna extra (a 1ª) + `+1` no canto.
+- A bolinha do canto superior direito vira a cor da **última marca renderizada visível** (sem perder informação porque o popover mostra todas).
+
+---
+
+## Popover (clique no dia)
+
+O popover já lista plantões e marcas separadamente. Apenas garantir que:
+
+- A seção de marcas mostre **horário** (hora:minuto) ao lado do tipo, para o usuário entender por que a marca foi posicionada em cima ou embaixo.
+- Ordem: plantões primeiro, marcas depois (sem mudança estrutural).
+
+---
+
+## Sincronização com outras telas
+
+Já existem listeners de `storage` (chave `marcas_atividade_d`) e `focus`/`visibilitychange` no `useEffect` do `EscalaCalendarCard`. Confirmar que:
+
+- Após salvar uma marca em qualquer modal `MarcarModal` (em qualquer rota), o `localStorage` é atualizado.
+- Ao voltar para a tela com o calendário, o listener de `focus`/`visibilitychange` chama `loadMarcas()` e re-renderiza.
+
+Nenhuma mudança de dados é necessária — só validar o fluxo após o refactor visual.
+
+---
+
+## Mudanças técnicas (só `src/components/escala-calendar-card.tsx`)
+
+1. Substituir o bloco do post-it (linhas ~254-281) que cobre `inset: 4`. O post-it deixa de ser fundo da célula inteira.
+2. Estender `barrasDoDia` (ou criar `slotsDoDia`) para devolver uma lista unificada de slots verticais `{ tipo: "plantao" | "marca", cor: string, lado: "top" | "bottom" | "cheia", marcaTipo?: TipoMarca }`, aplicando a tabela de conflito acima.
+3. No render dos slots, renderizar cada item como antes (faixa translúcida com borda superior colorida) **ou** como post-it amarelo quando `tipo === "marca"`.
+4. Atualizar `extras` para incluir marcas que não couberam.
+5. Atualizar a legenda no rodapé adicionando um exemplo do post-it amarelo: "Dejem/Delegada".
 
 ## Fora do escopo
 
-- Mostrar texto (nome do local) dentro da faixa — a célula é muito pequena (40×40) e isso brigaria com o número.
-- Mudar a altura da célula do calendário.
+- Mudar tamanho da célula.
+- Editar/remover a marca diretamente pelo calendário (segue só pela tela de marcação).
+- Sobrescrever a lógica de `gerarPlantoesDoMes` ou o storage de marcas.
