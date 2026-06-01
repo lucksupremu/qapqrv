@@ -1,50 +1,39 @@
-# Plano: APK 100% offline (SPA estática)
+## Botão "Manual" + página de manual detalhado
 
-Converter o projeto de TanStack Start (SSR no Cloudflare) para uma SPA estática pura, gerando `dist/` pronto para o Capacitor empacotar no APK.
+### O que será criado
+Um novo botão **"Manual"** na tela inicial (e no menu lateral) que abre uma página com um manual completo, escrito em linguagem simples para usuários leigos, explicando passo a passo cada função do app.
 
-## Mudanças no build
+### Conteúdo do manual (seções)
+1. **Boas-vindas** — para que serve o app QAP, QRV!.
+2. **Primeiros passos** — instalar como APK/PWA, abrir, permissões.
+3. **Tela inicial** — explicação de cada bloco:
+   - Marcar / Desmarcar Dejem/Delegada
+   - Email iNotes
+   - Calendário
+   - Escalas baixadas (somente APK)
+   - Guia AnyConnect
+   - Folha de Pagamento
+   - Campo de consulta de escala por ID
+4. **VPN AnyConnect** — por que é necessária, como conectar passo a passo, como abrir pelo botão do app.
+5. **Calendário e marcações** — como adicionar, editar e remover plantões; como funciona o histórico.
+6. **Escalas baixadas (APK)** — onde ficam, como reabrir offline.
+7. **Folha de Pagamento** — como acessar e dicas de login.
+8. **Email iNotes** — como acessar.
+9. **Ferramentas** — Consulta de Escala e Minha Localização.
+10. **Tema claro/escuro** — como alternar.
+11. **Menu lateral** — atalhos disponíveis.
+12. **Privacidade e dados** — onde ficam os dados (somente no aparelho) e link para a política.
+13. **Solução de problemas** — "página não abre", "VPN não conecta", "iNotes fica carregando", "Folha abre em desktop", etc.
+14. **Contato/suporte** — orientação final.
 
-1. **Substituir `vite.config.ts`** — remover `@lovable.dev/vite-tanstack-config` (que injeta Nitro/SSR) e usar Vite puro com `@vitejs/plugin-react` + `@tanstack/router-plugin` em modo `file-based` gerando o `routeTree.gen.ts` igual hoje.
-2. **Remover SSR**: deletar `src/server.ts` e `src/start.ts`. Criar `index.html` na raiz + `src/main.tsx` (entry client) que monta `<RouterProvider router={getRouter()} />`.
-3. **Router em modo client**: `getRouter()` continua igual, mas removendo qualquer dependência de `createRootRouteWithContext` que use `HeadContent`/`Scripts`/`shellComponent` — esses são SSR-only. Migrar os metadados de `head()` do `__root.tsx` para tags fixas no `index.html` (title, meta, manifest, fonts, AdSense).
-4. **`__root.tsx`**: remover `shellComponent`, `HeadContent`, `Scripts`. Manter só `component`, `notFoundComponent`, `errorComponent`. Conteúdo do `<head>` vai todo para `index.html`.
-5. **Hash routing**: trocar history para `createHashHistory()` em `getRouter()` — necessário porque WebView do APK carrega `file://` e rotas `/calendario` não resolvem sem servidor. Todas as URLs viram `#/calendario`, `#/historico`, etc.
-6. **`build` script** no `package.json`: `vite build` passa a gerar `dist/` estático (já é o `webDir` do `capacitor.config.ts`).
+### Arquivos a criar/alterar
+- **Criar** `src/routes/manual.tsx` — nova rota `/manual` com layout consistente (header, dark mode, cards de seção, navegação por âncoras).
+- **Editar** `src/routes/index.tsx` — adicionar bloco "Manual" (ícone `BookOpenCheck` ou `HelpCircle`) que navega para `/manual`.
+- **Editar** `src/components/side-drawer.tsx` — adicionar item "Manual" no grupo de ajuda, junto ao "Guia AnyConnect".
 
-## Capacitor / APK
-
-7. Após o build, rodar localmente (não dá pra fazer aqui):
-   ```bash
-   npx cap add android
-   npx cap sync android
-   npx cap open android
-   ```
-8. Copiar manualmente `android-plugin/VpnStatusPlugin.kt` para `android/app/src/main/java/br/com/qapqrv/app/` e registrar no `MainActivity.java` com `registerPlugin(VpnStatusPlugin.class)`.
-9. No Android Studio: Build → Generate Signed APK.
-
-## Itens que serão removidos / desligados
-
-- SSR, server functions (não há nenhuma em uso — `src/lib/api/example.functions.ts` será removido).
-- `src/server.ts`, `src/start.ts`, `src/lib/error-page.ts`, `src/lib/error-capture.ts`, `src/lib/config.server.ts`.
-- Plugin Nitro do Vite (perdemos worker/Cloudflare — não usado no APK).
-
-## Itens preservados
-
-- Todas as rotas, componentes, hooks, lógica de escalas, marcas, calendário, plantões.
-- LocalStorage, IndexedDB (`idb-keyval`), plugins Capacitor (Preferences, Filesystem, InAppBrowser, VPN).
-- Tailwind, design tokens, framer-motion, todos os componentes UI.
-
-## Detalhes técnicos
-
-- **Hash routing**: TanStack Router suporta nativamente `createHashHistory()` de `@tanstack/history`. Links `<Link to="/calendario">` continuam funcionando — o router cuida da serialização para `#/calendario`.
-- **Meta tags por rota** (`head()` nas rotas filhas): no APK não importa SEO, então não precisamos do `HeadContent`. As páginas continuam definindo `head()` mas só o `title` será aplicado via pequeno hook `useEffect(() => { document.title = ... }, [])` em um wrapper, se necessário (opcional, fora deste plano inicial).
-- **AdSense**: o `<script>` continua sendo injetado lazy no `RootComponent` via `useEffect` — funciona em WebView com internet. Se quiser desligar Ads no APK, dá pra detectar `isNativeApp()` e pular.
-- **Fontes Google**: ficam carregadas via CDN no `index.html` — requer internet na primeira carga. Para offline real, precisaria baixar e embarcar as fontes (fora deste plano).
-- **Build dev (Lovable preview)**: o preview do Lovable continua funcionando como SPA — só perde SSR (não é problema para este app, todo conteúdo é client-side hoje).
-
-## Riscos
-
-- O preview do Lovable hoje roda via TanStack Start. Após a conversão, o preview continuará funcionando, mas como SPA pura — qualquer rota direta (`/calendario`) passa a precisar de fallback. O `index.html` único resolve em produção estática; no dev do Vite o `historyApiFallback` cuida disso automaticamente.
-- Se no futuro precisar de SEO/SSR de novo, dá pra reverter.
-
-Posso prosseguir?
+### Detalhes técnicos
+- Rota TanStack Start padrão `createFileRoute("/manual")` com `head()` (title + description SEO).
+- Estrutura semântica: `<h1>` único, `<section>` com `<h2>`, sumário no topo com links âncora `#secao`.
+- Usa tokens de tema existentes (`bg-[#f1f5fb] dark:bg-[#050b18]`, gradients `var(--gradient-primary)`).
+- Sem dependências novas; ícones do `lucide-react` já instalado.
+- Sem alteração de backend.

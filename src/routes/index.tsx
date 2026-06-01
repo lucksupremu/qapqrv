@@ -11,6 +11,7 @@ import {
   Mail,
   Wallet,
   BookOpen,
+  BookOpenCheck,
   FolderDown,
   Loader2,
   Search,
@@ -215,6 +216,13 @@ function HomeScreen() {
             ),
           "a Folha de Pagamento",
         ),
+    },
+    {
+      label: "Manual",
+      icon: BookOpenCheck,
+      gradient: GRAD_PRIMARY,
+      shadow: SHADOW_PRIMARY,
+      onClick: () => navigate({ to: "/manual" }),
     },
   ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 

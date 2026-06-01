@@ -13,6 +13,7 @@ import { Route as Char91indexChar93RouteImport } from './routes/[index]'
 import { Route as SplashRouteImport } from './routes/splash'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ManualRouteImport } from './routes/manual'
 import { Route as IntranetRouteImport } from './routes/intranet'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as HistoricoRouteImport } from './routes/historico'
@@ -43,6 +44,11 @@ const SobreRoute = SobreRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualRoute = ManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntranetRoute = IntranetRouteImport.update({
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
+  '/manual': typeof ManualRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
+  '/manual': typeof ManualRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
+  '/manual': typeof ManualRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/index'
     | '/inicio'
     | '/intranet'
+    | '/manual'
     | '/privacidade'
     | '/sobre'
     | '/splash'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/index'
     | '/inicio'
     | '/intranet'
+    | '/manual'
     | '/privacidade'
     | '/sobre'
     | '/splash'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/index'
     | '/inicio'
     | '/intranet'
+    | '/manual'
     | '/privacidade'
     | '/sobre'
     | '/splash'
@@ -219,6 +231,7 @@ export interface RootRouteChildren {
   Char91indexChar93Route: typeof Char91indexChar93Route
   InicioRoute: typeof InicioRoute
   IntranetRoute: typeof IntranetRoute
+  ManualRoute: typeof ManualRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
   SplashRoute: typeof SplashRoute
@@ -255,6 +268,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual': {
+      id: '/manual'
+      path: '/manual'
+      fullPath: '/manual'
+      preLoaderRoute: typeof ManualRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intranet': {
@@ -347,6 +367,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91indexChar93Route: Char91indexChar93Route,
   InicioRoute: InicioRoute,
   IntranetRoute: IntranetRoute,
+  ManualRoute: ManualRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
   SplashRoute: SplashRoute,
