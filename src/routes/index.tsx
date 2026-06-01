@@ -279,7 +279,7 @@ function HomeScreen() {
 
           <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               <input
                 id="id-escala-input"
                 inputMode="numeric"
@@ -287,8 +287,9 @@ function HomeScreen() {
                 value={idEscala}
                 onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
                 onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-                className="w-full rounded-2xl border border-slate-800/80 bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-white placeholder:font-normal placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
               />
+
             </div>
             <button
               onClick={handleConsultar}
