@@ -9,6 +9,21 @@ import {
   removeEscala,
   saveEscalas,
 } from "@/lib/escala-trabalho";
+import { loadMarcas, type Marca } from "@/lib/marcas";
+
+const MARCA_COR: Record<string, string> = {
+  dejem: "#3498DB",
+  delegada: "#2ECC71",
+  delegada_capital: "#2ECC71",
+  delegada_outras: "#E67E22",
+};
+const MARCA_LABEL: Record<string, string> = {
+  dejem: "Dejem",
+  delegada: "Delegada",
+  delegada_capital: "Delegada Cap.",
+  delegada_outras: "Delegada",
+};
+
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
