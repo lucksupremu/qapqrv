@@ -184,7 +184,7 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="primeiros-passos" titulo="2. Primeiros passos" icone={Download}>
+        <Bloco id="primeiros-passos" titulo="2. Primeiros passos" icone={Download} tom="blue">
           <SubTitulo>Instalando como aplicativo (Android — APK)</SubTitulo>
           <Lista ordenada>
             <li>Baixe o APK pelo link enviado.</li>
@@ -237,7 +237,7 @@ function ManualScreen() {
           </Dica>
         </Bloco>
 
-        <Bloco id="vpn" titulo="4. VPN AnyConnect" icone={ShieldCheck}>
+        <Bloco id="vpn" titulo="4. VPN AnyConnect" icone={ShieldCheck} tom="blue">
           <p>
             Quase todas as funções que acessam a <strong>intranet da PMESP</strong>
             (consulta de escala, marcar/desmarcar, folha de pagamento, iNotes)
@@ -292,7 +292,7 @@ function ManualScreen() {
           </Lista>
         </Bloco>
 
-        <Bloco id="consulta" titulo="6. Consulta de escala por ID" icone={Search}>
+        <Bloco id="consulta" titulo="6. Consulta de escala por ID" icone={Search} tom="blue">
           <Lista ordenada>
             <li>Conecte a VPN AnyConnect.</li>
             <li>
@@ -334,7 +334,7 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="escalas-baixadas" titulo="8. Escalas baixadas (APK)" icone={FolderDown}>
+        <Bloco id="escalas-baixadas" titulo="8. Escalas baixadas (APK)" icone={FolderDown} tom="blue">
           <p>
             Esta função aparece <strong>somente no APK instalado</strong>. Toda vez
             que você consulta uma escala pelo ID, o app salva uma cópia para acesso
@@ -368,7 +368,7 @@ function ManualScreen() {
           </Dica>
         </Bloco>
 
-        <Bloco id="inotes" titulo="10. Email iNotes" icone={Mail}>
+        <Bloco id="inotes" titulo="10. Email iNotes" icone={Mail} tom="blue">
           <Lista ordenada>
             <li>Conecte a VPN AnyConnect.</li>
             <li>
@@ -395,7 +395,7 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="tema" titulo="12. Tema claro / escuro" icone={Sun}>
+        <Bloco id="tema" titulo="12. Tema claro / escuro" icone={Sun} tom="blue">
           <Lista>
             <li>
               Toque no <strong>sol/lua</strong> no topo direito da tela inicial.
@@ -416,7 +416,7 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="privacidade" titulo="14. Privacidade e dados" icone={Lock}>
+        <Bloco id="privacidade" titulo="14. Privacidade e dados" icone={Lock} tom="blue">
           <p>
             Seus plantões, valores e histórico ficam guardados <strong>apenas no
             seu celular</strong>. O app não envia esses dados para nenhum servidor.
@@ -469,7 +469,7 @@ function ManualScreen() {
           </Lista>
         </Bloco>
 
-        <Bloco id="suporte" titulo="16. Suporte" icone={HelpCircle}>
+        <Bloco id="suporte" titulo="16. Suporte" icone={HelpCircle} tom="blue">
           <p>
             Encontrou um erro ou tem sugestão de melhoria? Procure o canal de
             contato divulgado junto com o app. Quanto mais detalhes você enviar
