@@ -289,9 +289,10 @@ export function EscalaCalendarCard() {
               <span
                 className="relative text-[13px]"
                 style={{
+                  zIndex: 1,
                   color: !cell.inMonth
                     ? "#a8b5c2"
-                    : temMarca
+                    : temAlgo || temMarca
                       ? "#1a1a1a"
                       : isToday
                         ? COR_PRIMARY
@@ -301,6 +302,7 @@ export function EscalaCalendarCard() {
               >
                 {cell.date.getDate()}
               </span>
+
 
               {/* Faixas de plantão (estilo Google Agenda) */}
               {barrasVisiveis.length > 0 && (
