@@ -77,7 +77,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
 
       let loaded = false;
       let closed = false;
-      let fallbackTimer: ReturnType<typeof window.setTimeout> | undefined;
+      let fallbackTimer: number | undefined;
       const removeHandles: Array<{ remove: () => Promise<void> }> = [];
 
       const cleanup = () => {
