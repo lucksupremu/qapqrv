@@ -504,9 +504,9 @@ function InlineVpnChip() {
     );
   }
   return (
-    <div className="flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-1">
-      <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-      <span className="text-[9px] font-black uppercase tracking-wider text-rose-400">VPN Off</span>
+    <div className="flex items-center gap-2 rounded-full border border-red-800 bg-red-700 px-2.5 py-1 dark:border-red-400/60 dark:bg-red-950">
+      <span className="h-1.5 w-1.5 rounded-full bg-white dark:bg-red-300" />
+      <span className="text-[9px] font-black uppercase tracking-wider text-white dark:text-red-50">VPN Off</span>
     </div>
   );
 }
@@ -540,25 +540,25 @@ function VpnDetailRow() {
     <div className="mt-3">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 transition active:scale-[0.98]"
+        className="inline-flex items-center gap-2 rounded-full border border-red-800 bg-red-700 px-3 py-1.5 shadow-sm transition active:scale-[0.98] dark:border-red-400/60 dark:bg-red-950"
         aria-expanded={expanded}
       >
-        <ShieldCheck size={12} className="text-rose-400" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-300">
+        <ShieldCheck size={12} className="text-white dark:text-red-100" />
+        <span className="text-[10px] font-black uppercase tracking-wider text-white dark:text-red-50">
           Conecte a VPN para acessar a intranet
         </span>
-        <Info size={11} className="text-rose-400/70" />
+        <Info size={11} className="text-white/90 dark:text-red-100" />
       </button>
 
       {expanded && (
-        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-3 py-2.5 animate-fade-in">
-          <p className="text-[11px] leading-snug text-rose-200/90">
+        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-red-700 bg-red-50 px-3 py-2.5 animate-fade-in dark:border-red-400/50 dark:bg-red-950/80">
+          <p className="text-[11px] font-semibold leading-snug text-red-950 dark:text-red-50">
             Abra o Cisco AnyConnect, toque em <span className="font-bold">Conectar</span> e aguarde o cadeado verde.
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => openAnyConnect()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-red-700 px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-white active:scale-95 dark:bg-red-400 dark:text-red-950"
             >
               <ShieldCheck size={12} />
               Abrir AnyConnect
@@ -566,7 +566,7 @@ function VpnDetailRow() {
             {isNative && (
               <button
                 onClick={refresh}
-                className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-rose-300 active:scale-95"
+                className="inline-flex items-center gap-1 rounded-lg border border-red-700 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-red-800 active:scale-95 dark:border-red-400/60 dark:bg-red-950 dark:text-red-50"
               >
                 Verificar
               </button>
