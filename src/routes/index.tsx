@@ -269,7 +269,7 @@ function HomeScreen() {
           <div className="mb-4 flex items-center justify-between">
             <label
               htmlFor="id-escala-input"
-              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500"
+              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-500"
             >
               Consulta escala dejem/delegada
 
