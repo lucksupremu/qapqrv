@@ -1,41 +1,86 @@
 ## Objetivo
 
-Refinar a tela `/anyconnect` para deixar o passo a passo mais dinâmico e fácil de seguir, mantendo as imagens existentes (passo-1 a passo-6) como referência visual, e adicionar um botão para copiar o endereço do servidor `extranet.policiamilitar.sp.gov.br`.
+Na tela `/inicio`, logo abaixo do grid de ferramentas, adicionar um **card de Calendário de Escala** inspirado no app "Plantão Fácil": mini calendário do mês com bolinhas coloridas marcando os plantões, navegação entre meses e um botão para o policial cadastrar sua escala de trabalho recorrente (12x24, 12x48, alternada etc.), com data inicial, data final e horário de início.
 
-## Alterações em `src/routes/anyconnect.tsx`
+A partir das regras cadastradas, o app gera automaticamente as datas e pinta os dias correspondentes no mini calendário, facilitando enxergar os dias livres para agendar Dejem ou Delegada.
 
-### 1. Reformular cada passo
-Trocar os textos longos por estrutura escaneável:
-- **Título curto** (ex.: "Abra o menu", "Vá em Configurações", "Mantenha o padrão", "Acesse PMESP", "Confira o servidor", "Preferências avançadas")
-- **Descrição enxuta** em 1 linha
-- **Chips/destaques** com os valores exatos a conferir (ex.: `Descrição: PMESP`, `Servidor: extranet…`, `Certificado: Desabilitado`, `Auth: EAP-AnyConnect`)
-- Ícone numerado grande (badge "1/6") sobreposto ao card
+## Modelo de dados (novo: `src/lib/escala-trabalho.ts`)
 
-### 2. Botão "Copiar servidor"
-- Aparece **sempre** num bloco fixo logo acima do carrossel (visível em todos os passos, já que é a informação-chave da configuração)
-- Também aparece em destaque dentro do passo 5 (onde o usuário digita o servidor)
-- Usa `navigator.clipboard.writeText("extranet.policiamilitar.sp.gov.br")`
-- Feedback visual: ícone troca de `Copy` para `Check` por ~2s + texto "Copiado!" (estado local `copied`)
-- Layout: caixa branca com label "Servidor", o endereço em fonte mono, e o botão à direita
+```ts
+type EscalaRegra = {
+  id: string;
+  local: string;          // "Polícia Militar", "Clínica", etc.
+  cor: string;            // hex da bolinha
+  trabalho: number;       // horas trabalhadas (ex: 12)
+  folga: number;          // horas de folga (ex: 24 / 48)
+  horaInicio: number;     // 0..23
+  dataInicial: string;    // ISO yyyy-mm-dd
+  dataFinal: string;      // ISO yyyy-mm-dd
+  alternada?: {           // segundo turno opcional (caso "Escala Alternada")
+    trabalho: number;
+    folga: number;
+    horaInicio: number;
+  };
+};
 
-### 3. Dinamismo / UX
-- **Swipe horizontal por toque**: adicionar handlers `onTouchStart/onTouchEnd` para trocar passo arrastando (threshold ~50px)
-- **Barra de progresso** fina acima dos dots (`width: ((step+1)/total)*100%`) com transição suave
-- **Animação de entrada** do texto a cada passo: fade + slide (`key={step}` num wrapper com classes utilitárias já existentes ou inline `animation`)
-- **Teclas ←/→** para navegar (listener em `useEffect`)
-- **Auto-scroll ao topo** do card ao trocar de passo
-- Botão "Próximo" vira "Abrir AnyConnect" no último passo (consolidando o CTA, em vez de duplicar com o botão fixo) — manter ainda o botão fixo inferior "Abrir AnyConnect" como já existe
+loadEscalas(): EscalaRegra[]      // localStorage chave "qap-escalas-trabalho"
+saveEscalas(list: EscalaRegra[])
+removeEscala(id: string)
 
-### 4. Acessibilidade
-- `aria-live="polite"` no bloco de texto do passo atual
-- `aria-label` no botão copiar incluindo estado ("Copiar endereço do servidor" / "Endereço copiado")
+// gerador puro: dado um mês, devolve { date: Date, plantoes: EscalaRegra[] }
+gerarPlantoesDoMes(regras: EscalaRegra[], year: number, month: number)
+```
 
-## Sem mudanças
-- Imagens (`passo-1.jpg` a `passo-6.jpg`) permanecem as mesmas
-- `openAnyConnect` e botão fixo inferior continuam iguais
-- Sem novas dependências, sem mudanças de rota/backend
+Algoritmo: a partir de `dataInicial + horaInicio`, soma sucessivamente `(trabalho + folga)` horas até passar de `dataFinal`. Cada início que caia em dia do mês exibido marca esse dia com a cor da regra. Para escala alternada, intercala turno A e turno B.
+
+## Novo componente: `src/components/escala-calendar-card.tsx`
+
+Estrutura visual (segue a foto de referência, adaptada ao tema do app):
+
+- Card branco arredondado com sombra suave
+- Header: `‹  Mês AAAA  ›` (navegação por mês) + botão "Hoje"
+- Linha de dias da semana (DOM SEG TER QUA QUI SEX SAB)
+- Grid 7×6 de dias:
+  - Dia sem plantão → número simples
+  - Dia com 1 plantão → número dentro de círculo na cor do `local`
+  - Dia com 2+ plantões → círculo com gradiente cônico segmentado nas cores dos locais (visual de "donut multi-color" da imagem)
+  - Dia de hoje → realce com fundo suave + número em negrito
+- Legenda compacta abaixo do grid: bolinha + `Local · Trabalho×Folga · Hora` para cada regra cadastrada (com botão lixeira para remover)
+- Botão CTA: **"Configurar escala"** (abre o modal)
+- Estado vazio (sem regras): mostra o calendário limpo do mês atual + ilustração leve "Nenhuma escala cadastrada" + mesmo botão "Configurar escala"
+
+## Novo modal: `src/components/escala-config-modal.tsx`
+
+Reproduz a tela "Adicionar Plantão" da referência, mas integrada ao design system do projeto (shadcn `Dialog` + inputs estilizados):
+
+Campos:
+- **Local de trabalho** — input texto (placeholder "Ex: Polícia Militar")
+- **Cor** — seletor com 8 swatches pré-definidos (vermelho, azul, verde, magenta, laranja, ciano, roxo, amarelo)
+- **Escala (turno 1)** — dois inputs numéricos `trabalho` X `folga` + select `Hora de início` (0–23)
+- Checkbox **"Escala alternada"** — quando marcado, mostra um segundo bloco igual ao de cima para o turno alternado
+- **Data inicial** — DatePicker shadcn (`pointer-events-auto`)
+- **Data final** — DatePicker shadcn
+- Botões: **Cancelar** / **Salvar escala**
+
+Validação com zod (campos obrigatórios, datas coerentes, números 1..168).
+
+## Integração em `src/routes/inicio.tsx`
+
+Renderizar `<EscalaCalendarCard />` logo abaixo do `<main>` com o grid de ferramentas (`px-4 mt-6`). O card só some quando o usuário está filtrando ferramentas (campo de busca preenchido), para não poluir o resultado da busca.
 
 ## Detalhes técnicos
-- Apenas frontend, um arquivo editado: `src/routes/anyconnect.tsx`
-- Ícones novos do `lucide-react`: `Copy`, `Check` (já instalado)
-- Cores via tokens inline existentes no arquivo (mesma paleta `#2e6b8a`, `#e8f0f8`, etc.)
+
+- Apenas frontend, sem backend nem novas dependências
+- Persistência em `localStorage` (mesmo padrão de `src/lib/marcas.ts`)
+- Reaproveitar tokens de cor existentes (`#2e6b8a`, `#e8f0f8`, `--surface`, etc.) — sem cores fora do design system
+- shadcn `Dialog`, `Popover`, `Calendar`, `Checkbox`, `Input`, `Select`, `Button` já instalados
+- `date-fns` já no projeto para formatação
+- Acessibilidade: `aria-label` no botão de cada dia ("12 de abril — 2 plantões"), foco visível, modal com `aria-describedby`
+- Bolinhas multi-color: gerar `background: conic-gradient(...)` dinâmico em função das cores das regras do dia
+- Tema escuro: card usa `var(--surface)` e texto `var(--text-dark)` para manter legibilidade já corrigida em iterações anteriores
+
+## Fora do escopo
+
+- Não mexe em `/calendario` (continua sendo a tela detalhada de Dejem/Delegada com cálculo de valores)
+- Não sincroniza com backend
+- Não gera notificações para os plantões cadastrados (pode ser próximo passo)
