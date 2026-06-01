@@ -1,73 +1,47 @@
 ## Objetivo
 
-Deixar visualmente óbvio, no calendário de "Minha escala", quais dias são plantão **inteiro no dia** e quais são plantão **noturno que atravessa a meia-noite** — hoje a escala 12x24/12x48 parece "três dias seguidos" porque cada dia tocado pelo plantão recebe um círculo igual. Trocar a marcação por **barras dentro da célula** e, ao tocar no dia, abrir um pequeno detalhe com os horários.
+Trocar a barra fina embaixo do número por uma **faixa colorida translúcida que cobre o dia inteiro** (estilo Google Agenda) — o número continua visível por cima. Plantão diurno = faixa cheia. Plantão noturno = metade direita no dia de início + metade esquerda no dia seguinte.
 
 ---
 
-## 1. Nova marcação visual (barra na célula)
+## Mudanças em `src/components/escala-calendar-card.tsx`
 
-Em `src/components/escala-calendar-card.tsx`, substituir os anéis (`cellRing` / `cellContinuacao`) por uma **barra fina horizontal** dentro da célula do dia, posicionada na parte inferior (abaixo do número), com a cor da regra.
+1. **Substituir a barra fina** (atualmente `height: 3` posicionada `bottom: 3`) por uma **faixa translúcida que cobre toda a célula** atrás do número:
+   - Altura: ocupa a célula inteira (`inset: 2px` para respirar nas bordas).
+   - Cor: a cor da regra com **~28% de opacidade** (`color-mix(in srgb, <cor> 28%, transparent)`), para não competir com o número.
+   - Borda esquerda colorida sólida (3px) para reforçar a cor da escala, estilo Google Agenda.
+   - Cantos arredondados (`borderRadius: 6px`).
+   - `z-index` abaixo do número (que já é `relative`).
 
-Regras de preenchimento da barra, calculadas por plantão que toca o dia:
+2. **Geometria da faixa por tipo**:
+   - `cheia` (plantão começa e termina no mesmo dia): cobre 100% da largura.
+   - `dir` (plantão noturno, começa neste dia, termina no próximo): cobre da metade até a direita (`left: 50%; right: 2px`), borda colorida do lado esquerdo da faixa.
+   - `esq` (continuação no dia seguinte do plantão noturno): cobre do início até a metade (`left: 2px; right: 50%`), borda colorida do lado esquerdo.
+   - Para meias-faixas, arredondar só o lado externo (lado direito de `dir` e lado esquerdo de `esq`) e deixar o lado interno reto, para sugerir "continua".
 
-| Situação no dia | Barra |
-|---|---|
-| Plantão começa **e** termina no mesmo dia (ex.: 07:00 → 19:00) | **Barra cheia** (100% da largura) |
-| Plantão começa neste dia e termina no dia seguinte (ex.: 19:00 → 07:00) | **Metade direita** preenchida |
-| Plantão veio do dia anterior e termina neste dia (continuação) | **Metade esquerda** preenchida |
-| Plantão atravessa o dia inteiro (continuação que não termina aqui, raro em 12h) | **Barra cheia** |
-| Múltiplos plantões/cores no mesmo dia | Empilhar barras finas (uma por cor), até 2 visíveis; "+N" se houver mais |
+3. **Múltiplos plantões no mesmo dia**:
+   - Empilhar até 2 faixas verticalmente (cada uma ocupa metade da altura da célula), usando `top: 2/8/...` calculado.
+   - Se houver mais que 2, mostrar o "+N" pequeno no canto inferior direito (já existe lógica de `extras`).
 
-Detalhes:
-- Barra com ~4px de altura, cantos arredondados, posicionada com `position: absolute; left/right: 4px; bottom: 3px`.
-- Meias-barras usam `width: 50%` com `left: 4px` (esquerda) ou `right: 4px` (direita).
-- Remover `cellRing` e `cellContinuacao` atuais. O número do dia volta a ser limpo, sem círculo em volta.
-- O destaque de "hoje" passa a ser um fundo leve `COR_BG_SOFT` arredondado (já existe) — manter, mas reduzir para não competir com a barra.
-- O post-it amarelo de Dejem/Delegada continua igual; quando houver post-it, a barra fica **dentro** do post-it (sobre o amarelo) para não brigar visualmente.
+4. **Ajustes visuais relacionados**:
+   - Remover o fundo `rgba(0,0,0,0.06)` que servia de "trilho" da meia-barra antiga.
+   - O destaque de "hoje" continua sendo o círculo `COR_BG_SOFT` quando não há plantão.
+   - Quando houver post-it amarelo (Dejem/Delegada), a faixa colorida fica **por trás** do post-it (post-it sobrepõe). O número volta a usar a cor escura (já é).
+   - Aumentar o `font-weight` do número para `800` quando houver faixa (já é) e garantir contraste — número em `#1a1a1a` em vez de azul quando há faixa por baixo.
 
-Estado calculado por célula a partir dos `PlantaoEntry` já fornecidos por `gerarPlantoesDoMes`:
-- `tipo === "inicio"` + `fim` no mesmo dia → barra cheia
-- `tipo === "inicio"` + `fim` em dia diferente → metade direita
-- `tipo === "continuacao"` + `fim` no mesmo dia → metade esquerda
-- `tipo === "continuacao"` + `fim` em dia posterior → barra cheia
-
-## 2. Toque no dia abre detalhe
-
-Hoje a célula não é clicável. Tornar cada célula um `<button>` e, ao tocar, abrir um **Popover** (shadcn `popover` já disponível) ancorado na célula com:
-
-- Data por extenso (ex.: "Sex, 14 de março").
-- Para cada plantão do dia, uma linha com:
-  - Bolinha colorida da regra.
-  - Nome do local.
-  - Horário: `19:00 → 07:00 (termina no dia seguinte)` ou `07:00 → 19:00`, deduzido de `inicio`/`fim` do `PlantaoEntry`.
-  - Tag "Início do plantão" ou "Continuação (vem de dd/mm)".
-- Para cada marca (Dejem/Delegada) do dia, uma linha com a label correspondente e a cor.
-- Se o dia não tem nada, popover não abre (ou mostra "Sem plantão").
-
-Apenas um popover aberto por vez; fechar tocando fora ou em outra célula.
-
-## 3. Legenda
-
-Atualizar a mini-legenda visual no rodapé do card (ou inline acima do grid) com 3 ícones:
-
-```
-[████]  Plantão no dia
-[██  ]  Início (vai até o dia seguinte)
-[  ██]  Continuação (vem do dia anterior)
-```
-
-Texto curto: "Toque em um dia para ver detalhes."
+5. **Legenda** (rodapé do calendário): atualizar os 3 exemplos para mostrar a faixa translúcida em vez da barrinha fina:
+   - `[▮▮▮▮]` faixa cheia → "Plantão no dia"
+   - `[  ▮▮]` meia direita → "Início noturno"
+   - `[▮▮  ]` meia esquerda → "Continuação"
 
 ## Detalhes técnicos
 
-- Arquivo único alterado: `src/components/escala-calendar-card.tsx`.
-- Nenhuma mudança em `escala-trabalho.ts`, storage ou modal.
-- Helper local `barraDoDia(entries: PlantaoEntry[], date: Date)` que retorna `{ cor: string; lado: "cheia"|"esq"|"dir" }[]`, comparando `entry.fim` com o dia atual via `sameDay`.
-- Usar `Popover` + `PopoverTrigger`/`PopoverContent` de `@/components/ui/popover`.
-- Acessibilidade: o `<button>` mantém o `aria-label` atual e ganha `aria-haspopup="dialog"`.
+- Único arquivo alterado: `src/components/escala-calendar-card.tsx`.
+- Reescrever o bloco JSX das barras dentro do `cellInner` (sem mexer em `barrasDoDia`, que já retorna `{cor, lado}`).
+- Continuar usando `color-mix` em CSS inline (suportado em todos os browsers modernos onde o app já roda).
+- Sem mudanças no popover, no algoritmo de plantões ou no storage.
 
 ## Fora do escopo
 
-- Editar plantão direto pelo popover (só leitura).
-- Mudar como Dejem/Delegada são marcadas.
-- Mudar o algoritmo de geração de plantões.
+- Mostrar texto (nome do local) dentro da faixa — a célula é muito pequena (40×40) e isso brigaria com o número.
+- Mudar a altura da célula do calendário.
