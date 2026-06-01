@@ -50,12 +50,20 @@ function formatBytes(n?: number) {
 
 function DownloadedReportsScreen() {
   const navigate = useNavigate();
-  const [escalas, setEscalas] = useState<EscalaSalva[]>(() => lerLista());
+  // Inicia vazio para casar com o SSR; popula via useEffect após hidratar.
+  const [escalas, setEscalas] = useState<EscalaSalva[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<EscalaSalva | null>(null);
 
   useEffect(() => {
+    setEscalas(lerLista());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     salvarLista(escalas);
-  }, [escalas]);
+  }, [escalas, hydrated]);
 
   const handleAbrir = async (e: EscalaSalva) => {
     // APK: se tiver arquivo salvo no Filesystem, abre por URI nativa.

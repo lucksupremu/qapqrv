@@ -1,28 +1,40 @@
-## Objetivo
+## Diagnóstico
 
-Na versão web (PWA/navegador), parar de tentar detectar a VPN — o probe HTTP `no-cors` não é confiável (browser pode bloquear, cache, CORS, rede lenta) e por isso o botão "Verificar" parece não fazer nada quando o usuário está conectado. Em vez disso, mostrar um aviso claro de que é necessário estar conectado no Cisco AnyConnect e oferecer um botão que abre o app direto (Android ou iOS).
+No Chrome do Android (PWA/navegador) o toque em **Escalas Baixadas** (tile da Home, item do menu lateral e botão da bottom-nav) não navega. A causa não é a VPN — a rota `/escalas-baixadas` está registrada e os 3 caminhos usam `<Link>` / `navigate()` corretos.
 
-A detecção nativa continua intacta no APK Android (plugin Kotlin via `TRANSPORT_VPN`).
+O culpado é um **erro de hidratação** na Home (`src/routes/index.tsx`) que aparece nos logs do preview:
+
+```
+Hydration failed because the server rendered HTML didn't match the client.
+…
++ <ul className="space-y-2">
+- <div className="flex items-center gap-3 rounded-[16px] border…">
+```
+
+O que acontece:
+
+1. `useState(() => loadMarcas())` lê o `localStorage` no momento do render. No SSR não há `localStorage`, então o servidor sempre envia HTML do estado **vazio** ("Nenhuma escala agendada", que é um `<div>`).
+2. No cliente, no primeiro render já existem marcas, então a árvore vira `<ul>...<li>`. Tipos de elemento diferentes → React 19 descarta o subtree e re-renderiza.
+3. Em alguns Chromes Android esse "regen" deixa a página em estado parcialmente interativo: os handlers `onClick` dos botões irmãos (incluindo o tile "Escalas baixadas") **não disparam** até um reload completo. Daí "nada acontece, nem a URL muda".
+
+O mesmo padrão (`useState(() => lerLista())` lendo `localStorage` no render inicial) está em `src/routes/escalas-baixadas.tsx` — preventivamente também precisa corrigir.
 
 ## Mudanças
 
-### 1. `src/lib/vpn-status.ts`
-- Remover `probeIntranet()` e o cache de probe.
-- `isVpnActive()` passa a:
-  - Tentar o plugin nativo Android (Capacitor). Se responder → retorna `true/false`.
-  - Se o plugin não existir (web/iOS sem plugin) → retornar `null` (= "desconhecido, assuma que precisa de VPN").
-- Exportar um helper `isNativeVpnAvailable()` para os componentes saberem se devem mostrar o botão "Verificar" ou apenas o aviso estático.
+### 1. `src/routes/index.tsx`
+- Inicializar `marcas` como `[]` (estado consistente entre SSR e primeiro render do cliente).
+- Adicionar `useEffect` que, ao montar, chama `setMarcas(loadMarcas())` — depois disso o React já está hidratado e mudar `<div>` → `<ul>` é re-render normal, sem mismatch.
+- Manter o `useEffect` existente de `focus`/`visibilitychange`/`storage` que já recarrega via `setMarcas(loadMarcas())`.
+- Manter `saveMarcas(marcas)` no efeito atual (sem regressão).
 
-### 2. `src/routes/index.tsx` e `src/routes/ferramenta.consulta-escala.tsx`
-- Quando `isVpnActive()` retornar `null` (web):
-  - Esconder o botão "Verificar" / "Verificar novamente" (não faz sentido sem detecção real).
-  - Mostrar mensagem fixa: "Para usar esta ferramenta é necessário estar conectado à VPN da PMESP pelo Cisco AnyConnect."
-  - Manter o botão "Abrir AnyConnect" como ação principal — `openAnyConnect()` já trata Android (intent + Play Store fallback) e iOS (scheme + App Store fallback).
-- Quando `isVpnActive()` retornar `true/false` (Android nativo): manter o comportamento atual (badge verde/amarelo + botão Verificar).
+### 2. `src/routes/escalas-baixadas.tsx`
+- Mesmo padrão: `useState<EscalaSalva[]>([])` e popular via `useEffect` no mount com `lerLista()`. Evita futuras hidratações desencontradas se a lista crescer/encolher.
 
-### 3. Tooltips
-- Atualizar tooltip do ícone na web para refletir "status não verificável no navegador — conecte o AnyConnect".
+### 3. Verificação
+- Após a alteração, abrir a Home no preview, abrir o console e confirmar que **não aparece** mais o aviso de hydration mismatch.
+- Testar os 3 caminhos para `/escalas-baixadas`: tile da Home, item "Escalas Baixadas" no menu lateral, botão "Escalas" da bottom-nav.
 
 ## Fora de escopo
-- Plugin nativo Kotlin (já existe, sem mudanças).
-- Lógica de abertura do AnyConnect em `src/lib/open-anyconnect.ts` (já cobre Android + iOS corretamente).
+
+- Nada de mudança em VPN/AnyConnect — o problema é puramente de SSR/hidratação.
+- Sem alterar `routeTree.gen.ts`, `__root.tsx` ou o `PrivacyConsent`.
