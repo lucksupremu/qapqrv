@@ -71,13 +71,14 @@ function parseHHMM(s: string): { h: number; m: number } {
 }
 
 export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props) {
+  const [preset, setPreset] = useState<string>("12x24-12x48");
   const [local, setLocal] = useState("");
   const [cor, setCor] = useState(ESCALA_CORES[0]!.value);
   const [trabalho, setTrabalho] = useState(12);
   const [folga, setFolga] = useState(24);
   const [horaInicio, setHoraInicio] = useState(7);
   const [minutoInicio, setMinutoInicio] = useState(0);
-  const [alternada, setAlternada] = useState(false);
+  const [alternada, setAlternada] = useState(true);
   const [trabalhoB, setTrabalhoB] = useState(12);
   const [folgaB, setFolgaB] = useState(48);
   const [horaInicioB, setHoraInicioB] = useState(19);
@@ -88,6 +89,28 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
     d.setMonth(d.getMonth() + 6);
     return d;
   });
+
+  const presetAtual = ESCALA_PRESETS.find((p) => p.id === preset);
+  const presetForcaAlternada = !!presetAtual?.alternada;
+
+  const aplicarPreset = (id: string) => {
+    setPreset(id);
+    const p = ESCALA_PRESETS.find((x) => x.id === id);
+    if (!p || p.id === "custom") return;
+    setTrabalho(p.turno.trabalho);
+    setFolga(p.turno.folga);
+    setHoraInicio(p.turno.horaInicio);
+    setMinutoInicio(p.turno.minutoInicio);
+    if (p.alternada) {
+      setAlternada(true);
+      setTrabalhoB(p.alternada.trabalho);
+      setFolgaB(p.alternada.folga);
+      setHoraInicioB(p.alternada.horaInicio);
+      setMinutoInicioB(p.alternada.minutoInicio);
+    } else {
+      setAlternada(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -105,24 +128,35 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       setMinutoInicioB(initial.alternada?.minutoInicio ?? 0);
       setDataInicial(fromISO(initial.dataInicial));
       setDataFinal(fromISO(initial.dataFinal));
+      setPreset(
+        detectarPreset(
+          initial.trabalho,
+          initial.folga,
+          initial.horaInicio,
+          initial.minutoInicio ?? 0,
+          initial.alternada
+            ? {
+                trabalho: initial.alternada.trabalho,
+                folga: initial.alternada.folga,
+                horaInicio: initial.alternada.horaInicio,
+                minutoInicio: initial.alternada.minutoInicio ?? 0,
+              }
+            : null,
+        ),
+      );
     } else {
       setLocal("");
       setCor(ESCALA_CORES[0]!.value);
-      setTrabalho(12);
-      setFolga(24);
-      setHoraInicio(7);
-      setMinutoInicio(0);
-      setAlternada(false);
-      setTrabalhoB(12);
-      setFolgaB(48);
-      setHoraInicioB(19);
-      setMinutoInicioB(0);
       setDataInicial(new Date());
       const f = new Date();
       f.setMonth(f.getMonth() + 6);
       setDataFinal(f);
+      // aplica o preset padrão (12x24/12x48)
+      aplicarPreset("12x24-12x48");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial]);
+
 
   const handleSubmit = () => {
     const localOk = local.trim();
