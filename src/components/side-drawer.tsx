@@ -6,6 +6,7 @@ import {
   Mail,
   Wallet,
   BookOpen,
+  BookOpenCheck,
   Lock,
   X,
   Sun,
@@ -69,6 +70,7 @@ const grupo2: Item[] = [
   },
 ];
 const grupo3: Item[] = [
+  { type: "route", to: "/manual", label: "Manual", icon: BookOpenCheck },
   { type: "route", to: "/anyconnect", label: "Guia AnyConnect", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
 ];
