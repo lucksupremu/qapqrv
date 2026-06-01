@@ -15,6 +15,7 @@ import passo3 from "@/assets/anyconnect/passo-3.jpg";
 import passo4 from "@/assets/anyconnect/passo-4.jpg";
 import passo5 from "@/assets/anyconnect/passo-5.jpg";
 import passo6 from "@/assets/anyconnect/passo-6.jpg";
+import passo7 from "@/assets/anyconnect/passo-7.jpg";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({ meta: [{ title: "Configurar AnyConnect — QAP, QRV!" }] }),
@@ -75,6 +76,18 @@ const PASSOS: Passo[] = [
     chips: [
       { label: "Certificado", value: "Desabilitado" },
       { label: "Autenticação", value: "EAP-AnyConnect" },
+    ],
+  },
+  {
+    src: passo7,
+    alt: "Tela do Cisco Secure Client com a lista de Grupos aberta, destacando a opção 13 - DEJEM DELEGADA",
+    titulo: "Conecte-se",
+    descricao:
+      "Toque em Conectar, escolha o Grupo 13 e informe seu CPF + senha da aba Procedimentos.",
+    chips: [
+      { label: "Grupo", value: "13 - DEJEM DELEGADA" },
+      { label: "Usuário", value: "Seu CPF" },
+      { label: "Senha", value: "Aba Procedimentos" },
     ],
   },
 ];
