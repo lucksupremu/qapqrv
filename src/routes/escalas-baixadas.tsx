@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, FolderOpen, FileDown, Smartphone } from "lucide-react";
 import { useIsNative } from "@/hooks/use-is-native";
 import { toast } from "sonner";
+import { openInAppBrowser } from "@/lib/in-app-browser";
 
 import {
   AlertDialog,
@@ -139,10 +140,7 @@ function DownloadedReportsScreen() {
         return;
       }
     }
-    navigate({
-      to: "/intranet",
-      search: { url: e.url, titulo: e.titulo ?? `Escala ${e.id}` },
-    });
+    void openInAppBrowser(e.url, { titulo: e.titulo ?? `Escala ${e.id}` });
   };
 
 
