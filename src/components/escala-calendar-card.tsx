@@ -238,6 +238,9 @@ export function EscalaCalendarCard() {
           );
           const temAlgo = coresInicio.length + coresContinuacao.length > 0;
           const isToday = sameDay(cell.date, today);
+          const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
+          const temMarca = marcasDia.length > 0;
+          const corMarca = temMarca ? MARCA_COR[marcasDia[0]!.tipo] ?? "#3498DB" : null;
 
           return (
             <div
@@ -262,12 +265,41 @@ export function EscalaCalendarCard() {
                   style={cellRing(coresInicio)}
                 />
               )}
-              {isToday && !temAlgo && (
+              {temMarca && (
+                <>
+                  <span
+                    aria-hidden
+                    className="absolute"
+                    style={{
+                      inset: "4px",
+                      background: "#FFE066",
+                      transform: "rotate(-4deg)",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
+                      borderRadius: "2px",
+                    }}
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute"
+                    style={{
+                      right: 2,
+                      top: 2,
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: corMarca ?? "#3498DB",
+                      boxShadow: "0 0 0 1.5px #fff",
+                    }}
+                  />
+                </>
+              )}
+              {isToday && !temAlgo && !temMarca && (
                 <span
                   className="absolute inset-0 rounded-full"
                   style={{ background: COR_BG_SOFT }}
                 />
               )}
+
               <span
                 className="relative text-[13px]"
                 style={{
