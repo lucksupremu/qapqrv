@@ -127,12 +127,19 @@ function HomeScreen() {
   };
 
 
+  // Paleta sistemática: primário (azul institucional) e accent (dourado do logo),
+  // alternados. Adeus arco-íris.
+  const GRAD_PRIMARY = "var(--gradient-primary)";
+  const GRAD_GOLD = "var(--gradient-gold)";
+  const SHADOW_PRIMARY = "var(--shadow-glow)";
+  const SHADOW_GOLD = "var(--shadow-glow-gold)";
+
   const blocos: ActionBlock[] = [
     {
       label: "Marcar / Desmarcar",
       icon: CalendarPlus,
-      gradient: "linear-gradient(135deg, #1a5276 0%, #3498db 100%)",
-      shadow: "0 0 24px -8px rgba(26,82,118,0.45)",
+      gradient: GRAD_PRIMARY,
+      shadow: SHADOW_PRIMARY,
       onClick: () =>
         void guardIntranet(
           () =>
@@ -146,8 +153,8 @@ function HomeScreen() {
     {
       label: "Email iNotes",
       icon: Mail,
-      gradient: "linear-gradient(135deg, #8e44ad 0%, #c39bd3 100%)",
-      shadow: "0 0 24px -8px rgba(142,68,173,0.45)",
+      gradient: GRAD_GOLD,
+      shadow: SHADOW_GOLD,
       onClick: () =>
         void guardIntranet(
           () =>
@@ -160,23 +167,23 @@ function HomeScreen() {
     {
       label: "Calendário",
       icon: Calendar,
-      gradient: "linear-gradient(135deg, #d35400 0%, #f39c12 100%)",
-      shadow: "0 0 24px -8px rgba(211,84,0,0.45)",
+      gradient: GRAD_PRIMARY,
+      shadow: SHADOW_PRIMARY,
       onClick: () => navigate({ to: "/calendario" }),
     },
     {
       label: "Escalas baixadas",
       icon: FolderDown,
-      gradient: "linear-gradient(135deg, #27ae60 0%, #58d68d 100%)",
-      shadow: "0 0 24px -8px rgba(39,174,96,0.45)",
+      gradient: GRAD_GOLD,
+      shadow: SHADOW_GOLD,
       onClick: () => navigate({ to: "/escalas-baixadas" }),
       nativeOnly: true,
     },
     {
       label: "Guia AnyConnect",
       icon: BookOpen,
-      gradient: "linear-gradient(135deg, #c0392b 0%, #ec7063 100%)",
-      shadow: "0 0 24px -8px rgba(192,57,43,0.45)",
+      gradient: GRAD_PRIMARY,
+      shadow: SHADOW_PRIMARY,
       onClick: () => navigate({ to: "/anyconnect" }),
     },
   ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
@@ -184,76 +191,66 @@ function HomeScreen() {
   return (
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>
       {/* HEADER */}
-      <header className="flex items-center justify-between px-4 pt-6 pb-2">
+      <header className="flex items-center justify-between px-4 pt-6 pb-3">
         <div className="flex items-center gap-3">
           <img
             src={appLogo}
             alt="QAP, QRV! — Ferramentas Policiais"
-            className="h-14 w-14 rounded-2xl object-cover"
+            className="h-12 w-12 rounded-2xl object-cover"
             style={{ boxShadow: "var(--shadow-card)" }}
           />
-          <div>
-            <h1 className="text-[28px] font-extrabold leading-none tracking-tight" style={{ color: "var(--text-dark)" }}>
-              QAP, QRV!
-            </h1>
-            <p className="mt-1 text-[12px] font-medium tracking-wide" style={{ color: "var(--muted-fg)" }}>
-              Escalas PMESP
-            </p>
-          </div>
+          <h1 className="text-[22px] font-extrabold leading-none tracking-tight" style={{ color: "var(--text-dark)" }}>
+            QAP, QRV!
+          </h1>
         </div>
         <button
           aria-label="Menu"
           onClick={() => setDrawerOpen(true)}
-          className="flex h-12 w-12 items-center justify-center rounded-2xl border transition active:scale-95"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl border transition active:scale-95"
           style={{ background: "var(--surface-2)", color: "var(--primary-light)", borderColor: "var(--border-soft)" }}
         >
-          <Menu size={22} />
+          <Menu size={20} />
         </button>
       </header>
 
-      {/* CONSULTA DE ESCALA */}
+      {/* CONSULTA DE ESCALA — layout compacto, label fora do campo */}
       <section
-        className="mx-4 mt-4 rounded-[20px] border bg-[#ffffff] p-5"
+        className="mx-4 mt-2 rounded-[20px] border bg-[#ffffff] p-4"
         style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
       >
-        <h2 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: "var(--primary)" }}>
+        <label
+          htmlFor="id-escala-input"
+          className="block text-[11px] font-semibold uppercase tracking-wider"
+          style={{ color: "var(--primary)" }}
+        >
           Consultar escala
-        </h2>
+        </label>
 
-        <div className="mt-3 flex items-stretch gap-2">
+        <div className="mt-2 flex items-stretch gap-2">
           <div
-            className="relative flex-1 rounded-[14px] border px-3 pt-[18px] pb-1"
-            style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)", height: 52 }}
+            className="flex flex-1 items-center gap-2 rounded-[12px] border px-3"
+            style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)", height: 46 }}
           >
-            <label
-              className="absolute left-3 top-1 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--primary-light)" }}
-            >
-              ID da escala
-            </label>
+            <Search size={16} style={{ color: "var(--primary-light)" }} />
             <input
+              id="id-escala-input"
               inputMode="numeric"
+              placeholder="ID da escala"
               value={idEscala}
               onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
               onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-              className="w-full bg-transparent text-[16px] font-semibold outline-none"
+              className="w-full bg-transparent text-[15px] font-semibold outline-none placeholder:font-normal"
               style={{ color: "var(--text-dark)" }}
             />
           </div>
           <button
             onClick={handleConsultar}
             disabled={consultando}
-            className="flex h-[52px] items-center justify-center gap-2 rounded-[14px] px-5 font-bold text-white transition active:scale-[0.99] disabled:opacity-70"
+            aria-label="Consultar"
+            className="flex h-[46px] items-center justify-center gap-2 rounded-[12px] px-4 font-bold text-white transition active:scale-[0.97] disabled:opacity-70"
             style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
           >
-            {consultando ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Consultando...
-              </>
-            ) : (
-              "Consultar"
-            )}
+            {consultando ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
           </button>
         </div>
 
