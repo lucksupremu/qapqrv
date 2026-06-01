@@ -30,7 +30,7 @@ function Inicio() {
 
   return (
     <div className="min-h-screen pb-24 bg-background">
-      <AppHeader subtitle="Ferramentas operacionais em um só lugar" />
+      <AppHeader subtitle="Acesse todas as ferramentas." />
 
       <div className="px-4 -mt-7">
         <div
