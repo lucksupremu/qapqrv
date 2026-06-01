@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, FolderOpen, FileDown, Smartphone } from "lucide-react";
 import { useIsNative } from "@/hooks/use-is-native";
 import { toast } from "sonner";
+import { openInAppBrowser } from "@/lib/in-app-browser";
 
 import {
   AlertDialog,
@@ -88,14 +89,18 @@ function DownloadedReportsScreen() {
           </h1>
           <span className="h-10 w-10" aria-hidden />
         </header>
-        <div className="mx-4 mt-6 rounded-2xl border bg-white p-6 text-center" style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}>
+        <div
+          className="mx-4 mt-6 rounded-2xl border bg-white p-6 text-center"
+          style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
+        >
           <Smartphone size={56} className="mx-auto" style={{ color: "#2e6b8a" }} />
           <h2 className="mt-3 text-[18px] font-bold" style={{ color: "var(--text-dark)" }}>
             Disponível apenas no aplicativo
           </h2>
           <p className="mt-2 text-[14px]" style={{ color: "var(--muted-fg)" }}>
             Salvar escalas offline depende de acesso direto à intranet da PMESP, o que o navegador
-            não permite (bloqueio de CORS). Use o app instalado (APK) para baixar e abrir os PDFs sem internet.
+            não permite (bloqueio de CORS). Use o app instalado (APK) para baixar e abrir os PDFs
+            sem internet.
           </p>
           <button
             onClick={() => navigate({ to: "/" })}
@@ -109,18 +114,16 @@ function DownloadedReportsScreen() {
     );
   }
 
-
   const handleAbrir = async (e: EscalaSalva) => {
     // APK: se tiver arquivo salvo no Filesystem, abre por URI nativa.
     if (e.localPath) {
       try {
         const { Capacitor } = await import("@capacitor/core");
         if (Capacitor.isNativePlatform()) {
-          // @ts-ignore — plugin opcional
-          const fs: any = await import(/* @vite-ignore */ "@capacitor/filesystem");
-          const { uri } = await fs.Filesystem.getUri({
+          const { Filesystem, Directory } = await import("@capacitor/filesystem");
+          const { uri } = await Filesystem.getUri({
             path: e.localPath,
-            directory: fs.Directory.Data,
+            directory: Directory.Data,
           });
           window.open(uri, "_blank");
           return;
@@ -139,12 +142,8 @@ function DownloadedReportsScreen() {
         return;
       }
     }
-    navigate({
-      to: "/intranet",
-      search: { url: e.url, titulo: e.titulo ?? `Escala ${e.id}` },
-    });
+    void openInAppBrowser(e.url, { titulo: e.titulo ?? `Escala ${e.id}` });
   };
-
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
@@ -153,7 +152,6 @@ function DownloadedReportsScreen() {
     setConfirmDelete(null);
     toast.success("Escala removida.");
   };
-
 
   return (
     <div className="min-h-screen pb-10" style={{ background: "var(--bg)" }}>
@@ -166,10 +164,7 @@ function DownloadedReportsScreen() {
         >
           <ArrowLeft size={20} />
         </button>
-        <h1
-          className="flex-1 text-center text-[18px] font-bold"
-          style={{ color: "#2e6b8a" }}
-        >
+        <h1 className="flex-1 text-center text-[18px] font-bold" style={{ color: "#2e6b8a" }}>
           Escalas baixadas
         </h1>
         <span className="h-10 w-10" aria-hidden />
@@ -178,10 +173,7 @@ function DownloadedReportsScreen() {
       {escalas.length === 0 ? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
           <FolderOpen size={60} style={{ color: "#5b7a8f" }} />
-          <p
-            className="mt-3 text-[18px] font-bold"
-            style={{ color: "#2e6b8a" }}
-          >
+          <p className="mt-3 text-[18px] font-bold" style={{ color: "#2e6b8a" }}>
             Nenhuma escala baixada
           </p>
           <p className="mt-1 text-[14px]" style={{ color: "#5b7a8f" }}>
@@ -196,10 +188,7 @@ function DownloadedReportsScreen() {
               className="mx-2 rounded-[16px] bg-[#ffffff] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
             >
               <div className="flex items-center justify-between gap-2">
-                <span
-                  className="text-[16px] font-bold"
-                  style={{ color: "#0f2535" }}
-                >
+                <span className="text-[16px] font-bold" style={{ color: "#0f2535" }}>
                   ID {e.id}
                 </span>
                 {e.hasPdf ? (
@@ -243,26 +232,17 @@ function DownloadedReportsScreen() {
         </ul>
       )}
 
-      <AlertDialog
-        open={!!confirmDelete}
-        onOpenChange={(o) => !o && setConfirmDelete(null)}
-      >
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle style={{ color: "#2e6b8a" }}>
-              Excluir escala baixada
-            </AlertDialogTitle>
+            <AlertDialogTitle style={{ color: "#2e6b8a" }}>Excluir escala baixada</AlertDialogTitle>
             <AlertDialogDescription>
-              Deseja remover a escala do ID {confirmDelete?.id}? Esta ação não
-              pode ser desfeita.
+              Deseja remover a escala do ID {confirmDelete?.id}? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              style={{ background: "#E74C3C" }}
-            >
+            <AlertDialogAction onClick={handleDelete} style={{ background: "#E74C3C" }}>
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>

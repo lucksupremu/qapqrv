@@ -4,18 +4,60 @@
 //
 // Importes do Capacitor são DINÂMICOS para evitar quebrar o SSR — o
 // pacote toca `window`/`navigator` no carregamento.
+import type { InAppBrowserPlugin } from "@capacitor/inappbrowser";
+
+type InAppBrowserModule = typeof import("@capacitor/inappbrowser");
+
+type CapacitorWindow = Window & {
+  Capacitor?: {
+    isNativePlatform?: () => boolean;
+  };
+};
 
 export type AbrirOpts = {
   titulo?: string;
+  /** Mantém no WebView interno por padrão; usa Custom Tabs como fallback. */
+  modo?: "webview" | "system" | "external";
+  timeoutMs?: number;
 };
+
+const ANDROID_CHROME_UA =
+  "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+
+function normalizarUrl(url: string) {
+  const clean = url.trim();
+  if (/^(https?:|mailto:|tel:|market:|intent:)/i.test(clean)) return clean;
+  return `https://${clean}`;
+}
+
+async function openSystemBrowser(
+  InAppBrowser: InAppBrowserPlugin,
+  mod: InAppBrowserModule,
+  url: string,
+) {
+  await InAppBrowser.openInSystemBrowser({
+    url,
+    options: {
+      ...mod.DefaultSystemBrowserOptions,
+      android: {
+        ...mod.DefaultAndroidSystemBrowserOptions,
+        showTitle: true,
+        hideToolbarOnScroll: false,
+      },
+      iOS: {
+        ...mod.DefaultiOSSystemBrowserOptions,
+        closeButtonText: mod.DismissStyle.DONE,
+      },
+    },
+  });
+}
 
 export function isNativeApp(): boolean {
   if (typeof window === "undefined") return false;
   try {
     // require síncrono não funciona em ESM; usamos a global que o Capacitor
     // injeta no runtime nativo. Em web, retorna false.
-    // @ts-ignore
-    const cap = (window as any).Capacitor;
+    const cap = (window as CapacitorWindow).Capacitor;
     return !!cap?.isNativePlatform?.();
   } catch {
     return false;
@@ -24,21 +66,84 @@ export function isNativeApp(): boolean {
 
 export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
   void opts.titulo; // reservado para futura customização da toolbar
+  const targetUrl = normalizarUrl(url);
 
   if (isNativeApp()) {
     try {
       const mod = await import("@capacitor/inappbrowser");
-      // @ts-expect-error tipos do pacote variam por versão
-      const InAppBrowser = mod.InAppBrowser ?? mod.default;
+      const { InAppBrowser } = mod;
+
+      if (opts.modo === "external") {
+        await InAppBrowser.openInExternalBrowser({ url: targetUrl });
+        return;
+      }
+
+      if (opts.modo === "system") {
+        await openSystemBrowser(InAppBrowser, mod, targetUrl);
+        return;
+      }
+
+      let loaded = false;
+      let closed = false;
+      const fallbackTimer: { current?: number } = {};
+      const removeHandles: Array<{ remove: () => Promise<void> }> = [];
+
+      const cleanup = () => {
+        if (fallbackTimer.current) window.clearTimeout(fallbackTimer.current);
+        void Promise.allSettled(removeHandles.map((handle) => handle.remove()));
+      };
+
+      await InAppBrowser.removeAllListeners?.();
+      removeHandles.push(
+        await InAppBrowser.addListener("browserPageLoaded", () => {
+          loaded = true;
+          cleanup();
+        }),
+      );
+      removeHandles.push(
+        await InAppBrowser.addListener("browserPageNavigationCompleted", () => {
+          loaded = true;
+          cleanup();
+        }),
+      );
+      removeHandles.push(
+        await InAppBrowser.addListener("browserClosed", () => {
+          closed = true;
+          cleanup();
+        }),
+      );
+
+      fallbackTimer.current = window.setTimeout(() => {
+        if (loaded || closed) return;
+        closed = true;
+        void InAppBrowser.close()
+          .catch(() => undefined)
+          .finally(() => openSystemBrowser(InAppBrowser, mod, targetUrl).catch(() => undefined));
+      }, opts.timeoutMs ?? 22000);
 
       await InAppBrowser.openInWebView({
-        url,
+        url: targetUrl,
         options: {
-          // @ts-ignore
           ...mod.DefaultWebViewOptions,
+          clearCache: false,
+          clearSessionCache: false,
+          showToolbar: true,
           showURL: true,
           showNavigationButtons: true,
           closeButtonText: "Fechar",
+          customWebViewUserAgent: ANDROID_CHROME_UA,
+          android: {
+            ...mod.DefaultAndroidWebViewOptions,
+            allowZoom: true,
+            hardwareBack: true,
+            pauseMedia: true,
+            isIsolated: false,
+          },
+          iOS: {
+            ...mod.DefaultiOSWebViewOptions,
+            allowsBackForwardNavigationGestures: true,
+            enableViewportScale: true,
+          },
         },
       });
       return;
@@ -48,6 +153,6 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
   }
 
   if (typeof window !== "undefined") {
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(targetUrl, "_blank", "noopener,noreferrer");
   }
 }

@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { openAnyConnect as launchAnyConnect } from "@/lib/open-anyconnect";
 import {
   ArrowLeft,
   Share2,
@@ -32,7 +33,14 @@ function IntranetWebviewScreen() {
   const [error, setError] = useState(false);
   const [currentUrl, setCurrentUrl] = useState(url);
 
-  
+  useEffect(() => {
+    if (!loading || error) return;
+    const timeout = window.setTimeout(() => {
+      setLoading(false);
+      setError(true);
+    }, 22000);
+    return () => window.clearTimeout(timeout);
+  }, [loading, error, currentUrl]);
 
   const handleShare = async () => {
     try {
@@ -76,9 +84,7 @@ function IntranetWebviewScreen() {
     try {
       const m = currentUrl.match(/(?:nuesc=|arrelconesc\.aspx\?)(\d+)/i);
       const id = m?.[1] ?? Date.now().toString();
-      const { upsertEscala, baixarPdfEmBackground } = await import(
-        "@/lib/escalas-baixadas"
-      );
+      const { upsertEscala, baixarPdfEmBackground } = await import("@/lib/escalas-baixadas");
       upsertEscala({
         id,
         url: currentUrl,
@@ -95,9 +101,7 @@ function IntranetWebviewScreen() {
   };
 
   const openAnyConnect = () => {
-    if (typeof window === "undefined") return;
-    window.location.href =
-      "intent://com.cisco.anyconnect.vpn.android.avf#Intent;scheme=android-app;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.cisco.anyconnect.vpn.android.avf;end";
+    void launchAnyConnect();
   };
 
   return (
@@ -114,9 +118,7 @@ function IntranetWebviewScreen() {
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="flex-1 truncate text-center text-[16px] font-bold">
-          {titulo}
-        </h1>
+        <h1 className="flex-1 truncate text-center text-[16px] font-bold">{titulo}</h1>
         <button
           aria-label="Compartilhar"
           onClick={handleShare}
@@ -191,10 +193,7 @@ function IntranetWebviewScreen() {
       </div>
 
       {/* Barra inferior */}
-      <nav
-        className="grid grid-cols-4 border-t bg-[#ffffff]"
-        style={{ borderColor: "#e8f0f8" }}
-      >
+      <nav className="grid grid-cols-4 border-t bg-[#ffffff]" style={{ borderColor: "#e8f0f8" }}>
         <button
           onClick={goBack}
           className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold"
