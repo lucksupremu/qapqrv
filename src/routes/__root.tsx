@@ -110,12 +110,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
       { property: "og:description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
       { name: "twitter:description", content: "QAP QRV Tools provides essential utilities for military police officers, enhancing operational efficiency." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0fa5b7f-428d-457d-96fa-3dceb4d0abe4/id-preview-49580de1--c4ba12ae-de4d-4739-b500-bee9ca5bb9e9.lovable.app-1780237479015.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0fa5b7f-428d-457d-96fa-3dceb4d0abe4/id-preview-49580de1--c4ba12ae-de4d-4739-b500-bee9ca5bb9e9.lovable.app-1780237479015.png" },
+      { property: "og:image", content: "/icon-512.png" },
+      { name: "twitter:image", content: "/icon-512.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
