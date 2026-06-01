@@ -84,9 +84,7 @@ function IntranetWebviewScreen() {
     try {
       const m = currentUrl.match(/(?:nuesc=|arrelconesc\.aspx\?)(\d+)/i);
       const id = m?.[1] ?? Date.now().toString();
-      const { upsertEscala, baixarPdfEmBackground } = await import(
-        "@/lib/escalas-baixadas"
-      );
+      const { upsertEscala, baixarPdfEmBackground } = await import("@/lib/escalas-baixadas");
       upsertEscala({
         id,
         url: currentUrl,
@@ -120,9 +118,7 @@ function IntranetWebviewScreen() {
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="flex-1 truncate text-center text-[16px] font-bold">
-          {titulo}
-        </h1>
+        <h1 className="flex-1 truncate text-center text-[16px] font-bold">{titulo}</h1>
         <button
           aria-label="Compartilhar"
           onClick={handleShare}
@@ -197,10 +193,7 @@ function IntranetWebviewScreen() {
       </div>
 
       {/* Barra inferior */}
-      <nav
-        className="grid grid-cols-4 border-t bg-[#ffffff]"
-        style={{ borderColor: "#e8f0f8" }}
-      >
+      <nav className="grid grid-cols-4 border-t bg-[#ffffff]" style={{ borderColor: "#e8f0f8" }}>
         <button
           onClick={goBack}
           className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold"

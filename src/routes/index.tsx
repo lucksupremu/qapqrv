@@ -38,8 +38,7 @@ export const Route = createFileRoute("/")({
       { title: "QAP, QRV! — Escalas PMESP" },
       {
         name: "description",
-        content:
-          "Acompanhe suas escalas Dejem e Delegada da PMESP em um só lugar.",
+        content: "Acompanhe suas escalas Dejem e Delegada da PMESP em um só lugar.",
       },
     ],
   }),
@@ -77,7 +76,6 @@ function HomeScreen() {
     applyTheme(next);
     setThemeState(next);
   };
-
 
   useEffect(() => {
     setMarcas(loadMarcas());
@@ -142,7 +140,6 @@ function HomeScreen() {
       setTimeout(() => setConsultando(false), 300);
     });
   };
-
 
   // Paleta sistemática: primário (azul institucional) e accent (dourado do logo),
   // alternados. Adeus arco-íris.
@@ -274,14 +271,16 @@ function HomeScreen() {
               className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-500"
             >
               Consulta escala dejem/delegada
-
             </label>
             <InlineVpnChip />
           </div>
 
           <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <Search
+                size={16}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              />
               <input
                 id="id-escala-input"
                 inputMode="numeric"
@@ -291,7 +290,6 @@ function HomeScreen() {
                 onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
                 className="w-full rounded-2xl border border-slate-300 bg-white dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-500 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
               />
-
             </div>
             <button
               onClick={handleConsultar}
@@ -299,7 +297,11 @@ function HomeScreen() {
               aria-label="Consultar"
               className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-black shadow-lg shadow-amber-500/20 transition active:scale-95 disabled:opacity-70"
             >
-              {consultando ? <Loader2 size={20} className="animate-spin" strokeWidth={3} /> : <ArrowRight size={20} strokeWidth={3} />}
+              {consultando ? (
+                <Loader2 size={20} className="animate-spin" strokeWidth={3} />
+              ) : (
+                <ArrowRight size={20} strokeWidth={3} />
+              )}
             </button>
           </div>
 
@@ -337,8 +339,12 @@ function HomeScreen() {
                   <Calendar size={18} className="text-slate-400 dark:text-slate-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[13px] font-bold text-slate-800 dark:text-slate-300">Sem escalas próximas</p>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-600">Toque em "Ver tudo" para configurar.</p>
+                  <p className="text-[13px] font-bold text-slate-800 dark:text-slate-300">
+                    Sem escalas próximas
+                  </p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-600">
+                    Toque em "Ver tudo" para configurar.
+                  </p>
                 </div>
               </div>
             );
@@ -470,8 +476,6 @@ function HomeScreen() {
         <EscalaCalendarCard />
       </section>
 
-
-
       {/* FOOTER */}
       <footer className="mt-8 text-center">
         <button
@@ -508,7 +512,9 @@ function InlineVpnChip() {
     return (
       <div className="flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-900/60 px-2.5 py-1">
         <Loader2 size={10} className="animate-spin text-slate-500" />
-        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Verificando</span>
+        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+          Verificando
+        </span>
       </div>
     );
   }
@@ -516,14 +522,18 @@ function InlineVpnChip() {
     return (
       <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400">VPN Ativa</span>
+        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400">
+          VPN Ativa
+        </span>
       </div>
     );
   }
   return (
     <div className="flex items-center gap-2 rounded-full border border-red-800 bg-red-700 px-2.5 py-1 dark:border-red-400/60 dark:bg-red-950">
       <span className="h-1.5 w-1.5 rounded-full bg-white dark:bg-red-300" />
-      <span className="text-[9px] font-black uppercase tracking-wider text-white dark:text-red-50">VPN Off</span>
+      <span className="text-[9px] font-black uppercase tracking-wider text-white dark:text-red-50">
+        VPN Off
+      </span>
     </div>
   );
 }
@@ -594,6 +604,3 @@ function VpnDetailRow() {
     </div>
   );
 }
-
-
-
