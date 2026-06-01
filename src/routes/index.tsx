@@ -427,7 +427,7 @@ function HomeScreen() {
       {/* ACESSO RÁPIDO — grid tático */}
       <section className="px-5 mt-6">
         <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
             Acesso Rápido
           </h2>
         </div>
@@ -438,18 +438,18 @@ function HomeScreen() {
               <button
                 key={b.label}
                 onClick={b.onClick}
-                className="group flex flex-col items-start gap-3 rounded-3xl border border-white/5 bg-slate-900/40 p-4 text-left transition-all hover:bg-slate-900/70 active:scale-95"
+                className="group flex flex-col items-start gap-3 rounded-3xl border border-slate-200 bg-white dark:border-white/5 dark:bg-slate-900/40 p-4 text-left shadow-sm dark:shadow-none transition-all hover:bg-slate-50 dark:hover:bg-slate-900/70 active:scale-95"
               >
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
                     gold
-                      ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                      : "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                      ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500"
+                      : "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
                   }`}
                 >
                   <b.icon size={20} strokeWidth={2} />
                 </div>
-                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-200 whitespace-pre-line">
+                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-800 dark:text-slate-200 whitespace-pre-line">
                   {b.label}
                 </span>
               </button>
