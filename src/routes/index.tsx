@@ -293,7 +293,7 @@ function HomeScreen() {
                 <b.icon size={28} />
               </div>
               <span
-                className="text-center text-[13px] font-bold leading-tight"
+                className="text-center text-[13px] font-bold leading-tight whitespace-pre-line"
                 style={{ color: "var(--text-dark)" }}
               >
                 {b.label}
