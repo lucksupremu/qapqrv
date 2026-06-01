@@ -238,7 +238,7 @@ function HomeScreen() {
             <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-slate-900 dark:text-white">
               QAP, QRV!
             </h1>
-            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-500">
+            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-500">
               Ferramentas Operacionais
             </span>
           </div>
@@ -269,7 +269,7 @@ function HomeScreen() {
           <div className="mb-4 flex items-center justify-between">
             <label
               htmlFor="id-escala-input"
-              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500"
+              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-500"
             >
               Consulta escala dejem/delegada
 
@@ -287,7 +287,7 @@ function HomeScreen() {
                 value={idEscala}
                 onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
                 onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
+                className="w-full rounded-2xl border border-slate-300 bg-white dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-500 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
               />
 
             </div>
@@ -308,12 +308,12 @@ function HomeScreen() {
       {/* PRÓXIMAS ESCALAS */}
       <section className="px-5 mt-6">
         <div className="mb-3 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
             Próximas Escalas
           </h2>
           <button
             onClick={() => navigate({ to: "/calendario" })}
-            className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500"
+            className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500"
           >
             Ver tudo →
           </button>
@@ -335,8 +335,8 @@ function HomeScreen() {
                   <Calendar size={18} className="text-slate-400 dark:text-slate-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[13px] font-bold text-slate-700 dark:text-slate-300">Sem escalas próximas</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-600">Toque em "Ver tudo" para configurar.</p>
+                  <p className="text-[13px] font-bold text-slate-800 dark:text-slate-300">Sem escalas próximas</p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-600">Toque em "Ver tudo" para configurar.</p>
                 </div>
               </div>
             );
@@ -393,7 +393,7 @@ function HomeScreen() {
                         <p className="truncate text-[14px] font-bold text-slate-900 dark:text-slate-100">
                           {TIPO_LABEL[m.tipo] ?? "Escala"}
                         </p>
-                        <p className="text-[12px] text-slate-500 dark:text-slate-500">
+                        <p className="text-[12px] text-slate-600 dark:text-slate-500">
                           {d.toLocaleString("pt-BR", {
                             day: "2-digit",
                             month: "2-digit",
@@ -427,7 +427,7 @@ function HomeScreen() {
       {/* ACESSO RÁPIDO — grid tático */}
       <section className="px-5 mt-6">
         <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
             Acesso Rápido
           </h2>
         </div>
@@ -443,13 +443,13 @@ function HomeScreen() {
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
                     gold
-                      ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500"
-                      : "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
+                      ? "bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-500"
+                      : "bg-blue-500/15 border-blue-500/30 text-blue-700 dark:text-blue-400"
                   }`}
                 >
                   <b.icon size={20} strokeWidth={2} />
                 </div>
-                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-800 dark:text-slate-200 whitespace-pre-line">
+                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-900 dark:text-slate-200 whitespace-pre-line">
                   {b.label}
                 </span>
               </button>
@@ -462,7 +462,7 @@ function HomeScreen() {
       <footer className="mt-8 text-center">
         <button
           onClick={() => navigate({ to: "/privacidade" })}
-          className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-600 underline underline-offset-4 decoration-slate-300 dark:decoration-slate-800"
+          className="text-[11px] uppercase tracking-wider text-slate-600 dark:text-slate-600 underline underline-offset-4 decoration-slate-400 dark:decoration-slate-800"
         >
           Política de Privacidade
         </button>
