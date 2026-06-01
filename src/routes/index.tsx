@@ -504,9 +504,9 @@ function InlineVpnChip() {
     );
   }
   return (
-    <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1">
-      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-      <span className="text-[9px] font-black uppercase tracking-wider text-amber-400">VPN Off</span>
+    <div className="flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-1">
+      <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+      <span className="text-[9px] font-black uppercase tracking-wider text-rose-400">VPN Off</span>
     </div>
   );
 }
