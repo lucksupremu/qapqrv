@@ -335,8 +335,8 @@ function HomeScreen() {
                   <Calendar size={18} className="text-slate-400 dark:text-slate-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[13px] font-bold text-slate-700 dark:text-slate-300">Sem escalas próximas</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-600">Toque em "Ver tudo" para configurar.</p>
+                  <p className="text-[13px] font-bold text-slate-800 dark:text-slate-300">Sem escalas próximas</p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-600">Toque em "Ver tudo" para configurar.</p>
                 </div>
               </div>
             );
