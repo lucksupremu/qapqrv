@@ -47,6 +47,7 @@ type ActionBlock = {
   gradient: string;
   shadow: string;
   onClick: () => void;
+  nativeOnly?: boolean;
 };
 
 function HomeScreen() {
