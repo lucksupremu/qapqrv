@@ -211,7 +211,7 @@ function HomeScreen() {
           () =>
             openInAppBrowser(
               "https://www.ciaf.policiamilitar.sp.gov.br/folhadepagamento/autenticacaosegura.aspx",
-              { titulo: "Folha de Pagamento" },
+              { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
             ),
           "a Folha de Pagamento",
         ),

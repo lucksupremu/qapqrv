@@ -19,6 +19,8 @@ export type AbrirOpts = {
   /** Mantém no WebView interno por padrão; usa Custom Tabs como fallback. */
   modo?: "webview" | "system" | "external";
   timeoutMs?: number;
+  /** Força UA mobile e desabilita fallback p/ Custom Tabs (que herda UA do Chrome do device). */
+  forceMobileUA?: boolean;
 };
 
 const ANDROID_CHROME_UA =
@@ -115,6 +117,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
 
       fallbackTimer.current = window.setTimeout(() => {
         if (loaded || closed) return;
+        if (opts.forceMobileUA) return; // não cai p/ Custom Tabs (UA pode ser desktop)
         closed = true;
         void InAppBrowser.close()
           .catch(() => undefined)
