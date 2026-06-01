@@ -22,12 +22,23 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   ESCALA_CORES,
   type EscalaRegra,
   newEscalaId,
 } from "@/lib/escala-trabalho";
+import {
+  ESCALA_PRESETS,
+  detectarPreset,
+} from "@/lib/escala-presets";
 
 type Props = {
   open: boolean;
