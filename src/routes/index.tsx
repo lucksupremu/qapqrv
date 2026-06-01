@@ -530,12 +530,14 @@ function VpnBadge() {
               <ShieldCheck size={13} />
               Abrir AnyConnect
             </button>
-            <button
-              onClick={refresh}
-              className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 px-3 py-1.5 text-[12px] font-semibold text-amber-800 dark:text-amber-200 transition active:scale-[0.97] hover:bg-amber-500/20"
-            >
-              Verificar
-            </button>
+            {isNative && (
+              <button
+                onClick={refresh}
+                className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 px-3 py-1.5 text-[12px] font-semibold text-amber-800 dark:text-amber-200 transition active:scale-[0.97] hover:bg-amber-500/20"
+              >
+                Verificar
+              </button>
+            )}
           </div>
         </div>
       )}
