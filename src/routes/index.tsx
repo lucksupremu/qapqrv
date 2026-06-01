@@ -222,7 +222,7 @@ function HomeScreen() {
               QAP, QRV!
             </h1>
             <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.22em] text-amber-500">
-              Central de Comando
+              Ferramentas Operacionais
             </span>
           </div>
         </div>
