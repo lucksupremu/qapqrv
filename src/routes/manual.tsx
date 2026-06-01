@@ -500,11 +500,13 @@ function Bloco({
   id,
   titulo,
   icone: Icone,
+  tom = "gold",
   children,
 }: {
   id: string;
   titulo: string;
   icone: LucideIcon;
+  tom?: "gold" | "blue";
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -514,7 +516,6 @@ function Bloco({
     const checkHash = () => {
       if (window.location.hash === `#${id}`) {
         setOpen(true);
-        // Garante que rola até a seção após expandir
         requestAnimationFrame(() => {
           document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
@@ -524,6 +525,11 @@ function Bloco({
     window.addEventListener("hashchange", checkHash);
     return () => window.removeEventListener("hashchange", checkHash);
   }, [id]);
+
+  const iconCls =
+    tom === "blue"
+      ? "border-blue-500/30 bg-blue-500/15 text-blue-700 dark:text-blue-400"
+      : "border-amber-500/30 bg-amber-500/15 text-amber-700 dark:text-amber-400";
 
   return (
     <section
@@ -536,7 +542,7 @@ function Bloco({
         aria-expanded={open}
         className="flex w-full items-center gap-3 p-5 text-left transition active:scale-[0.995] hover:bg-slate-50 dark:hover:bg-slate-900/70"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/15 text-amber-700 dark:text-amber-400">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${iconCls}`}>
           <Icone size={18} />
         </div>
         <h2 className="flex-1 text-[16px] font-extrabold text-slate-900 dark:text-white">
