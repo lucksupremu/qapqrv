@@ -468,17 +468,26 @@ export function EscalaCalendarCard() {
                 )}
                 {marcasDia.length > 0 && (
                   <div className="mt-2 space-y-1 border-t pt-2" style={{ borderColor: COR_BG_SOFT }}>
-                    {marcasDia.map((mk, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <span
-                          className="h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{ background: MARCA_COR[mk.tipo] ?? "#3498DB" }}
-                        />
-                        <span className="text-[12px] text-foreground">
-                          {MARCA_LABEL[mk.tipo] ?? mk.tipo}
-                        </span>
-                      </div>
-                    ))}
+                    {marcasDia.map((mk, idx) => {
+                      const dMk = new Date(mk.data);
+                      const horaOk = !Number.isNaN(dMk.getTime());
+                      return (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span
+                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ background: MARCA_COR[mk.tipo] ?? "#3498DB" }}
+                          />
+                          <span className="text-[12px] text-foreground">
+                            {MARCA_LABEL[mk.tipo] ?? mk.tipo}
+                            {horaOk && (
+                              <span className="ml-1 text-[11px] text-muted-foreground">
+                                · {fmtHora(dMk)}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </PopoverContent>
