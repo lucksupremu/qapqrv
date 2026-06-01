@@ -7,6 +7,7 @@ import {
   Menu,
   Globe,
   Mail,
+  Wallet,
   BookOpen,
   FolderDown,
   Loader2,
@@ -185,6 +186,21 @@ function HomeScreen() {
       gradient: GRAD_PRIMARY,
       shadow: SHADOW_PRIMARY,
       onClick: () => navigate({ to: "/anyconnect" }),
+    },
+    {
+      label: "Folha de Pagamento",
+      icon: Wallet,
+      gradient: GRAD_GOLD,
+      shadow: SHADOW_GOLD,
+      onClick: () =>
+        void guardIntranet(
+          () =>
+            openInAppBrowser(
+              "https://www.ciaf.policiamilitar.sp.gov.br/folhadepagamento/autenticacaosegura.aspx",
+              { titulo: "Folha de Pagamento" },
+            ),
+          "a Folha de Pagamento",
+        ),
     },
   ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 
