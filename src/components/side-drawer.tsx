@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
+import { useIsNative } from "@/hooks/use-is-native";
 
 type Ctx = { open: boolean; setOpen: (v: boolean) => void };
 const DrawerCtx = createContext<Ctx | null>(null);
@@ -38,9 +39,11 @@ type Item =
   | { type: "route"; to: string; label: string; icon: typeof Home }
   | { type: "external"; href: string; label: string; icon: typeof Home };
 
-const grupo1: Item[] = [
+const grupo1Base: Item[] = [
   { type: "route", to: "/", label: "Início", icon: Home },
   { type: "route", to: "/calendario", label: "Calendário", icon: Calendar },
+];
+const grupo1NativeOnly: Item[] = [
   { type: "route", to: "/escalas-baixadas", label: "Escalas Baixadas", icon: FolderDown },
 ];
 const grupo2: Item[] = [
@@ -66,6 +69,8 @@ const grupo3: Item[] = [
 function SideDrawer() {
   const { open, setOpen } = useDrawer();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const native = useIsNative();
+  const grupo1 = native ? [...grupo1Base, ...grupo1NativeOnly] : grupo1Base;
   const [theme, setTheme] = useState<Theme>("light");
   useEffect(() => {
     setTheme(getStoredTheme());
