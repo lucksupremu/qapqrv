@@ -393,7 +393,7 @@ function HomeScreen() {
                         <p className="truncate text-[14px] font-bold text-slate-900 dark:text-slate-100">
                           {TIPO_LABEL[m.tipo] ?? "Escala"}
                         </p>
-                        <p className="text-[12px] text-slate-500 dark:text-slate-500">
+                        <p className="text-[12px] text-slate-600 dark:text-slate-500">
                           {d.toLocaleString("pt-BR", {
                             day: "2-digit",
                             month: "2-digit",
