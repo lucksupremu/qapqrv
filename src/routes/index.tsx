@@ -29,6 +29,7 @@ import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
 import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -257,6 +258,8 @@ function HomeScreen() {
           </button>
         </div>
       </header>
+
+      <PwaInstallBanner />
 
       {/* CONSULTA — card tático com glow dourado */}
       <section className="px-5 pt-2">

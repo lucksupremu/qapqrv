@@ -1,40 +1,45 @@
-## Diagnóstico
 
-No Chrome do Android (PWA/navegador) o toque em **Escalas Baixadas** (tile da Home, item do menu lateral e botão da bottom-nav) não navega. A causa não é a VPN — a rota `/escalas-baixadas` está registrada e os 3 caminhos usam `<Link>` / `navigate()` corretos.
+## Objetivo
 
-O culpado é um **erro de hidratação** na Home (`src/routes/index.tsx`) que aparece nos logs do preview:
+Na versão web (não-APK), oferecer ao usuário a opção de instalar o app como PWA, tanto no Android quanto no iPhone. A opção aparece em dois lugares:
 
-```
-Hydration failed because the server rendered HTML didn't match the client.
-…
-+ <ul className="space-y-2">
-- <div className="flex items-center gap-3 rounded-[16px] border…">
-```
+1. **Banner/modal de boas-vindas** ao entrar pela primeira vez.
+2. **Item permanente no menu hambúrguer** (side drawer), sempre acessível.
 
-O que acontece:
+No APK (Capacitor), nada disso aparece (já está instalado).
 
-1. `useState(() => loadMarcas())` lê o `localStorage` no momento do render. No SSR não há `localStorage`, então o servidor sempre envia HTML do estado **vazio** ("Nenhuma escala agendada", que é um `<div>`).
-2. No cliente, no primeiro render já existem marcas, então a árvore vira `<ul>...<li>`. Tipos de elemento diferentes → React 19 descarta o subtree e re-renderiza.
-3. Em alguns Chromes Android esse "regen" deixa a página em estado parcialmente interativo: os handlers `onClick` dos botões irmãos (incluindo o tile "Escalas baixadas") **não disparam** até um reload completo. Daí "nada acontece, nem a URL muda".
+## Como funciona em cada plataforma
 
-O mesmo padrão (`useState(() => lerLista())` lendo `localStorage` no render inicial) está em `src/routes/escalas-baixadas.tsx` — preventivamente também precisa corrigir.
+- **Android / Chrome / Edge**: o navegador dispara o evento `beforeinstallprompt`. Capturamos, e ao clicar em "Instalar" chamamos `prompt()` nativo do navegador. Instalação em 1 toque.
+- **iOS / Safari**: não existe API de instalação. Mostramos um modal com instruções visuais: "Toque em Compartilhar (ícone quadrado com seta) → Adicionar à Tela de Início".
+- **Desktop**: mesma lógica do Android (Chrome/Edge suportam `beforeinstallprompt`).
+- **Já instalado** (`display-mode: standalone` ou `navigator.standalone`): esconde tudo.
 
-## Mudanças
+## Arquivos a criar
 
-### 1. `src/routes/index.tsx`
-- Inicializar `marcas` como `[]` (estado consistente entre SSR e primeiro render do cliente).
-- Adicionar `useEffect` que, ao montar, chama `setMarcas(loadMarcas())` — depois disso o React já está hidratado e mudar `<div>` → `<ul>` é re-render normal, sem mismatch.
-- Manter o `useEffect` existente de `focus`/`visibilitychange`/`storage` que já recarrega via `setMarcas(loadMarcas())`.
-- Manter `saveMarcas(marcas)` no efeito atual (sem regressão).
+- `src/hooks/use-pwa-install.ts` — hook que:
+  - detecta plataforma (Android/iOS/desktop), se está em standalone, e se é APK (usa `isNativeApp()`).
+  - captura `beforeinstallprompt` e expõe `canPrompt`, `promptInstall()`.
+  - expõe `isIOS`, `isInstalled`, `isNative`, `shouldShow`.
+  - persiste dispensa do banner em `localStorage` (`pwa_install_dismissed`).
 
-### 2. `src/routes/escalas-baixadas.tsx`
-- Mesmo padrão: `useState<EscalaSalva[]>([])` e popular via `useEffect` no mount com `lerLista()`. Evita futuras hidratações desencontradas se a lista crescer/encolher.
+- `src/components/pwa-install-banner.tsx` — banner discreto que aparece na home (`/`) na primeira visita web:
+  - Android/desktop: botão "Instalar app" → chama `promptInstall()`.
+  - iOS: botão "Como instalar" → abre o modal de instruções.
+  - Botão "Agora não" persiste a dispensa.
 
-### 3. Verificação
-- Após a alteração, abrir a Home no preview, abrir o console e confirmar que **não aparece** mais o aviso de hydration mismatch.
-- Testar os 3 caminhos para `/escalas-baixadas`: tile da Home, item "Escalas Baixadas" no menu lateral, botão "Escalas" da bottom-nav.
+- `src/components/pwa-install-modal.tsx` — modal com instruções específicas iOS (Compartilhar → Adicionar à Tela de Início) e Android (passo a passo via menu do navegador, como fallback se `beforeinstallprompt` não disparou).
 
-## Fora de escopo
+## Arquivos a alterar
 
-- Nada de mudança em VPN/AnyConnect — o problema é puramente de SSR/hidratação.
-- Sem alterar `routeTree.gen.ts`, `__root.tsx` ou o `PrivacyConsent`.
+- `src/routes/index.tsx` — renderizar `<PwaInstallBanner />` no topo da home, condicionado a `shouldShow` (web, não-instalado, não-dispensado).
+- `src/components/side-drawer.tsx` — adicionar item permanente "Instalar app" no Grupo 3 (acima de "Guia AnyConnect"), oculto quando `isNative` ou `isInstalled`. Ao clicar:
+  - se `canPrompt` → `promptInstall()`.
+  - senão → abre `PwaInstallModal` com instruções (iOS ou Android fallback).
+- `public/manifest.webmanifest` — já existe e está adequado (`display: standalone`, ícones 192/512, theme/background color). Sem mudanças.
+
+## Observações importantes
+
+- **Sem service worker / sem `vite-plugin-pwa`**. O manifest já basta para "Adicionar à Tela de Início" / instalação básica, conforme orientação do projeto (evita problemas de cache no preview iframe).
+- O banner é dispensável e não bloqueia a UI.
+- Textos em PT-BR, usando os tokens de cor já existentes do design system.
