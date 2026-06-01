@@ -449,7 +449,7 @@ function HomeScreen() {
                 >
                   <b.icon size={20} strokeWidth={2} />
                 </div>
-                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-800 dark:text-slate-200 whitespace-pre-line">
+                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-900 dark:text-slate-200 whitespace-pre-line">
                   {b.label}
                 </span>
               </button>
