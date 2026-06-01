@@ -19,6 +19,7 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
+import { useIsNative } from "@/hooks/use-is-native";
 import appLogo from "@/assets/app-logo.png";
 
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
@@ -46,6 +47,7 @@ type ActionBlock = {
   gradient: string;
   shadow: string;
   onClick: () => void;
+  nativeOnly?: boolean;
 };
 
 function HomeScreen() {
@@ -58,6 +60,7 @@ function HomeScreen() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
+  const native = useIsNative();
 
   useEffect(() => {
     setMarcas(loadMarcas());
@@ -109,7 +112,13 @@ function HomeScreen() {
         window.open(url, "_blank", "noopener,noreferrer");
       }
       setTimeout(() => {
-        void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
+        // Salvar offline só faz sentido no APK (no web o fetch da intranet
+        // bate em CORS e a função não consegue persistir o PDF).
+        if (isNativeApp()) {
+          void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
+        } else {
+          setConsultando(false);
+        }
       }, 0);
     }, `a escala #${id}`).finally(() => {
       // se o guard recusou (toast), libera o botão
@@ -161,6 +170,7 @@ function HomeScreen() {
       gradient: "linear-gradient(135deg, #27ae60 0%, #58d68d 100%)",
       shadow: "0 0 24px -8px rgba(39,174,96,0.45)",
       onClick: () => navigate({ to: "/escalas-baixadas" }),
+      nativeOnly: true,
     },
     {
       label: "Guia AnyConnect",
@@ -169,7 +179,7 @@ function HomeScreen() {
       shadow: "0 0 24px -8px rgba(192,57,43,0.45)",
       onClick: () => navigate({ to: "/anyconnect" }),
     },
-  ];
+  ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "var(--bg)" }}>

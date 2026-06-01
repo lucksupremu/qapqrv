@@ -1,16 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Calendar, FolderDown, Menu } from "lucide-react";
 import { useDrawer } from "@/components/side-drawer";
+import { useIsNative } from "@/hooks/use-is-native";
 
-const items = [
+const baseItems = [
   { to: "/", label: "Início", icon: Home },
   { to: "/calendario", label: "Agenda", icon: Calendar },
+] as const;
+
+const nativeOnlyItems = [
   { to: "/escalas-baixadas", label: "Escalas", icon: FolderDown },
 ] as const;
 
 export function BottomNav() {
   const { setOpen } = useDrawer();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const native = useIsNative();
+  const items = native ? [...baseItems, ...nativeOnlyItems] : baseItems;
 
   return (
     <nav
