@@ -1,45 +1,41 @@
-
 ## Objetivo
 
-Na versão web (não-APK), oferecer ao usuário a opção de instalar o app como PWA, tanto no Android quanto no iPhone. A opção aparece em dois lugares:
+Refinar a tela `/anyconnect` para deixar o passo a passo mais dinâmico e fácil de seguir, mantendo as imagens existentes (passo-1 a passo-6) como referência visual, e adicionar um botão para copiar o endereço do servidor `extranet.policiamilitar.sp.gov.br`.
 
-1. **Banner/modal de boas-vindas** ao entrar pela primeira vez.
-2. **Item permanente no menu hambúrguer** (side drawer), sempre acessível.
+## Alterações em `src/routes/anyconnect.tsx`
 
-No APK (Capacitor), nada disso aparece (já está instalado).
+### 1. Reformular cada passo
+Trocar os textos longos por estrutura escaneável:
+- **Título curto** (ex.: "Abra o menu", "Vá em Configurações", "Mantenha o padrão", "Acesse PMESP", "Confira o servidor", "Preferências avançadas")
+- **Descrição enxuta** em 1 linha
+- **Chips/destaques** com os valores exatos a conferir (ex.: `Descrição: PMESP`, `Servidor: extranet…`, `Certificado: Desabilitado`, `Auth: EAP-AnyConnect`)
+- Ícone numerado grande (badge "1/6") sobreposto ao card
 
-## Como funciona em cada plataforma
+### 2. Botão "Copiar servidor"
+- Aparece **sempre** num bloco fixo logo acima do carrossel (visível em todos os passos, já que é a informação-chave da configuração)
+- Também aparece em destaque dentro do passo 5 (onde o usuário digita o servidor)
+- Usa `navigator.clipboard.writeText("extranet.policiamilitar.sp.gov.br")`
+- Feedback visual: ícone troca de `Copy` para `Check` por ~2s + texto "Copiado!" (estado local `copied`)
+- Layout: caixa branca com label "Servidor", o endereço em fonte mono, e o botão à direita
 
-- **Android / Chrome / Edge**: o navegador dispara o evento `beforeinstallprompt`. Capturamos, e ao clicar em "Instalar" chamamos `prompt()` nativo do navegador. Instalação em 1 toque.
-- **iOS / Safari**: não existe API de instalação. Mostramos um modal com instruções visuais: "Toque em Compartilhar (ícone quadrado com seta) → Adicionar à Tela de Início".
-- **Desktop**: mesma lógica do Android (Chrome/Edge suportam `beforeinstallprompt`).
-- **Já instalado** (`display-mode: standalone` ou `navigator.standalone`): esconde tudo.
+### 3. Dinamismo / UX
+- **Swipe horizontal por toque**: adicionar handlers `onTouchStart/onTouchEnd` para trocar passo arrastando (threshold ~50px)
+- **Barra de progresso** fina acima dos dots (`width: ((step+1)/total)*100%`) com transição suave
+- **Animação de entrada** do texto a cada passo: fade + slide (`key={step}` num wrapper com classes utilitárias já existentes ou inline `animation`)
+- **Teclas ←/→** para navegar (listener em `useEffect`)
+- **Auto-scroll ao topo** do card ao trocar de passo
+- Botão "Próximo" vira "Abrir AnyConnect" no último passo (consolidando o CTA, em vez de duplicar com o botão fixo) — manter ainda o botão fixo inferior "Abrir AnyConnect" como já existe
 
-## Arquivos a criar
+### 4. Acessibilidade
+- `aria-live="polite"` no bloco de texto do passo atual
+- `aria-label` no botão copiar incluindo estado ("Copiar endereço do servidor" / "Endereço copiado")
 
-- `src/hooks/use-pwa-install.ts` — hook que:
-  - detecta plataforma (Android/iOS/desktop), se está em standalone, e se é APK (usa `isNativeApp()`).
-  - captura `beforeinstallprompt` e expõe `canPrompt`, `promptInstall()`.
-  - expõe `isIOS`, `isInstalled`, `isNative`, `shouldShow`.
-  - persiste dispensa do banner em `localStorage` (`pwa_install_dismissed`).
+## Sem mudanças
+- Imagens (`passo-1.jpg` a `passo-6.jpg`) permanecem as mesmas
+- `openAnyConnect` e botão fixo inferior continuam iguais
+- Sem novas dependências, sem mudanças de rota/backend
 
-- `src/components/pwa-install-banner.tsx` — banner discreto que aparece na home (`/`) na primeira visita web:
-  - Android/desktop: botão "Instalar app" → chama `promptInstall()`.
-  - iOS: botão "Como instalar" → abre o modal de instruções.
-  - Botão "Agora não" persiste a dispensa.
-
-- `src/components/pwa-install-modal.tsx` — modal com instruções específicas iOS (Compartilhar → Adicionar à Tela de Início) e Android (passo a passo via menu do navegador, como fallback se `beforeinstallprompt` não disparou).
-
-## Arquivos a alterar
-
-- `src/routes/index.tsx` — renderizar `<PwaInstallBanner />` no topo da home, condicionado a `shouldShow` (web, não-instalado, não-dispensado).
-- `src/components/side-drawer.tsx` — adicionar item permanente "Instalar app" no Grupo 3 (acima de "Guia AnyConnect"), oculto quando `isNative` ou `isInstalled`. Ao clicar:
-  - se `canPrompt` → `promptInstall()`.
-  - senão → abre `PwaInstallModal` com instruções (iOS ou Android fallback).
-- `public/manifest.webmanifest` — já existe e está adequado (`display: standalone`, ícones 192/512, theme/background color). Sem mudanças.
-
-## Observações importantes
-
-- **Sem service worker / sem `vite-plugin-pwa`**. O manifest já basta para "Adicionar à Tela de Início" / instalação básica, conforme orientação do projeto (evita problemas de cache no preview iframe).
-- O banner é dispensável e não bloqueia a UI.
-- Textos em PT-BR, usando os tokens de cor já existentes do design system.
+## Detalhes técnicos
+- Apenas frontend, um arquivo editado: `src/routes/anyconnect.tsx`
+- Ícones novos do `lucide-react`: `Copy`, `Check` (já instalado)
+- Cores via tokens inline existentes no arquivo (mesma paleta `#2e6b8a`, `#e8f0f8`, etc.)
