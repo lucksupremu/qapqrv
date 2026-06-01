@@ -406,11 +406,12 @@ function HomeScreen() {
                         </p>
                       </div>
                       <span
-                        className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
-                        style={{
-                          background: diasFalta <= 1 ? cor : "#0f172a",
-                          color: diasFalta <= 1 ? "#fff" : "#cbd5e1",
-                        }}
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                          diasFalta <= 1
+                            ? "text-white"
+                            : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        }`}
+                        style={diasFalta <= 1 ? { background: cor } : undefined}
                       >
                         {label}
                       </span>
