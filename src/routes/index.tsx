@@ -308,12 +308,12 @@ function HomeScreen() {
       {/* PRÓXIMAS ESCALAS */}
       <section className="px-5 mt-6">
         <div className="mb-3 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
             Próximas Escalas
           </h2>
           <button
             onClick={() => navigate({ to: "/calendario" })}
-            className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500"
+            className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500"
           >
             Ver tudo →
           </button>
