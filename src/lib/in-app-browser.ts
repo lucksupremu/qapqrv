@@ -4,6 +4,15 @@
 //
 // Importes do Capacitor são DINÂMICOS para evitar quebrar o SSR — o
 // pacote toca `window`/`navigator` no carregamento.
+import type { InAppBrowserPlugin } from "@capacitor/inappbrowser";
+
+type InAppBrowserModule = typeof import("@capacitor/inappbrowser");
+
+type CapacitorWindow = Window & {
+  Capacitor?: {
+    isNativePlatform?: () => boolean;
+  };
+};
 
 export type AbrirOpts = {
   titulo?: string;
@@ -21,22 +30,23 @@ function normalizarUrl(url: string) {
   return `https://${clean}`;
 }
 
-async function openSystemBrowser(InAppBrowser: any, mod: any, url: string) {
+async function openSystemBrowser(
+  InAppBrowser: InAppBrowserPlugin,
+  mod: InAppBrowserModule,
+  url: string,
+) {
   await InAppBrowser.openInSystemBrowser({
     url,
     options: {
-      // @ts-ignore
       ...mod.DefaultSystemBrowserOptions,
       android: {
-        // @ts-ignore
         ...mod.DefaultAndroidSystemBrowserOptions,
         showTitle: true,
         hideToolbarOnScroll: false,
       },
       iOS: {
-        // @ts-ignore
         ...mod.DefaultiOSSystemBrowserOptions,
-        closeButtonText: "Fechar",
+        closeButtonText: mod.DismissStyle.DONE,
       },
     },
   });
@@ -47,8 +57,7 @@ export function isNativeApp(): boolean {
   try {
     // require síncrono não funciona em ESM; usamos a global que o Capacitor
     // injeta no runtime nativo. Em web, retorna false.
-    // @ts-ignore
-    const cap = (window as any).Capacitor;
+    const cap = (window as CapacitorWindow).Capacitor;
     return !!cap?.isNativePlatform?.();
   } catch {
     return false;
