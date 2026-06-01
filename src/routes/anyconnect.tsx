@@ -272,7 +272,7 @@ function AnyConnectGuideScreen() {
           </h2>
           <p
             className="mt-1 text-[14px] leading-relaxed"
-            style={{ color: "#3b556b" }}
+            style={{ color: "#1a3348" }}
           >
             {passo.descricao}
           </p>
