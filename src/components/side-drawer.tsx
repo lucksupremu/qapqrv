@@ -186,6 +186,19 @@ function SideDrawer() {
           {grupo2.map(renderItem)}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo3.map(renderItem)}
+          {pwa.isInstallable && (
+            <button
+              onClick={() => {
+                setOpen(false);
+                void handleInstallClick();
+              }}
+              className="flex items-center gap-3 px-6 py-4 text-[15px] transition-all duration-200 hover:bg-[#e8f0f8]"
+              style={{ color: "#0f2535" }}
+            >
+              <Download size={20} style={{ color: "#f59e0b" }} />
+              <span>Instalar app</span>
+            </button>
+          )}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           <button
             onClick={handleToggleTheme}
