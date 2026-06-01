@@ -302,67 +302,66 @@ export function EscalaCalendarCard() {
                 {cell.date.getDate()}
               </span>
 
-              {/* Barras de plantão */}
+              {/* Faixas de plantão (estilo Google Agenda) */}
               {barrasVisiveis.length > 0 && (
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute"
-                  style={{
-                    left: 3,
-                    right: 3,
-                    bottom: 3,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                  }}
-                >
+                <>
                   {barrasVisiveis.map((b, idx) => {
-                    const baseStyle: React.CSSProperties = {
-                      height: 3,
-                      borderRadius: 2,
-                      background: b.cor,
-                    };
-                    if (b.lado === "cheia") {
-                      return <span key={idx} style={{ ...baseStyle, width: "100%" }} />;
+                    const total = barrasVisiveis.length;
+                    const cellH = 36; // 40 - 2*2 inset
+                    const slotH = total === 1 ? cellH : cellH / total;
+                    const top = 2 + idx * slotH;
+                    const height = slotH - (total > 1 ? 1 : 0);
+                    const bg = `color-mix(in srgb, ${b.cor} 28%, transparent)`;
+                    let left = 2;
+                    let right = 2;
+                    let borderRadius = "6px";
+                    let borderLeft = `3px solid ${b.cor}`;
+                    if (b.lado === "dir") {
+                      left = 20; // metade de 40
+                      borderRadius = "0 6px 6px 0";
+                    } else if (b.lado === "esq") {
+                      right = 20;
+                      borderRadius = "6px 0 0 6px";
+                      borderLeft = `3px solid ${b.cor}`;
                     }
                     return (
                       <span
                         key={idx}
+                        aria-hidden
+                        className="pointer-events-none absolute"
                         style={{
-                          position: "relative",
-                          height: 3,
-                          width: "100%",
-                          borderRadius: 2,
-                          background: "rgba(0,0,0,0.06)",
+                          left,
+                          right,
+                          top,
+                          height,
+                          background: bg,
+                          borderLeft,
+                          borderRadius,
+                          zIndex: 0,
                         }}
-                      >
-                        <span
-                          style={{
-                            ...baseStyle,
-                            position: "absolute",
-                            top: 0,
-                            [b.lado === "esq" ? "left" : "right"]: 0,
-                            width: "50%",
-                          }}
-                        />
-                      </span>
+                      />
                     );
                   })}
                   {extras > 0 && (
                     <span
+                      aria-hidden
+                      className="pointer-events-none absolute"
                       style={{
+                        right: 3,
+                        bottom: 1,
                         fontSize: 8,
                         fontWeight: 700,
                         color: "#5b7a8f",
                         lineHeight: 1,
-                        textAlign: "right",
+                        zIndex: 2,
                       }}
                     >
                       +{extras}
                     </span>
                   )}
-                </span>
+                </>
               )}
+
             </>
           );
 
