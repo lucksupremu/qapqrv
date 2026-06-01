@@ -51,12 +51,22 @@ function HomeScreen() {
   const navigate = useNavigate();
   const { setOpen: setDrawerOpen } = useDrawer();
   const [idEscala, setIdEscala] = useState("");
-  const [marcas, setMarcas] = useState<Marca[]>(() => loadMarcas());
+  // Inicia vazio para casar com o HTML do SSR (sem acesso a localStorage).
+  // Após hidratar, o useEffect abaixo popula a lista — evita hydration mismatch
+  // que estava derrubando os event handlers da Home em alguns Chromes Android.
+  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
 
   useEffect(() => {
+    setMarcas(loadMarcas());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     saveMarcas(marcas);
-  }, [marcas]);
+  }, [marcas, hydrated]);
 
   // Recarrega marcas ao voltar para a aba/rota (ex.: depois de adicionar
   // uma escala em /calendario) sem precisar recarregar a página.
