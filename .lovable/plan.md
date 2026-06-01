@@ -1,56 +1,73 @@
 ## Objetivo
 
-Tornar o cadastro da escala mais simples adicionando **presets prontos** (12x24/12x48, 12x36, 24x72…). O usuário escolhe o modelo e o sistema já preenche tudo — inclusive a alternância dia/noite quando for o caso. A opção de cadastrar uma segunda escala (para quem tem outro plantão diferente) continua existindo de forma clara.
+Deixar visualmente óbvio, no calendário de "Minha escala", quais dias são plantão **inteiro no dia** e quais são plantão **noturno que atravessa a meia-noite** — hoje a escala 12x24/12x48 parece "três dias seguidos" porque cada dia tocado pelo plantão recebe um círculo igual. Trocar a marcação por **barras dentro da célula** e, ao tocar no dia, abrir um pequeno detalhe com os horários.
 
 ---
 
-## 1. Presets de escala no modal
+## 1. Nova marcação visual (barra na célula)
 
-No topo do modal **"Adicionar plantão"** (`src/components/escala-config-modal.tsx`), adicionar um seletor `"Modelo de escala"` com as opções:
+Em `src/components/escala-calendar-card.tsx`, substituir os anéis (`cellRing` / `cellContinuacao`) por uma **barra fina horizontal** dentro da célula do dia, posicionada na parte inferior (abaixo do número), com a cor da regra.
 
-| Preset | Turno 1 | Turno 2 (alternado) |
-|---|---|---|
-| **12x24 / 12x48** (dia + noite) | 12h trab × 24h folga · início 07:00 | 12h trab × 48h folga · início 19:00 |
-| **12x36** | 12h trab × 36h folga · início 07:00 | — |
-| **24x72** | 24h trab × 72h folga · início 07:00 | — |
-| **24x48** | 24h trab × 48h folga · início 07:00 | — |
-| **Personalizada** | (usuário define) | (opcional, via checkbox) |
+Regras de preenchimento da barra, calculadas por plantão que toca o dia:
 
-Selecionar um preset preenche automaticamente: `trabalho`, `folga`, `horaInicio`, `minutoInicio` e, quando o preset for 12x24/12x48, também marca **alternada = true** e preenche o segundo turno.
+| Situação no dia | Barra |
+|---|---|
+| Plantão começa **e** termina no mesmo dia (ex.: 07:00 → 19:00) | **Barra cheia** (100% da largura) |
+| Plantão começa neste dia e termina no dia seguinte (ex.: 19:00 → 07:00) | **Metade direita** preenchida |
+| Plantão veio do dia anterior e termina neste dia (continuação) | **Metade esquerda** preenchida |
+| Plantão atravessa o dia inteiro (continuação que não termina aqui, raro em 12h) | **Barra cheia** |
+| Múltiplos plantões/cores no mesmo dia | Empilhar barras finas (uma por cor), até 2 visíveis; "+N" se houver mais |
 
-Os campos de hora continuam editáveis depois do preset — o usuário pode ajustar o horário inicial sem perder a configuração das horas. Trocar o preset reseta os campos para os valores do novo preset.
+Detalhes:
+- Barra com ~4px de altura, cantos arredondados, posicionada com `position: absolute; left/right: 4px; bottom: 3px`.
+- Meias-barras usam `width: 50%` com `left: 4px` (esquerda) ou `right: 4px` (direita).
+- Remover `cellRing` e `cellContinuacao` atuais. O número do dia volta a ser limpo, sem círculo em volta.
+- O destaque de "hoje" passa a ser um fundo leve `COR_BG_SOFT` arredondado (já existe) — manter, mas reduzir para não competir com a barra.
+- O post-it amarelo de Dejem/Delegada continua igual; quando houver post-it, a barra fica **dentro** do post-it (sobre o amarelo) para não brigar visualmente.
 
-## 2. Clareza visual: "Turno alternado" vs. "Segunda escala"
+Estado calculado por célula a partir dos `PlantaoEntry` já fornecidos por `gerarPlantoesDoMes`:
+- `tipo === "inicio"` + `fim` no mesmo dia → barra cheia
+- `tipo === "inicio"` + `fim` em dia diferente → metade direita
+- `tipo === "continuacao"` + `fim` no mesmo dia → metade esquerda
+- `tipo === "continuacao"` + `fim` em dia posterior → barra cheia
 
-Hoje há ambiguidade entre dois conceitos diferentes:
+## 2. Toque no dia abre detalhe
 
-- **Turno alternado** (dentro da mesma escala): plantão dia + plantão noite que se intercalam (caso 12x24/12x48).
-- **Segunda escala** (cadastrar outra regra separada): outro plantão em local diferente, sem relação com o primeiro.
+Hoje a célula não é clicável. Tornar cada célula um `<button>` e, ao tocar, abrir um **Popover** (shadcn `popover` já disponível) ancorado na célula com:
 
-Mudanças no modal para deixar isso explícito:
+- Data por extenso (ex.: "Sex, 14 de março").
+- Para cada plantão do dia, uma linha com:
+  - Bolinha colorida da regra.
+  - Nome do local.
+  - Horário: `19:00 → 07:00 (termina no dia seguinte)` ou `07:00 → 19:00`, deduzido de `inicio`/`fim` do `PlantaoEntry`.
+  - Tag "Início do plantão" ou "Continuação (vem de dd/mm)".
+- Para cada marca (Dejem/Delegada) do dia, uma linha com a label correspondente e a cor.
+- Se o dia não tem nada, popover não abre (ou mostra "Sem plantão").
 
-- Renomear a label `Escala alternada (segundo turno)` → **"Plantão alterna dia/noite no mesmo local"**, com um texto de apoio: _"Marque quando o mesmo serviço alterna um turno diurno e um noturno (ex.: 12x24 / 12x48)."_
-- Quando o preset já implica alternância (12x24/12x48), o checkbox aparece **marcado e bloqueado** com uma nota _"Já configurado pelo modelo selecionado."_
-- No `EscalaCalendarCard`, abaixo da lista de regras, adicionar um botão secundário **"+ Cadastrar outra escala"** que abre o mesmo modal (já dispara `setModalOpen(true)`). Isso reforça que cadastrar uma segunda escala = nova regra independente, não o checkbox de alternância.
+Apenas um popover aberto por vez; fechar tocando fora ou em outra célula.
 
-## 3. Detalhes técnicos
+## 3. Legenda
 
-- Novo arquivo `src/lib/escala-presets.ts` exporta a lista de presets com a estrutura:
-  ```ts
-  type Preset = {
-    id: "custom" | "12x24-12x48" | "12x36" | "24x72" | "24x48";
-    label: string;
-    descricao: string;
-    turno: { trabalho; folga; horaInicio; minutoInicio };
-    alternada?: { trabalho; folga; horaInicio; minutoInicio };
-  };
-  ```
-- No modal, estado novo `preset: string`; ao mudar, dispara `setTrabalho/setFolga/setHoraInicio/setMinutoInicio/setAlternada/setTrabalhoB/...` com os valores do preset.
-- Ao editar uma regra existente (`initial` definido), tentar adivinhar o preset comparando os valores; se não bater, seleciona `"Personalizada"`.
-- Componente: usar `Select` shadcn já presente para o picker de preset, no topo do bloco "Escala".
+Atualizar a mini-legenda visual no rodapé do card (ou inline acima do grid) com 3 ícones:
+
+```
+[████]  Plantão no dia
+[██  ]  Início (vai até o dia seguinte)
+[  ██]  Continuação (vem do dia anterior)
+```
+
+Texto curto: "Toque em um dia para ver detalhes."
+
+## Detalhes técnicos
+
+- Arquivo único alterado: `src/components/escala-calendar-card.tsx`.
+- Nenhuma mudança em `escala-trabalho.ts`, storage ou modal.
+- Helper local `barraDoDia(entries: PlantaoEntry[], date: Date)` que retorna `{ cor: string; lado: "cheia"|"esq"|"dir" }[]`, comparando `entry.fim` com o dia atual via `sameDay`.
+- Usar `Popover` + `PopoverTrigger`/`PopoverContent` de `@/components/ui/popover`.
+- Acessibilidade: o `<button>` mantém o `aria-label` atual e ganha `aria-haspopup="dialog"`.
 
 ## Fora do escopo
 
-- Salvar presets criados pelo próprio usuário.
-- Mudar a forma de armazenamento ou o algoritmo `gerarPlantoesDoMes` — os presets só preenchem campos existentes.
-- Notificações ou avisos por plantão.
+- Editar plantão direto pelo popover (só leitura).
+- Mudar como Dejem/Delegada são marcadas.
+- Mudar o algoritmo de geração de plantões.
