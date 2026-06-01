@@ -30,6 +30,7 @@ import { salvarEscalaEmBackground } from "@/lib/escala-download";
 import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
+import { EscalaCalendarCard } from "@/components/escala-calendar-card";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -457,6 +458,18 @@ function HomeScreen() {
           })}
         </div>
       </section>
+
+      {/* MINHA ESCALA — calendário de plantões */}
+      <section className="mt-6">
+        <div className="mb-3 flex items-center justify-between px-6">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
+            Minha Escala
+          </h2>
+        </div>
+        <EscalaCalendarCard />
+      </section>
+
+
 
       {/* FOOTER */}
       <footer className="mt-8 text-center">
