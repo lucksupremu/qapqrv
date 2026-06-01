@@ -214,6 +214,11 @@ function SideDrawer() {
           </button>
         </nav>
       </aside>
+      <PwaInstallModal
+        open={showPwaModal}
+        onClose={() => setShowPwaModal(false)}
+        platform={pwa.isIOS ? "ios" : pwa.isAndroid ? "android" : "desktop"}
+      />
     </>
   );
 }
