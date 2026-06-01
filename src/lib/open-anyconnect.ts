@@ -1,7 +1,9 @@
 import { toast } from "sonner";
+import { isNativeApp } from "@/lib/in-app-browser";
 
 const ANDROID_PACKAGE = "com.cisco.anyconnect.vpn.android.avf";
 const PLAY_STORE_URL = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
+const PLAY_STORE_MARKET = `market://details?id=${ANDROID_PACKAGE}`;
 const APP_STORE_URL = "https://apps.apple.com/us/app/cisco-secure-client/id1135064690";
 const SCHEME = "anyconnect://";
 
@@ -17,9 +19,48 @@ function detectPlatform(): Platform {
   return "other";
 }
 
-export function openAnyConnect() {
+async function openViaCapacitor(platform: Platform): Promise<boolean> {
+  try {
+    const { AppLauncher } = await import("@capacitor/app-launcher");
+    if (platform === "android") {
+      // Tenta abrir pelo package (Android consegue resolver direto)
+      const { value } = await AppLauncher.canOpenUrl({ url: ANDROID_PACKAGE });
+      if (value) {
+        await AppLauncher.openUrl({ url: ANDROID_PACKAGE });
+        return true;
+      }
+      // App não instalado → Play Store
+      await AppLauncher.openUrl({ url: PLAY_STORE_MARKET }).catch(async () => {
+        await AppLauncher.openUrl({ url: PLAY_STORE_URL });
+      });
+      return true;
+    }
+    if (platform === "ios") {
+      const { value } = await AppLauncher.canOpenUrl({ url: SCHEME });
+      if (value) {
+        await AppLauncher.openUrl({ url: SCHEME });
+        return true;
+      }
+      await AppLauncher.openUrl({ url: APP_STORE_URL });
+      return true;
+    }
+  } catch (err) {
+    console.error("[anyconnect] AppLauncher falhou:", err);
+  }
+  return false;
+}
+
+export async function openAnyConnect() {
   if (typeof window === "undefined") return;
   const platform = detectPlatform();
+
+  // Dentro do APK Capacitor: usa o plugin nativo (intent:// não funciona na WebView)
+  if (isNativeApp()) {
+    const ok = await openViaCapacitor(platform);
+    if (ok) return;
+    toast.error("Não foi possível abrir o Cisco Secure Client.");
+    return;
+  }
 
   if (platform === "android") {
     // Intent URL: abre o app se instalado, ou cai na Play Store via fallback.
