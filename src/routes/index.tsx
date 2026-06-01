@@ -462,7 +462,7 @@ function HomeScreen() {
       <footer className="mt-8 text-center">
         <button
           onClick={() => navigate({ to: "/privacidade" })}
-          className="text-[11px] uppercase tracking-wider text-slate-600 underline underline-offset-4 decoration-slate-800"
+          className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-600 underline underline-offset-4 decoration-slate-300 dark:decoration-slate-800"
         >
           Política de Privacidade
         </button>
