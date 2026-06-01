@@ -497,10 +497,11 @@ function CalendarScreen() {
                       color: isSelected
                         ? "#fff"
                         : !cell.inMonth
-                          ? "#8896a8"
+                          ? "var(--muted-fg)"
                           : isWeekend
                             ? "#c44569"
-                            : "#0f2535",
+                            : "var(--text-dark)",
+                      opacity: !cell.inMonth && !isSelected ? 0.7 : 1,
                       border: isToday && !isSelected
                         ? `2px solid ${COR_PRIMARY}`
                         : "2px solid transparent",
