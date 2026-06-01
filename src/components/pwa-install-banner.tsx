@@ -9,13 +9,7 @@ export function PwaInstallBanner() {
   const [showModal, setShowModal] = useState(false);
 
   if (!shouldShowBanner) {
-    return (
-      <PwaInstallModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        platform={isIOS ? "ios" : isAndroid ? "android" : "desktop"}
-      />
-    );
+    return null;
   }
 
   const handleInstall = async () => {

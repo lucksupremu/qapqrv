@@ -6,13 +6,13 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-const DISMISS_KEY = "pwa_install_dismissed";
+const DISMISS_KEY = "pwa_install_dismissed_at";
+const DISMISS_DAYS = 7;
 
 function detectIOS(): boolean {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent || "";
   const iOS = /iPad|iPhone|iPod/.test(ua);
-  // iPadOS 13+ se passa por Mac; detecta via touch
   const iPadOS =
     /Macintosh/.test(ua) && typeof document !== "undefined" && "ontouchend" in document;
   return iOS || iPadOS;
@@ -26,10 +26,22 @@ function detectAndroid(): boolean {
 function detectStandalone(): boolean {
   if (typeof window === "undefined") return false;
   const mql = window.matchMedia?.("(display-mode: standalone)").matches;
-  // iOS Safari
   const iosStandalone = (window.navigator as unknown as { standalone?: boolean })
     .standalone === true;
   return !!mql || iosStandalone;
+}
+
+function isDismissExpired(): boolean {
+  try {
+    const raw = localStorage.getItem(DISMISS_KEY);
+    if (!raw) return true;
+    const ts = Number(raw);
+    if (Number.isNaN(ts)) return true;
+    const elapsed = Date.now() - ts;
+    return elapsed > DISMISS_DAYS * 24 * 60 * 60 * 1000;
+  } catch {
+    return true;
+  }
 }
 
 export function usePwaInstall() {
@@ -45,11 +57,7 @@ export function usePwaInstall() {
     setIsAndroid(detectAndroid());
     setIsInstalled(detectStandalone());
     setIsNative(isNativeApp());
-    try {
-      setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
-    } catch {
-      // ignore
-    }
+    setDismissed(!isDismissExpired());
 
     const onPrompt = (e: Event) => {
       e.preventDefault();
@@ -58,6 +66,13 @@ export function usePwaInstall() {
     const onInstalled = () => {
       setIsInstalled(true);
       setDeferred(null);
+      // limpa dismiss ao instalar com sucesso
+      try {
+        localStorage.removeItem(DISMISS_KEY);
+      } catch {
+        // ignore
+      }
+      setDismissed(false);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
@@ -72,12 +87,21 @@ export function usePwaInstall() {
     await deferred.prompt();
     const choice = await deferred.userChoice;
     setDeferred(null);
+    if (choice.outcome === "accepted") {
+      setIsInstalled(true);
+      try {
+        localStorage.removeItem(DISMISS_KEY);
+      } catch {
+        // ignore
+      }
+      setDismissed(false);
+    }
     return choice.outcome;
   }, [deferred]);
 
   const dismiss = useCallback(() => {
     try {
-      localStorage.setItem(DISMISS_KEY, "1");
+      localStorage.setItem(DISMISS_KEY, String(Date.now()));
     } catch {
       // ignore
     }
@@ -85,8 +109,6 @@ export function usePwaInstall() {
   }, []);
 
   const canPrompt = !!deferred;
-  // Mostrável quando: não está no APK, não está instalado, e
-  // (a) há prompt nativo disponível, OU (b) é iOS (precisa instruções)
   const isInstallable = !isNative && !isInstalled && (canPrompt || isIOS);
   const shouldShowBanner = isInstallable && !dismissed;
 
