@@ -49,6 +49,11 @@ function Sobre() {
         </section>
       </main>
 
+      <div className="mt-8 px-4 flex flex-col items-center" aria-label="Publicidade">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Publicidade</p>
+        <AdSlot type="banner" />
+      </div>
+
       <BottomNav />
     </div>
   );
