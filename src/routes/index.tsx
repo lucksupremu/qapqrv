@@ -32,6 +32,7 @@ import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
+import { CertWarningModal } from "@/components/cert-warning-modal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -65,6 +66,7 @@ function HomeScreen() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
+  const [certModalUrl, setCertModalUrl] = useState<string | null>(null);
   const native = useIsNative();
   const [theme, setThemeState] = useState<Theme>("light");
 
@@ -158,17 +160,31 @@ function HomeScreen() {
       onClick: () => {
         const url =
           "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx";
-        void guardIntranet(
-          () =>
-            openInAppBrowser(url, {
-              titulo: "Marcar / Desmarcar",
-              // No APK: abre no Chrome completo (não Custom Tabs) para
-              // permitir aceitar o certificado interno PMESP e ativar
-              // "Site para computador" no menu do navegador.
-              modo: isNativeApp() ? "external" : "system",
-            }),
-          "Marcar / Desmarcar",
-        );
+
+        const abrir = () =>
+          openInAppBrowser(url, {
+            titulo: "Marcar / Desmarcar",
+            // No APK: abre no Chrome completo (não Custom Tabs) para
+            // permitir aceitar o certificado interno PMESP e ativar
+            // "Site para computador" no menu do navegador.
+            modo: isNativeApp() ? "external" : "system",
+          });
+
+        // No mobile-web (PWA/navegador): Chrome do Android bloqueia o
+        // certificado interno PMESP sem opção de continuar. Exibe modal
+        // de instrução antes de abrir. No APK e no desktop, abre direto.
+        const isMobileWeb =
+          !isNativeApp() &&
+          typeof navigator !== "undefined" &&
+          /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+        void guardIntranet(() => {
+          if (isMobileWeb) {
+            setCertModalUrl(url);
+            return;
+          }
+          void abrir();
+        }, "Marcar / Desmarcar");
       },
     },
     {
@@ -509,6 +525,20 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
+
+      <CertWarningModal
+        open={certModalUrl !== null}
+        url={certModalUrl ?? ""}
+        onClose={() => setCertModalUrl(null)}
+        onContinue={() => {
+          if (certModalUrl) {
+            void openInAppBrowser(certModalUrl, {
+              titulo: "Marcar / Desmarcar",
+              modo: "system",
+            });
+          }
+        }}
+      />
     </div>
   );
 }
