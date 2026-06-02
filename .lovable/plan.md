@@ -1,111 +1,66 @@
-# Sistema de notificações para escalas dejem/delegada
+## Diagnóstico
 
-## O que será construído
+1. **"Notificação genérica PQRV sem informação"**: o Chrome Android mostra um aviso fallback ("este site foi atualizado em segundo plano") com o nome do site (`qapqrv...`) sempre que recebe um push remoto cujo Service Worker **não consegue chamar `showNotification` com payload visível**. Isso acontece quando o SW não tem o payload decodificado corretamente ou quando a versão do SW em cache no celular ainda é a antiga. Como você não quer push remoto, a forma mais limpa de eliminar isso de vez é desligar a inscrição remota e remover toda a infraestrutura.
 
-Sistema em duas camadas que cobre todos os cenários:
+2. **"Testar local não funciona"**: a função usa `new Notification(...)` diretamente. No **Chrome Android** esse construtor é bloqueado — só funciona via `ServiceWorkerRegistration.showNotification`. Por isso o teste local não aparece no celular (só no desktop). Vai ser corrigido usando o SW para disparar a notificação no web, e o plugin Capacitor no APK.
 
-| Cenário | Tecnologia | Funciona com app fechado? |
-|---|---|---|
-| Android APK (Capacitor) | `@capacitor/local-notifications` | Sim, nativo, garantido |
-| Web/PWA — aba aberta | Notification API + setTimeout (já existe) | Sim |
-| Web/PWA — aba fechada | Service Worker + Web Push (VAPID) | Sim |
-| Push remoto (avisos não programados, ex: aviso administrativo) | Backend TanStack + FCM + Web Push | Sim, em todos |
+## Escopo da mudança
 
-## Etapa 1 — Notificações locais (funciona imediatamente, sem credenciais)
+Manter apenas **notificações locais** (1 dia antes às 09:00 + 2 h antes da escala), agendadas no próprio dispositivo:
+- **APK Android (Capacitor)**: `@capacitor/local-notifications` — já persiste com app fechado.
+- **Web/PWA**: `setTimeout` + `registration.showNotification` (via Service Worker), com fila em `localStorage` que é re-armada no boot.
 
-### 1.1 Capacitor LocalNotifications (Android APK)
-- `bun add @capacitor/local-notifications`
-- Estender `src/lib/notifications-adapter.ts`:
-  - Detectar `Capacitor.isNativePlatform()` e usar `LocalNotifications.schedule()` quando nativo, com fallback web atual
-  - `cancelForMarca` → `LocalNotifications.cancel()` quando nativo
-  - Hash determinístico `marcaId:index` → `number` (id do plugin é numérico)
-  - Pedir permissão nativa via `LocalNotifications.requestPermissions()`
+Remover por completo o caminho de push remoto (Edge Function `send-push`, tabela `scheduled_pushes`, tabela `push_subscriptions`, cliente Web Push e secrets VAPID).
 
-### 1.2 Disparos automáticos padrão
-Ao salvar uma marca em `marcar-modal.tsx`, gerar automaticamente DOIS lembretes (substituindo o atual default único):
-- **1 dia antes às 09:00** (já existe)
-- **2 horas antes do início da escala** (novo)
+## Mudanças
 
-Usuário ainda pode adicionar/remover/editar manualmente. A função `buildAutoReminders(dataISO)` centralizará a regra.
+### Frontend
+1. **`src/lib/notifications-adapter.ts`**
+   - Trocar `fireNow()` e `fireTestNotification()` para usar `navigator.serviceWorker.ready` → `registration.showNotification(title, opts)` no caminho web (com fallback para `new Notification` apenas no desktop quando o SW não está disponível).
+   - Garantir que o SW seja registrado uma vez no boot do app web (chamada centralizada em `main.tsx`/`__root.tsx`), fora do preview/iframe.
 
-### 1.3 Reagendamento global
-- `rehydrateReminders()` já é chamado no boot — reforçar em `__root.tsx` para rearmar timers ao abrir a aba e ao voltar do background (`visibilitychange`)
-- No nativo, o próprio plugin persiste — não precisa de rehydrate
+2. **`public/sw.js`**
+   - Remover o handler `push` (não há mais push remoto).
+   - Manter `install`/`activate` mínimos e o `notificationclick` (para abrir `/calendario`).
+   - Adicionar `message` handler para a página pedir ao SW que dispare uma notificação imediata (usado pelo "Testar local" no Android web).
 
-## Etapa 2 — Service Worker + Web Push (web em background)
+3. **`src/components/push-settings-card.tsx`**
+   - Remover seção "Push remoto (web)" e o botão "Testar push remoto".
+   - Manter apenas:
+     - Status da permissão local + botão "Ativar".
+     - Botão "Testar local" (agora funcional no Android web).
+   - Tirar imports de `web-push-client` e `push.functions`.
 
-### 2.1 Service Worker manual (sem `vite-plugin-pwa`)
-Conforme orientação Lovable, NÃO usar `vite-plugin-pwa` (interfere no preview). Em vez disso:
-- Criar `public/sw.js` manual minimalista, registrado apenas em produção e fora de iframe (`window.self === window.top` e hostname ≠ preview Lovable)
-- Handlers: `push` (mostra notificação) e `notificationclick` (abre a rota da escala)
-- Estratégia: SW só lida com push, não cacheia HTML (evita conteúdo stale)
-- Kill-switch já documentado caso seja preciso remover
+4. **`src/components/push-permission-prompt.tsx`**
+   - Trocar `subscribeWebPush()` por `requestNotificationPermission()` do adapter.
+   - Sem chamada a tabelas remotas; apenas pede a permissão do navegador.
 
-### 2.2 Web Push (VAPID)
-- `bun add web-push` (server-side)
-- Server functions em `src/lib/push.functions.ts`:
-  - `subscribeWebPush({ subscription })` — salva inscrição em tabela `push_subscriptions`
-  - `unsubscribeWebPush({ endpoint })`
-- Cliente: `src/lib/web-push-client.ts` — pede permissão, gera `PushSubscription` com `applicationServerKey = VAPID_PUBLIC_KEY`, envia para servidor
+5. **`src/components/marcar-modal.tsx`** e **`src/routes/calendario.tsx`**
+   - Remover chamadas a `schedulePushesForMarca` / `cancelScheduledPushesForMarca`.
+   - Manter apenas `scheduleRemindersForMarca` / `cancelForMarca` (já usados, são locais).
 
-### 2.3 FCM para Android
-- `bun add @capacitor/push-notifications`
-- `src/lib/fcm-client.ts` — registra token FCM e envia para servidor (`registerFcmToken`)
-- Requer `google-services.json` no projeto Android (usuário fornece após criar projeto Firebase)
+6. **Arquivos a deletar (sem mais uso)**
+   - `src/lib/web-push-client.ts`
+   - `src/lib/push.functions.ts`
+   - `src/lib/push-config.ts` (apenas constante VAPID; ícones movidos para `notifications-adapter` ou um novo `notif-assets.ts`)
+   - `supabase/functions/send-push/index.ts`
 
-## Etapa 3 — Backend (Lovable Cloud)
+### Backend
+7. **Migração SQL**
+   - `DROP TABLE public.push_subscriptions`
+   - `DROP TABLE public.scheduled_pushes`
+   - Desagendar o cron job `send-push-tick` no `pg_cron`.
 
-### 3.1 Banco
-Tabela `push_subscriptions`:
-- `id uuid`, `user_id uuid` (nullable — app é local-first), `device_id text`, `platform text` (`web|android`), `endpoint text`, `p256dh text`, `auth text`, `fcm_token text`, `created_at`
-- RLS: por enquanto inserção pública (app local-first); leitura só `service_role`
-- GRANTs explícitos (`anon insert`, `service_role all`)
+8. **Secrets**
+   - Pedir para você remover (opcional, ficam ociosos): `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`.
 
-Tabela `scheduled_pushes` (para avisos programados pelo servidor — backup do local):
-- `id`, `device_id`, `marca_id`, `title`, `body`, `send_at`, `sent_at`, `payload jsonb`
+## Limitações importantes (web, sem APK)
 
-### 3.2 Server functions / routes
-- `src/routes/api/public/push/send.ts` — endpoint chamado por `pg_cron` a cada minuto, busca `scheduled_pushes` com `send_at <= now() AND sent_at IS NULL`, dispara via `web-push` (web) ou HTTP v1 do FCM (Android), marca enviado
-- `src/lib/push.functions.ts` — `schedulePushForMarca({ marcaId, deviceId, reminders[] })` (espelha agendamento local no servidor; opcional/redundância)
-- `pg_cron` rodando o endpoint a cada minuto
+- **App totalmente fechado no navegador**: sem push remoto, o `setTimeout` é perdido quando o navegador é encerrado. A fila em `localStorage` é re-armada **quando o usuário reabre o app**. Se ele reabrir depois do horário-alvo, a notificação dispara nesse momento (catch-up).
+- **APK Android**: 100% confiável com app fechado, porque o plugin nativo agenda no AlarmManager do Android.
+- Resumindo: **no APK funciona com app fechado; no navegador web só funciona com o site aberto em alguma aba ou reaberto a tempo**. Confirme se isso atende seu requisito antes de eu remover o remoto.
 
-### 3.3 Segredos necessários (pedirei via `add_secret` no build)
-- `VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` (gero via `web-push generate-vapid-keys`)
-- `VAPID_SUBJECT` (e-mail mailto)
-- `FCM_SERVICE_ACCOUNT_JSON` (JSON do service account Firebase para HTTP v1)
-- `VITE_VAPID_PUBLIC_KEY` (pública, no client — exposta em build)
+## Como o "Testar local" vai funcionar depois
 
-## Etapa 4 — Ícone M para notificações
-
-Gerar 3 PNGs (`imagegen` premium, fundo transparente):
-- `public/notif-icon-192.png` — círculo `#0c2340`, gradient sutil para `#2e6b8a`, letra "M" branca bold serif, 192×192 (Android FCM `notification.icon`)
-- `public/notif-icon-512.png` — versão 512 (web push `icon`)
-- `public/notif-badge-72.png` — versão monocromática branca sem fundo (Android `badge`)
-
-Atualizar `notifications-adapter.ts` para usar `/notif-icon-192.png` no lugar do atual `/favicon.ico`. SW e payload remoto também referenciam estes caminhos.
-
-## Etapa 5 — UI
-
-- Em `marcar-modal.tsx`: trocar o botão único "Ativar notificações push" por status detalhado (Local OK, Push remoto OK, etc.) — só pede permissão remota se o usuário ativar opt-in
-- Tela de configurações em `/configuracoes` (ou dentro de `/favoritos`/menu) com switch "Receber avisos quando o app estiver fechado" — dispara o fluxo de subscription (Web Push ou FCM)
-- Botão "Testar notificação" para validar fim-a-fim
-
-## Detalhes técnicos
-
-- **Idempotência de IDs nativos**: hash `marcaId:index` → `parseInt(sha1.slice(0,8),16) % 2_000_000_000`. Mantém mapa reverso em `localStorage` para cancelamento.
-- **Capacitor sync**: após `bun add` dos plugins, rodar `npx cap sync` (documentar no README — usuário precisa rebuildar o APK)
-- **SSR safety**: todo código de notificação roda só no client (`typeof window !== "undefined"`); `web-push` só em `*.server.ts`
-- **Build:dev**: o registro do SW é guardado por `import.meta.env.PROD` para não quebrar preview
-- **Preview Lovable**: notificações locais funcionam; web push remoto também (Lovable serve em HTTPS), mas SW só registra fora de iframe — testar em aba dedicada
-
-## O que precisarei do usuário
-
-1. **Para Web Push funcionar (Etapa 2.2 + 3)**: vou gerar as VAPID keys e pedir para adicionar como segredos
-2. **Para FCM/Android remoto (Etapa 2.3)**: usuário precisa criar projeto no [Firebase Console](https://console.firebase.google.com/), baixar `google-services.json` e o JSON do service account. Sem isso, **as notificações locais Android continuam funcionando 100%** — só o "push remoto não programado" no Android fica indisponível.
-
-## Ordem de execução
-
-1. Etapa 4 (ícone) + Etapa 1 (locais + auto-reminders) — entrega valor imediato sem credenciais
-2. Etapa 3.1 (tabelas) + Etapa 2.1 (service worker) + VAPID setup → Web Push funcional
-3. Solicitar credenciais Firebase ao usuário → ativar FCM Android
-4. Etapa 3.2 (cron + endpoint de envio) → push remoto programado completo
+- **APK**: agenda via Capacitor para daqui a 1 segundo → notificação real do Android.
+- **Web (mobile/desktop)**: envia `postMessage` para o Service Worker, que chama `showNotification("Teste de notificação", {body, icon, tag})`. Funciona inclusive no Chrome Android (que bloqueia o construtor direto).
