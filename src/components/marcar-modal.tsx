@@ -109,23 +109,16 @@ export function MarcarModal({
       const startLocal = initialDate ? isoToLocalInput(initialDate) : "";
       setData(startLocal);
       setValor("");
-      setReminders(startLocal ? [defaultReminderForDate(startLocal)] : []);
+      setReminders(startLocal ? defaultRemindersForDate(startLocal) : []);
     }
     setErrors({});
   }, [open, initialMarca, initialDate]);
 
-  // Manter o lembrete automático em sincronia quando o usuário muda a data
-  // (apenas em criação, e se o primeiro lembrete ainda for o padrão).
+  // Mantém os lembretes automáticos em sincronia ao trocar a data (apenas em criação).
   useEffect(() => {
     if (isEdit) return;
     if (!data) return;
-    setReminders((prev) => {
-      if (prev.length === 0) return [defaultReminderForDate(data)];
-      // se houver pelo menos um, recalcula o primeiro
-      const next = [...prev];
-      next[0] = defaultReminderForDate(data);
-      return next;
-    });
+    setReminders(defaultRemindersForDate(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
