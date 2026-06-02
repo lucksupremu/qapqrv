@@ -20,9 +20,6 @@ import {
   getPermission,
 } from "@/lib/notifications-adapter";
 import { buildAutoReminders, isoToLocalInput } from "@/lib/auto-reminders";
-import { schedulePushesForMarca } from "@/lib/push.functions";
-import { getDeviceId } from "@/lib/device-id";
-import { useServerFn } from "@tanstack/react-start";
 
 const tipoOptions: { value: TipoMarca; label: string }[] = [
   { value: "dejem", label: "Dejem" },
