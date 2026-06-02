@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char91indexChar93RouteImport } from './routes/[index]'
 import { Route as SplashRouteImport } from './routes/splash'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as IntranetRouteImport } from './routes/intranet'
@@ -39,6 +40,11 @@ const SplashRoute = SplashRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/intranet'
     | '/manual'
     | '/privacidade'
+    | '/sitemap.xml'
     | '/sobre'
     | '/splash'
     | '/ferramenta/$slug'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/intranet'
     | '/manual'
     | '/privacidade'
+    | '/sitemap.xml'
     | '/sobre'
     | '/splash'
     | '/ferramenta/$slug'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/intranet'
     | '/manual'
     | '/privacidade'
+    | '/sitemap.xml'
     | '/sobre'
     | '/splash'
     | '/ferramenta/$slug'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   IntranetRoute: typeof IntranetRoute
   ManualRoute: typeof ManualRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   SplashRoute: typeof SplashRoute
   FerramentaSlugRoute: typeof FerramentaSlugRoute
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -369,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntranetRoute: IntranetRoute,
   ManualRoute: ManualRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   SplashRoute: SplashRoute,
   FerramentaSlugRoute: FerramentaSlugRoute,
