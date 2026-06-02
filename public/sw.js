@@ -1,5 +1,6 @@
-// Service Worker — apenas para receber Web Push.
-// NÃO faz cache de HTML (evita conteúdo desatualizado).
+// Service Worker — apenas para disparar notificações locais via showNotification
+// (necessário no Chrome Android, que bloqueia `new Notification()`).
+// NÃO faz cache de HTML. NÃO recebe push remoto.
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
@@ -9,19 +10,17 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("push", (event) => {
-  let data = {};
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch (_e) {
-    data = { title: "Aviso", body: event.data ? event.data.text() : "" };
-  }
-  const title = data.title || "Aviso de escala";
+// A página envia { type: "show-notification", title, body, tag, icon, badge, url }
+// e o SW dispara a notificação imediatamente.
+self.addEventListener("message", (event) => {
+  const data = event.data || {};
+  if (data.type !== "show-notification") return;
+  const title = data.title || "Aviso";
   const options = {
     body: data.body || "",
     icon: data.icon || "/notif-icon-192.png",
     badge: data.badge || "/notif-badge-72.png",
-    tag: data.tag || "qap-escala",
+    tag: data.tag || `notif-${Date.now()}`,
     data: { url: data.url || "/calendario" },
     requireInteraction: false,
   };
