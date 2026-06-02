@@ -132,33 +132,6 @@ function ManualScreen() {
         </div>
       </section>
 
-      {/* SUMÁRIO */}
-      <section className="px-5 mt-5">
-        <h3 className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
-          Sumário
-        </h3>
-        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {SECOES.map((s) => {
-            const Icon = s.icone;
-            return (
-              <li key={s.id}>
-                <a
-                  href={`#${s.id}`}
-                  className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/40 px-3 py-2.5 shadow-sm dark:shadow-none transition active:scale-[0.99] hover:bg-slate-50 dark:hover:bg-slate-900/70"
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/30 bg-blue-500/15 text-blue-700 dark:text-blue-400">
-                    <Icon size={16} />
-                  </div>
-                  <span className="flex-1 text-[13px] font-semibold text-slate-800 dark:text-slate-200">
-                    {s.titulo}
-                  </span>
-                  <ChevronRight size={16} className="text-slate-400 dark:text-slate-600" />
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
 
       {/* CONTEÚDO */}
       <div className="mt-8 space-y-6 px-5">
