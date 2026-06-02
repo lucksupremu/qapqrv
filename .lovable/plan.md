@@ -1,66 +1,62 @@
-## Diagnóstico
 
-1. **"Notificação genérica PQRV sem informação"**: o Chrome Android mostra um aviso fallback ("este site foi atualizado em segundo plano") com o nome do site (`qapqrv...`) sempre que recebe um push remoto cujo Service Worker **não consegue chamar `showNotification` com payload visível**. Isso acontece quando o SW não tem o payload decodificado corretamente ou quando a versão do SW em cache no celular ainda é a antiga. Como você não quer push remoto, a forma mais limpa de eliminar isso de vez é desligar a inscrição remota e remover toda a infraestrutura.
+## Proposta: abrir tudo no navegador padrão do aparelho (Chrome externo)
 
-2. **"Testar local não funciona"**: a função usa `new Notification(...)` diretamente. No **Chrome Android** esse construtor é bloqueado — só funciona via `ServiceWorkerRegistration.showNotification`. Por isso o teste local não aparece no celular (só no desktop). Vai ser corrigido usando o SW para disparar a notificação no web, e o plugin Capacitor no APK.
+### Resposta direta
+Sim — abrir diretamente no Chrome (ou navegador padrão do usuário) resolve a **maior parte** dos problemas que estamos enfrentando, mas **não 100%**. Vale a pena fazer. Abaixo o que muda, o que melhora e o que continua sendo limitação externa.
 
-## Escopo da mudança
+### O que melhora ao abrir no Chrome externo
 
-Manter apenas **notificações locais** (1 dia antes às 09:00 + 2 h antes da escala), agendadas no próprio dispositivo:
-- **APK Android (Capacitor)**: `@capacitor/local-notifications` — já persiste com app fechado.
-- **Web/PWA**: `setTimeout` + `registration.showNotification` (via Service Worker), com fila em `localStorage` que é re-armada no boot.
+1. **Menu completo do Chrome disponível** — botão de 3 pontos com "Site para computador", recarregar, compartilhar, etc.
+2. **Sem timeout / fallback / SSL handler customizado** — sumimos com toda a lógica frágil de `browserPageLoaded`, `sslError`, listeners do plugin.
+3. **Cookies e sessão persistentes** — o Chrome guarda login do iNotes/Intranet entre sessões; o WebView interno reseta com mais facilidade.
+4. **Certificado interno (ICP-Brasil)** — se o usuário já aceitou uma vez no Chrome, fica aceito. No WebView interno cada app tem seu próprio cache de certificados.
+5. **Compatibilidade com a página da PMESP** — algumas páginas (iNotes principalmente) só funcionam bem no Chrome completo, não no WebView.
+6. **Código muito mais simples** — basta `window.open(url, '_blank')` no web e `InAppBrowser.openInExternalBrowser({url})` no APK.
 
-Remover por completo o caminho de push remoto (Edge Function `send-push`, tabela `scheduled_pushes`, tabela `push_subscriptions`, cliente Web Push e secrets VAPID).
+### O que NÃO se resolve (limitação externa, não do app)
 
-## Mudanças
+1. **Chrome bloqueando certificado** — se o Chrome do aparelho do usuário decidiu bloquear o certificado da PMESP (versões 124+), continua bloqueando. Isso é uma decisão do Chrome, não temos como contornar de dentro do app.
+2. **Usuário precisa estar na VPN/Intranet** — já tratado pelo `guardIntranet`.
+3. **iNotes em mobile** — depende do servidor da PMESP decidir qual interface entregar.
 
-### Frontend
-1. **`src/lib/notifications-adapter.ts`**
-   - Trocar `fireNow()` e `fireTestNotification()` para usar `navigator.serviceWorker.ready` → `registration.showNotification(title, opts)` no caminho web (com fallback para `new Notification` apenas no desktop quando o SW não está disponível).
-   - Garantir que o SW seja registrado uma vez no boot do app web (chamada centralizada em `main.tsx`/`__root.tsx`), fora do preview/iframe.
+### Trade-offs (o que o usuário perde)
 
-2. **`public/sw.js`**
-   - Remover o handler `push` (não há mais push remoto).
-   - Manter `install`/`activate` mínimos e o `notificationclick` (para abrir `/calendario`).
-   - Adicionar `message` handler para a página pedir ao SW que dispare uma notificação imediata (usado pelo "Testar local" no Android web).
+- **Sai do app** — abre o Chrome em outra aba. Para voltar, usa o botão "voltar" do Android (volta direto pro app, geralmente).
+- **Sem barra "Fechar"** dentro do app — mas o botão de voltar do sistema cumpre esse papel.
+- **Sem User-Agent forçado mobile** — mas é justamente o que o usuário pediu (poder alternar entre desktop/mobile pelo menu do Chrome).
 
-3. **`src/components/push-settings-card.tsx`**
-   - Remover seção "Push remoto (web)" e o botão "Testar push remoto".
-   - Manter apenas:
-     - Status da permissão local + botão "Ativar".
-     - Botão "Testar local" (agora funcional no Android web).
-   - Tirar imports de `web-push-client` e `push.functions`.
+### Implementação proposta
 
-4. **`src/components/push-permission-prompt.tsx`**
-   - Trocar `subscribeWebPush()` por `requestNotificationPermission()` do adapter.
-   - Sem chamada a tabelas remotas; apenas pede a permissão do navegador.
+**Arquivo único alterado: `src/lib/in-app-browser.ts`**
 
-5. **`src/components/marcar-modal.tsx`** e **`src/routes/calendario.tsx`**
-   - Remover chamadas a `schedulePushesForMarca` / `cancelScheduledPushesForMarca`.
-   - Manter apenas `scheduleRemindersForMarca` / `cancelForMarca` (já usados, são locais).
+Simplificar drasticamente a função `openInAppBrowser`:
+- **No APK (Capacitor)**: sempre usar `InAppBrowser.openInExternalBrowser({url})` → abre o Chrome do aparelho.
+- **No navegador web (PWA/desktop)**: `window.open(url, '_blank')` → abre nova aba do próprio navegador.
+- Remover todo o código de WebView interno, listeners de erro, timeouts, fallback, `forceMobileUA`, `ANDROID_CHROME_UA`.
 
-6. **Arquivos a deletar (sem mais uso)**
-   - `src/lib/web-push-client.ts`
-   - `src/lib/push.functions.ts`
-   - `src/lib/push-config.ts` (apenas constante VAPID; ícones movidos para `notifications-adapter` ou um novo `notif-assets.ts`)
-   - `supabase/functions/send-push/index.ts`
+**Arquivo `src/routes/index.tsx`**
+- Remover os parâmetros `modo`, `forceMobileUA`, `titulo` das chamadas — ficam só `openInAppBrowser(url)`. As 3 chamadas (Marcar/Desmarcar, iNotes, e outras se houver) ficam idênticas.
 
-### Backend
-7. **Migração SQL**
-   - `DROP TABLE public.push_subscriptions`
-   - `DROP TABLE public.scheduled_pushes`
-   - Desagendar o cron job `send-push-tick` no `pg_cron`.
+**Manter intactos**
+- `guardIntranet` (toast de "precisa estar na VPN").
+- `isNativeApp()` (detecção de plataforma).
+- Resto do app não muda.
 
-8. **Secrets**
-   - Pedir para você remover (opcional, ficam ociosos): `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`.
+### Resumo técnico
 
-## Limitações importantes (web, sem APK)
+```text
+ANTES                                    DEPOIS
+─────                                    ──────
+openInAppBrowser(url, {                  openInAppBrowser(url)
+  modo: "webview" | "system",            ↓
+  titulo, forceMobileUA, timeout         APK   → Chrome externo
+})                                       Web   → nova aba
+↓
+WebView interno + UA custom + 
+listeners de SSL + timeout + 
+fallback p/ Custom Tabs
+```
 
-- **App totalmente fechado no navegador**: sem push remoto, o `setTimeout` é perdido quando o navegador é encerrado. A fila em `localStorage` é re-armada **quando o usuário reabre o app**. Se ele reabrir depois do horário-alvo, a notificação dispara nesse momento (catch-up).
-- **APK Android**: 100% confiável com app fechado, porque o plugin nativo agenda no AlarmManager do Android.
-- Resumindo: **no APK funciona com app fechado; no navegador web só funciona com o site aberto em alguma aba ou reaberto a tempo**. Confirme se isso atende seu requisito antes de eu remover o remoto.
+### Próximo passo
 
-## Como o "Testar local" vai funcionar depois
-
-- **APK**: agenda via Capacitor para daqui a 1 segundo → notificação real do Android.
-- **Web (mobile/desktop)**: envia `postMessage` para o Service Worker, que chama `showNotification("Teste de notificação", {body, icon, tag})`. Funciona inclusive no Chrome Android (que bloqueia o construtor direto).
+Posso aplicar agora — é uma mudança pequena (1 arquivo principal + ajuste em 2-3 chamadas) e remove muita complexidade. Quer prosseguir?
