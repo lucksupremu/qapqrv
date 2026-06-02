@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { type Marca, loadMarcas, saveMarcas, MARCAS_EVENT } from "@/lib/marcas";
+import { type Marca, loadMarcas, MARCAS_EVENT } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { useIsNative } from "@/hooks/use-is-native";
 import appLogo from "@/assets/app-logo.png";
