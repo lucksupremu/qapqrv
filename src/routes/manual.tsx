@@ -14,7 +14,7 @@ import {
   Menu,
   Lock,
   HelpCircle,
-  Download,
+  
   Smartphone,
   AlertTriangle,
   KeyRound,
