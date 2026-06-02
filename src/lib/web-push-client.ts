@@ -66,30 +66,26 @@ export async function subscribeWebPush(): Promise<{ ok: boolean; reason?: string
     const json = sub.toJSON();
     const deviceId = getDeviceId();
     const deviceUA = navigator.userAgent;
-    // Tenta atualizar a inscrição existente; se não houver, insere.
-    const { data: updated, error: updErr } = await supabase
-      .from("push_subscriptions")
-      .update({
-        endpoint: json.endpoint,
-        p256dh: json.keys?.p256dh ?? null,
-        auth: json.keys?.auth ?? null,
-        user_agent: deviceUA,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("device_id", deviceId)
-      .eq("platform", "web");
-    let error = updErr;
-    if (!error && (updated == null || (Array.isArray(updated) && updated.length === 0))) {
-      const { error: insErr } = await supabase.from("push_subscriptions").insert({
-        device_id: deviceId,
-        platform: "web",
-        endpoint: json.endpoint,
-        p256dh: json.keys?.p256dh ?? null,
-        auth: json.keys?.auth ?? null,
-        user_agent: deviceUA,
-      });
-      // Conflito de unicidade significa que já existe (e o UPDATE acima já atualizou em outra corrida) → ok
-      if (insErr && !/duplicate key|unique/i.test(insErr.message)) error = insErr;
+    const row = {
+      device_id: deviceId,
+      platform: "web",
+      endpoint: json.endpoint,
+      p256dh: json.keys?.p256dh ?? null,
+      auth: json.keys?.auth ?? null,
+      user_agent: deviceUA,
+    };
+    // Tenta inserir; se já existir (unique violation), atualiza.
+    const { error: insErr } = await supabase.from("push_subscriptions").insert(row);
+    let error: { message: string } | null = null;
+    if (insErr && /duplicate key|unique|23505/i.test(insErr.message)) {
+      const { error: updErr } = await supabase
+        .from("push_subscriptions")
+        .update({ ...row, updated_at: new Date().toISOString() })
+        .eq("device_id", deviceId)
+        .eq("platform", "web");
+      if (updErr) error = updErr;
+    } else if (insErr) {
+      error = insErr;
     }
     if (error) {
       console.error("[web-push] upsert failed", error);
