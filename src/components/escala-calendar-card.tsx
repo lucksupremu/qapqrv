@@ -11,7 +11,7 @@ import {
   removeEscala,
   saveEscalas,
 } from "@/lib/escala-trabalho";
-import { loadMarcas, type Marca, MARCAS_EVENT } from "@/lib/marcas";
+import { loadMarcas, type Marca } from "@/lib/marcas";
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
@@ -78,12 +78,10 @@ export function EscalaCalendarCard() {
     window.addEventListener("focus", refresh);
     window.addEventListener("storage", onStorage);
     document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener(MARCAS_EVENT, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("storage", onStorage);
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener(MARCAS_EVENT, refresh);
     };
   }, []);
 

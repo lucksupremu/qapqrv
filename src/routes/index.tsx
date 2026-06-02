@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { type Marca, loadMarcas, saveMarcas, MARCAS_EVENT } from "@/lib/marcas";
+import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { useIsNative } from "@/hooks/use-is-native";
 import appLogo from "@/assets/app-logo.png";
@@ -104,13 +104,11 @@ function HomeScreen() {
     window.addEventListener("pageshow", refresh);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("storage", onStorage);
-    window.addEventListener(MARCAS_EVENT, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("pageshow", refresh);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("storage", onStorage);
-      window.removeEventListener(MARCAS_EVENT, refresh);
     };
   }, []);
 
@@ -126,7 +124,7 @@ function HomeScreen() {
     setConsultando(true);
     void guardIntranet(() => {
       if (isNativeApp()) {
-        void openInAppBrowser(url);
+        void openInAppBrowser(url, { titulo: `Escala ${id}`, modo: "system" });
       } else if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
       }
@@ -162,7 +160,11 @@ function HomeScreen() {
         const url =
           "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx";
         void guardIntranet(
-          () => openInAppBrowser(url),
+          () =>
+            openInAppBrowser(url, {
+              titulo: "Marcar / Desmarcar",
+              modo: isNativeApp() ? "external" : "system",
+            }),
           "Marcar / Desmarcar",
         );
       },
@@ -173,9 +175,17 @@ function HomeScreen() {
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
       onClick: () => {
+        // A URL raiz do iNotes redireciona automaticamente para a interface
+        // correta (desktop/mobile) após o login. Usar `?ui=mobile` direto
+        // na raiz retorna 404 no servidor da PMESP.
         const url = "https://correio.policiamilitar.sp.gov.br/";
         void guardIntranet(
-          () => openInAppBrowser(url),
+          () =>
+            openInAppBrowser(url, {
+              titulo: "Email iNotes",
+              modo: isNativeApp() ? "webview" : "system",
+              forceMobileUA: isNativeApp(),
+            }),
           "o Email iNotes",
         );
       },
@@ -212,6 +222,7 @@ function HomeScreen() {
           () =>
             openInAppBrowser(
               "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
+              { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
             ),
           "a Folha de Pagamento",
         ),

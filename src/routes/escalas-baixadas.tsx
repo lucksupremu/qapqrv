@@ -142,7 +142,7 @@ function DownloadedReportsScreen() {
         return;
       }
     }
-    void openInAppBrowser(e.url);
+    void openInAppBrowser(e.url, { titulo: e.titulo ?? `Escala ${e.id}` });
   };
 
   const handleDelete = async () => {
