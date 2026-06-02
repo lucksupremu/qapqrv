@@ -104,11 +104,13 @@ function HomeScreen() {
     window.addEventListener("pageshow", refresh);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("storage", onStorage);
+    window.addEventListener(MARCAS_EVENT, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("pageshow", refresh);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener(MARCAS_EVENT, refresh);
     };
   }, []);
 
