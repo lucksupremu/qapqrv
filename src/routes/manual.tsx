@@ -172,45 +172,17 @@ function ManualScreen() {
             calendário pessoal.
           </p>
           <p>
-            O app roda pelo <strong>navegador</strong> e também pode ser instalado
-            como atalho na tela inicial do celular, funcionando como um aplicativo.
+            O app roda direto pelo <strong>navegador</strong> — não precisa
+            baixar nada. Basta abrir o site, conectar a VPN e usar.
           </p>
         </Bloco>
 
-        <Bloco id="primeiros-passos" titulo="2. Primeiros passos" icone={Download} tom="blue">
-          <SubTitulo>Instalando como atalho (PWA)</SubTitulo>
-          <p className="text-[12.5px] text-slate-600 dark:text-slate-400">
-            Você pode usar o app direto no navegador, ou instalá-lo como atalho
-            para abrir rapidinho pela tela inicial:
-          </p>
-          <Lista ordenada>
-            <li>Abra o site do app no Chrome (Android) ou Safari (iPhone).</li>
-            <li>
-              <strong>Android:</strong> menu (três pontos) → "Instalar aplicativo"
-              ou "Adicionar à tela inicial".
-            </li>
-            <li>
-              <strong>iPhone:</strong> ícone de compartilhar (quadrado com seta) →
-              "Adicionar à Tela de Início".
-            </li>
-          </Lista>
-
-          <Dica>
-            Se aparecer um banner no topo da home dizendo "Instalar app", basta
-            tocar nele que o próprio app guia a instalação.
-          </Dica>
-        </Bloco>
-
-        <Bloco id="tela-inicial" titulo="3. Tela inicial" icone={Smartphone}>
+        <Bloco id="tela-inicial" titulo="2. Tela inicial" icone={Smartphone} tom="blue">
           <p>De cima pra baixo, é isso que você vê na home:</p>
           <Lista ordenada>
             <li>
               <strong>Topo:</strong> logo do app, botão <em>sol/lua</em> (alterna
               tema claro/escuro) e ícone <em>☰</em> (abre o menu lateral).
-            </li>
-            <li>
-              <strong>Banner "Instalar app"</strong> — aparece quando dá pra
-              instalar o app como atalho no celular.
             </li>
             <li>
               <strong>Card "Consulta escala Dejem/Delegada":</strong> campo pra
