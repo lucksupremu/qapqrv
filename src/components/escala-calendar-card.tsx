@@ -11,7 +11,7 @@ import {
   removeEscala,
   saveEscalas,
 } from "@/lib/escala-trabalho";
-import { loadMarcas, type Marca } from "@/lib/marcas";
+import { loadMarcas, type Marca, MARCAS_EVENT } from "@/lib/marcas";
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
