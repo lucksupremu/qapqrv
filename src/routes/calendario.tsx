@@ -219,7 +219,8 @@ function CalendarScreen() {
     if (!confirmDelete) return;
     cancelForMarca(confirmDelete.id);
     void cancelScheduledPushesForMarca({
-      data: { deviceId: getDeviceId(), marcaId: confirmDelete.id },
+      deviceId: getDeviceId(),
+      marcaId: confirmDelete.id,
     }).catch(() => {});
     setMarcas((prev) => prev.filter((m) => m.id !== confirmDelete.id));
     setConfirmDelete(null);
