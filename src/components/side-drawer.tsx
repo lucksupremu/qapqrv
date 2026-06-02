@@ -12,6 +12,7 @@ import {
   Sun,
   Moon,
   Download,
+  Bell,
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
