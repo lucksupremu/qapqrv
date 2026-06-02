@@ -266,7 +266,7 @@ function HomeScreen() {
         </div>
       </header>
 
-      <PwaInstallBanner />
+      
 
       {/* CONSULTA — card tático com glow dourado */}
       <section className="px-5 pt-2">
