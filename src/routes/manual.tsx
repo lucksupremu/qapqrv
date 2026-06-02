@@ -21,6 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
+import { AdSlot } from "@/components/ad-slot";
 
 export const Route = createFileRoute("/manual")({
   head: () => ({
@@ -347,6 +348,11 @@ function ManualScreen() {
             </button>
           </div>
         </Bloco>
+      </div>
+
+      <div className="mt-8 px-5 flex flex-col items-center" aria-label="Publicidade">
+        <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">Publicidade</p>
+        <AdSlot type="banner" />
       </div>
     </div>
   );

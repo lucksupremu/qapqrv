@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
+import { AdSlot } from "@/components/ad-slot";
 import { ToolCard } from "@/components/tool-card";
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
 import { tools } from "@/lib/tools";
@@ -61,6 +62,11 @@ function Inicio() {
       </main>
 
       {q.trim() === "" && <EscalaCalendarCard />}
+
+      <div className="mt-8 px-4 flex flex-col items-center" aria-label="Publicidade">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Publicidade</p>
+        <AdSlot type="banner" />
+      </div>
 
       <BottomNav />
     </div>
