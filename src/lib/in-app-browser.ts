@@ -87,12 +87,26 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
 
       let loaded = false;
       let closed = false;
+      let fellBack = false;
       const fallbackTimer: { current?: number } = {};
       const removeHandles: Array<{ remove: () => Promise<void> }> = [];
 
       const cleanup = () => {
         if (fallbackTimer.current) window.clearTimeout(fallbackTimer.current);
         void Promise.allSettled(removeHandles.map((handle) => handle.remove()));
+      };
+
+      const fallbackToSystem = (motivo: string) => {
+        if (fellBack || closed) return;
+        fellBack = true;
+        closed = true;
+        cleanup();
+        console.warn(`[InAppBrowser] fallback p/ Chrome do sistema: ${motivo}`);
+        void InAppBrowser.close()
+          .catch(() => undefined)
+          .finally(() =>
+            openSystemBrowser(InAppBrowser, mod, targetUrl).catch(() => undefined),
+          );
       };
 
       await InAppBrowser.removeAllListeners?.();
@@ -114,15 +128,39 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
           cleanup();
         }),
       );
+      // Eventos de erro variam entre versões do plugin; registramos todos os
+      // candidatos conhecidos. Qualquer falha de SSL/rede dispara o fallback.
+      const errorEvents = [
+        "browserPageLoadError",
+        "pageLoadError",
+        "browserPageLoadFailed",
+        "sslError",
+      ];
+      for (const ev of errorEvents) {
+        try {
+          const handle = await (
+            InAppBrowser as unknown as {
+              addListener: (
+                name: string,
+                cb: (err: unknown) => void,
+              ) => Promise<{ remove: () => Promise<void> }>;
+            }
+          ).addListener(ev, (err) => {
+            fallbackToSystem(`${ev}: ${JSON.stringify(err ?? {})}`);
+          });
+          if (handle) removeHandles.push(handle);
+        } catch {
+          // listener inexistente nessa versão do plugin — ignora
+        }
+      }
 
       fallbackTimer.current = window.setTimeout(() => {
         if (loaded || closed) return;
-        if (opts.forceMobileUA) return; // não cai p/ Custom Tabs (UA pode ser desktop)
-        closed = true;
-        void InAppBrowser.close()
-          .catch(() => undefined)
-          .finally(() => openSystemBrowser(InAppBrowser, mod, targetUrl).catch(() => undefined));
-      }, opts.timeoutMs ?? 22000);
+        // Mesmo com forceMobileUA, se nada carregou é melhor cair p/ Custom Tabs
+        // (onde o usuário pode aceitar manualmente o certificado interno).
+        fallbackToSystem("timeout sem browserPageLoaded");
+      }, opts.timeoutMs ?? (opts.forceMobileUA ? 12000 : 8000));
+
 
       await InAppBrowser.openInWebView({
         url: targetUrl,
