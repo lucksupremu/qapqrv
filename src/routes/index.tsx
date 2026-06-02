@@ -155,15 +155,21 @@ function HomeScreen() {
       icon: CalendarPlus,
       gradient: GRAD_PRIMARY,
       shadow: SHADOW_PRIMARY,
-      onClick: () =>
+      onClick: () => {
+        const url =
+          "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx";
         void guardIntranet(
           () =>
-            openInAppBrowser(
-              "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
-              { titulo: "Marcar / Desmarcar", modo: "system" },
-            ),
+            openInAppBrowser(url, {
+              titulo: "Marcar / Desmarcar",
+              // No APK: abre no Chrome completo (não Custom Tabs) para
+              // permitir aceitar o certificado interno PMESP e ativar
+              // "Site para computador" no menu do navegador.
+              modo: isNativeApp() ? "external" : "system",
+            }),
           "Marcar / Desmarcar",
-        ),
+        );
+      },
     },
     {
       label: "Email iNotes",
