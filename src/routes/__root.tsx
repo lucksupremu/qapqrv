@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { DrawerProvider } from "@/components/side-drawer";
 import { BottomNav } from "@/components/bottom-nav";
 import { PrivacyConsent } from "@/components/privacy-consent";
+import { PushPermissionPrompt } from "@/components/push-permission-prompt";
 import { isNativeApp } from "@/lib/in-app-browser";
 
 /** Google AdSense client ID */
@@ -157,6 +158,7 @@ function RootComponent() {
           </div>
           <BottomNav />
           <PrivacyConsent />
+          <PushPermissionPrompt />
           <Toaster />
         </DrawerProvider>
       </TooltipProvider>
