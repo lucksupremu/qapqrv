@@ -19,7 +19,7 @@ const emAndamento = new Set<string>();
 async function isNative(): Promise<boolean> {
   if (typeof window === "undefined") return false;
   try {
-    const { Capacitor } = await import("@capacitor/core");
+    const { Capacitor } = await import(/* @vite-ignore */ "@capacitor/core");
     return Capacitor.isNativePlatform();
   } catch {
     return false;
@@ -28,7 +28,7 @@ async function isNative(): Promise<boolean> {
 
 async function baixarNoNativo(id: string, url: string): Promise<boolean> {
   try {
-    const { CapacitorHttp } = await import("@capacitor/core");
+    const { CapacitorHttp } = await import(/* @vite-ignore */ "@capacitor/core");
     const resp = await CapacitorHttp.request({
       method: "GET",
       url,

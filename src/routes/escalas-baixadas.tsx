@@ -118,9 +118,9 @@ function DownloadedReportsScreen() {
     // APK: se tiver arquivo salvo no Filesystem, abre por URI nativa.
     if (e.localPath) {
       try {
-        const { Capacitor } = await import("@capacitor/core");
+        const { Capacitor } = await import(/* @vite-ignore */ "@capacitor/core");
         if (Capacitor.isNativePlatform()) {
-          const { Filesystem, Directory } = await import("@capacitor/filesystem");
+          const { Filesystem, Directory } = await import(/* @vite-ignore */ "@capacitor/filesystem");
           const { uri } = await Filesystem.getUri({
             path: e.localPath,
             directory: Directory.Data,
