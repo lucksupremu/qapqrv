@@ -1,14 +1,8 @@
-// Notification adapter: web now, Capacitor-ready later.
-//
-// Web: uses the Notification API + setTimeout for in-session firing,
-// plus a localStorage queue + 1h interval rehydrate for longer horizons.
-//
-// Capacitor: when running natively, swap the implementation to
-// @capacitor/local-notifications (LocalNotifications.schedule), which
-// survives app close. Install with:
-//   bun add @capacitor/local-notifications
-//   npx cap sync
-// then uncomment the native block in scheduleOne / cancelForMarca.
+// Adapter de notificações locais.
+// - APK Android (Capacitor): usa @capacitor/local-notifications (persiste com app fechado)
+// - Web/PWA: Notification API + setTimeout, com queue em localStorage e rehydrate
+
+import { NOTIF_ICON_192 } from "./push-config";
 
 export type ScheduledReminder = {
   id: string; // `${marcaId}:${index}`
@@ -19,9 +13,10 @@ export type ScheduledReminder = {
 };
 
 const QUEUE_KEY = "reminders_queue";
+const NATIVE_ID_MAP_KEY = "reminders_native_id_map";
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
 
-function isNative() {
+function isNative(): boolean {
   if (typeof window === "undefined") return false;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cap = (window as any).Capacitor;
@@ -46,7 +41,44 @@ function saveQueue(q: ScheduledReminder[]) {
   }
 }
 
+function loadNativeIdMap(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(NATIVE_ID_MAP_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveNativeIdMap(map: Record<string, number>) {
+  try {
+    localStorage.setItem(NATIVE_ID_MAP_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+// Hash determinístico string → int (32 bits)
+function stringToInt(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  // Plugin Capacitor exige id positivo, cabendo em int32
+  return Math.abs(h | 0) || 1;
+}
+
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
+  if (isNative()) {
+    try {
+      const mod = await import("@capacitor/local-notifications");
+      const res = await mod.LocalNotifications.requestPermissions();
+      return res.display === "granted" ? "granted" : "denied";
+    } catch {
+      return "denied";
+    }
+  }
   if (typeof window === "undefined" || !("Notification" in window)) return "denied";
   if (Notification.permission === "default") {
     try {
@@ -59,6 +91,10 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
 }
 
 export function getPermission(): NotificationPermission {
+  if (isNative()) {
+    // No nativo presumimos granted após pedir; o estado real será checado em runtime.
+    return "granted";
+  }
   if (typeof window === "undefined" || !("Notification" in window)) return "denied";
   return Notification.permission;
 }
@@ -69,7 +105,8 @@ function fireNow(r: ScheduledReminder) {
   try {
     new Notification(r.title, {
       body: r.body,
-      icon: "/favicon.ico",
+      icon: NOTIF_ICON_192,
+      badge: NOTIF_ICON_192,
       tag: r.id,
     });
   } catch {
@@ -77,38 +114,74 @@ function fireNow(r: ScheduledReminder) {
   }
 }
 
-const MAX_TIMEOUT = 24 * 60 * 60 * 1000; // 24h window for setTimeout scheduling
+const MAX_TIMEOUT = 24 * 60 * 60 * 1000;
 
-function scheduleOne(r: ScheduledReminder) {
-  // Clear any existing timer for this id
+function scheduleOneWeb(r: ScheduledReminder) {
   const existing = timers.get(r.id);
   if (existing) clearTimeout(existing);
 
   const when = new Date(r.whenISO).getTime();
   const delay = when - Date.now();
 
-  if (delay <= 0) return; // past — caller decides whether to fire or drop
-  if (delay > MAX_TIMEOUT) return; // too far — will be picked up later by rehydrate
+  if (delay <= 0) return;
+  if (delay > MAX_TIMEOUT) return;
 
   const t = setTimeout(() => {
     fireNow(r);
     timers.delete(r.id);
-    // Remove from queue after firing
     const q = loadQueue().filter((x) => x.id !== r.id);
     saveQueue(q);
   }, delay);
   timers.set(r.id, t);
+}
 
-  // TODO (Capacitor): if (isNative()) {
-  //   await LocalNotifications.schedule({
-  //     notifications: [{
-  //       id: hashToInt(r.id),
-  //       title: r.title,
-  //       body: r.body,
-  //       schedule: { at: new Date(r.whenISO) },
-  //     }],
-  //   });
-  // }
+async function scheduleNative(reminders: ScheduledReminder[]) {
+  try {
+    const mod = await import("@capacitor/local-notifications");
+    const map = loadNativeIdMap();
+    const toSchedule = reminders
+      .map((r) => {
+        const at = new Date(r.whenISO);
+        if (at.getTime() <= Date.now()) return null;
+        const nid = stringToInt(r.id);
+        map[r.id] = nid;
+        return {
+          id: nid,
+          title: r.title,
+          body: r.body,
+          schedule: { at, allowWhileIdle: true },
+          smallIcon: "ic_stat_notification",
+          iconColor: "#0c2340",
+          extra: { marcaId: r.marcaId, reminderId: r.id },
+        };
+      })
+      .filter(Boolean);
+    if (toSchedule.length === 0) return;
+    saveNativeIdMap(map);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await mod.LocalNotifications.schedule({ notifications: toSchedule as any });
+  } catch (e) {
+    console.error("[notif] native schedule failed", e);
+  }
+}
+
+async function cancelNativeForMarca(marcaId: string) {
+  try {
+    const mod = await import("@capacitor/local-notifications");
+    const map = loadNativeIdMap();
+    const ids = Object.entries(map)
+      .filter(([key]) => key.startsWith(`${marcaId}:`))
+      .map(([, id]) => ({ id }));
+    if (ids.length > 0) {
+      await mod.LocalNotifications.cancel({ notifications: ids });
+      for (const key of Object.keys(map)) {
+        if (key.startsWith(`${marcaId}:`)) delete map[key];
+      }
+      saveNativeIdMap(map);
+    }
+  } catch (e) {
+    console.error("[notif] native cancel failed", e);
+  }
 }
 
 export function scheduleRemindersForMarca(
@@ -116,10 +189,10 @@ export function scheduleRemindersForMarca(
   whenISOs: string[],
   buildContent: (whenISO: string, index: number) => { title: string; body: string },
 ) {
-  // Replace existing scheduled reminders for this marca
   cancelForMarca(marcaId);
   const q = loadQueue();
   const now = Date.now();
+  const reminders: ScheduledReminder[] = [];
 
   whenISOs.forEach((whenISO, index) => {
     const when = new Date(whenISO).getTime();
@@ -132,12 +205,17 @@ export function scheduleRemindersForMarca(
       title,
       body,
     };
+    reminders.push(r);
     q.push(r);
-    scheduleOne(r);
   });
 
   saveQueue(q);
-  void isNative; // reserved
+
+  if (isNative()) {
+    void scheduleNative(reminders);
+  } else {
+    for (const r of reminders) scheduleOneWeb(r);
+  }
 }
 
 export function cancelForMarca(marcaId: string) {
@@ -151,24 +229,62 @@ export function cancelForMarca(marcaId: string) {
     return false;
   });
   saveQueue(q);
-
-  // TODO (Capacitor): LocalNotifications.cancel({ notifications: [...] })
+  if (isNative()) void cancelNativeForMarca(marcaId);
 }
 
-/** Re-arm timers from the persisted queue. Call on app boot and periodically. */
+/** Re-arma timers no boot e periodicamente. No nativo, o plugin já persiste. */
 export function rehydrateReminders() {
   if (typeof window === "undefined") return;
+  if (isNative()) return; // plugin nativo já persiste
+
   const now = Date.now();
   const fresh = loadQueue().filter((r) => {
     const when = new Date(r.whenISO).getTime();
     if (Number.isNaN(when)) return false;
     if (when <= now) {
-      // Missed reminder — fire once if app is open, then drop
       fireNow(r);
       return false;
     }
-    scheduleOne(r); // no-op if > 24h, will be retried next tick
+    scheduleOneWeb(r);
     return true;
   });
   saveQueue(fresh);
+}
+
+/** Dispara uma notificação local de teste imediatamente. */
+export async function fireTestNotification(): Promise<boolean> {
+  const perm = await requestNotificationPermission();
+  if (perm !== "granted") return false;
+
+  if (isNative()) {
+    try {
+      const mod = await import("@capacitor/local-notifications");
+      await mod.LocalNotifications.schedule({
+        notifications: [
+          {
+            id: stringToInt(`test:${Date.now()}`),
+            title: "Teste de notificação",
+            body: "Tudo funcionando! Você receberá avisos das escalas.",
+            schedule: { at: new Date(Date.now() + 1000) },
+            smallIcon: "ic_stat_notification",
+            iconColor: "#0c2340",
+          },
+        ],
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  try {
+    new Notification("Teste de notificação", {
+      body: "Tudo funcionando! Você receberá avisos das escalas.",
+      icon: NOTIF_ICON_192,
+      badge: NOTIF_ICON_192,
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
