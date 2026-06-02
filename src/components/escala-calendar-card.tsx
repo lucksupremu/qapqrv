@@ -78,10 +78,12 @@ export function EscalaCalendarCard() {
     window.addEventListener("focus", refresh);
     window.addEventListener("storage", onStorage);
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener(MARCAS_EVENT, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("storage", onStorage);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener(MARCAS_EVENT, refresh);
     };
   }, []);
 
