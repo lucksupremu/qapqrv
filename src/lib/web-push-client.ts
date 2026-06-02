@@ -65,18 +65,28 @@ export async function subscribeWebPush(): Promise<{ ok: boolean; reason?: string
     }
     const json = sub.toJSON();
     const deviceId = getDeviceId();
-    const { error } = await supabase.from("push_subscriptions").upsert(
-      {
-        device_id: deviceId,
-        platform: "web",
-        endpoint: json.endpoint,
-        p256dh: json.keys?.p256dh ?? null,
-        auth: json.keys?.auth ?? null,
-        user_agent: navigator.userAgent,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "device_id,platform" },
-    );
+    const deviceUA = navigator.userAgent;
+    const row = {
+      device_id: deviceId,
+      platform: "web",
+      endpoint: json.endpoint,
+      p256dh: json.keys?.p256dh ?? null,
+      auth: json.keys?.auth ?? null,
+      user_agent: deviceUA,
+    };
+    // Tenta inserir; se já existir (unique violation), atualiza.
+    const { error: insErr } = await supabase.from("push_subscriptions").insert(row);
+    let error: { message: string } | null = null;
+    if (insErr && /duplicate key|unique|23505/i.test(insErr.message)) {
+      const { error: updErr } = await supabase
+        .from("push_subscriptions")
+        .update({ ...row, updated_at: new Date().toISOString() })
+        .eq("device_id", deviceId)
+        .eq("platform", "web");
+      if (updErr) error = updErr;
+    } else if (insErr) {
+      error = insErr;
+    }
     if (error) {
       console.error("[web-push] upsert failed", error);
       return { ok: false, reason: error.message };
