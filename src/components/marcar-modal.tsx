@@ -63,22 +63,11 @@ export type MarcarModalProps = {
   initialDate?: string | null;
 };
 
-function isoToLocalInput(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function defaultReminderForDate(dataLocal: string): string {
-  // 1 day before, at 09:00
-  if (!dataLocal) return "";
+function defaultRemindersForDate(dataLocal: string): string[] {
+  if (!dataLocal) return [];
   const d = new Date(dataLocal);
-  if (Number.isNaN(d.getTime())) return "";
-  d.setDate(d.getDate() - 1);
-  d.setHours(9, 0, 0, 0);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (Number.isNaN(d.getTime())) return [];
+  return buildAutoReminders(d.toISOString()).map(isoToLocalInput);
 }
 
 export function MarcarModal({
