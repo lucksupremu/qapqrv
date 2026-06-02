@@ -1,17 +1,7 @@
-// Abre links sempre no navegador padrão do aparelho.
-// - No APK (Capacitor): usa InAppBrowser.openInExternalBrowser → Chrome do sistema
-// - No web (PWA/desktop): window.open em nova aba
-//
-// Decisão: NÃO usamos mais WebView interno. O Chrome externo dá ao usuário o
-// menu completo (3 pontos → "Site para computador", recarregar, etc.), mantém
-// cookies/certificados aceitos entre sessões e elimina toda a lógica frágil de
-// fallback / timeout / handler de SSL do plugin.
+// O app roda apenas como web/PWA. APK (Capacitor) foi descontinuado.
+// Esta função abre links sempre em nova aba do navegador padrão.
 
-type CapacitorWindow = Window & {
-  Capacitor?: {
-    isNativePlatform?: () => boolean;
-  };
-};
+
 
 // `AbrirOpts` é mantido como tipo opcional só para compatibilidade com chamadas
 // antigas — os campos são ignorados. Sempre abrimos no navegador padrão.
