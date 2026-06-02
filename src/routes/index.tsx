@@ -170,19 +170,25 @@ function HomeScreen() {
       icon: Mail,
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
-      onClick: () =>
+      onClick: () => {
+        // Detecta mobile (APK ou navegador mobile) para abrir versão otimizada
+        const isMobile =
+          isNativeApp() ||
+          (typeof navigator !== "undefined" &&
+            /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
+        const url = isMobile
+          ? "https://correio.policiamilitar.sp.gov.br/?ui=mobile"
+          : "https://correio.policiamilitar.sp.gov.br/";
         void guardIntranet(
           () =>
-            openInAppBrowser(
-              "https://correio.policiamilitar.sp.gov.br/iwaredir.nsf?ui=mobile",
-              {
-                titulo: "Email iNotes",
-                modo: "webview",
-                forceMobileUA: true,
-              },
-            ),
+            openInAppBrowser(url, {
+              titulo: "Email iNotes",
+              modo: isNativeApp() ? "webview" : "system",
+              forceMobileUA: isNativeApp(),
+            }),
           "o Email iNotes",
-        ),
+        );
+      },
     },
     {
       label: "Calendário",
