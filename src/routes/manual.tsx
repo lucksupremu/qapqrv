@@ -21,6 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
+import { AdSlot } from "@/components/ad-slot";
 
 export const Route = createFileRoute("/manual")({
   head: () => ({
