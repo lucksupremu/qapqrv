@@ -32,8 +32,6 @@ import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
-import { BrowserPickerModal } from "@/components/browser-picker-modal";
-import type { AbrirOpts } from "@/lib/in-app-browser";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -67,10 +65,6 @@ function HomeScreen() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
-  const [browserPick, setBrowserPick] = useState<
-    { url: string; titulo: string } | null
-  >(null);
-
   const native = useIsNative();
   const [theme, setThemeState] = useState<Theme>("light");
 
@@ -129,7 +123,7 @@ function HomeScreen() {
     setConsultando(true);
     void guardIntranet(() => {
       if (isNativeApp()) {
-        void openInAppBrowser(url, { titulo: `Escala ${id}`, modo: "system" });
+        void openInAppBrowser(url, { titulo: `Escala ${id}` });
       } else if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
       }
@@ -161,37 +155,30 @@ function HomeScreen() {
       icon: CalendarPlus,
       gradient: GRAD_PRIMARY,
       shadow: SHADOW_PRIMARY,
-      onClick: () => {
-        const url =
-          "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx";
+      onClick: () =>
         void guardIntranet(
-          () => {
-            setBrowserPick({ url, titulo: "Marcar / Desmarcar" });
-          },
+          () =>
+            openInAppBrowser(
+              "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
+              { titulo: "Marcar / Desmarcar" },
+            ),
           "Marcar / Desmarcar",
-        );
-      },
+        ),
     },
     {
       label: "Email iNotes",
       icon: Mail,
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
-      onClick: () => {
-        // A URL raiz do iNotes redireciona automaticamente para a interface
-        // correta (desktop/mobile) após o login. Usar `?ui=mobile` direto
-        // na raiz retorna 404 no servidor da PMESP.
-        const url = "https://correio.policiamilitar.sp.gov.br/";
+      onClick: () =>
         void guardIntranet(
           () =>
-            openInAppBrowser(url, {
+            openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
               titulo: "Email iNotes",
-              modo: isNativeApp() ? "webview" : "system",
-              forceMobileUA: isNativeApp(),
+              modo: "system",
             }),
           "o Email iNotes",
-        );
-      },
+        ),
     },
     {
       label: "Calendário",
@@ -506,28 +493,6 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
-
-      <BrowserPickerModal
-        open={!!browserPick}
-        url={browserPick?.url ?? null}
-        titulo={browserPick?.titulo}
-        isNative={native}
-        onClose={() => setBrowserPick(null)}
-        onPick={(modo) => {
-          if (!browserPick) return;
-          const { url, titulo } = browserPick;
-          setBrowserPick(null);
-          if (!isNativeApp() && modo === "external") {
-            void navigator.clipboard
-              ?.writeText(url)
-              .then(() => toast.success("Link copiado! Cole em outro navegador."))
-              .catch(() => toast.info(url));
-            return;
-          }
-          const opts: AbrirOpts = { titulo, modo };
-          void openInAppBrowser(url, opts);
-        }}
-      />
     </div>
   );
 }
