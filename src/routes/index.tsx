@@ -525,6 +525,20 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
+
+      <CertWarningModal
+        open={certModalUrl !== null}
+        url={certModalUrl ?? ""}
+        onClose={() => setCertModalUrl(null)}
+        onContinue={() => {
+          if (certModalUrl) {
+            void openInAppBrowser(certModalUrl, {
+              titulo: "Marcar / Desmarcar",
+              modo: "system",
+            });
+          }
+        }}
+      />
     </div>
   );
 }
