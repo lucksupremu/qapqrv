@@ -20,7 +20,7 @@ let interstitialPrepared = false;
 export async function initAdMob(): Promise<void> {
   if (!isNativeApp() || initialized) return;
   try {
-    const { AdMob } = await import("@capacitor-community/admob");
+    const { AdMob } = await import(/* @vite-ignore */ "@capacitor-community/admob");
     await AdMob.initialize({ initializeForTesting: false });
     initialized = true;
   } catch (e) {
@@ -33,7 +33,7 @@ export async function prepareInterstitial(): Promise<void> {
   if (!isNativeApp() || interstitialPrepared) return;
   try {
     await initAdMob();
-    const { AdMob } = await import("@capacitor-community/admob");
+    const { AdMob } = await import(/* @vite-ignore */ "@capacitor-community/admob");
     await AdMob.prepareInterstitial({ adId: ADMOB_INTERSTITIAL_ID });
     interstitialPrepared = true;
   } catch (e) {
@@ -46,7 +46,7 @@ export async function showInterstitial(): Promise<void> {
   if (!isNativeApp()) return;
   try {
     if (!interstitialPrepared) await prepareInterstitial();
-    const { AdMob } = await import("@capacitor-community/admob");
+    const { AdMob } = await import(/* @vite-ignore */ "@capacitor-community/admob");
     await AdMob.showInterstitial();
     interstitialPrepared = false;
     void prepareInterstitial(); // pré-carrega o próximo
