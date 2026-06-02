@@ -1,21 +1,15 @@
-## Problema
+## Mudanças
 
-Ao excluir uma marca (Dejem / Delegada) na tela de Calendário, ela some de lá, mas o calendário da tela inicial (`EscalaCalendarCard`) continua mostrando a marca até dar refresh/focus.
+### 1. Desativar opção de instalar PWA
+- `src/routes/index.tsx`: remover `<PwaInstallBanner />` e o import.
+- `src/components/side-drawer.tsx`: remover o botão "Instalar app", o estado/uso de `usePwaInstall`, o `PwaInstallModal` e os imports relacionados.
 
-Causa: `EscalaCalendarCard` só recarrega via `window.storage` (que **não dispara na mesma aba**), `focus` e `visibilitychange`. Como a edição/exclusão acontece na mesma aba, o card da home não é notificado.
+Os arquivos `pwa-install-banner.tsx`, `pwa-install-modal.tsx` e `use-pwa-install.ts` ficam no projeto (sem uso) para não quebrar nada — podem ser apagados depois se desejar.
 
-## Correção
-
-1. **`src/lib/marcas.ts`** — dentro de `saveMarcas`, após gravar no `localStorage`, disparar um evento customizado na mesma aba:
-   ```ts
-   window.dispatchEvent(new CustomEvent("marcas-changed"));
-   ```
-   Isso vira o canal único de sincronização para qualquer tela que leia marcas.
-
-2. **`src/components/escala-calendar-card.tsx`** — no `useEffect` que já registra `focus`/`storage`/`visibilitychange`, adicionar listener para `"marcas-changed"` chamando o mesmo `refresh()` (e remover no cleanup). Assim, ao excluir/editar/criar marca em qualquer lugar do app, o calendário da home atualiza imediatamente.
-
-3. **`src/routes/calendario.tsx`** — nenhuma mudança de lógica necessária; o `useEffect(() => saveMarcas(marcas), [marcas])` já vai disparar o novo evento automaticamente, cobrindo exclusão, edição e criação.
-
-## Observação
-
-Cancelamento de lembretes (`cancelForMarca`) na exclusão já está feito em `calendario.tsx`. Esta correção é apenas de propagação de estado UI — escopo puramente de frontend, sem alterar regras de negócio.
+### 2. Popup ao entrar avisando sobre o Chrome
+- Criar `src/components/browser-warning-modal.tsx`: modal informativo (não-bloqueante) com texto:
+  > "O navegador Chrome pode bloquear alguns acessos a recursos da intranet PMESP. Caso encontre erros, tente abrir em outro navegador (ex.: Firefox ou Edge)."
+  - Botão "Entendi" fecha o modal.
+  - Aparece automaticamente uma vez por usuário (salva flag em `localStorage` chave `browser_warning_dismissed_v1`).
+  - Não aparece no APK nativo (usa `useIsNative()` para suprimir).
+- Montar o componente em `src/routes/__root.tsx` para garantir que apareça em qualquer rota inicial.
