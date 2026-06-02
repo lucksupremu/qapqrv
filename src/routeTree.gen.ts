@@ -18,6 +18,7 @@ import { Route as ManualRouteImport } from './routes/manual'
 import { Route as IntranetRouteImport } from './routes/intranet'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as HistoricoRouteImport } from './routes/historico'
+import { Route as Googlef2edc9e3a6b2e4a9DothtmlRouteImport } from './routes/googlef2edc9e3a6b2e4a9[.]html'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
 import { Route as CalendarioRouteImport } from './routes/calendario'
@@ -72,6 +73,12 @@ const HistoricoRoute = HistoricoRouteImport.update({
   path: '/historico',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Googlef2edc9e3a6b2e4a9DothtmlRoute =
+  Googlef2edc9e3a6b2e4a9DothtmlRouteImport.update({
+    id: '/googlef2edc9e3a6b2e4a9.html',
+    path: '/googlef2edc9e3a6b2e4a9.html',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const FavoritosRoute = FavoritosRouteImport.update({
   id: '/favoritos',
   path: '/favoritos',
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
+  '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   '/historico': typeof HistoricoRoute
   '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
@@ -140,6 +148,7 @@ export interface FileRoutesByTo {
   '/calendario': typeof CalendarioRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
+  '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   '/historico': typeof HistoricoRoute
   '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
@@ -160,6 +169,7 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
+  '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   '/historico': typeof HistoricoRoute
   '/index': typeof Char91indexChar93Route
   '/inicio': typeof InicioRoute
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/escalas-baixadas'
     | '/favoritos'
+    | '/googlef2edc9e3a6b2e4a9.html'
     | '/historico'
     | '/index'
     | '/inicio'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/escalas-baixadas'
     | '/favoritos'
+    | '/googlef2edc9e3a6b2e4a9.html'
     | '/historico'
     | '/index'
     | '/inicio'
@@ -219,6 +231,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/escalas-baixadas'
     | '/favoritos'
+    | '/googlef2edc9e3a6b2e4a9.html'
     | '/historico'
     | '/index'
     | '/inicio'
@@ -239,6 +252,7 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FavoritosRoute: typeof FavoritosRoute
+  Googlef2edc9e3a6b2e4a9DothtmlRoute: typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   HistoricoRoute: typeof HistoricoRoute
   Char91indexChar93Route: typeof Char91indexChar93Route
   InicioRoute: typeof InicioRoute
@@ -318,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoricoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/googlef2edc9e3a6b2e4a9.html': {
+      id: '/googlef2edc9e3a6b2e4a9.html'
+      path: '/googlef2edc9e3a6b2e4a9.html'
+      fullPath: '/googlef2edc9e3a6b2e4a9.html'
+      preLoaderRoute: typeof Googlef2edc9e3a6b2e4a9DothtmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favoritos': {
       id: '/favoritos'
       path: '/favoritos'
@@ -383,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FavoritosRoute: FavoritosRoute,
+  Googlef2edc9e3a6b2e4a9DothtmlRoute: Googlef2edc9e3a6b2e4a9DothtmlRoute,
   HistoricoRoute: HistoricoRoute,
   Char91indexChar93Route: Char91indexChar93Route,
   InicioRoute: InicioRoute,
