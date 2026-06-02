@@ -65,19 +65,32 @@ export async function subscribeWebPush(): Promise<{ ok: boolean; reason?: string
     }
     const json = sub.toJSON();
     const deviceId = getDeviceId();
-    const { error } = await supabase.from("push_subscriptions").upsert(
-      {
+    const deviceUA = navigator.userAgent;
+    // Tenta atualizar a inscrição existente; se não houver, insere.
+    const { data: updated, error: updErr } = await supabase
+      .from("push_subscriptions")
+      .update({
+        endpoint: json.endpoint,
+        p256dh: json.keys?.p256dh ?? null,
+        auth: json.keys?.auth ?? null,
+        user_agent: deviceUA,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("device_id", deviceId)
+      .eq("platform", "web");
+    let error = updErr;
+    if (!error && (updated == null || (Array.isArray(updated) && updated.length === 0))) {
+      const { error: insErr } = await supabase.from("push_subscriptions").insert({
         device_id: deviceId,
         platform: "web",
         endpoint: json.endpoint,
         p256dh: json.keys?.p256dh ?? null,
         auth: json.keys?.auth ?? null,
-        user_agent: navigator.userAgent,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "device_id,platform", ignoreDuplicates: false },
-    ).select("id").maybeSingle().throwOnError().then(() => ({ error: null as null }))
-      .catch((e: { message?: string }) => ({ error: e }));
+        user_agent: deviceUA,
+      });
+      // Conflito de unicidade significa que já existe (e o UPDATE acima já atualizou em outra corrida) → ok
+      if (insErr && !/duplicate key|unique/i.test(insErr.message)) error = insErr;
+    }
     if (error) {
       console.error("[web-push] upsert failed", error);
       return { ok: false, reason: error.message };
