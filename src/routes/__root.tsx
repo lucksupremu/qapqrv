@@ -131,10 +131,10 @@ function RootComponent() {
       60 * 60 * 1000,
     );
 
-    // Registra o Service Worker para Web Push (apenas em produção, fora do preview/iframe).
+    // Registra o Service Worker para mostrar notificações locais (Chrome Android exige).
     if (!isNativeApp() && import.meta.env.PROD) {
-      import("@/lib/web-push-client").then(({ registerServiceWorker }) => {
-        registerServiceWorker().catch(() => {});
+      import("@/lib/notifications-adapter").then(({ ensureServiceWorker }) => {
+        ensureServiceWorker().catch(() => {});
       });
     }
     return () => {
