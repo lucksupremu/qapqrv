@@ -173,17 +173,9 @@ function HomeScreen() {
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
       onClick: () => {
-        // A URL raiz do iNotes redireciona automaticamente para a interface
-        // correta (desktop/mobile) após o login. Usar `?ui=mobile` direto
-        // na raiz retorna 404 no servidor da PMESP.
         const url = "https://correio.policiamilitar.sp.gov.br/";
         void guardIntranet(
-          () =>
-            openInAppBrowser(url, {
-              titulo: "Email iNotes",
-              modo: isNativeApp() ? "webview" : "system",
-              forceMobileUA: isNativeApp(),
-            }),
+          () => openInAppBrowser(url),
           "o Email iNotes",
         );
       },
