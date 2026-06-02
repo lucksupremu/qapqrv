@@ -162,11 +162,7 @@ function HomeScreen() {
         const url =
           "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx";
         void guardIntranet(
-          () =>
-            openInAppBrowser(url, {
-              titulo: "Marcar / Desmarcar",
-              modo: isNativeApp() ? "external" : "system",
-            }),
+          () => openInAppBrowser(url),
           "Marcar / Desmarcar",
         );
       },
