@@ -1,8 +1,9 @@
 // Adapter de notificações locais.
-// - APK Android (Capacitor): usa @capacitor/local-notifications (persiste com app fechado)
-// - Web/PWA: Notification API + setTimeout, com queue em localStorage e rehydrate
+// - APK Android (Capacitor): usa @capacitor/local-notifications (persiste com app fechado, AlarmManager)
+// - Web/PWA: setTimeout + ServiceWorkerRegistration.showNotification, com fila em localStorage e rehydrate
 
-import { NOTIF_ICON_192 } from "./push-config";
+const NOTIF_ICON_192 = "/notif-icon-192.png";
+const NOTIF_BADGE_72 = "/notif-badge-72.png";
 
 export type ScheduledReminder = {
   id: string; // `${marcaId}:${index}`
@@ -21,6 +22,17 @@ function isNative(): boolean {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cap = (window as any).Capacitor;
   return !!cap?.isNativePlatform?.();
+}
+
+function isPreviewOrIframe(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    if (window.self !== window.top) return true;
+  } catch {
+    return true;
+  }
+  const host = window.location.hostname;
+  return host.includes("id-preview--") || host.includes("lovableproject.com");
 }
 
 function loadQueue(): ScheduledReminder[] {
@@ -58,15 +70,36 @@ function saveNativeIdMap(map: Record<string, number>) {
   }
 }
 
-// Hash determinístico string → int (32 bits)
+// Hash determinístico string → int (32 bits, positivo)
 function stringToInt(s: string): number {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
-  // Plugin Capacitor exige id positivo, cabendo em int32
   return Math.abs(h | 0) || 1;
+}
+
+// Registra o Service Worker uma vez (web only, fora de iframe/preview).
+let swReadyPromise: Promise<ServiceWorkerRegistration | null> | null = null;
+export function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (swReadyPromise) return swReadyPromise;
+  swReadyPromise = (async () => {
+    if (typeof window === "undefined") return null;
+    if (isNative()) return null;
+    if (isPreviewOrIframe()) return null;
+    if (!("serviceWorker" in navigator)) return null;
+    try {
+      const existing = await navigator.serviceWorker.getRegistration("/");
+      const reg = existing ?? (await navigator.serviceWorker.register("/sw.js", { scope: "/" }));
+      await navigator.serviceWorker.ready;
+      return reg;
+    } catch (e) {
+      console.error("[notif] SW register failed", e);
+      return null;
+    }
+  })();
+  return swReadyPromise;
 }
 
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
@@ -82,36 +115,62 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   if (typeof window === "undefined" || !("Notification" in window)) return "denied";
   if (Notification.permission === "default") {
     try {
-      return await Notification.requestPermission();
+      const p = await Notification.requestPermission();
+      if (p === "granted") void ensureServiceWorker();
+      return p;
     } catch {
       return "denied";
     }
   }
+  if (Notification.permission === "granted") void ensureServiceWorker();
   return Notification.permission;
 }
 
 export function getPermission(): NotificationPermission {
-  if (isNative()) {
-    // No nativo presumimos granted após pedir; o estado real será checado em runtime.
-    return "granted";
-  }
+  if (isNative()) return "granted";
   if (typeof window === "undefined" || !("Notification" in window)) return "denied";
   return Notification.permission;
 }
 
-function fireNow(r: ScheduledReminder) {
-  if (typeof window === "undefined" || !("Notification" in window)) return;
-  if (Notification.permission !== "granted") return;
-  try {
-    new Notification(r.title, {
-      body: r.body,
-      icon: NOTIF_ICON_192,
-      badge: NOTIF_ICON_192,
-      tag: r.id,
-    });
-  } catch {
-    /* ignore */
+// Mostra notificação imediata na web — preferindo o Service Worker
+// (obrigatório no Chrome Android; o construtor `new Notification` é bloqueado lá).
+async function showNotificationWeb(opts: {
+  title: string;
+  body: string;
+  tag?: string;
+  url?: string;
+}): Promise<boolean> {
+  if (typeof window === "undefined" || !("Notification" in window)) return false;
+  if (Notification.permission !== "granted") return false;
+  const reg = await ensureServiceWorker();
+  const payload = {
+    body: opts.body,
+    icon: NOTIF_ICON_192,
+    badge: NOTIF_BADGE_72,
+    tag: opts.tag ?? `notif-${Date.now()}`,
+    data: { url: opts.url ?? "/calendario" },
+    requireInteraction: false,
+  };
+  if (reg) {
+    try {
+      await reg.showNotification(opts.title, payload);
+      return true;
+    } catch (e) {
+      console.warn("[notif] reg.showNotification falhou, tentando fallback", e);
+    }
   }
+  // Fallback desktop quando SW indisponível
+  try {
+    new Notification(opts.title, payload);
+    return true;
+  } catch (e) {
+    console.error("[notif] new Notification falhou", e);
+    return false;
+  }
+}
+
+function fireNow(r: ScheduledReminder) {
+  void showNotificationWeb({ title: r.title, body: r.body, tag: r.id });
 }
 
 const MAX_TIMEOUT = 24 * 60 * 60 * 1000;
@@ -235,13 +294,14 @@ export function cancelForMarca(marcaId: string) {
 /** Re-arma timers no boot e periodicamente. No nativo, o plugin já persiste. */
 export function rehydrateReminders() {
   if (typeof window === "undefined") return;
-  if (isNative()) return; // plugin nativo já persiste
+  if (isNative()) return;
 
   const now = Date.now();
   const fresh = loadQueue().filter((r) => {
     const when = new Date(r.whenISO).getTime();
     if (Number.isNaN(when)) return false;
     if (when <= now) {
+      // Catch-up: dispara o aviso atrasado agora.
       fireNow(r);
       return false;
     }
@@ -277,14 +337,9 @@ export async function fireTestNotification(): Promise<boolean> {
     }
   }
 
-  try {
-    new Notification("Teste de notificação", {
-      body: "Tudo funcionando! Você receberá avisos das escalas.",
-      icon: NOTIF_ICON_192,
-      badge: NOTIF_ICON_192,
-    });
-    return true;
-  } catch {
-    return false;
-  }
+  return showNotificationWeb({
+    title: "Teste de notificação",
+    body: "Tudo funcionando! Você receberá avisos das escalas.",
+    tag: "test-notification",
+  });
 }

@@ -20,9 +20,6 @@ import {
   getPermission,
 } from "@/lib/notifications-adapter";
 import { buildAutoReminders, isoToLocalInput } from "@/lib/auto-reminders";
-import { schedulePushesForMarca } from "@/lib/push.functions";
-import { getDeviceId } from "@/lib/device-id";
-import { useServerFn } from "@tanstack/react-start";
 
 const tipoOptions: { value: TipoMarca; label: string }[] = [
   { value: "dejem", label: "Dejem" },
@@ -193,21 +190,6 @@ export function MarcarModal({
       scheduleRemindersForMarca(marca.id, [], () => ({ title: "", body: "" }));
     }
 
-    // Espelhar no servidor (push remoto programado — redundância para quem ativou web push).
-    try {
-      await schedulePushesForMarca({
-        deviceId: getDeviceId(),
-        marcaId: marca.id,
-        reminders: isoReminders.map((sendAt) => ({
-          title: `Lembrete — ${tipoLabel}`,
-          body: buildBody(sendAt),
-          sendAt,
-        })),
-      });
-    } catch (e) {
-      // Falha silenciosa: notificação local segue funcionando
-      console.warn("[marcar] push remoto não agendado", e);
-    }
 
     onOpenChange(false);
     toast.success(isEdit ? "Marca atualizada!" : "Marca salva!");

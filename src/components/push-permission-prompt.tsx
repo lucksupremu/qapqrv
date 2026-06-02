@@ -3,6 +3,7 @@ import { Bell, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { isNativeApp } from "@/lib/in-app-browser";
+import { requestNotificationPermission } from "@/lib/notifications-adapter";
 
 const STORAGE_KEY = "push-prompt-dismissed-v1";
 
@@ -23,7 +24,7 @@ export function PushPermissionPrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (isNativeApp()) return; // no APK usamos LocalNotifications
+    if (isNativeApp()) return; // no APK a permissão é pedida pelo plugin no agendamento
     if (isPreviewOrIframe()) return;
     if (!("Notification" in window)) return;
     if (Notification.permission !== "default") return;
@@ -41,19 +42,14 @@ export function PushPermissionPrompt() {
   const enable = async () => {
     setLoading(true);
     try {
-      const { subscribeWebPush } = await import("@/lib/web-push-client");
-      const res = await subscribeWebPush();
-      if (res.ok) {
+      const p = await requestNotificationPermission();
+      if (p === "granted") {
         toast.success("Notificações ativadas");
-        localStorage.setItem(STORAGE_KEY, "1");
-        setShow(false);
       } else {
-        toast.error(res.reason ?? "Não foi possível ativar");
-        if (res.reason === "Permissão negada") {
-          localStorage.setItem(STORAGE_KEY, "1");
-          setShow(false);
-        }
+        toast.error("Permissão negada — ative nas configurações do navegador");
       }
+      localStorage.setItem(STORAGE_KEY, "1");
+      setShow(false);
     } finally {
       setLoading(false);
     }
@@ -72,7 +68,7 @@ export function PushPermissionPrompt() {
             Ativar notificações?
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Receba lembretes das suas escalas mesmo com o app fechado.
+            Receba lembretes das suas escalas no horário marcado.
           </p>
           <div className="mt-3 flex gap-2">
             <Button size="sm" onClick={enable} disabled={loading}>
