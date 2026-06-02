@@ -75,8 +75,9 @@ export async function subscribeWebPush(): Promise<{ ok: boolean; reason?: string
         user_agent: navigator.userAgent,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "device_id,platform" },
-    );
+      { onConflict: "device_id,platform", ignoreDuplicates: false },
+    ).select("id").maybeSingle().throwOnError().then(() => ({ error: null as null }))
+      .catch((e: { message?: string }) => ({ error: e }));
     if (error) {
       console.error("[web-push] upsert failed", error);
       return { ok: false, reason: error.message };
