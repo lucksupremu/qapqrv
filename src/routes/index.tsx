@@ -175,14 +175,10 @@ function HomeScreen() {
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
       onClick: () => {
-        // Detecta mobile (APK ou navegador mobile) para abrir versão otimizada
-        const isMobile =
-          isNativeApp() ||
-          (typeof navigator !== "undefined" &&
-            /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
-        const url = isMobile
-          ? "https://correio.policiamilitar.sp.gov.br/?ui=mobile"
-          : "https://correio.policiamilitar.sp.gov.br/";
+        // A URL raiz do iNotes redireciona automaticamente para a interface
+        // correta (desktop/mobile) após o login. Usar `?ui=mobile` direto
+        // na raiz retorna 404 no servidor da PMESP.
+        const url = "https://correio.policiamilitar.sp.gov.br/";
         void guardIntranet(
           () =>
             openInAppBrowser(url, {
