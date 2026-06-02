@@ -506,6 +506,28 @@ function HomeScreen() {
           Política de Privacidade
         </button>
       </footer>
+
+      <BrowserPickerModal
+        open={!!browserPick}
+        url={browserPick?.url ?? null}
+        titulo={browserPick?.titulo}
+        isNative={native}
+        onClose={() => setBrowserPick(null)}
+        onPick={(modo) => {
+          if (!browserPick) return;
+          const { url, titulo } = browserPick;
+          setBrowserPick(null);
+          if (!isNativeApp() && modo === "external") {
+            void navigator.clipboard
+              ?.writeText(url)
+              .then(() => toast.success("Link copiado! Cole em outro navegador."))
+              .catch(() => toast.info(url));
+            return;
+          }
+          const opts: AbrirOpts = { titulo, modo };
+          void openInAppBrowser(url, opts);
+        }}
+      />
     </div>
   );
 }
