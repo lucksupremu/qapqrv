@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { type Marca, loadMarcas, MARCAS_EVENT } from "@/lib/marcas";
+import { type Marca, loadMarcas, saveMarcas, MARCAS_EVENT } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { useIsNative } from "@/hooks/use-is-native";
 import appLogo from "@/assets/app-logo.png";
@@ -63,6 +63,7 @@ function HomeScreen() {
   // Após hidratar, o useEffect abaixo popula a lista — evita hydration mismatch
   // que estava derrubando os event handlers da Home em alguns Chromes Android.
   const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
   
   const native = useIsNative();
@@ -80,14 +81,13 @@ function HomeScreen() {
 
   useEffect(() => {
     setMarcas(loadMarcas());
+    setHydrated(true);
   }, []);
 
-  // A home apenas LÊ marcas (mostra "próximas escalas"). A criação/edição/
-  // exclusão acontece em /calendario, que é a única fonte de verdade.
-  // Não gravar aqui evita race condition: ao receber MARCAS_EVENT e atualizar
-  // o estado local, um efeito de save sobrescrevia mudanças vindas de outras
-  // telas (ex.: uma exclusão recém-feita).
-
+  useEffect(() => {
+    if (!hydrated) return;
+    saveMarcas(marcas);
+  }, [marcas, hydrated]);
 
   // Recarrega marcas ao voltar para a aba/rota (ex.: depois de adicionar
   // uma escala em /calendario) sem precisar recarregar a página.

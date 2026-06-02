@@ -21,7 +21,7 @@ function detectPlatform(): Platform {
 
 async function openViaCapacitor(platform: Platform): Promise<boolean> {
   try {
-    const { AppLauncher } = await (async () => { throw new Error("APK descontinuado: @capacitor/app-launcher indisponível"); })();
+    const { AppLauncher } = await import("@capacitor/app-launcher");
     if (platform === "android") {
       // Tenta abrir pelo package (Android consegue resolver direto)
       const { value } = await AppLauncher.canOpenUrl({ url: ANDROID_PACKAGE });

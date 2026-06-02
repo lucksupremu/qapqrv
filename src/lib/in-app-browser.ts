@@ -1,7 +1,17 @@
-// O app roda apenas como web/PWA. APK (Capacitor) foi descontinuado.
-// Esta função abre links sempre em nova aba do navegador padrão.
+// Abre links sempre no navegador padrão do aparelho.
+// - No APK (Capacitor): usa InAppBrowser.openInExternalBrowser → Chrome do sistema
+// - No web (PWA/desktop): window.open em nova aba
+//
+// Decisão: NÃO usamos mais WebView interno. O Chrome externo dá ao usuário o
+// menu completo (3 pontos → "Site para computador", recarregar, etc.), mantém
+// cookies/certificados aceitos entre sessões e elimina toda a lógica frágil de
+// fallback / timeout / handler de SSL do plugin.
 
-
+type CapacitorWindow = Window & {
+  Capacitor?: {
+    isNativePlatform?: () => boolean;
+  };
+};
 
 // `AbrirOpts` é mantido como tipo opcional só para compatibilidade com chamadas
 // antigas — os campos são ignorados. Sempre abrimos no navegador padrão.
@@ -18,16 +28,29 @@ function normalizarUrl(url: string) {
   return `https://${clean}`;
 }
 
-// APK foi descontinuado — o app roda apenas como web/PWA.
-// `isNativeApp` permanece exportado para compatibilidade com chamadas existentes,
-// mas sempre retorna false. Assim, todas as branches `if (isNativeApp())` no
-// código viram dead-code e nada do Capacitor é executado em produção.
 export function isNativeApp(): boolean {
-  return false;
+  if (typeof window === "undefined") return false;
+  try {
+    const cap = (window as CapacitorWindow).Capacitor;
+    return !!cap?.isNativePlatform?.();
+  } catch {
+    return false;
+  }
 }
 
 export async function openInAppBrowser(url: string, _opts: AbrirOpts = {}) {
   const targetUrl = normalizarUrl(url);
+
+  if (isNativeApp()) {
+    try {
+      const { InAppBrowser } = await import("@capacitor/inappbrowser");
+      await InAppBrowser.openInExternalBrowser({ url: targetUrl });
+      return;
+    } catch (e) {
+      console.warn("InAppBrowser indisponível, fallback window.open", e);
+    }
+  }
+
   if (typeof window !== "undefined") {
     window.open(targetUrl, "_blank", "noopener,noreferrer");
   }

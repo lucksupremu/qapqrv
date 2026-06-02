@@ -95,12 +95,12 @@ function DownloadedReportsScreen() {
         >
           <Smartphone size={56} className="mx-auto" style={{ color: "#2e6b8a" }} />
           <h2 className="mt-3 text-[18px] font-bold" style={{ color: "var(--text-dark)" }}>
-            Indisponível no navegador
+            Disponível apenas no aplicativo
           </h2>
           <p className="mt-2 text-[14px]" style={{ color: "var(--muted-fg)" }}>
-            Salvar escalas offline depende de acesso direto à intranet da PMESP, o que o
-            navegador não permite (bloqueio de CORS). Acesse a escala diretamente pelo botão
-            "Consultar escala" na tela inicial enquanto estiver conectado à VPN.
+            Salvar escalas offline depende de acesso direto à intranet da PMESP, o que o navegador
+            não permite (bloqueio de CORS). Use o app instalado (APK) para baixar e abrir os PDFs
+            sem internet.
           </p>
           <button
             onClick={() => navigate({ to: "/" })}
@@ -118,9 +118,9 @@ function DownloadedReportsScreen() {
     // APK: se tiver arquivo salvo no Filesystem, abre por URI nativa.
     if (e.localPath) {
       try {
-        const { Capacitor } = await (async () => { throw new Error("APK descontinuado: @capacitor/core indisponível"); })();
+        const { Capacitor } = await import("@capacitor/core");
         if (Capacitor.isNativePlatform()) {
-          const { Filesystem, Directory } = await (async () => { throw new Error("APK descontinuado: @capacitor/filesystem indisponível"); })();
+          const { Filesystem, Directory } = await import("@capacitor/filesystem");
           const { uri } = await Filesystem.getUri({
             path: e.localPath,
             directory: Directory.Data,
