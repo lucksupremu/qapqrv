@@ -34,9 +34,14 @@ export function loadMarcas(): Marca[] {
   }
 }
 
+export const MARCAS_EVENT = "marcas:updated";
+
 export function saveMarcas(marcas: Marca[]) {
   try {
     window.localStorage.setItem(MARCAS_STORAGE_KEY, JSON.stringify(marcas));
+    // Notifica outros componentes na mesma aba (o evento `storage` nativo
+    // só dispara entre abas diferentes).
+    window.dispatchEvent(new CustomEvent(MARCAS_EVENT));
   } catch {
     /* ignore */
   }
