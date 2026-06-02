@@ -28,7 +28,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
-import { Route as ApiPublicPushSendRouteImport } from './routes/api/public/push/send'
 
 const Char91indexChar93Route = Char91indexChar93RouteImport.update({
   id: '/index',
@@ -128,11 +127,6 @@ const FerramentaSlugRoute = FerramentaSlugRouteImport.update({
   path: '/ferramenta/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicPushSendRoute = ApiPublicPushSendRouteImport.update({
-  id: '/api/public/push/send',
-  path: '/api/public/push/send',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -154,7 +148,6 @@ export interface FileRoutesByFullPath {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
-  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -176,7 +169,6 @@ export interface FileRoutesByTo {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
-  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -199,7 +191,6 @@ export interface FileRoutesById {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
-  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -223,7 +214,6 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
-    | '/api/public/push/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -245,7 +235,6 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
-    | '/api/public/push/send'
   id:
     | '__root__'
     | '/'
@@ -267,7 +256,6 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
-    | '/api/public/push/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -290,7 +278,6 @@ export interface RootRouteChildren {
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
   FerramentaMinhaLocalizacaoRoute: typeof FerramentaMinhaLocalizacaoRoute
-  ApiPublicPushSendRoute: typeof ApiPublicPushSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -428,13 +415,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FerramentaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/push/send': {
-      id: '/api/public/push/send'
-      path: '/api/public/push/send'
-      fullPath: '/api/public/push/send'
-      preLoaderRoute: typeof ApiPublicPushSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -458,7 +438,6 @@ const rootRouteChildren: RootRouteChildren = {
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
   FerramentaMinhaLocalizacaoRoute: FerramentaMinhaLocalizacaoRoute,
-  ApiPublicPushSendRoute: ApiPublicPushSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

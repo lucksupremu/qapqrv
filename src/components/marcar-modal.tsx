@@ -84,7 +84,7 @@ export function MarcarModal({
   const [reminders, setReminders] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ tipo?: string; data?: string }>({});
   const [perm, setPerm] = useState<NotificationPermission>("default");
-  const schedulePushFn = useServerFn(schedulePushesForMarca);
+  
 
   useEffect(() => {
     if (!open) return;
@@ -195,16 +195,14 @@ export function MarcarModal({
 
     // Espelhar no servidor (push remoto programado — redundância para quem ativou web push).
     try {
-      await schedulePushFn({
-        data: {
-          deviceId: getDeviceId(),
-          marcaId: marca.id,
-          reminders: isoReminders.map((sendAt) => ({
-            title: `Lembrete — ${tipoLabel}`,
-            body: buildBody(sendAt),
-            sendAt,
-          })),
-        },
+      await schedulePushesForMarca({
+        deviceId: getDeviceId(),
+        marcaId: marca.id,
+        reminders: isoReminders.map((sendAt) => ({
+          title: `Lembrete — ${tipoLabel}`,
+          body: buildBody(sendAt),
+          sendAt,
+        })),
       });
     } catch (e) {
       // Falha silenciosa: notificação local segue funcionando

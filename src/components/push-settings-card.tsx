@@ -17,7 +17,6 @@ import {
   unsubscribeWebPush,
 } from "@/lib/web-push-client";
 import { sendTestPush } from "@/lib/push.functions";
-import { useServerFn } from "@tanstack/react-start";
 import { getDeviceId } from "@/lib/device-id";
 import { isNativeApp } from "@/lib/in-app-browser";
 
@@ -28,8 +27,6 @@ export function PushSettingsCard() {
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
   const native = isNativeApp();
-
-  const sendTestPushFn = useServerFn(sendTestPush);
 
   useEffect(() => {
     setPerm(getPermission());
@@ -76,7 +73,7 @@ export function PushSettingsCard() {
   const handleTestRemote = async () => {
     setTesting(true);
     try {
-      const res = await sendTestPushFn({ data: { deviceId: getDeviceId() } });
+      const res = await sendTestPush({ deviceId: getDeviceId() });
       if (res.ok) {
         toast.success(`Push remoto enviado para ${res.sent} dispositivo(s)`);
       } else {
