@@ -21,6 +21,7 @@ import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as Googlef2edc9e3a6b2e4a9DothtmlRouteImport } from './routes/googlef2edc9e3a6b2e4a9[.]html'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AnyconnectRouteImport } from './routes/anyconnect'
 import { Route as IndexRouteImport } from './routes/index'
@@ -90,6 +91,11 @@ const EscalasBaixadasRoute = EscalasBaixadasRouteImport.update({
   path: '/escalas-baixadas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarioRoute = CalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/'
     | '/anyconnect'
     | '/calendario'
+    | '/configuracoes'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/'
     | '/anyconnect'
     | '/calendario'
+    | '/configuracoes'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/'
     | '/anyconnect'
     | '/calendario'
+    | '/configuracoes'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnyconnectRoute: typeof AnyconnectRoute
   CalendarioRoute: typeof CalendarioRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FavoritosRoute: typeof FavoritosRoute
   Googlef2edc9e3a6b2e4a9DothtmlRoute: typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -366,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalasBaixadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendario': {
       id: '/calendario'
       path: '/calendario'
@@ -422,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnyconnectRoute: AnyconnectRoute,
   CalendarioRoute: CalendarioRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FavoritosRoute: FavoritosRoute,
   Googlef2edc9e3a6b2e4a9DothtmlRoute: Googlef2edc9e3a6b2e4a9DothtmlRoute,
