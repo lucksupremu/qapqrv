@@ -32,6 +32,8 @@ import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
+import { BrowserPickerModal } from "@/components/browser-picker-modal";
+import type { AbrirOpts } from "@/lib/in-app-browser";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -65,7 +67,10 @@ function HomeScreen() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
-  
+  const [browserPick, setBrowserPick] = useState<
+    { url: string; titulo: string } | null
+  >(null);
+
   const native = useIsNative();
   const [theme, setThemeState] = useState<Theme>("light");
 
@@ -160,11 +165,9 @@ function HomeScreen() {
         const url =
           "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx";
         void guardIntranet(
-          () =>
-            openInAppBrowser(url, {
-              titulo: "Marcar / Desmarcar",
-              modo: isNativeApp() ? "external" : "system",
-            }),
+          () => {
+            setBrowserPick({ url, titulo: "Marcar / Desmarcar" });
+          },
           "Marcar / Desmarcar",
         );
       },
