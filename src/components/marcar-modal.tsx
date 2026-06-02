@@ -84,6 +84,7 @@ export function MarcarModal({
   const [reminders, setReminders] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ tipo?: string; data?: string }>({});
   const [perm, setPerm] = useState<NotificationPermission>("default");
+  const schedulePushFn = useServerFn(schedulePushesForMarca);
 
   useEffect(() => {
     if (!open) return;
