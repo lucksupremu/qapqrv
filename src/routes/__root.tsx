@@ -160,6 +160,7 @@ function RootComponent() {
           <BottomNav />
           <PrivacyConsent />
           <PushPermissionPrompt />
+          <BrowserWarningModal />
           <Toaster />
         </DrawerProvider>
       </TooltipProvider>
