@@ -95,12 +95,12 @@ function DownloadedReportsScreen() {
         >
           <Smartphone size={56} className="mx-auto" style={{ color: "#2e6b8a" }} />
           <h2 className="mt-3 text-[18px] font-bold" style={{ color: "var(--text-dark)" }}>
-            Disponível apenas no aplicativo
+            Indisponível no navegador
           </h2>
           <p className="mt-2 text-[14px]" style={{ color: "var(--muted-fg)" }}>
-            Salvar escalas offline depende de acesso direto à intranet da PMESP, o que o navegador
-            não permite (bloqueio de CORS). Use o app instalado (APK) para baixar e abrir os PDFs
-            sem internet.
+            Salvar escalas offline depende de acesso direto à intranet da PMESP, o que o
+            navegador não permite (bloqueio de CORS). Acesse a escala diretamente pelo botão
+            "Consultar escala" na tela inicial enquanto estiver conectado à VPN.
           </p>
           <button
             onClick={() => navigate({ to: "/" })}
