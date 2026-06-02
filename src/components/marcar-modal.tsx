@@ -190,21 +190,6 @@ export function MarcarModal({
       scheduleRemindersForMarca(marca.id, [], () => ({ title: "", body: "" }));
     }
 
-    // Espelhar no servidor (push remoto programado — redundância para quem ativou web push).
-    try {
-      await schedulePushesForMarca({
-        deviceId: getDeviceId(),
-        marcaId: marca.id,
-        reminders: isoReminders.map((sendAt) => ({
-          title: `Lembrete — ${tipoLabel}`,
-          body: buildBody(sendAt),
-          sendAt,
-        })),
-      });
-    } catch (e) {
-      // Falha silenciosa: notificação local segue funcionando
-      console.warn("[marcar] push remoto não agendado", e);
-    }
 
     onOpenChange(false);
     toast.success(isEdit ? "Marca atualizada!" : "Marca salva!");
