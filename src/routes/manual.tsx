@@ -7,7 +7,6 @@ import {
   CalendarPlus,
   Mail,
   Calendar,
-  FolderDown,
   ShieldCheck,
   Wallet,
   Search,
@@ -57,13 +56,12 @@ const SECOES: Secao[] = [
   { id: "consulta", titulo: "5. Consulta de escala por ID", icone: Search },
   { id: "marcar", titulo: "6. Marcar / Desmarcar Dejem-Delegada", icone: CalendarPlus },
   { id: "calendario", titulo: "7. Calendário e histórico", icone: Calendar },
-  { id: "escalas-baixadas", titulo: "8. Escalas baixadas (APK)", icone: FolderDown },
-  { id: "folha", titulo: "9. Folha de Pagamento (CIAF)", icone: Wallet },
-  { id: "inotes", titulo: "10. Email iNotes", icone: Mail },
-  { id: "menu", titulo: "11. Menu, tema e instalação", icone: Menu },
-  { id: "privacidade", titulo: "12. Privacidade e dados", icone: Lock },
-  { id: "problemas", titulo: "13. Solução de problemas", icone: AlertTriangle },
-  { id: "suporte", titulo: "14. Suporte", icone: HelpCircle },
+  { id: "folha", titulo: "8. Folha de Pagamento (CIAF)", icone: Wallet },
+  { id: "inotes", titulo: "9. Email iNotes", icone: Mail },
+  { id: "menu", titulo: "10. Menu, tema e instalação", icone: Menu },
+  { id: "privacidade", titulo: "11. Privacidade e dados", icone: Lock },
+  { id: "problemas", titulo: "12. Solução de problemas", icone: AlertTriangle },
+  { id: "suporte", titulo: "13. Suporte", icone: HelpCircle },
 ];
 
 function ManualScreen() {
@@ -175,26 +173,16 @@ function ManualScreen() {
             calendário pessoal.
           </p>
           <p>
-            O app pode ser usado de duas formas: pelo <strong>navegador</strong>
-            (versão web) ou instalado como <strong>aplicativo APK</strong> no
-            celular Android. As funções são as mesmas — só o APK ganha extras
-            como salvar escalas para acesso offline e detectar automaticamente
-            se a VPN AnyConnect está conectada.
+            O app roda pelo <strong>navegador</strong> e também pode ser instalado
+            como atalho na tela inicial do celular, funcionando como um aplicativo.
           </p>
         </Bloco>
 
         <Bloco id="primeiros-passos" titulo="2. Primeiros passos" icone={Download} tom="blue">
-          <SubTitulo>Instalando como aplicativo (APK — Android)</SubTitulo>
-          <Lista ordenada>
-            <li>Baixe o APK pelo link enviado.</li>
-            <li>Abra o arquivo. Se aparecer aviso "instalar de fonte desconhecida", aceite.</li>
-            <li>Confirme a instalação e abra o app pelo ícone no menu do celular.</li>
-          </Lista>
-
-          <SubTitulo>Instalando como atalho (PWA — Android ou iPhone)</SubTitulo>
+          <SubTitulo>Instalando como atalho (PWA)</SubTitulo>
           <p className="text-[12.5px] text-slate-600 dark:text-slate-400">
-            O APK só existe pra Android. Em iPhone (e também no Android, se preferir),
-            use a versão web instalada como atalho:
+            Você pode usar o app direto no navegador, ou instalá-lo como atalho
+            para abrir rapidinho pela tela inicial:
           </p>
           <Lista ordenada>
             <li>Abra o site do app no Chrome (Android) ou Safari (iPhone).</li>
@@ -222,16 +210,12 @@ function ManualScreen() {
               tema claro/escuro) e ícone <em>☰</em> (abre o menu lateral).
             </li>
             <li>
-              <strong>Banner "Instalar app"</strong> — aparece só no navegador
-              quando ainda dá pra instalar o app como PWA.
+              <strong>Banner "Instalar app"</strong> — aparece quando dá pra
+              instalar o app como atalho no celular.
             </li>
             <li>
               <strong>Card "Consulta escala Dejem/Delegada":</strong> campo pra
               digitar o ID da escala e botão amarelo de seta pra abrir.
-              No APK, esse card também mostra o <strong>chip verde "VPN Ativa"</strong>
-              {" "}quando a VPN está conectada, ou um <strong>aviso vermelho
-              "Conectar VPN — acesso às escalas"</strong> com o botão
-              "Abrir Cisco AnyConnect" quando não está.
             </li>
             <li>
               <strong>Próximas Escalas:</strong> seus 5 próximos plantões
@@ -239,8 +223,8 @@ function ManualScreen() {
             </li>
             <li>
               <strong>Acesso Rápido:</strong> grid com os botões
-              Marcar/Desmarcar, iNotes, Calendário, Escalas Baixadas (só APK),
-              Guia AnyConnect, Folha de Pagamento e Manual.
+              Marcar/Desmarcar, iNotes, Calendário, Guia AnyConnect,
+              Folha de Pagamento e Manual.
             </li>
             <li>
               <strong>Minha Escala:</strong> calendário visual do mês com os
@@ -260,34 +244,16 @@ function ManualScreen() {
             conectada. Sem a VPN, essas páginas simplesmente não abrem.
           </p>
 
-          <SubTitulo>Como o app avisa se a VPN está ligada</SubTitulo>
-          <Lista>
-            <li>
-              No APK, um <strong>chip verde "VPN Ativa"</strong> aparece no canto
-              do card de consulta quando tudo está ok.
-            </li>
-            <li>
-              Se aparecer <strong>aviso vermelho "Conectar VPN"</strong>, toque
-              nele para expandir e usar o botão <em>"Abrir Cisco AnyConnect"</em>.
-              Depois de conectar, toque em <em>"Verificar conexão"</em>.
-            </li>
-            <li>
-              Na versão web não há detecção automática — sempre confirme manualmente
-              que o AnyConnect está conectado antes de abrir as escalas.
-            </li>
-          </Lista>
-
           <SubTitulo>Como conectar passo a passo</SubTitulo>
           <Lista ordenada>
             <li>
-              Toque em <strong>"Guia AnyConnect"</strong> na tela inicial (ou no
-              botão vermelho "Abrir Cisco AnyConnect" do aviso).
+              Toque em <strong>"Guia AnyConnect"</strong> na tela inicial.
             </li>
             <li>Siga o tutorial com prints (Conexão, Servidor, Autenticação EAP-AnyConnect…).</li>
             <li>
-              No final, toque em <strong>"Abrir AnyConnect"</strong>. O app abre
-              o Cisco Secure Client instalado no seu celular. Se não estiver
-              instalado, ele abre a Play Store pra você baixar.
+              No final, toque em <strong>"Abrir AnyConnect"</strong>. Se o
+              Cisco Secure Client não estiver instalado, baixe pela Play Store
+              ou App Store.
             </li>
             <li>
               Dentro do AnyConnect, toque em <strong>Connect</strong>, escolha o
@@ -296,6 +262,12 @@ function ManualScreen() {
           </Lista>
 
           <BoxLogin grupo="13 - DEJEM DELEGADA" />
+
+          <Dica>
+            Sempre confirme que o AnyConnect está conectado antes de abrir
+            qualquer botão que leva à intranet — caso contrário a página fica
+            carregando sem fim.
+          </Dica>
         </Bloco>
 
         <Bloco id="consulta" titulo="5. Consulta de escala por ID" icone={Search} tom="blue">
@@ -308,11 +280,6 @@ function ManualScreen() {
             <li>Toque na seta amarela ao lado, ou pressione Enter.</li>
             <li>A escala abre no navegador interno do app.</li>
           </Lista>
-          <Dica>
-            No APK, o app salva automaticamente uma cópia da escala consultada para
-            você acessar depois sem internet — veja a seção
-            "Escalas baixadas".
-          </Dica>
         </Bloco>
 
         <Bloco id="marcar" titulo="6. Marcar / Desmarcar Dejem-Delegada" icone={CalendarPlus}>
@@ -356,23 +323,7 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="escalas-baixadas" titulo="8. Escalas baixadas (APK)" icone={FolderDown}>
-          <p>
-            Esta função aparece <strong>somente no APK instalado</strong>. Toda vez
-            que você consulta uma escala pelo ID, o app salva uma cópia para acesso
-            offline.
-          </p>
-          <Lista ordenada>
-            <li>
-              Toque em <strong>"Escalas baixadas"</strong> no acesso rápido.
-            </li>
-            <li>Veja a lista das escalas guardadas, com data e número.</li>
-            <li>Toque em qualquer item para reabrir, mesmo sem internet/VPN.</li>
-            <li>Use o ícone de lixeira para apagar uma escala da lista.</li>
-          </Lista>
-        </Bloco>
-
-        <Bloco id="folha" titulo="9. Folha de Pagamento (CIAF)" icone={Wallet} tom="blue">
+        <Bloco id="folha" titulo="8. Folha de Pagamento (CIAF)" icone={Wallet}>
           <Lista ordenada>
             <li>Conecte o AnyConnect.</li>
             <li>
@@ -390,7 +341,7 @@ function ManualScreen() {
           </Dica>
         </Bloco>
 
-        <Bloco id="inotes" titulo="10. Email iNotes" icone={Mail}>
+        <Bloco id="inotes" titulo="9. Email iNotes" icone={Mail} tom="blue">
           <Lista ordenada>
             <li>Conecte o AnyConnect.</li>
             <li>
@@ -402,15 +353,15 @@ function ManualScreen() {
           <BoxLogin />
         </Bloco>
 
-        <Bloco id="menu" titulo="11. Menu lateral, tema e instalação" icone={Menu} tom="blue">
+        <Bloco id="menu" titulo="10. Menu lateral, tema e instalação" icone={Menu}>
           <SubTitulo>Menu lateral (☰)</SubTitulo>
           <p>
             Toque no ícone <strong>☰</strong> no canto superior direito da home.
-            O menu mostra atalhos para: Início, Calendário, Escalas Baixadas
-            (só APK), Correio PMESP, Folha de Pagamento, Guia AnyConnect,
-            Manual e Política de Privacidade. Ele também tem o botão de
-            <strong> instalar o app </strong>(quando disponível) e o
-            <strong> toggle de tema </strong>claro/escuro.
+            O menu mostra atalhos para: Início, Calendário, Correio PMESP,
+            Folha de Pagamento, Guia AnyConnect, Manual e Política de Privacidade.
+            Ele também tem o botão de <strong>instalar o app</strong>
+            {" "}(quando disponível) e o <strong>toggle de tema</strong>
+            {" "}claro/escuro.
           </p>
 
           <SubTitulo>Tema claro / escuro</SubTitulo>
@@ -425,7 +376,7 @@ function ManualScreen() {
           <Dica>O tema escolhido é lembrado mesmo depois de fechar o app.</Dica>
         </Bloco>
 
-        <Bloco id="privacidade" titulo="12. Privacidade e dados" icone={Lock}>
+        <Bloco id="privacidade" titulo="11. Privacidade e dados" icone={Lock} tom="blue">
           <p>
             Seus plantões, valores e histórico ficam guardados <strong>apenas no
             seu celular</strong>. O app não envia esses dados para nenhum servidor.
@@ -441,13 +392,7 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="problemas" titulo="13. Solução de problemas" icone={AlertTriangle} tom="blue">
-          <SubTitulo>Aparece "VPN Off" em vermelho</SubTitulo>
-          <Lista>
-            <li>Toque no aviso vermelho e use "Abrir Cisco AnyConnect".</li>
-            <li>Depois de conectar, toque em "Verificar conexão".</li>
-          </Lista>
-
+        <Bloco id="problemas" titulo="12. Solução de problemas" icone={AlertTriangle}>
           <SubTitulo>Página fica carregando e não abre</SubTitulo>
           <Lista>
             <li>Confirme que o AnyConnect está realmente conectado.</li>
@@ -458,7 +403,7 @@ function ManualScreen() {
           <SubTitulo>Botão "Abrir AnyConnect" não faz nada</SubTitulo>
           <Lista>
             <li>Verifique se o Cisco Secure Client está instalado no celular.</li>
-            <li>Se não estiver, o app abre a Play Store para você baixar.</li>
+            <li>Se não estiver, baixe pela Play Store ou App Store.</li>
           </Lista>
 
           <SubTitulo>Folha de Pagamento abre em formato de PC</SubTitulo>
@@ -469,20 +414,16 @@ function ManualScreen() {
             </li>
           </Lista>
 
-          <SubTitulo>Escalas e histórico sumiram</SubTitulo>
+          <SubTitulo>Histórico do calendário sumiu</SubTitulo>
           <Lista>
             <li>
-              Os dados ficam só no celular. Se você desinstalar o app ou limpar
-              os dados pelas configurações do Android, o histórico é perdido.
-            </li>
-            <li>
-              Para reabrir escalas já salvas no APK, use "Escalas baixadas" —
-              funciona mesmo sem internet.
+              Os dados ficam só no celular. Se você limpar os dados do navegador
+              ou desinstalar o atalho, o histórico é perdido.
             </li>
           </Lista>
         </Bloco>
 
-        <Bloco id="suporte" titulo="14. Suporte" icone={HelpCircle}>
+        <Bloco id="suporte" titulo="13. Suporte" icone={HelpCircle} tom="blue">
           <p>
             Encontrou um erro ou tem sugestão de melhoria? Procure o canal de
             contato divulgado junto com o app. Quanto mais detalhes você enviar
