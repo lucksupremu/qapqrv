@@ -80,7 +80,6 @@ function HomeScreen() {
 
   useEffect(() => {
     setMarcas(loadMarcas());
-    setHydrated(true);
   }, []);
 
   // A home apenas LÊ marcas (mostra "próximas escalas"). A criação/edição/
