@@ -71,6 +71,7 @@ const grupo2: Item[] = [
   },
 ];
 const grupo3: Item[] = [
+  { type: "route", to: "/configuracoes", label: "Notificações", icon: Bell },
   { type: "route", to: "/manual", label: "Manual", icon: BookOpenCheck },
   { type: "route", to: "/anyconnect", label: "Guia AnyConnect", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
