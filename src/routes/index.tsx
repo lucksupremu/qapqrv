@@ -66,6 +66,7 @@ function HomeScreen() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
+  const [certModalUrl, setCertModalUrl] = useState<string | null>(null);
   const native = useIsNative();
   const [theme, setThemeState] = useState<Theme>("light");
 
