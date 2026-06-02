@@ -1,11 +1,9 @@
 // Server functions de push (subscribe/agendamento/teste).
-// `attachSupabaseAuth` é opcional aqui (app é local-first).
+// IMPORTANTE: `supabaseAdmin` e `web-push` são SOMENTE server.
+// Importamos dinamicamente DENTRO dos handlers para não vazar pro bundle client.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { sendWebPush } from "./push.server";
 
 const ReminderInput = z.object({
   deviceId: z.string().min(8).max(128),
@@ -28,7 +26,7 @@ const ReminderInput = z.object({
 export const schedulePushesForMarca = createServerFn({ method: "POST" })
   .inputValidator((input) => ReminderInput.parse(input))
   .handler(async ({ data }) => {
-    // Limpa antigos
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
       .from("scheduled_pushes")
       .delete()
@@ -61,6 +59,7 @@ export const cancelScheduledPushesForMarca = createServerFn({ method: "POST" })
     z.object({ deviceId: z.string().min(8).max(128), marcaId: z.string().min(1).max(128) }).parse(input),
   )
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("scheduled_pushes")
       .delete()
@@ -75,6 +74,9 @@ export const cancelScheduledPushesForMarca = createServerFn({ method: "POST" })
 export const sendTestPush = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ deviceId: z.string().min(8).max(128) }).parse(input))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendWebPush } = await import("./push.server");
+
     const { data: subs, error } = await supabaseAdmin
       .from("push_subscriptions")
       .select("*")
