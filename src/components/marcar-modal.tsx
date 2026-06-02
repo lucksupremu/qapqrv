@@ -171,22 +171,43 @@ export function MarcarModal({
 
     onSave(marca);
 
-    // Agendar push (web). Pede permissão silenciosamente se ainda não decidida.
+    const tipoLabel = TIPO_LABEL_SHORT[marca.tipo] ?? "Escala";
+    const buildBody = (whenISO: string) =>
+      `Escala em ${formatBRDate(marca.data)}${
+        marca.valor > 0
+          ? ` · ${marca.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+          : ""
+      }\n(Aviso de ${formatBRDate(whenISO)})`;
+
+    // Agendar local (web + nativo). Pede permissão silenciosamente se ainda não decidida.
     if (isoReminders.length > 0) {
       if (getPermission() === "default") {
         await requestNotificationPermission();
       }
       scheduleRemindersForMarca(marca.id, isoReminders, (whenISO) => ({
-        title: `Lembrete — ${TIPO_LABEL_SHORT[marca.tipo] ?? "Escala"}`,
-        body: `Escala em ${formatBRDate(marca.data)}${
-          marca.valor > 0
-            ? ` · ${marca.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
-            : ""
-        }\n(Aviso de ${formatBRDate(whenISO)})`,
+        title: `Lembrete — ${tipoLabel}`,
+        body: buildBody(whenISO),
       }));
     } else {
-      // sem lembretes — limpa qualquer agendamento prévio
       scheduleRemindersForMarca(marca.id, [], () => ({ title: "", body: "" }));
+    }
+
+    // Espelhar no servidor (push remoto programado — redundância para quem ativou web push).
+    try {
+      await schedulePushFn({
+        data: {
+          deviceId: getDeviceId(),
+          marcaId: marca.id,
+          reminders: isoReminders.map((sendAt) => ({
+            title: `Lembrete — ${tipoLabel}`,
+            body: buildBody(sendAt),
+            sendAt,
+          })),
+        },
+      });
+    } catch (e) {
+      // Falha silenciosa: notificação local segue funcionando
+      console.warn("[marcar] push remoto não agendado", e);
     }
 
     onOpenChange(false);
