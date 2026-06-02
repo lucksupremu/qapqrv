@@ -38,7 +38,7 @@ function IntranetWebviewScreen() {
   // Abrimos no Custom Tabs do sistema e voltamos para a home.
   useEffect(() => {
     if (!isNativeApp()) return;
-    void openInAppBrowser(url, { titulo, modo: "system" });
+    void openInAppBrowser(url);
     navigate({ to: "/" });
   }, [url, titulo, navigate]);
 
