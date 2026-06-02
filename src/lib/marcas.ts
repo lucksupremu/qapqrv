@@ -37,6 +37,7 @@ export function loadMarcas(): Marca[] {
 export function saveMarcas(marcas: Marca[]) {
   try {
     window.localStorage.setItem(MARCAS_STORAGE_KEY, JSON.stringify(marcas));
+    window.dispatchEvent(new CustomEvent("marcas-changed"));
   } catch {
     /* ignore */
   }
