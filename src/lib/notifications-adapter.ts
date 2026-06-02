@@ -105,7 +105,7 @@ export function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null>
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (isNative()) {
     try {
-      const mod = await import(/* @vite-ignore */ "@capacitor/local-notifications");
+      const mod = await (async () => { throw new Error("APK descontinuado: @capacitor/local-notifications indisponível"); })();
       const res = await mod.LocalNotifications.requestPermissions();
       return res.display === "granted" ? "granted" : "denied";
     } catch {
@@ -196,7 +196,7 @@ function scheduleOneWeb(r: ScheduledReminder) {
 
 async function scheduleNative(reminders: ScheduledReminder[]) {
   try {
-    const mod = await import(/* @vite-ignore */ "@capacitor/local-notifications");
+    const mod = await (async () => { throw new Error("APK descontinuado: @capacitor/local-notifications indisponível"); })();
     const map = loadNativeIdMap();
     const toSchedule = reminders
       .map((r) => {
@@ -226,7 +226,7 @@ async function scheduleNative(reminders: ScheduledReminder[]) {
 
 async function cancelNativeForMarca(marcaId: string) {
   try {
-    const mod = await import(/* @vite-ignore */ "@capacitor/local-notifications");
+    const mod = await (async () => { throw new Error("APK descontinuado: @capacitor/local-notifications indisponível"); })();
     const map = loadNativeIdMap();
     const ids = Object.entries(map)
       .filter(([key]) => key.startsWith(`${marcaId}:`))
@@ -318,7 +318,7 @@ export async function fireTestNotification(): Promise<boolean> {
 
   if (isNative()) {
     try {
-      const mod = await import(/* @vite-ignore */ "@capacitor/local-notifications");
+      const mod = await (async () => { throw new Error("APK descontinuado: @capacitor/local-notifications indisponível"); })();
       await mod.LocalNotifications.schedule({
         notifications: [
           {
