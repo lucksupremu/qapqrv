@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { type Marca, loadMarcas, saveMarcas } from "@/lib/marcas";
+import { type Marca, loadMarcas, saveMarcas, MARCAS_EVENT } from "@/lib/marcas";
 import { useDrawer } from "@/components/side-drawer";
 import { useIsNative } from "@/hooks/use-is-native";
 import appLogo from "@/assets/app-logo.png";
@@ -104,11 +104,13 @@ function HomeScreen() {
     window.addEventListener("pageshow", refresh);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("storage", onStorage);
+    window.addEventListener(MARCAS_EVENT, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("pageshow", refresh);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener(MARCAS_EVENT, refresh);
     };
   }, []);
 
