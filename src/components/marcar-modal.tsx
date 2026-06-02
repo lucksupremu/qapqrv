@@ -19,6 +19,10 @@ import {
   scheduleRemindersForMarca,
   getPermission,
 } from "@/lib/notifications-adapter";
+import { buildAutoReminders, isoToLocalInput } from "@/lib/auto-reminders";
+import { schedulePushesForMarca } from "@/lib/push.functions";
+import { getDeviceId } from "@/lib/device-id";
+import { useServerFn } from "@tanstack/react-start";
 
 const tipoOptions: { value: TipoMarca; label: string }[] = [
   { value: "dejem", label: "Dejem" },
@@ -59,22 +63,11 @@ export type MarcarModalProps = {
   initialDate?: string | null;
 };
 
-function isoToLocalInput(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function defaultReminderForDate(dataLocal: string): string {
-  // 1 day before, at 09:00
-  if (!dataLocal) return "";
+function defaultRemindersForDate(dataLocal: string): string[] {
+  if (!dataLocal) return [];
   const d = new Date(dataLocal);
-  if (Number.isNaN(d.getTime())) return "";
-  d.setDate(d.getDate() - 1);
-  d.setHours(9, 0, 0, 0);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (Number.isNaN(d.getTime())) return [];
+  return buildAutoReminders(d.toISOString()).map(isoToLocalInput);
 }
 
 export function MarcarModal({
@@ -91,6 +84,7 @@ export function MarcarModal({
   const [reminders, setReminders] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ tipo?: string; data?: string }>({});
   const [perm, setPerm] = useState<NotificationPermission>("default");
+  const schedulePushFn = useServerFn(schedulePushesForMarca);
 
   useEffect(() => {
     if (!open) return;
@@ -116,23 +110,16 @@ export function MarcarModal({
       const startLocal = initialDate ? isoToLocalInput(initialDate) : "";
       setData(startLocal);
       setValor("");
-      setReminders(startLocal ? [defaultReminderForDate(startLocal)] : []);
+      setReminders(startLocal ? defaultRemindersForDate(startLocal) : []);
     }
     setErrors({});
   }, [open, initialMarca, initialDate]);
 
-  // Manter o lembrete automático em sincronia quando o usuário muda a data
-  // (apenas em criação, e se o primeiro lembrete ainda for o padrão).
+  // Mantém os lembretes automáticos em sincronia ao trocar a data (apenas em criação).
   useEffect(() => {
     if (isEdit) return;
     if (!data) return;
-    setReminders((prev) => {
-      if (prev.length === 0) return [defaultReminderForDate(data)];
-      // se houver pelo menos um, recalcula o primeiro
-      const next = [...prev];
-      next[0] = defaultReminderForDate(data);
-      return next;
-    });
+    setReminders(defaultRemindersForDate(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
@@ -185,22 +172,43 @@ export function MarcarModal({
 
     onSave(marca);
 
-    // Agendar push (web). Pede permissão silenciosamente se ainda não decidida.
+    const tipoLabel = TIPO_LABEL_SHORT[marca.tipo] ?? "Escala";
+    const buildBody = (whenISO: string) =>
+      `Escala em ${formatBRDate(marca.data)}${
+        marca.valor > 0
+          ? ` · ${marca.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+          : ""
+      }\n(Aviso de ${formatBRDate(whenISO)})`;
+
+    // Agendar local (web + nativo). Pede permissão silenciosamente se ainda não decidida.
     if (isoReminders.length > 0) {
       if (getPermission() === "default") {
         await requestNotificationPermission();
       }
       scheduleRemindersForMarca(marca.id, isoReminders, (whenISO) => ({
-        title: `Lembrete — ${TIPO_LABEL_SHORT[marca.tipo] ?? "Escala"}`,
-        body: `Escala em ${formatBRDate(marca.data)}${
-          marca.valor > 0
-            ? ` · ${marca.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
-            : ""
-        }\n(Aviso de ${formatBRDate(whenISO)})`,
+        title: `Lembrete — ${tipoLabel}`,
+        body: buildBody(whenISO),
       }));
     } else {
-      // sem lembretes — limpa qualquer agendamento prévio
       scheduleRemindersForMarca(marca.id, [], () => ({ title: "", body: "" }));
+    }
+
+    // Espelhar no servidor (push remoto programado — redundância para quem ativou web push).
+    try {
+      await schedulePushFn({
+        data: {
+          deviceId: getDeviceId(),
+          marcaId: marca.id,
+          reminders: isoReminders.map((sendAt) => ({
+            title: `Lembrete — ${tipoLabel}`,
+            body: buildBody(sendAt),
+            sendAt,
+          })),
+        },
+      });
+    } catch (e) {
+      // Falha silenciosa: notificação local segue funcionando
+      console.warn("[marcar] push remoto não agendado", e);
     }
 
     onOpenChange(false);

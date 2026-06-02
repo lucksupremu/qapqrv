@@ -21,12 +21,14 @@ import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as Googlef2edc9e3a6b2e4a9DothtmlRouteImport } from './routes/googlef2edc9e3a6b2e4a9[.]html'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AnyconnectRouteImport } from './routes/anyconnect'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
+import { Route as ApiPublicPushSendRouteImport } from './routes/api/public/push/send'
 
 const Char91indexChar93Route = Char91indexChar93RouteImport.update({
   id: '/index',
@@ -89,6 +91,11 @@ const EscalasBaixadasRoute = EscalasBaixadasRouteImport.update({
   path: '/escalas-baixadas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarioRoute = CalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
@@ -121,11 +128,17 @@ const FerramentaSlugRoute = FerramentaSlugRouteImport.update({
   path: '/ferramenta/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPushSendRoute = ApiPublicPushSendRouteImport.update({
+  id: '/api/public/push/send',
+  path: '/api/public/push/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -141,11 +154,13 @@ export interface FileRoutesByFullPath {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -161,12 +176,14 @@ export interface FileRoutesByTo {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -182,6 +199,7 @@ export interface FileRoutesById {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -189,6 +207,7 @@ export interface FileRouteTypes {
     | '/'
     | '/anyconnect'
     | '/calendario'
+    | '/configuracoes'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -204,11 +223,13 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/api/public/push/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/anyconnect'
     | '/calendario'
+    | '/configuracoes'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -224,11 +245,13 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/api/public/push/send'
   id:
     | '__root__'
     | '/'
     | '/anyconnect'
     | '/calendario'
+    | '/configuracoes'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -244,12 +267,14 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/api/public/push/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnyconnectRoute: typeof AnyconnectRoute
   CalendarioRoute: typeof CalendarioRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FavoritosRoute: typeof FavoritosRoute
   Googlef2edc9e3a6b2e4a9DothtmlRoute: typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -265,6 +290,7 @@ export interface RootRouteChildren {
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
   FerramentaMinhaLocalizacaoRoute: typeof FerramentaMinhaLocalizacaoRoute
+  ApiPublicPushSendRoute: typeof ApiPublicPushSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -353,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalasBaixadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendario': {
       id: '/calendario'
       path: '/calendario'
@@ -395,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FerramentaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/push/send': {
+      id: '/api/public/push/send'
+      path: '/api/public/push/send'
+      fullPath: '/api/public/push/send'
+      preLoaderRoute: typeof ApiPublicPushSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -402,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnyconnectRoute: AnyconnectRoute,
   CalendarioRoute: CalendarioRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FavoritosRoute: FavoritosRoute,
   Googlef2edc9e3a6b2e4a9DothtmlRoute: Googlef2edc9e3a6b2e4a9DothtmlRoute,
@@ -417,6 +458,7 @@ const rootRouteChildren: RootRouteChildren = {
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
   FerramentaMinhaLocalizacaoRoute: FerramentaMinhaLocalizacaoRoute,
+  ApiPublicPushSendRoute: ApiPublicPushSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

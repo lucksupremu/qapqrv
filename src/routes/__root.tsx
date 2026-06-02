@@ -129,6 +129,13 @@ function RootComponent() {
       },
       60 * 60 * 1000,
     );
+
+    // Registra o Service Worker para Web Push (apenas em produção, fora do preview/iframe).
+    if (!isNativeApp() && import.meta.env.PROD) {
+      import("@/lib/web-push-client").then(({ registerServiceWorker }) => {
+        registerServiceWorker().catch(() => {});
+      });
+    }
     return () => {
       clearInterval(id);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

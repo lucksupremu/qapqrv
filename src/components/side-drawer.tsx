@@ -12,6 +12,7 @@ import {
   Sun,
   Moon,
   Download,
+  Bell,
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
@@ -70,6 +71,7 @@ const grupo2: Item[] = [
   },
 ];
 const grupo3: Item[] = [
+  { type: "route", to: "/configuracoes", label: "Notificações", icon: Bell },
   { type: "route", to: "/manual", label: "Manual", icon: BookOpenCheck },
   { type: "route", to: "/anyconnect", label: "Guia AnyConnect", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
