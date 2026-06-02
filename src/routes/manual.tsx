@@ -207,28 +207,24 @@ function ManualScreen() {
           </Lista>
         </Bloco>
 
-        <Bloco id="vpn" titulo="4. VPN AnyConnect" icone={ShieldCheck} tom="blue">
+        <Bloco id="vpn" titulo="3. VPN AnyConnect" icone={ShieldCheck}>
           <p>
             Quase todos os botões que abrem a <strong>intranet da PMESP</strong>
             {" "}(Consulta de escala, Marcar/Desmarcar, Folha de Pagamento e iNotes)
             exigem que a VPN <strong>Cisco Secure Client (AnyConnect)</strong> esteja
-            conectada. Sem a VPN, essas páginas simplesmente não abrem.
+            conectada no seu equipamento. Sem a VPN, essas páginas simplesmente
+            não abrem.
           </p>
 
           <SubTitulo>Como conectar passo a passo</SubTitulo>
           <Lista ordenada>
             <li>
-              Toque em <strong>"Guia AnyConnect"</strong> na tela inicial.
+              Abra o <strong>"Guia AnyConnect"</strong> pelo botão da tela inicial.
             </li>
             <li>Siga o tutorial com prints (Conexão, Servidor, Autenticação EAP-AnyConnect…).</li>
             <li>
-              No final, toque em <strong>"Abrir AnyConnect"</strong>. Se o
-              Cisco Secure Client não estiver instalado, baixe pela Play Store
-              ou App Store.
-            </li>
-            <li>
-              Dentro do AnyConnect, toque em <strong>Connect</strong>, escolha o
-              {" "}<strong>Grupo 13 - DEJEM DELEGADA</strong> e faça login.
+              Abra o Cisco Secure Client, clique em <strong>Connect</strong>,
+              escolha o <strong>Grupo 13 - DEJEM DELEGADA</strong> e faça login.
             </li>
           </Lista>
 
@@ -241,50 +237,49 @@ function ManualScreen() {
           </Dica>
         </Bloco>
 
-        <Bloco id="consulta" titulo="5. Consulta de escala por ID" icone={Search} tom="blue">
+        <Bloco id="consulta" titulo="4. Consulta de escala por ID" icone={Search} tom="blue">
           <Lista ordenada>
             <li>Conecte o AnyConnect (veja a seção VPN).</li>
             <li>
               Na tela inicial, digite o <strong>número da escala</strong> no campo
               "Insira o ID da Escala".
             </li>
-            <li>Toque na seta amarela ao lado, ou pressione Enter.</li>
-            <li>A escala abre no navegador interno do app.</li>
+            <li>Clique na seta amarela ao lado, ou pressione Enter.</li>
+            <li>A escala abre no navegador.</li>
           </Lista>
         </Bloco>
 
-        <Bloco id="marcar" titulo="6. Marcar / Desmarcar Dejem-Delegada" icone={CalendarPlus}>
+        <Bloco id="marcar" titulo="5. Marcar / Desmarcar Dejem-Delegada" icone={CalendarPlus}>
           <Lista ordenada>
             <li>Conecte o AnyConnect.</li>
             <li>
-              Na home, toque em <strong>"Marcar / Desmarcar Dejem/Delegada"</strong>.
+              Na home, clique em <strong>"Marcar / Desmarcar Dejem/Delegada"</strong>.
             </li>
-            <li>A página oficial da PMESP abre dentro do navegador do app.</li>
+            <li>A página oficial da PMESP abre no navegador.</li>
             <li>Faça login (mesmas credenciais usadas na intranet PMESP — veja o quadro abaixo).</li>
             <li>Escolha a data, o tipo (Dejem ou Delegada) e confirme a operação.</li>
-            <li>Para sair, toque na seta de voltar no topo da tela.</li>
           </Lista>
           <BoxLogin />
         </Bloco>
 
-        <Bloco id="calendario" titulo="7. Calendário e histórico" icone={Calendar} tom="blue">
+        <Bloco id="calendario" titulo="6. Calendário e histórico" icone={Calendar} tom="blue">
           <p>
             O calendário guarda os plantões que você marcou, com o valor recebido
-            por cada um. Tudo fica salvo <strong>somente no seu celular</strong>
-            — o app não envia nada pra nenhum servidor.
+            por cada um. Tudo fica salvo <strong>apenas no seu navegador</strong>
+            {" "}— o app não envia nada pra nenhum servidor.
           </p>
           <SubTitulo>Adicionar um plantão</SubTitulo>
           <Lista ordenada>
             <li>
-              Toque em <strong>"Calendário"</strong> no acesso rápido ou no menu lateral.
+              Clique em <strong>"Calendário"</strong> no acesso rápido ou no menu lateral.
             </li>
-            <li>Toque no dia desejado.</li>
+            <li>Clique no dia desejado.</li>
             <li>Escolha o tipo: Dejem, Delegada Capital ou Delegada Outras.</li>
             <li>Informe horário e valor, depois confirme.</li>
           </Lista>
           <SubTitulo>Editar ou remover</SubTitulo>
           <Lista>
-            <li>Toque no plantão existente no calendário.</li>
+            <li>Clique no plantão existente no calendário.</li>
             <li>Use os botões "Editar" ou "Remover" no card que aparece.</li>
           </Lista>
           <SubTitulo>Histórico</SubTitulo>
@@ -294,29 +289,23 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="folha" titulo="8. Folha de Pagamento (CIAF)" icone={Wallet}>
+        <Bloco id="folha" titulo="7. Folha de Pagamento (CIAF)" icone={Wallet}>
           <Lista ordenada>
             <li>Conecte o AnyConnect.</li>
             <li>
-              Toque em <strong>"Folha de Pagamento"</strong>.
+              Clique em <strong>"Folha de Pagamento"</strong>.
             </li>
-            <li>
-              A página do CIAF abre em <strong>modo celular</strong> dentro do app.
-            </li>
+            <li>A página do CIAF abre no navegador.</li>
             <li>Faça login (veja o quadro abaixo) e consulte holerites e demais informações financeiras.</li>
           </Lista>
           <BoxLogin />
-          <Dica>
-            Se a página abrir em formato de computador, feche o navegador interno
-            e tente novamente — o app força a versão mobile do CIAF.
-          </Dica>
         </Bloco>
 
-        <Bloco id="inotes" titulo="9. Email iNotes" icone={Mail} tom="blue">
+        <Bloco id="inotes" titulo="8. Email iNotes" icone={Mail} tom="blue">
           <Lista ordenada>
             <li>Conecte o AnyConnect.</li>
             <li>
-              Toque em <strong>"Email iNotes"</strong>.
+              Clique em <strong>"Email iNotes"</strong>.
             </li>
             <li>A página oficial do correio PMESP abre no navegador.</li>
             <li>Faça login (mesmas credenciais — veja o quadro abaixo).</li>
@@ -324,35 +313,33 @@ function ManualScreen() {
           <BoxLogin />
         </Bloco>
 
-        <Bloco id="menu" titulo="10. Menu lateral, tema e instalação" icone={Menu}>
+        <Bloco id="menu" titulo="9. Menu lateral e tema" icone={Menu}>
           <SubTitulo>Menu lateral (☰)</SubTitulo>
           <p>
-            Toque no ícone <strong>☰</strong> no canto superior direito da home.
+            Clique no ícone <strong>☰</strong> no canto superior direito da home.
             O menu mostra atalhos para: Início, Calendário, Correio PMESP,
             Folha de Pagamento, Guia AnyConnect, Manual e Política de Privacidade.
-            Ele também tem o botão de <strong>instalar o app</strong>
-            {" "}(quando disponível) e o <strong>toggle de tema</strong>
-            {" "}claro/escuro.
+            Inclui também o <strong>toggle de tema</strong> claro/escuro.
           </p>
 
           <SubTitulo>Tema claro / escuro</SubTitulo>
           <Lista>
             <li>
-              Toque no <strong>sol/lua</strong> no topo direito da home.
+              Clique no <strong>sol/lua</strong> no topo direito da home.
             </li>
             <li>
-              Ou abra o menu lateral e toque em "Modo claro" / "Modo escuro".
+              Ou abra o menu lateral e clique em "Modo claro" / "Modo escuro".
             </li>
           </Lista>
-          <Dica>O tema escolhido é lembrado mesmo depois de fechar o app.</Dica>
+          <Dica>O tema escolhido é lembrado mesmo depois de fechar o navegador.</Dica>
         </Bloco>
 
-        <Bloco id="privacidade" titulo="11. Privacidade e dados" icone={Lock} tom="blue">
+        <Bloco id="privacidade" titulo="10. Privacidade e dados" icone={Lock} tom="blue">
           <p>
             Seus plantões, valores e histórico ficam guardados <strong>apenas no
-            seu celular</strong>. O app não envia esses dados para nenhum servidor.
-            Login e senha são digitados direto nos sites oficiais da PMESP, dentro
-            do navegador interno — o app não vê nem armazena essas informações.
+            seu navegador</strong>. O app não envia esses dados para nenhum servidor.
+            Login e senha são digitados direto nos sites oficiais da PMESP — o
+            app não vê nem armazena essas informações.
           </p>
           <p>
             Para mais detalhes, leia a{" "}
@@ -363,43 +350,34 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="problemas" titulo="12. Solução de problemas" icone={AlertTriangle}>
+        <Bloco id="problemas" titulo="11. Solução de problemas" icone={AlertTriangle}>
           <SubTitulo>Página fica carregando e não abre</SubTitulo>
           <Lista>
             <li>Confirme que o AnyConnect está realmente conectado.</li>
-            <li>Feche o navegador interno e tente abrir de novo.</li>
+            <li>Feche a aba e tente abrir de novo.</li>
             <li>Se persistir, desconecte e reconecte a VPN.</li>
           </Lista>
 
           <SubTitulo>Botão "Abrir AnyConnect" não faz nada</SubTitulo>
           <Lista>
-            <li>Verifique se o Cisco Secure Client está instalado no celular.</li>
-            <li>Se não estiver, baixe pela Play Store ou App Store.</li>
-          </Lista>
-
-          <SubTitulo>Folha de Pagamento abre em formato de PC</SubTitulo>
-          <Lista>
-            <li>
-              Feche a aba e abra de novo pelo botão "Folha de Pagamento" — o app
-              força a versão mobile do CIAF.
-            </li>
+            <li>Verifique se o Cisco Secure Client está instalado e em execução.</li>
           </Lista>
 
           <SubTitulo>Histórico do calendário sumiu</SubTitulo>
           <Lista>
             <li>
-              Os dados ficam só no celular. Se você limpar os dados do navegador
-              ou desinstalar o atalho, o histórico é perdido.
+              Os dados ficam só no navegador. Se você limpar os dados do site
+              ou trocar de navegador, o histórico é perdido.
             </li>
           </Lista>
         </Bloco>
 
-        <Bloco id="suporte" titulo="13. Suporte" icone={HelpCircle} tom="blue">
+        <Bloco id="suporte" titulo="12. Suporte" icone={HelpCircle} tom="blue">
           <p>
             Encontrou um erro ou tem sugestão de melhoria? Procure o canal de
             contato divulgado junto com o app. Quanto mais detalhes você enviar
-            (qual tela, o que apareceu, qual celular), mais rápido o problema é
-            resolvido.
+            (qual tela, o que apareceu, qual navegador), mais rápido o problema
+            é resolvido.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button
