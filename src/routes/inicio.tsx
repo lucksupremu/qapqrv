@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
+import { AdSlot } from "@/components/ad-slot";
 import { ToolCard } from "@/components/tool-card";
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
 import { tools } from "@/lib/tools";
