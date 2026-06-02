@@ -14,6 +14,7 @@ import { DrawerProvider } from "@/components/side-drawer";
 import { BottomNav } from "@/components/bottom-nav";
 import { PrivacyConsent } from "@/components/privacy-consent";
 import { PushPermissionPrompt } from "@/components/push-permission-prompt";
+import { BrowserWarningModal } from "@/components/browser-warning-modal";
 import { isNativeApp } from "@/lib/in-app-browser";
 
 /** Google AdSense client ID */
@@ -159,6 +160,7 @@ function RootComponent() {
           <BottomNav />
           <PrivacyConsent />
           <PushPermissionPrompt />
+          <BrowserWarningModal />
           <Toaster />
         </DrawerProvider>
       </TooltipProvider>

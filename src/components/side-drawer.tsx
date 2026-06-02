@@ -11,14 +11,11 @@ import {
   X,
   Sun,
   Moon,
-  Download,
   Bell,
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { useIsNative } from "@/hooks/use-is-native";
-import { usePwaInstall } from "@/hooks/use-pwa-install";
-import { PwaInstallModal } from "@/components/pwa-install-modal";
 
 type Ctx = { open: boolean; setOpen: (v: boolean) => void };
 const DrawerCtx = createContext<Ctx | null>(null);
@@ -83,8 +80,6 @@ function SideDrawer() {
   const native = useIsNative();
   const grupo1 = native ? [...grupo1Base, ...grupo1NativeOnly] : grupo1Base;
   const [theme, setTheme] = useState<Theme>("light");
-  const pwa = usePwaInstall();
-  const [showPwaModal, setShowPwaModal] = useState(false);
   useEffect(() => {
     setTheme(getStoredTheme());
   }, []);
@@ -93,13 +88,8 @@ function SideDrawer() {
     applyTheme(next);
     setTheme(next);
   };
-  const handleInstallClick = async () => {
-    if (pwa.canPrompt) {
-      await pwa.promptInstall();
-    } else {
-      setShowPwaModal(true);
-    }
-  };
+
+
 
 
   const renderItem = (it: Item) => {
@@ -190,19 +180,6 @@ function SideDrawer() {
           {grupo2.map(renderItem)}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo3.map(renderItem)}
-          {pwa.isInstallable && (
-            <button
-              onClick={() => {
-                setOpen(false);
-                void handleInstallClick();
-              }}
-              className="flex items-center gap-3 px-6 py-4 text-[15px] transition-all duration-200 hover:bg-[#e8f0f8]"
-              style={{ color: "#0f2535" }}
-            >
-              <Download size={20} style={{ color: "#f59e0b" }} />
-              <span>Instalar app</span>
-            </button>
-          )}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           <button
             onClick={handleToggleTheme}
@@ -218,11 +195,6 @@ function SideDrawer() {
           </button>
         </nav>
       </aside>
-      <PwaInstallModal
-        open={showPwaModal}
-        onClose={() => setShowPwaModal(false)}
-        platform={pwa.isIOS ? "ios" : pwa.isAndroid ? "android" : "desktop"}
-      />
     </>
   );
 }
