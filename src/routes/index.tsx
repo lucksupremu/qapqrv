@@ -118,12 +118,12 @@ function HomeScreen() {
       return;
     }
 
-    const url = `http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
+    const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
     setConsultando(true);
     void guardIntranet(() => {
       if (isNativeApp()) {
-        void openInAppBrowser(url, { titulo: `Escala ${id}` });
+        void openInAppBrowser(url, { titulo: `Escala ${id}`, modo: "system" });
       } else if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
       }
@@ -159,8 +159,8 @@ function HomeScreen() {
         void guardIntranet(
           () =>
             openInAppBrowser(
-              "http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
-              { titulo: "Marcar / Desmarcar" },
+              "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
+              { titulo: "Marcar / Desmarcar", modo: "system" },
             ),
           "Marcar / Desmarcar",
         ),
