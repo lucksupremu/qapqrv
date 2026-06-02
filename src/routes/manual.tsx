@@ -50,18 +50,17 @@ type Secao = {
 
 const SECOES: Secao[] = [
   { id: "boas-vindas", titulo: "1. Boas-vindas", icone: BookOpenCheck },
-  { id: "primeiros-passos", titulo: "2. Primeiros passos", icone: Download },
-  { id: "tela-inicial", titulo: "3. Tela inicial", icone: Smartphone },
-  { id: "vpn", titulo: "4. VPN AnyConnect", icone: ShieldCheck },
-  { id: "consulta", titulo: "5. Consulta de escala por ID", icone: Search },
-  { id: "marcar", titulo: "6. Marcar / Desmarcar Dejem-Delegada", icone: CalendarPlus },
-  { id: "calendario", titulo: "7. Calendário e histórico", icone: Calendar },
-  { id: "folha", titulo: "8. Folha de Pagamento (CIAF)", icone: Wallet },
-  { id: "inotes", titulo: "9. Email iNotes", icone: Mail },
-  { id: "menu", titulo: "10. Menu, tema e instalação", icone: Menu },
-  { id: "privacidade", titulo: "11. Privacidade e dados", icone: Lock },
-  { id: "problemas", titulo: "12. Solução de problemas", icone: AlertTriangle },
-  { id: "suporte", titulo: "13. Suporte", icone: HelpCircle },
+  { id: "tela-inicial", titulo: "2. Tela inicial", icone: Smartphone },
+  { id: "vpn", titulo: "3. VPN AnyConnect", icone: ShieldCheck },
+  { id: "consulta", titulo: "4. Consulta de escala por ID", icone: Search },
+  { id: "marcar", titulo: "5. Marcar / Desmarcar Dejem-Delegada", icone: CalendarPlus },
+  { id: "calendario", titulo: "6. Calendário e histórico", icone: Calendar },
+  { id: "folha", titulo: "7. Folha de Pagamento (CIAF)", icone: Wallet },
+  { id: "inotes", titulo: "8. Email iNotes", icone: Mail },
+  { id: "menu", titulo: "9. Menu lateral e tema", icone: Menu },
+  { id: "privacidade", titulo: "10. Privacidade e dados", icone: Lock },
+  { id: "problemas", titulo: "11. Solução de problemas", icone: AlertTriangle },
+  { id: "suporte", titulo: "12. Suporte", icone: HelpCircle },
 ];
 
 function ManualScreen() {
