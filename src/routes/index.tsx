@@ -126,7 +126,7 @@ function HomeScreen() {
     setConsultando(true);
     void guardIntranet(() => {
       if (isNativeApp()) {
-        void openInAppBrowser(url, { titulo: `Escala ${id}`, modo: "system" });
+        void openInAppBrowser(url);
       } else if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
       }
@@ -162,11 +162,7 @@ function HomeScreen() {
         const url =
           "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx";
         void guardIntranet(
-          () =>
-            openInAppBrowser(url, {
-              titulo: "Marcar / Desmarcar",
-              modo: isNativeApp() ? "external" : "system",
-            }),
+          () => openInAppBrowser(url),
           "Marcar / Desmarcar",
         );
       },
@@ -177,17 +173,9 @@ function HomeScreen() {
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
       onClick: () => {
-        // A URL raiz do iNotes redireciona automaticamente para a interface
-        // correta (desktop/mobile) após o login. Usar `?ui=mobile` direto
-        // na raiz retorna 404 no servidor da PMESP.
         const url = "https://correio.policiamilitar.sp.gov.br/";
         void guardIntranet(
-          () =>
-            openInAppBrowser(url, {
-              titulo: "Email iNotes",
-              modo: isNativeApp() ? "webview" : "system",
-              forceMobileUA: isNativeApp(),
-            }),
+          () => openInAppBrowser(url),
           "o Email iNotes",
         );
       },
@@ -224,7 +212,6 @@ function HomeScreen() {
           () =>
             openInAppBrowser(
               "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
-              { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
             ),
           "a Folha de Pagamento",
         ),
