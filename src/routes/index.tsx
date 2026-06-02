@@ -173,10 +173,14 @@ function HomeScreen() {
       onClick: () =>
         void guardIntranet(
           () =>
-            openInAppBrowser("http://ms.policiamilitar.sp.gov.br/login.aspx", {
-              titulo: "Email iNotes",
-              modo: "system",
-            }),
+            openInAppBrowser(
+              "https://correio.policiamilitar.sp.gov.br/iwaredir.nsf?ui=mobile",
+              {
+                titulo: "Email iNotes",
+                modo: "webview",
+                forceMobileUA: true,
+              },
+            ),
           "o Email iNotes",
         ),
     },
