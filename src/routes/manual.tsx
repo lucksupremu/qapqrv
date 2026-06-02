@@ -11,15 +11,14 @@ import {
   ShieldCheck,
   Wallet,
   Search,
-  MapPin,
   Sun,
   Menu,
   Lock,
   HelpCircle,
   Download,
   Smartphone,
-  Wifi,
   AlertTriangle,
+  KeyRound,
   type LucideIcon,
 } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
@@ -55,18 +54,16 @@ const SECOES: Secao[] = [
   { id: "primeiros-passos", titulo: "2. Primeiros passos", icone: Download },
   { id: "tela-inicial", titulo: "3. Tela inicial", icone: Smartphone },
   { id: "vpn", titulo: "4. VPN AnyConnect", icone: ShieldCheck },
-  { id: "marcar", titulo: "5. Marcar / Desmarcar Dejem-Delegada", icone: CalendarPlus },
-  { id: "consulta", titulo: "6. Consulta de escala por ID", icone: Search },
-  { id: "calendario", titulo: "7. Calendário e marcações", icone: Calendar },
+  { id: "consulta", titulo: "5. Consulta de escala por ID", icone: Search },
+  { id: "marcar", titulo: "6. Marcar / Desmarcar Dejem-Delegada", icone: CalendarPlus },
+  { id: "calendario", titulo: "7. Calendário e histórico", icone: Calendar },
   { id: "escalas-baixadas", titulo: "8. Escalas baixadas (APK)", icone: FolderDown },
-  { id: "folha", titulo: "9. Folha de Pagamento", icone: Wallet },
+  { id: "folha", titulo: "9. Folha de Pagamento (CIAF)", icone: Wallet },
   { id: "inotes", titulo: "10. Email iNotes", icone: Mail },
-  { id: "ferramentas", titulo: "11. Ferramentas", icone: MapPin },
-  { id: "tema", titulo: "12. Tema claro / escuro", icone: Sun },
-  { id: "menu", titulo: "13. Menu lateral", icone: Menu },
-  { id: "privacidade", titulo: "14. Privacidade e dados", icone: Lock },
-  { id: "problemas", titulo: "15. Solução de problemas", icone: AlertTriangle },
-  { id: "suporte", titulo: "16. Suporte", icone: HelpCircle },
+  { id: "menu", titulo: "11. Menu, tema e instalação", icone: Menu },
+  { id: "privacidade", titulo: "12. Privacidade e dados", icone: Lock },
+  { id: "problemas", titulo: "13. Solução de problemas", icone: AlertTriangle },
+  { id: "suporte", titulo: "14. Suporte", icone: HelpCircle },
 ];
 
 function ManualScreen() {
@@ -131,7 +128,7 @@ function ManualScreen() {
               <p className="mt-1 text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">
                 Aqui você encontra explicações claras de cada função do app QAP, QRV!,
                 com o passo a passo para quem está usando pela primeira vez.
-                Toque em uma seção abaixo para ir direto ao tópico.
+                Toque em uma seção para abrir o conteúdo.
               </p>
             </div>
           </div>
@@ -172,129 +169,138 @@ function ManualScreen() {
           <p>
             O <strong>QAP, QRV!</strong> é um aplicativo feito para policiais militares
             do Estado de São Paulo (PMESP). Ele reúne, em um só lugar, atalhos para os
-            sistemas internos mais usados no dia a dia: marcar e desmarcar plantões
-            (Dejem e Delegada), consultar escalas, ver o calendário pessoal, acessar
-            o email iNotes e abrir a Folha de Pagamento.
+            sistemas internos mais usados no dia a dia: consultar escalas por ID,
+            marcar e desmarcar plantões (Dejem e Delegada), acessar a Folha de
+            Pagamento (CIAF), o Email iNotes e organizar seus plantões num
+            calendário pessoal.
           </p>
           <p>
             O app pode ser usado de duas formas: pelo <strong>navegador</strong>
-            (entrando no site) ou instalado como <strong>aplicativo</strong> no
-            celular Android (APK). Algumas funções avançadas, como salvar escalas
-            para acessar sem internet, só aparecem na versão instalada.
+            (versão web) ou instalado como <strong>aplicativo APK</strong> no
+            celular Android. As funções são as mesmas — só o APK ganha extras
+            como salvar escalas para acesso offline e detectar automaticamente
+            se a VPN AnyConnect está conectada.
           </p>
         </Bloco>
 
         <Bloco id="primeiros-passos" titulo="2. Primeiros passos" icone={Download} tom="blue">
-          <SubTitulo>Instalando como aplicativo (Android — APK)</SubTitulo>
+          <SubTitulo>Instalando como aplicativo (APK — Android)</SubTitulo>
           <Lista ordenada>
             <li>Baixe o APK pelo link enviado.</li>
             <li>Abra o arquivo. Se aparecer aviso "instalar de fonte desconhecida", aceite.</li>
             <li>Confirme a instalação e abra o app pelo ícone no menu do celular.</li>
           </Lista>
 
-          <SubTitulo>Instalando como atalho (PWA — qualquer celular)</SubTitulo>
+          <SubTitulo>Instalando como atalho (PWA — Android ou iPhone)</SubTitulo>
+          <p className="text-[12.5px] text-slate-600 dark:text-slate-400">
+            O APK só existe pra Android. Em iPhone (e também no Android, se preferir),
+            use a versão web instalada como atalho:
+          </p>
           <Lista ordenada>
             <li>Abra o site do app no Chrome (Android) ou Safari (iPhone).</li>
             <li>
-              <strong>Android:</strong> toque no menu (três pontos) → "Instalar aplicativo"
+              <strong>Android:</strong> menu (três pontos) → "Instalar aplicativo"
               ou "Adicionar à tela inicial".
             </li>
             <li>
-              <strong>iPhone:</strong> toque no ícone de compartilhar (quadrado com
-              seta) → "Adicionar à Tela de Início".
+              <strong>iPhone:</strong> ícone de compartilhar (quadrado com seta) →
+              "Adicionar à Tela de Início".
             </li>
           </Lista>
 
           <Dica>
-            Se aparecer um banner no topo dizendo "Instalar app", basta tocar nele
-            que o próprio app guia a instalação.
+            Se aparecer um banner no topo da home dizendo "Instalar app", basta
+            tocar nele que o próprio app guia a instalação.
           </Dica>
         </Bloco>
 
         <Bloco id="tela-inicial" titulo="3. Tela inicial" icone={Smartphone}>
-          <p>A tela inicial tem quatro áreas principais:</p>
-          <Lista>
+          <p>De cima pra baixo, é isso que você vê na home:</p>
+          <Lista ordenada>
             <li>
-              <strong>Consulta rápida:</strong> digite o ID da escala para abrir
-              diretamente na intranet.
+              <strong>Topo:</strong> logo do app, botão <em>sol/lua</em> (alterna
+              tema claro/escuro) e ícone <em>☰</em> (abre o menu lateral).
             </li>
             <li>
-              <strong>Próximas escalas:</strong> mostra seus próximos plantões
-              cadastrados no calendário.
+              <strong>Banner "Instalar app"</strong> — aparece só no navegador
+              quando ainda dá pra instalar o app como PWA.
             </li>
             <li>
-              <strong>Acesso rápido:</strong> botões para Marcar/Desmarcar, iNotes,
-              Calendário, Escalas Baixadas, Guia AnyConnect, Folha de Pagamento e
-              este Manual.
+              <strong>Card "Consulta escala Dejem/Delegada":</strong> campo pra
+              digitar o ID da escala e botão amarelo de seta pra abrir.
+              No APK, esse card também mostra o <strong>chip verde "VPN Ativa"</strong>
+              {" "}quando a VPN está conectada, ou um <strong>aviso vermelho
+              "Conectar VPN — acesso às escalas"</strong> com o botão
+              "Abrir Cisco AnyConnect" quando não está.
             </li>
             <li>
-              <strong>Minha Escala:</strong> calendário visual com os plantões do mês.
+              <strong>Próximas Escalas:</strong> seus 5 próximos plantões
+              cadastrados, com etiqueta "Hoje", "Amanhã" ou "Em N dias".
+            </li>
+            <li>
+              <strong>Acesso Rápido:</strong> grid com os botões
+              Marcar/Desmarcar, iNotes, Calendário, Escalas Baixadas (só APK),
+              Guia AnyConnect, Folha de Pagamento e Manual.
+            </li>
+            <li>
+              <strong>Minha Escala:</strong> calendário visual do mês com os
+              plantões marcados.
+            </li>
+            <li>
+              <strong>Rodapé:</strong> link para a Política de Privacidade.
             </li>
           </Lista>
-          <Dica>
-            No topo direito há dois botões: 🌙/☀️ alterna entre tema escuro e claro,
-            e ☰ abre o menu lateral com mais atalhos.
-          </Dica>
         </Bloco>
 
         <Bloco id="vpn" titulo="4. VPN AnyConnect" icone={ShieldCheck} tom="blue">
           <p>
-            Quase todas as funções que acessam a <strong>intranet da PMESP</strong>
-            (consulta de escala, marcar/desmarcar, folha de pagamento, iNotes)
-            exigem que a VPN <strong>Cisco AnyConnect</strong> esteja conectada.
-            Sem a VPN, essas páginas não abrem.
+            Quase todos os botões que abrem a <strong>intranet da PMESP</strong>
+            {" "}(Consulta de escala, Marcar/Desmarcar, Folha de Pagamento e iNotes)
+            exigem que a VPN <strong>Cisco Secure Client (AnyConnect)</strong> esteja
+            conectada. Sem a VPN, essas páginas simplesmente não abrem.
           </p>
 
-          <SubTitulo>Como conectar a VPN passo a passo</SubTitulo>
+          <SubTitulo>Como o app avisa se a VPN está ligada</SubTitulo>
+          <Lista>
+            <li>
+              No APK, um <strong>chip verde "VPN Ativa"</strong> aparece no canto
+              do card de consulta quando tudo está ok.
+            </li>
+            <li>
+              Se aparecer <strong>aviso vermelho "Conectar VPN"</strong>, toque
+              nele para expandir e usar o botão <em>"Abrir Cisco AnyConnect"</em>.
+              Depois de conectar, toque em <em>"Verificar conexão"</em>.
+            </li>
+            <li>
+              Na versão web não há detecção automática — sempre confirme manualmente
+              que o AnyConnect está conectado antes de abrir as escalas.
+            </li>
+          </Lista>
+
+          <SubTitulo>Como conectar passo a passo</SubTitulo>
           <Lista ordenada>
             <li>
-              Toque em <strong>"Guia AnyConnect"</strong> na tela inicial.
+              Toque em <strong>"Guia AnyConnect"</strong> na tela inicial (ou no
+              botão vermelho "Abrir Cisco AnyConnect" do aviso).
             </li>
+            <li>Siga o tutorial com prints (Conexão, Servidor, Autenticação EAP-AnyConnect…).</li>
             <li>
-              Siga o tutorial com prints (Conexão, Servidor, Autenticação EAP-AnyConnect…).
-            </li>
-            <li>
-              Ao final, toque em <strong>"Abrir AnyConnect"</strong> — o app abre
-              o Cisco Secure Client instalado no seu celular.
+              No final, toque em <strong>"Abrir AnyConnect"</strong>. O app abre
+              o Cisco Secure Client instalado no seu celular. Se não estiver
+              instalado, ele abre a Play Store pra você baixar.
             </li>
             <li>
               Dentro do AnyConnect, toque em <strong>Connect</strong>, escolha o
-              <strong> Grupo 13 - DEJEM DELEGADA</strong> e faça login com:
+              {" "}<strong>Grupo 13 - DEJEM DELEGADA</strong> e faça login.
             </li>
           </Lista>
 
-          <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-3 text-[12.5px] leading-relaxed text-blue-900 dark:text-blue-100">
-            <p><strong>Usuário:</strong> seu CPF (somente números)</p>
-            <p><strong>Senha:</strong> a mesma da aba <strong>Procedimentos</strong> da intranet PMESP</p>
-            <p><strong>Grupo:</strong> 13 - DEJEM DELEGADA</p>
-          </div>
-
-          <Dica>
-            No APK, um <strong>chip verde "VPN Ativa"</strong> aparece no topo do
-            card de consulta quando a VPN está conectada. Se aparecer "VPN Off" em
-            vermelho, conecte a VPN antes de tentar abrir as escalas.
-          </Dica>
-
+          <BoxLogin grupo="13 - DEJEM DELEGADA" />
         </Bloco>
 
-        <Bloco id="marcar" titulo="5. Marcar / Desmarcar Dejem-Delegada" icone={CalendarPlus}>
+        <Bloco id="consulta" titulo="5. Consulta de escala por ID" icone={Search} tom="blue">
           <Lista ordenada>
-            <li>Conecte a VPN AnyConnect.</li>
-            <li>
-              Na tela inicial, toque no botão{" "}
-              <strong>"Marcar / Desmarcar Dejem/Delegada"</strong>.
-            </li>
-            <li>
-              A página oficial da PMESP abre dentro do app. Faça login com seu RG e senha da intranet.
-            </li>
-            <li>Escolha a data, o tipo (Dejem ou Delegada) e confirme a operação.</li>
-            <li>Para sair, toque na seta de voltar no topo.</li>
-          </Lista>
-        </Bloco>
-
-        <Bloco id="consulta" titulo="6. Consulta de escala por ID" icone={Search} tom="blue">
-          <Lista ordenada>
-            <li>Conecte a VPN AnyConnect.</li>
+            <li>Conecte o AnyConnect (veja a seção VPN).</li>
             <li>
               Na tela inicial, digite o <strong>número da escala</strong> no campo
               "Insira o ID da Escala".
@@ -303,15 +309,31 @@ function ManualScreen() {
             <li>A escala abre no navegador interno do app.</li>
           </Lista>
           <Dica>
-            No APK, o app também salva uma cópia da escala automaticamente para você
-            poder consultar depois sem internet — veja a seção "Escalas baixadas".
+            No APK, o app salva automaticamente uma cópia da escala consultada para
+            você acessar depois sem internet — veja a seção
+            "Escalas baixadas".
           </Dica>
         </Bloco>
 
-        <Bloco id="calendario" titulo="7. Calendário e marcações" icone={Calendar}>
+        <Bloco id="marcar" titulo="6. Marcar / Desmarcar Dejem-Delegada" icone={CalendarPlus}>
+          <Lista ordenada>
+            <li>Conecte o AnyConnect.</li>
+            <li>
+              Na home, toque em <strong>"Marcar / Desmarcar Dejem/Delegada"</strong>.
+            </li>
+            <li>A página oficial da PMESP abre dentro do navegador do app.</li>
+            <li>Faça login (mesmas credenciais usadas na intranet PMESP — veja o quadro abaixo).</li>
+            <li>Escolha a data, o tipo (Dejem ou Delegada) e confirme a operação.</li>
+            <li>Para sair, toque na seta de voltar no topo da tela.</li>
+          </Lista>
+          <BoxLogin />
+        </Bloco>
+
+        <Bloco id="calendario" titulo="7. Calendário e histórico" icone={Calendar} tom="blue">
           <p>
             O calendário guarda os plantões que você marcou, com o valor recebido
-            por cada um. Tudo fica salvo apenas no seu celular.
+            por cada um. Tudo fica salvo <strong>somente no seu celular</strong>
+            — o app não envia nada pra nenhum servidor.
           </p>
           <SubTitulo>Adicionar um plantão</SubTitulo>
           <Lista ordenada>
@@ -324,7 +346,7 @@ function ManualScreen() {
           </Lista>
           <SubTitulo>Editar ou remover</SubTitulo>
           <Lista>
-            <li>Toque no plantão já existente no calendário.</li>
+            <li>Toque no plantão existente no calendário.</li>
             <li>Use os botões "Editar" ou "Remover" no card que aparece.</li>
           </Lista>
           <SubTitulo>Histórico</SubTitulo>
@@ -334,7 +356,7 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="escalas-baixadas" titulo="8. Escalas baixadas (APK)" icone={FolderDown} tom="blue">
+        <Bloco id="escalas-baixadas" titulo="8. Escalas baixadas (APK)" icone={FolderDown}>
           <p>
             Esta função aparece <strong>somente no APK instalado</strong>. Toda vez
             que você consulta uma escala pelo ID, o app salva uma cópia para acesso
@@ -350,73 +372,60 @@ function ManualScreen() {
           </Lista>
         </Bloco>
 
-        <Bloco id="folha" titulo="9. Folha de Pagamento" icone={Wallet}>
+        <Bloco id="folha" titulo="9. Folha de Pagamento (CIAF)" icone={Wallet} tom="blue">
           <Lista ordenada>
-            <li>Conecte a VPN AnyConnect.</li>
+            <li>Conecte o AnyConnect.</li>
             <li>
               Toque em <strong>"Folha de Pagamento"</strong>.
             </li>
             <li>
               A página do CIAF abre em <strong>modo celular</strong> dentro do app.
             </li>
-            <li>Faça login com seu RG funcional e senha do sistema CIAF.</li>
-            <li>Consulte holerites e demais informações financeiras.</li>
+            <li>Faça login (veja o quadro abaixo) e consulte holerites e demais informações financeiras.</li>
           </Lista>
+          <BoxLogin />
           <Dica>
             Se a página abrir em formato de computador, feche o navegador interno
-            e tente novamente — o app está configurado para forçar a versão mobile.
+            e tente novamente — o app força a versão mobile do CIAF.
           </Dica>
         </Bloco>
 
-        <Bloco id="inotes" titulo="10. Email iNotes" icone={Mail} tom="blue">
+        <Bloco id="inotes" titulo="10. Email iNotes" icone={Mail}>
           <Lista ordenada>
-            <li>Conecte a VPN AnyConnect.</li>
+            <li>Conecte o AnyConnect.</li>
             <li>
               Toque em <strong>"Email iNotes"</strong>.
             </li>
             <li>A página oficial do correio PMESP abre no navegador.</li>
-            <li>Faça login com seu usuário e senha do iNotes.</li>
+            <li>Faça login (mesmas credenciais — veja o quadro abaixo).</li>
           </Lista>
+          <BoxLogin />
         </Bloco>
 
-        <Bloco id="ferramentas" titulo="11. Ferramentas" icone={MapPin}>
-          <SubTitulo>Consulta de Escala</SubTitulo>
+        <Bloco id="menu" titulo="11. Menu lateral, tema e instalação" icone={Menu} tom="blue">
+          <SubTitulo>Menu lateral (☰)</SubTitulo>
           <p>
-            Atalho rápido para abrir uma escala da intranet pelo ID. Mesma função
-            do campo da tela inicial, porém com tela própria explicando o status
-            da VPN.
+            Toque no ícone <strong>☰</strong> no canto superior direito da home.
+            O menu mostra atalhos para: Início, Calendário, Escalas Baixadas
+            (só APK), Correio PMESP, Folha de Pagamento, Guia AnyConnect,
+            Manual e Política de Privacidade. Ele também tem o botão de
+            <strong> instalar o app </strong>(quando disponível) e o
+            <strong> toggle de tema </strong>claro/escuro.
           </p>
-          <SubTitulo>Minha Localização</SubTitulo>
-          <p>
-            Mostra sua posição atual no mapa, com latitude e longitude — útil
-            quando precisa informar localização exata por rádio ou WhatsApp. Para
-            funcionar, autorize o app a acessar a localização do aparelho quando
-            for solicitado.
-          </p>
-        </Bloco>
 
-        <Bloco id="tema" titulo="12. Tema claro / escuro" icone={Sun} tom="blue">
+          <SubTitulo>Tema claro / escuro</SubTitulo>
           <Lista>
             <li>
-              Toque no <strong>sol/lua</strong> no topo direito da tela inicial.
+              Toque no <strong>sol/lua</strong> no topo direito da home.
             </li>
             <li>
-              Ou abra o menu lateral (☰) e toque em "Modo claro" / "Modo escuro".
+              Ou abra o menu lateral e toque em "Modo claro" / "Modo escuro".
             </li>
           </Lista>
           <Dica>O tema escolhido é lembrado mesmo depois de fechar o app.</Dica>
         </Bloco>
 
-        <Bloco id="menu" titulo="13. Menu lateral" icone={Menu}>
-          <p>
-            Toque no ícone <strong>☰</strong> no canto superior direito da tela
-            inicial. O menu mostra atalhos para Início, Calendário, Escalas
-            Baixadas (APK), Correio PMESP, Folha de Pagamento, Guia AnyConnect,
-            Manual e Política de Privacidade.
-          </p>
-        </Bloco>
-
-        <Bloco id="privacidade" titulo="14. Privacidade e dados" icone={Lock} tom="blue">
+        <Bloco id="privacidade" titulo="12. Privacidade e dados" icone={Lock}>
           <p>
             Seus plantões, valores e histórico ficam guardados <strong>apenas no
             seu celular</strong>. O app não envia esses dados para nenhum servidor.
@@ -432,10 +441,16 @@ function ManualScreen() {
           </p>
         </Bloco>
 
-        <Bloco id="problemas" titulo="15. Solução de problemas" icone={AlertTriangle}>
+        <Bloco id="problemas" titulo="13. Solução de problemas" icone={AlertTriangle} tom="blue">
+          <SubTitulo>Aparece "VPN Off" em vermelho</SubTitulo>
+          <Lista>
+            <li>Toque no aviso vermelho e use "Abrir Cisco AnyConnect".</li>
+            <li>Depois de conectar, toque em "Verificar conexão".</li>
+          </Lista>
+
           <SubTitulo>Página fica carregando e não abre</SubTitulo>
           <Lista>
-            <li>Confirme que a VPN AnyConnect está conectada (chip verde no topo).</li>
+            <li>Confirme que o AnyConnect está realmente conectado.</li>
             <li>Feche o navegador interno e tente abrir de novo.</li>
             <li>Se persistir, desconecte e reconecte a VPN.</li>
           </Lista>
@@ -443,9 +458,7 @@ function ManualScreen() {
           <SubTitulo>Botão "Abrir AnyConnect" não faz nada</SubTitulo>
           <Lista>
             <li>Verifique se o Cisco Secure Client está instalado no celular.</li>
-            <li>
-              Se não estiver, o app abre a Play Store/App Store para você baixar.
-            </li>
+            <li>Se não estiver, o app abre a Play Store para você baixar.</li>
           </Lista>
 
           <SubTitulo>Folha de Pagamento abre em formato de PC</SubTitulo>
@@ -456,20 +469,20 @@ function ManualScreen() {
             </li>
           </Lista>
 
-          <SubTitulo>Não recebo notificações ou as escalas somem</SubTitulo>
+          <SubTitulo>Escalas e histórico sumiram</SubTitulo>
           <Lista>
             <li>
               Os dados ficam só no celular. Se você desinstalar o app ou limpar
-              os dados, o histórico é perdido.
+              os dados pelas configurações do Android, o histórico é perdido.
             </li>
             <li>
-              <Wifi size={12} className="inline -mt-0.5" /> Para reabrir escalas
-              salvas, basta usar "Escalas baixadas" mesmo sem internet.
+              Para reabrir escalas já salvas no APK, use "Escalas baixadas" —
+              funciona mesmo sem internet.
             </li>
           </Lista>
         </Bloco>
 
-        <Bloco id="suporte" titulo="16. Suporte" icone={HelpCircle} tom="blue">
+        <Bloco id="suporte" titulo="14. Suporte" icone={HelpCircle}>
           <p>
             Encontrou um erro ou tem sugestão de melhoria? Procure o canal de
             contato divulgado junto com o app. Quanto mais detalhes você enviar
@@ -593,6 +606,19 @@ function Dica({ children }: { children: React.ReactNode }) {
     <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-[12.5px] leading-relaxed text-amber-900 dark:text-amber-100">
       <strong className="font-bold">Dica: </strong>
       {children}
+    </div>
+  );
+}
+
+function BoxLogin({ grupo }: { grupo?: string }) {
+  return (
+    <div className="flex gap-3 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-3 text-[12.5px] leading-relaxed text-blue-900 dark:text-blue-100">
+      <KeyRound size={16} className="mt-0.5 shrink-0 text-blue-700 dark:text-blue-300" />
+      <div className="space-y-0.5">
+        <p><strong>Usuário:</strong> seu CPF (somente números)</p>
+        <p><strong>Senha:</strong> a mesma da aba <strong>Procedimentos</strong> da intranet PMESP</p>
+        {grupo && <p><strong>Grupo:</strong> {grupo}</p>}
+      </div>
     </div>
   );
 }
