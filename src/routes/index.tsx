@@ -32,7 +32,6 @@ import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
-import { CertWarningModal } from "@/components/cert-warning-modal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
