@@ -84,10 +84,12 @@ function HomeScreen() {
     setHydrated(true);
   }, []);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    saveMarcas(marcas);
-  }, [marcas, hydrated]);
+  // A home apenas LÊ marcas (mostra "próximas escalas"). A criação/edição/
+  // exclusão acontece em /calendario, que é a única fonte de verdade.
+  // Não gravar aqui evita race condition: ao receber MARCAS_EVENT e atualizar
+  // o estado local, um efeito de save sobrescrevia mudanças vindas de outras
+  // telas (ex.: uma exclusão recém-feita).
+
 
   // Recarrega marcas ao voltar para a aba/rota (ex.: depois de adicionar
   // uma escala em /calendario) sem precisar recarregar a página.
