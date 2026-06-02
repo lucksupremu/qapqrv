@@ -148,7 +148,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
           ).addListener(ev, (err) => {
             fallbackToSystem(`${ev}: ${JSON.stringify(err ?? {})}`);
           });
-          if (handle?.remove) removeHandles.push(handle);
+          if (handle) removeHandles.push(handle);
         } catch {
           // listener inexistente nessa versão do plugin — ignora
         }
