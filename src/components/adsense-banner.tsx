@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /** Google AdSense client ID */
 const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT ?? "ca-pub-4966192764194561";
@@ -8,64 +8,80 @@ type Props = {
   adFormat?: string;        // ex: "auto", "rectangle", "fluid"
   style?: React.CSSProperties;
   className?: string;
+  /** Altura mínima reservada (evita CLS / layout quebrado). Padrão: 100px. */
+  minHeight?: number;
 };
 
 /**
  * Componente para exibir anúncios do Google AdSense.
  *
- * Uso:
- *   <AdSenseBanner adSlot="1234567890" adFormat="auto" />
- *
- * Requer VITE_ADSENSE_CLIENT configurado (ca-pub-XXXXXXXXXXXXXXXX).
+ * - Reserva espaço fixo para evitar Cumulative Layout Shift.
+ * - Mostra placeholder discreto enquanto carrega ou se o anúncio falhar
+ *   (sem rede, AdBlock, slot vazio, script bloqueado etc.).
  */
-export function AdSenseBanner({ adSlot, adFormat = "auto", style, className }: Props) {
+export function AdSenseBanner({
+  adSlot,
+  adFormat = "auto",
+  style,
+  className,
+  minHeight = 100,
+}: Props) {
   const ref = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
+  const [status, setStatus] = useState<"loading" | "filled" | "empty">("loading");
 
   useEffect(() => {
     if (!ADSENSE_CLIENT || pushed.current) return;
-    if (!ref.current) return;
+    const el = ref.current;
+    if (!el) return;
 
     try {
-      const adsbygoogle = (window as unknown as Record<string, unknown>)["adsbygoogle"];
-      if (Array.isArray(adsbygoogle)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (adsbygoogle as any).push({});
-        pushed.current = true;
-      }
+      const w = window as unknown as { adsbygoogle?: unknown[] };
+      w.adsbygoogle = w.adsbygoogle || [];
+      w.adsbygoogle.push({});
+      pushed.current = true;
     } catch {
-      // ignora falhas de carregamento do AdSense
+      setStatus("empty");
+      return;
     }
+
+    // Verifica após alguns segundos se o AdSense preencheu o slot.
+    const check = window.setTimeout(() => {
+      const filled =
+        el.getAttribute("data-ad-status") === "filled" ||
+        (el.firstElementChild?.clientHeight ?? 0) > 0;
+      setStatus(filled ? "filled" : "empty");
+    }, 2500);
+
+    return () => window.clearTimeout(check);
   }, []);
 
-  if (!ADSENSE_CLIENT) {
-    // fallback visual quando não configurado
-    return (
-      <div
-        className={`w-full rounded-xl border border-dashed border-border bg-muted/60 p-6 text-center ${className ?? ""}`}
-        style={style}
-      >
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">
-          Espaço para anúncio
-        </p>
-        <p className="mt-2 text-sm text-foreground/70">
-          Configure VITE_ADSENSE_CLIENT para ativar
-        </p>
-      </div>
-    );
-  }
+  const showPlaceholder = status !== "filled";
 
   return (
-    <div className={className} style={style}>
+    <div
+      className={`relative w-full ${className ?? ""}`}
+      style={{ minHeight, ...style }}
+    >
       <ins
         ref={ref}
         className="adsbygoogle"
-        style={{ display: "block", ...style }}
+        style={{ display: "block", minHeight, width: "100%" }}
         data-ad-client={ADSENSE_CLIENT}
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-full-width-responsive="true"
       />
+      {showPlaceholder && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl border border-dashed border-border bg-muted/40"
+        >
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            {status === "loading" ? "Carregando anúncio…" : "Espaço publicitário"}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
