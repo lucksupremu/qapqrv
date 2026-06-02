@@ -30,7 +30,7 @@ import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
 import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
-import { PwaInstallBanner } from "@/components/pwa-install-banner";
+
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
 
 export const Route = createFileRoute("/")({
