@@ -123,7 +123,7 @@ function HomeScreen() {
     setConsultando(true);
     void guardIntranet(() => {
       if (isNativeApp()) {
-        void openInAppBrowser(url, { titulo: `Escala ${id}` });
+        void openInAppBrowser(url, { titulo: `Escala ${id}`, modo: "system" });
       } else if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
       }
