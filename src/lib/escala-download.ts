@@ -19,7 +19,7 @@ const emAndamento = new Set<string>();
 async function isNative(): Promise<boolean> {
   if (typeof window === "undefined") return false;
   try {
-    const { Capacitor } = await import(/* @vite-ignore */ "@capacitor/core");
+    const { Capacitor } = await (async () => { throw new Error("APK descontinuado: @capacitor/core indisponível"); })();
     return Capacitor.isNativePlatform();
   } catch {
     return false;
@@ -28,7 +28,7 @@ async function isNative(): Promise<boolean> {
 
 async function baixarNoNativo(id: string, url: string): Promise<boolean> {
   try {
-    const { CapacitorHttp } = await import(/* @vite-ignore */ "@capacitor/core");
+    const { CapacitorHttp } = await (async () => { throw new Error("APK descontinuado: @capacitor/core indisponível"); })();
     const resp = await CapacitorHttp.request({
       method: "GET",
       url,
@@ -44,7 +44,7 @@ async function baixarNoNativo(id: string, url: string): Promise<boolean> {
     let Directory: any;
     try {
       // @ts-ignore — plugin opcional, instalar com: bun add @capacitor/filesystem
-      const mod = await import(/* @vite-ignore */ "@capacitor/filesystem");
+      const mod = await (async () => { throw new Error("APK descontinuado: @capacitor/filesystem indisponível"); })();
       Filesystem = mod.Filesystem;
       Directory = mod.Directory;
     } catch {
