@@ -16,10 +16,9 @@ export function AdSlot({ type = "app-open" }: Props) {
   if (!isNative) {
     return (
       <div className="w-full max-w-sm">
-        {/* Substitua SUA_AD_SLOT_AQUI pelo seu data-ad-slot do AdSense */}
         <AdSenseBanner
-          adSlot="SUA_AD_SLOT_AQUI"
-          adFormat={type === "banner" ? "auto" : "rectangle"}
+          adSlot="7036302359"
+          adFormat="auto"
           className="w-full"
         />
       </div>

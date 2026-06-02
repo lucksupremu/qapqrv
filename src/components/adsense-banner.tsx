@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /** Google AdSense client ID */
-const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT ?? "";
+const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT ?? "ca-pub-4966192764194561";
 
 type Props = {
   adSlot: string;           // data-ad-slot
