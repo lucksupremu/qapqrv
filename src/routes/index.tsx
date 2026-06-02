@@ -118,7 +118,7 @@ function HomeScreen() {
       return;
     }
 
-    const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
+    const url = `http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
     setConsultando(true);
     void guardIntranet(() => {
@@ -159,7 +159,7 @@ function HomeScreen() {
         void guardIntranet(
           () =>
             openInAppBrowser(
-              "https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
+              "http://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/EscOpeDel.aspx",
               { titulo: "Marcar / Desmarcar" },
             ),
           "Marcar / Desmarcar",
