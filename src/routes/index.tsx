@@ -63,7 +63,6 @@ function HomeScreen() {
   // Após hidratar, o useEffect abaixo popula a lista — evita hydration mismatch
   // que estava derrubando os event handlers da Home em alguns Chromes Android.
   const [marcas, setMarcas] = useState<Marca[]>([]);
-  const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
   
   const native = useIsNative();
