@@ -69,6 +69,10 @@ export function isNativeApp(): boolean {
 export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
   void opts.titulo; // reservado para futura customização da toolbar
   const targetUrl = normalizarUrl(url);
+  // Padrão: forçar WebView interna do app + UA mobile próprio.
+  // O Chrome / Custom Tabs está bloqueando o acesso à intranet PMESP, então
+  // NÃO caímos mais para o navegador do sistema automaticamente.
+  const forceMobileUA = opts.forceMobileUA ?? true;
 
   if (isNativeApp()) {
     try {
