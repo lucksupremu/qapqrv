@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "cap:assets": "capacitor-assets generate --android",
+    "cap:sync": "npm run build && npx cap sync android && npm run cap:assets"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",

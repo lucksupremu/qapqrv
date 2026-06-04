@@ -11,6 +11,15 @@ const config: CapacitorConfig = {
     AdMob: {
       appId: "ca-app-pub-4966192764194561~2515666476",
     },
+    SplashScreen: {
+      launchShowDuration: 1500,
+      backgroundColor: "#0b1733",
+      androidSplashResourceName: "splash",
+      androidScaleType: "CENTER_CROP",
+      showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
   },
 };
 

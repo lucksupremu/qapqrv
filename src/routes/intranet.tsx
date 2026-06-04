@@ -35,10 +35,11 @@ function IntranetWebviewScreen() {
   const [currentUrl, setCurrentUrl] = useState(url);
 
   // No APK nativo, iframe não funciona com sites .gov.br (X-Frame-Options).
-  // Abrimos no Custom Tabs do sistema e voltamos para a home.
+  // Abrimos na WebView interna do Capacitor (NÃO no Chrome / Custom Tabs,
+  // que está bloqueando o acesso à intranet PMESP).
   useEffect(() => {
     if (!isNativeApp()) return;
-    void openInAppBrowser(url, { titulo, modo: "system" });
+    void openInAppBrowser(url, { titulo, modo: "webview", forceMobileUA: true });
     navigate({ to: "/" });
   }, [url, titulo, navigate]);
 
