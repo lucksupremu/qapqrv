@@ -121,7 +121,9 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
 
       fallbackTimer.current = window.setTimeout(() => {
         if (loaded || closed) return;
-        if (opts.forceMobileUA) return; // não cai p/ Custom Tabs (UA pode ser desktop)
+        // Não cai mais para o Custom Tabs (Chrome). Apenas fecha a WebView;
+        // o usuário vê a tela anterior com aviso de VPN/erro.
+        if (forceMobileUA) return;
         closed = true;
         void InAppBrowser.close()
           .catch(() => undefined)
