@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Copy,
   Smartphone,
+  PlayCircle,
 } from "lucide-react";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import passo1 from "@/assets/anyconnect/passo-1.jpg";
@@ -16,6 +17,7 @@ import passo4 from "@/assets/anyconnect/passo-4.jpg";
 import passo5 from "@/assets/anyconnect/passo-5.jpg";
 import passo6 from "@/assets/anyconnect/passo-6.jpg";
 import passo7 from "@/assets/anyconnect/passo-7.jpg";
+import tutorialVideo from "@/assets/anyconnect/tutorial.mp4.asset.json";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({ meta: [{ title: "Configurar AnyConnect — QAP, QRV!" }] }),
