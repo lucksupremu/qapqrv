@@ -2,7 +2,7 @@
 // - No app nativo (Capacitor Android): usa nosso plugin próprio
 //   `InAppWebView` (WebView nativa em Activity dedicada — controle total
 //   de UA, cookies, JS, zoom). Resolve o problema de acesso à intranet
-//   PMESP que o @capacitor/inappbrowser não conseguia.
+//   PMESP que o navegador externo não conseguia.
 // - No web (navegador comum): abre nova aba.
 
 import { InAppWebView } from "./in-app-webview";
@@ -23,8 +23,8 @@ export type AbrirOpts = {
   forceMobileUA?: boolean;
 };
 
-const ANDROID_CHROME_UA =
-  "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+const INTERNAL_WEBVIEW_UA =
+  "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Mobile Safari/537.36 QAPQRVWebView/1.0";
 
 function normalizarUrl(url: string) {
   const clean = url.trim();
@@ -50,7 +50,7 @@ export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
       await InAppWebView.open({
         url: targetUrl,
         title: opts.titulo ?? "",
-        userAgent: ANDROID_CHROME_UA,
+        userAgent: INTERNAL_WEBVIEW_UA,
       });
       return;
     } catch (e) {
