@@ -373,6 +373,24 @@ class InAppWebViewActivity : Activity() {
         else -> "ERR_$code"
     }
 
+    private fun handleHttpNavigation(url: String): Boolean {
+        if (isPdfLikeUrl(url)) {
+            downloadPdfToDownloads(url, null, "application/pdf")
+            showDownloadedPdfPage(url)
+            return true
+        }
+        return false
+    }
+
+    private fun handlePopupNavigation(url: String) {
+        if (isPdfLikeUrl(url)) {
+            downloadPdfToDownloads(url, null, "application/pdf")
+            showDownloadedPdfPage(url)
+        } else {
+            webView.loadUrl(url)
+        }
+    }
+
     private fun isPdfLikeUrl(url: String): Boolean {
         val lower = url.lowercase()
         return lower.endsWith(".pdf") ||
