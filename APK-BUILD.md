@@ -1,8 +1,8 @@
 # Gerar APK (sem Android Studio)
 
 O APK é compilado automaticamente pelo **GitHub Actions** (`.github/workflows/build-apk.yml`).
-O app usa o **WebView interno do Capacitor** — não abre o Chrome nem usa Custom Tabs,
-contornando o bloqueio do Chrome à intranet PMESP.
+O app usa um **WebView interno nativo** — não abre navegador externo nem usa Custom Tabs,
+contornando bloqueios de navegadores externos à intranet PMESP.
 
 ---
 
@@ -54,9 +54,9 @@ Sempre que você publicar uma nova versão no Lovable:
 - **APK debug**, não release — instala sem precisar de Play Store, mas o Android
   marca como "app de origem desconhecida". Para release assinado oficial seria
   necessário gerar uma keystore e adicionar como secret do GitHub.
-- **Sem Chrome embutido:** o app usa o `WebView` do Android (renderiza HTML
+- **Sem navegador externo embutido:** o app usa o `WebView` do Android (renderiza HTML
   internamente). Toda navegação à intranet PMESP, SEI e iNotes passa por dentro
-  do app com User-Agent de Chrome 120 Mobile, mas **sem** abrir o app Chrome.
+  do app com User-Agent próprio do navegador interno, sem abrir outro aplicativo.
 - **Ícone e splash:** gerados automaticamente a partir de `resources/icon.png`,
   `resources/icon-foreground.png`, `resources/icon-background.png` e
   `resources/splash.png` durante o build.
