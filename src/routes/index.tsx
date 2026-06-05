@@ -61,7 +61,7 @@ function HomeScreen() {
   const [idEscala, setIdEscala] = useState("");
   // Inicia vazio para casar com o HTML do SSR (sem acesso a localStorage).
   // Após hidratar, o useEffect abaixo popula a lista — evita hydration mismatch
-  // que estava derrubando os event handlers da Home em alguns Chromes Android.
+  // que estava derrubando os event handlers da Home em alguns navegadores Android.
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
