@@ -125,12 +125,10 @@ export function usePwaInstall() {
   }, []);
 
   const canPrompt = !!deferred;
-  const isFirefox = detectFirefox();
   const isChromeFamily = detectChromeFamily();
-  // Política: habilitar instalação PWA apenas em Firefox (e iOS Safari).
-  // Chrome/Edge/Brave/Opera/Samsung são bloqueados pois o Chrome bloqueia
-  // acessos a recursos da intranet PMESP.
-  const browserAllowsInstall = isFirefox || (isIOS && !isChromeFamily);
+  // Política: bloquear instalação PWA apenas no Chrome/Chromium (inclui Edge,
+  // Brave, Opera, Samsung Internet, CriOS). Firefox, Safari e demais ficam liberados.
+  const browserAllowsInstall = !isChromeFamily;
   const isInstallable =
     !isNative && !isInstalled && browserAllowsInstall && (canPrompt || isIOS);
   const shouldShowBanner = isInstallable && !dismissed;
