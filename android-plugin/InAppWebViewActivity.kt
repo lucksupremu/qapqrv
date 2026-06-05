@@ -1,8 +1,11 @@
 package br.com.qapqrv.app.plugins
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.DownloadManager
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -15,6 +18,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.webkit.CookieManager
 import android.webkit.DownloadListener
+import android.webkit.JsResult
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
 import android.webkit.WebChromeClient
@@ -111,6 +115,20 @@ class InAppWebViewActivity : Activity() {
                 btnForward.alpha = if (webView.canGoForward()) 1f else 0.3f
             }
 
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?,
+            ): Boolean {
+                val uri = request?.url ?: return false
+                return handleExternalScheme(uri)
+            }
+
+            @Suppress("DEPRECATION")
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                if (url == null) return false
+                return handleExternalScheme(Uri.parse(url))
+            }
+
             override fun onReceivedSslError(
                 view: WebView?,
                 handler: SslErrorHandler,
@@ -134,7 +152,6 @@ class InAppWebViewActivity : Activity() {
                 error: WebResourceError?,
             ) {
                 val url = request?.url?.toString().orEmpty()
-                // Só mostra overlay se for o frame principal
                 if (request?.isForMainFrame == true) {
                     Log.e(TAG, "onReceivedError $url code=${error?.errorCode} ${error?.description}")
                     showErrorOverlay(
@@ -162,11 +179,88 @@ class InAppWebViewActivity : Activity() {
                 isUserGesture: Boolean,
                 resultMsg: android.os.Message?,
             ): Boolean {
-                // Popups (iNotes/folha) — abre o link na própria WebView.
-                val href = view?.handler?.obtainMessage()
-                val transport = resultMsg?.obj as? WebView.WebViewTransport
-                transport?.webView = webView
-                resultMsg?.sendToTarget()
+                // Popups (EscOpeDel, iNotes, folha): cria WebView descartável só
+                // para capturar a URL alvo e carrega na WebView principal.
+                // Reutilizar a própria webView aqui crasha o app em alguns devices.
+                if (resultMsg == null) return false
+                val tempView = WebView(this@InAppWebViewActivity)
+                tempView.settings.javaScriptEnabled = true
+                tempView.settings.userAgentString = webView.settings.userAgentString
+                tempView.webViewClient = object : WebViewClient() {
+                    private var handled = false
+                    override fun shouldOverrideUrlLoading(
+                        v: WebView?,
+                        req: WebResourceRequest?,
+                    ): Boolean {
+                        val u = req?.url?.toString() ?: return true
+                        loadFromPopup(u)
+                        return true
+                    }
+
+                    @Suppress("DEPRECATION")
+                    override fun shouldOverrideUrlLoading(v: WebView?, url: String?): Boolean {
+                        if (url != null) loadFromPopup(url)
+                        return true
+                    }
+
+                    override fun onPageStarted(v: WebView?, url: String?, favicon: Bitmap?) {
+                        if (!handled && !url.isNullOrBlank() && url != "about:blank") {
+                            loadFromPopup(url)
+                        }
+                    }
+
+                    private fun loadFromPopup(url: String) {
+                        if (handled) return
+                        handled = true
+                        Log.i(TAG, "popup → main webview: $url")
+                        try { tempView.stopLoading() } catch (_: Throwable) {}
+                        try { tempView.destroy() } catch (_: Throwable) {}
+                        if (!handleExternalScheme(Uri.parse(url))) {
+                            webView.loadUrl(url)
+                        }
+                    }
+                }
+                val transport = resultMsg.obj as? WebView.WebViewTransport
+                transport?.webView = tempView
+                resultMsg.sendToTarget()
+                return true
+            }
+
+            override fun onCloseWindow(window: WebView?) {
+                // Popup pediu para fechar — volta no histórico se possível.
+                if (webView.canGoBack()) webView.goBack()
+            }
+
+            override fun onJsAlert(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?,
+            ): Boolean {
+                try {
+                    AlertDialog.Builder(this@InAppWebViewActivity)
+                        .setMessage(message ?: "")
+                        .setPositiveButton("OK") { _, _ -> result?.confirm() }
+                        .setOnCancelListener { result?.cancel() }
+                        .show()
+                } catch (_: Throwable) { result?.confirm() }
+                return true
+            }
+
+            override fun onJsConfirm(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?,
+            ): Boolean {
+                try {
+                    AlertDialog.Builder(this@InAppWebViewActivity)
+                        .setMessage(message ?: "")
+                        .setPositiveButton("OK") { _, _ -> result?.confirm() }
+                        .setNegativeButton("Cancelar") { _, _ -> result?.cancel() }
+                        .setOnCancelListener { result?.cancel() }
+                        .show()
+                } catch (_: Throwable) { result?.cancel() }
                 return true
             }
         }
@@ -191,6 +285,38 @@ class InAppWebViewActivity : Activity() {
 
     override fun onBackPressed() {
         if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else super.onBackPressed()
+    }
+
+    /**
+     * Trata esquemas de URL que não são http/https (mailto:, tel:, intent:, market:, etc.).
+     * Retorna true se a URL foi delegada a um app externo (e o WebView NÃO deve carregá-la).
+     * Para http/https, retorna false (deixa o WebView lidar normalmente).
+     */
+    private fun handleExternalScheme(uri: Uri): Boolean {
+        val scheme = uri.scheme?.lowercase() ?: return false
+        if (scheme == "http" || scheme == "https" || scheme == "about" || scheme == "data") {
+            return false
+        }
+        return try {
+            if (scheme == "intent") {
+                val intent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            } else {
+                val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            }
+            true
+        } catch (e: ActivityNotFoundException) {
+            Log.w(TAG, "Sem app para abrir $uri")
+            Toast.makeText(this, "Nenhum app instalado para abrir este link.", Toast.LENGTH_SHORT).show()
+            true
+        } catch (e: Throwable) {
+            Log.e(TAG, "Falha ao abrir $uri", e)
+            true
+        }
     }
 
     override fun onDestroy() {
