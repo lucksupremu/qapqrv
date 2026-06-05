@@ -178,7 +178,7 @@ function HomeScreen() {
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      toast.error(`Não foi possível baixar a escala #${id}. ${msg}`, { id: loadingId });
+      toast.error(msg || `Não foi possível baixar a escala #${id}.`, { id: loadingId });
     } finally {
       setConsultando(false);
     }

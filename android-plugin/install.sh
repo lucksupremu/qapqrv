@@ -230,6 +230,33 @@ if ! grep -q "androidx.core.content.FileProvider" "$MANIFEST"; then
   sed -i "s#</application>#$PROVIDER_BLOCK#" "$MANIFEST"
 fi
 
+# ----- Network Security Config: confia em CAs do sistema + do usuário (VPN) -----
+# Resolve `CertPathValidatorException: Trust anchor for certification path not found`
+# ao baixar PDFs da intranet PMESP via HttpURLConnection nativo.
+cat > "$RES_XML_DIR/network_security_config.xml" <<'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">policiamilitar.sp.gov.br</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
+EOF
+
+if ! grep -q 'android:networkSecurityConfig' "$MANIFEST"; then
+  echo "==> Registrando networkSecurityConfig no AndroidManifest"
+  sed -i 's#<application#<application android:networkSecurityConfig="@xml/network_security_config"#' "$MANIFEST"
+fi
+
 echo "==> install.sh: OK (Android System WebView, sem GeckoView)"
 echo "--- app/build.gradle ---"
 cat "$APP_GRADLE"
