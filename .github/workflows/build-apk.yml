@@ -41,11 +41,8 @@ jobs:
             bunx cap add android
           fi
 
-      - name: Patch minSdkVersion to 26 (required by @capacitor/inappbrowser)
-        run: |
-          sed -i 's/minSdkVersion = 24/minSdkVersion = 26/' android/variables.gradle
-          echo "--- variables.gradle ---"
-          cat android/variables.gradle
+
+
 
       - name: Generate APK assets (icon + splash)
         run: bunx capacitor-assets generate --android || true
