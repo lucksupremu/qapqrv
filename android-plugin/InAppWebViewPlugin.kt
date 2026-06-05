@@ -114,20 +114,18 @@ class InAppWebViewPlugin : Plugin() {
                 val status = try {
                     conn.responseCode
                 } catch (sslErr: javax.net.ssl.SSLHandshakeException) {
-                    conn.disconnect()
-                    getActivity().runOnUiThread {
-                        call.reject("Não foi possível validar o acesso à intranet. Confirme a VPN ativa.")
-                    }
+                    try { conn.disconnect() } catch (_: Throwable) {}
+                    call.reject("Não foi possível validar o acesso à intranet. Confirme a VPN ativa.")
                     return@thread
                 }
                 if (status !in 200..299) {
-                    getActivity().runOnUiThread { call.reject("Servidor respondeu HTTP $status. Verifique a VPN/login.") }
-                    conn.disconnect()
+                    call.reject("Servidor respondeu HTTP $status. Verifique a VPN/login.")
+                    try { conn.disconnect() } catch (_: Throwable) {}
                     return@thread
                 }
                 val contentType = conn.contentType?.lowercase() ?: ""
                 conn.inputStream.use { input -> out.outputStream().use { output -> input.copyTo(output) } }
-                conn.disconnect()
+                try { conn.disconnect() } catch (_: Throwable) {}
 
                 // Valida que é PDF real (header %PDF) — evita salvar HTML de login.
                 val isPdf = out.length() > 4 && run {
@@ -137,11 +135,11 @@ class InAppWebViewPlugin : Plugin() {
                         head[2] == 0x44.toByte() && head[3] == 0x46.toByte()
                 }
                 if (!isPdf) {
-                    out.delete()
+                    try { out.delete() } catch (_: Throwable) {}
                     val motivo = if (contentType.contains("html"))
                         "Sessão expirou ou VPN inativa. Faça login na intranet e tente novamente."
                     else "Resposta não é um PDF válido (tipo: $contentType)."
-                    getActivity().runOnUiThread { call.reject(motivo) }
+                    call.reject(motivo)
                     return@thread
                 }
 
@@ -149,7 +147,7 @@ class InAppWebViewPlugin : Plugin() {
                 ret.put("path", "escalas/$safeId.pdf")
                 ret.put("size", out.length())
                 ret.put("mime", "application/pdf")
-                getActivity().runOnUiThread { call.resolve(ret) }
+                call.resolve(ret)
             } catch (e: Throwable) {
                 android.util.Log.e("InAppWebView", "downloadPdf falhou", e)
                 val raw = e.message ?: ""
@@ -165,7 +163,11 @@ class InAppWebViewPlugin : Plugin() {
                         "Tempo esgotado ao baixar a escala. Tente novamente."
                     else -> "Falha ao baixar PDF da escala."
                 }
-                getActivity().runOnUiThread { call.reject(friendly) }
+                try {
+                    call.reject(friendly)
+                } catch (_: Throwable) {
+                    // call já resolvido/descartado — ignora para não derrubar o processo.
+                }
             }
         }
     }
