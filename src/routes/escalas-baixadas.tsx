@@ -111,6 +111,20 @@ function DownloadedReportsScreen() {
         <span className="h-10 w-10" aria-hidden />
       </header>
 
+      {mostrarAvisoWeb && (
+        <div
+          className="mx-2 mb-2 flex items-start gap-3 rounded-[14px] border bg-white p-3"
+          style={{ borderColor: "var(--border-soft)" }}
+        >
+          <Smartphone size={20} className="mt-0.5 shrink-0" style={{ color: "#2e6b8a" }} />
+          <p className="text-[12px] leading-relaxed" style={{ color: "#5b7a8f" }}>
+            A lista de escalas funciona no navegador. Para baixar e abrir o PDF
+            <strong> sem internet</strong>, use o aplicativo (APK).
+          </p>
+        </div>
+      )}
+
+
       {escalas.length === 0 ? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
           <FolderOpen size={60} style={{ color: "#5b7a8f" }} />
