@@ -223,6 +223,33 @@ function AnyConnectGuideScreen() {
         <CopyServerButton />
       </div>
 
+      {/* Vídeo tutorial */}
+      <div className="mx-3 mt-3">
+        <div
+          className="overflow-hidden rounded-[16px] border bg-white"
+          style={{ borderColor: "#cfe0ec" }}
+        >
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={{ background: "#e8f0f8" }}
+          >
+            <PlayCircle size={18} style={{ color: "#2e6b8a" }} />
+            <p className="text-[13px] font-bold" style={{ color: "#1a3348" }}>
+              Vídeo tutorial — veja o passo a passo
+            </p>
+          </div>
+          <video
+            src={tutorialVideo.url}
+            controls
+            playsInline
+            preload="metadata"
+            className="block w-full bg-black"
+            style={{ maxHeight: 380 }}
+          />
+        </div>
+      </div>
+
+
       {/* Carrossel */}
       <div
         ref={cardRef}
