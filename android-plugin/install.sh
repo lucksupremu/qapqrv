@@ -195,6 +195,18 @@ if ! grep -q 'usesCleartextTraffic="true"' "$MANIFEST"; then
   sed -i 's#<application#<application android:usesCleartextTraffic="true"#' "$MANIFEST"
 fi
 
+# ----- AdMob: meta-data APPLICATION_ID no Manifest -----
+if ! grep -q "com.google.android.gms.ads.APPLICATION_ID" "$MANIFEST"; then
+  echo "==> Adicionando meta-data AdMob APPLICATION_ID no AndroidManifest"
+  sed -i "s#</application>#    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"$ADMOB_APP_ID\" />\n    </application>#" "$MANIFEST"
+fi
+
+# ----- AdMob: dependência play-services-ads no app/build.gradle -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "play-services-ads" "$APP_GRADLE"; then
+  echo "==> Adicionando dependência play-services-ads em $APP_GRADLE"
+  sed -i "s#dependencies {#dependencies {\n    implementation \"com.google.android.gms:play-services-ads:23.6.0\"#" "$APP_GRADLE"
+fi
+
 echo "==> install.sh: OK (Android System WebView, sem GeckoView)"
 echo "--- app/build.gradle ---"
 cat "$APP_GRADLE"
