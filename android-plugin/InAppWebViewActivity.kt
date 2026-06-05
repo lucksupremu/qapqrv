@@ -59,7 +59,6 @@ class InAppWebViewActivity : Activity() {
                 .javaScriptEnabled(true)
                 .aboutConfigEnabled(false)
                 .consoleOutput(true)
-                .remoteDebuggingService(false)
                 .build()
             val r = GeckoRuntime.create(ctx.applicationContext, settings)
             sRuntime = r
