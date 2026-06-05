@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Instala os plugins Android nativos do projeto (VpnStatus + InAppWebView baseado em GeckoView)
-# DENTRO da pasta android/ que o `cap add android` gera. Idempotente.
+# Instala os plugins Android nativos do projeto (VpnStatus + InAppWebView baseado
+# no Android System WebView). Idempotente.
 #
 # Uso (no CI, após `bunx cap sync android`):
 #   bash android-plugin/install.sh
@@ -16,8 +16,6 @@ APP_GRADLE="android/app/build.gradle"
 ROOT_GRADLE="android/build.gradle"
 SETTINGS_GRADLE="android/settings.gradle"
 KOTLIN_VERSION="2.3.10"
-# GeckoView estável (motor do Firefox) — independe do Android System WebView / Chrome.
-GECKOVIEW_VERSION="149.0.20260403140140"
 
 echo "==> Copiando plugins Kotlin para $PKG_DIR"
 mkdir -p "$PKG_DIR"
@@ -36,7 +34,6 @@ fi
 
 if [ -f "$APP_GRADLE" ]; then
   sed -i -E "s#org.jetbrains.kotlin:kotlin-stdlib:[0-9A-Za-z.+_-]+#org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION#g" "$APP_GRADLE"
-  sed -i "s#org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION#g" "$APP_GRADLE"
 fi
 
 # ----- Classpath Kotlin no root build.gradle -----
@@ -47,9 +44,7 @@ fi
 
 if [ -f "$ROOT_GRADLE" ]; then
   sed -i -E "s#org.jetbrains.kotlin:kotlin-gradle-plugin:[0-9A-Za-z.+_-]+#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
-  sed -i "s#org.jetbrains.kotlin:kotlin-gradle-plugin:\${kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
   sed -i -E "s#kotlin_version[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]#kotlin_version = '$KOTLIN_VERSION'#g" "$ROOT_GRADLE"
-  sed -i -E "s#kotlinVersion[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]#kotlinVersion = '$KOTLIN_VERSION'#g" "$ROOT_GRADLE"
   sed -i -E "s#(id[[:space:]]+['\"]org\.jetbrains\.kotlin\.(android|jvm)['\"][[:space:]]+version[[:space:]]+['\"])[^'\"]+(['\"])#\1$KOTLIN_VERSION\3#g" "$ROOT_GRADLE"
 fi
 
@@ -62,78 +57,73 @@ if [ -f "$VARS_GRADLE" ] && grep -q "kotlin_version" "$VARS_GRADLE"; then
   sed -i -E "s#kotlin_version[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]#kotlin_version = '$KOTLIN_VERSION'#g" "$VARS_GRADLE"
 fi
 
-# ----- Adiciona repositório Maven da Mozilla (necessário para GeckoView) -----
-# Capacitor 5+/Gradle 8 usa dependencyResolutionManagement em settings.gradle
-# com RepositoriesMode.FAIL_ON_PROJECT_REPOS — então precisamos injetar lá.
-# Em projetos antigos ainda existe allprojects { repositories } no root build.gradle.
-MOZILLA_REPO_LINE='        maven { url "https://maven.mozilla.org/maven2/" }'
+# ----- Remove vestígios do GeckoView (versões anteriores deste script) -----
+if [ -f "$APP_GRADLE" ] && grep -q "org.mozilla.geckoview" "$APP_GRADLE"; then
+  echo "==> Removendo dependência GeckoView de $APP_GRADLE"
+  sed -i '/org\.mozilla\.geckoview/d' "$APP_GRADLE"
+fi
+if [ -f "$SETTINGS_GRADLE" ] && grep -q "maven.mozilla.org" "$SETTINGS_GRADLE"; then
+  sed -i '/maven.mozilla.org/d' "$SETTINGS_GRADLE"
+fi
+if [ -f "$ROOT_GRADLE" ] && grep -q "maven.mozilla.org" "$ROOT_GRADLE"; then
+  sed -i '/maven.mozilla.org/d' "$ROOT_GRADLE"
+fi
 
-# settings.gradle: dependencyResolutionManagement -> repositories
-if [ -f "$SETTINGS_GRADLE" ] && ! grep -q "maven.mozilla.org" "$SETTINGS_GRADLE"; then
-  if grep -q "dependencyResolutionManagement" "$SETTINGS_GRADLE"; then
-    echo "==> Adicionando repositório Mozilla em dependencyResolutionManagement ($SETTINGS_GRADLE)"
-    # Insere depois da PRIMEIRA "repositories {" que aparece após dependencyResolutionManagement
-    python3 - "$SETTINGS_GRADLE" <<'PY'
+# ----- multiDexEnabled (inofensivo) -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "multiDexEnabled" "$APP_GRADLE"; then
+  sed -i "s#defaultConfig {#defaultConfig {\n        multiDexEnabled true#" "$APP_GRADLE"
+fi
+
+# ----- ABI splits + minify para reduzir APK -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "splits {" "$APP_GRADLE"; then
+  echo "==> Adicionando splits ABI em $APP_GRADLE"
+  python3 - "$APP_GRADLE" <<'PY'
 import sys, re
 p = sys.argv[1]
 s = open(p).read()
-m = re.search(r'dependencyResolutionManagement\s*\{', s)
+m = re.search(r'android\s*\{', s)
 if m:
-    rest = s[m.end():]
-    rm = re.search(r'repositories\s*\{', rest)
-    if rm:
-        ins_at = m.end() + rm.end()
-        s = s[:ins_at] + '\n        maven { url "https://maven.mozilla.org/maven2/" }' + s[ins_at:]
-        open(p,'w').write(s)
+    ins = m.end()
+    block = """
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            universalApk false
+        }
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/AL2.0', 'META-INF/LGPL2.1', 'META-INF/*.kotlin_module']
+        }
+    }
+"""
+    s = s[:ins] + block + s[ins:]
+    open(p,'w').write(s)
 PY
-  fi
 fi
 
-# root build.gradle: allprojects { repositories { ... } } (fallback)
-if [ -f "$ROOT_GRADLE" ] && ! grep -q "maven.mozilla.org" "$ROOT_GRADLE"; then
-  if grep -q "allprojects" "$ROOT_GRADLE"; then
-    echo "==> Adicionando repositório Mozilla em allprojects ($ROOT_GRADLE)"
-    python3 - "$ROOT_GRADLE" <<'PY'
-import sys, re
-p = sys.argv[1]
-s = open(p).read()
-m = re.search(r'allprojects\s*\{', s)
-if m:
-    rest = s[m.end():]
-    rm = re.search(r'repositories\s*\{', rest)
-    if rm:
-        ins_at = m.end() + rm.end()
-        s = s[:ins_at] + '\n        maven { url "https://maven.mozilla.org/maven2/" }' + s[ins_at:]
-        open(p,'w').write(s)
-PY
-  fi
-fi
-
-# ----- Adiciona dependência GeckoView ao módulo :app -----
-if [ -f "$APP_GRADLE" ] && ! grep -q "org.mozilla.geckoview:geckoview" "$APP_GRADLE"; then
-  echo "==> Adicionando dependência GeckoView ($GECKOVIEW_VERSION) em $APP_GRADLE"
-  sed -i "s#dependencies {#dependencies {\n    implementation \"org.mozilla.geckoview:geckoview:$GECKOVIEW_VERSION\"#" "$APP_GRADLE"
-fi
-
-# ----- Garante minSdkVersion >= 26 (GeckoView exige) e multiDexEnabled -----
+# Ativa minify+shrinkResources no buildType release (debug fica sem para CI rápido).
 if [ -f "$APP_GRADLE" ]; then
-  if ! grep -q "multiDexEnabled" "$APP_GRADLE"; then
-    sed -i "s#defaultConfig {#defaultConfig {\n        multiDexEnabled true#" "$APP_GRADLE"
-  fi
-  # Força minSdkVersion no defaultConfig do módulo :app
-  if grep -q "minSdkVersion" "$APP_GRADLE"; then
-    sed -i -E "s#minSdkVersion[[:space:]]+[A-Za-z0-9._]+#minSdkVersion 26#g" "$APP_GRADLE"
-  else
-    sed -i "s#defaultConfig {#defaultConfig {\n        minSdkVersion 26#" "$APP_GRADLE"
-  fi
-fi
-
-# variables.gradle do Capacitor define minSdkVersion globalmente
-VARS_GRADLE="android/variables.gradle"
-if [ -f "$VARS_GRADLE" ]; then
-  if grep -q "minSdkVersion" "$VARS_GRADLE"; then
-    sed -i -E "s#minSdkVersion[[:space:]]*=[[:space:]]*[0-9]+#minSdkVersion = 26#g" "$VARS_GRADLE"
-  fi
+  python3 - "$APP_GRADLE" <<'PY'
+import sys, re
+p = sys.argv[1]
+s = open(p).read()
+# Garante bloco buildTypes.release com minify e shrinkResources
+if 'buildTypes' in s and 'release {' in s:
+    s2 = re.sub(
+        r'release\s*\{[^}]*\}',
+        """release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }""",
+        s, count=1
+    )
+    if s2 != s:
+        open(p,'w').write(s2)
+PY
 fi
 
 # ----- Reescreve MainActivity registrando os plugins -----
@@ -183,11 +173,9 @@ fi
 if ! grep -q "InAppWebViewActivity" "$MANIFEST"; then
   echo "==> Registrando InAppWebViewActivity no AndroidManifest"
   sed -i 's#</application>#    <activity android:name=".plugins.InAppWebViewActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
-elif grep -q 'InAppWebViewActivity' "$MANIFEST" && ! grep -q 'InAppWebViewActivity.*hardwareAccelerated' "$MANIFEST"; then
-  sed -i 's#android:name=".plugins.InAppWebViewActivity"#android:name=".plugins.InAppWebViewActivity" android:hardwareAccelerated="true"#' "$MANIFEST"
 fi
 
-# Permissões: INTERNET + WRITE_EXTERNAL_STORAGE (para Downloads em SDK<=28)
+# Permissões
 grep -q "android.permission.INTERNET" "$MANIFEST" || \
   sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET" />\n    <application#' "$MANIFEST"
 
@@ -197,19 +185,11 @@ grep -q "WRITE_EXTERNAL_STORAGE" "$MANIFEST" || \
 # Cleartext HTTP (intranet PMESP usa http:// em alguns endpoints)
 if ! grep -q 'usesCleartextTraffic="true"' "$MANIFEST"; then
   echo "==> Habilitando android:usesCleartextTraffic no AndroidManifest"
-  if grep -q '<application' "$MANIFEST" && ! grep -q 'usesCleartextTraffic' "$MANIFEST"; then
-    sed -i 's#<application#<application android:usesCleartextTraffic="true"#' "$MANIFEST"
-  fi
+  sed -i 's#<application#<application android:usesCleartextTraffic="true"#' "$MANIFEST"
 fi
 
-echo "==> install.sh: OK (GeckoView $GECKOVIEW_VERSION)"
-echo "--- MainActivity ---"
-cat "${MAIN_ACT_JAVA:-$MAIN_ACT_KT}" 2>/dev/null || cat "$MAIN_ACT_KT"
+echo "==> install.sh: OK (Android System WebView, sem GeckoView)"
 echo "--- app/build.gradle ---"
 cat "$APP_GRADLE"
-echo "--- root build.gradle ---"
-cat "$ROOT_GRADLE"
-echo "--- settings.gradle ---"
-cat "$SETTINGS_GRADLE" 2>/dev/null || true
 echo "--- AndroidManifest ---"
 cat "$MANIFEST"
