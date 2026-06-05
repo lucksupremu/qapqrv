@@ -51,15 +51,16 @@ Sempre que você publicar uma nova versão no Lovable:
 
 ## Observações técnicas
 
-- **APK debug**, não release — instala sem precisar de Play Store, mas o Android
-  marca como "app de origem desconhecida". Para release assinado oficial seria
-  necessário gerar uma keystore e adicionar como secret do GitHub.
-- **Sem navegador externo embutido:** o app usa o `WebView` do Android (renderiza HTML
-  internamente). Toda navegação à intranet PMESP, SEI e iNotes passa por dentro
-  do app com User-Agent próprio do navegador interno, sem abrir outro aplicativo.
+- **APK debug**, não release — instala sem precisar de Play Store.
+- **Navegador interno com motor Mozilla GeckoView** (mesmo motor do Firefox).
+  Não depende do Android System WebView nem do Chrome do aparelho — resolve
+  a tela branca em celulares onde esses componentes estão bloqueados ou
+  desatualizados. Toda navegação a iNotes, intranet PMESP, Folha de Pagamento
+  e Marcar/Desmarcar acontece dentro do app.
+- **Tamanho do APK maior** (~60-80 MB) porque o motor GeckoView é embutido.
+  Isto é esperado e necessário para independer do Chrome.
 - **Ícone e splash:** gerados automaticamente a partir de `resources/icon.png`,
   `resources/icon-foreground.png`, `resources/icon-background.png` e
   `resources/splash.png` durante o build.
 - **Não precisa de Android Studio nem de SDK local** — tudo roda na nuvem do
-  GitHub Actions, gratuito para repositórios públicos e com 2.000 min/mês
-  grátis para privados.
+  GitHub Actions.
