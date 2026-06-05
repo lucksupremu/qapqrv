@@ -132,10 +132,7 @@ function HomeScreen() {
         window.open(url, "_blank", "noopener,noreferrer");
         setConsultando(false);
       }
-    }, `a escala #${id}`).finally(() => {
-      // se o guard recusou (toast), libera o botão
-      setTimeout(() => setConsultando(false), 300);
-    });
+    }, `a escala #${id}`).catch(() => setConsultando(false));
   };
 
   // Paleta sistemática: primário (azul institucional) e accent (dourado do logo),
