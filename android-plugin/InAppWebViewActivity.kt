@@ -1,8 +1,11 @@
 package br.com.qapqrv.app.plugins
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.DownloadManager
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -15,6 +18,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.webkit.CookieManager
 import android.webkit.DownloadListener
+import android.webkit.JsResult
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
 import android.webkit.WebChromeClient
