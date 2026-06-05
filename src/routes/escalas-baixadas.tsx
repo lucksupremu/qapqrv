@@ -20,8 +20,8 @@ import {
   lerLista,
   salvarLista,
   removerEscala,
-  lerPdfBlob,
 } from "@/lib/escalas-baixadas";
+
 
 export const Route = createFileRoute("/escalas-baixadas")({
   head: () => ({ meta: [{ title: "Escalas baixadas — QAP, QRV!" }] }),
