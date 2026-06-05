@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +21,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
@@ -30,11 +33,8 @@ import java.io.InputStream
 import kotlin.concurrent.thread
 
 /**
- * Navegador interno baseado em Mozilla GeckoView (mesmo motor do Firefox).
- * Não depende do Android System WebView / Chrome — resolve a tela branca
- * em aparelhos onde o WebView do sistema está desatualizado ou bloqueado.
- *
- * Layout em código pra evitar XML em res/.
+ * Navegador interno baseado em Mozilla GeckoView (motor do Firefox).
+ * Não depende do Android System WebView / Chrome.
  */
 class InAppWebViewActivity : Activity() {
 
@@ -46,6 +46,7 @@ class InAppWebViewActivity : Activity() {
         private const val TOOLBAR_BG = 0xFF2E6B8A.toInt()
         private const val TOOLBAR_FG = Color.WHITE
         private const val TAG = "InAppGecko"
+        private const val LOAD_TIMEOUT_MS = 25_000L
 
         @Volatile
         private var sRuntime: GeckoRuntime? = null
@@ -57,6 +58,8 @@ class InAppWebViewActivity : Activity() {
             val settings = GeckoRuntimeSettings.Builder()
                 .javaScriptEnabled(true)
                 .aboutConfigEnabled(false)
+                .consoleOutput(true)
+                .remoteDebuggingService(false)
                 .build()
             val r = GeckoRuntime.create(ctx.applicationContext, settings)
             sRuntime = r
@@ -70,10 +73,24 @@ class InAppWebViewActivity : Activity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var btnBack: ImageButton
     private lateinit var btnForward: ImageButton
+    private lateinit var errorOverlay: LinearLayout
+    private lateinit var errorMessage: TextView
+    private lateinit var loadingOverlay: View
 
     private var canGoBack = false
     private var canGoForward = false
     private var pageTitleFixed = ""
+    private var initialUrl = ""
+    private var userAgentOverride: String = ""
+    private var firstPaintReceived = false
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val timeoutRunnable = Runnable {
+        if (!firstPaintReceived) {
+            Log.w(TAG, "Timeout sem first-paint para $initialUrl")
+            showErrorOverlay(initialUrl, "TIMEOUT", "A página não respondeu a tempo.")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,78 +98,163 @@ class InAppWebViewActivity : Activity() {
 
         val url = intent.getStringExtra(EXTRA_URL) ?: run { finish(); return }
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
+        userAgentOverride = intent.getStringExtra(EXTRA_USER_AGENT).orEmpty()
         pageTitleFixed = title
+        initialUrl = url
+
+        Log.i(TAG, "onCreate url=$url title=$title ua=${userAgentOverride.take(60)}")
 
         setContentView(buildLayout(title))
 
         val rt = runtime(this)
-        session = GeckoSession(
-            GeckoSessionSettings.Builder()
-                .usePrivateMode(false)
-                .build(),
-        )
-        session.open(rt)
+        session = newSession(rt)
         geckoView.setSession(session)
 
-        session.navigationDelegate = object : GeckoSession.NavigationDelegate {
-            override fun onCanGoBack(s: GeckoSession, value: Boolean) {
+        loadUrl(url)
+    }
+
+    private fun newSession(rt: GeckoRuntime): GeckoSession {
+        val s = GeckoSession(
+            GeckoSessionSettings.Builder()
+                .usePrivateMode(false)
+                .userAgentMode(GeckoSessionSettings.USER_AGENT_MODE_MOBILE)
+                .viewportMode(GeckoSessionSettings.VIEWPORT_MODE_MOBILE)
+                .allowJavascript(true)
+                .build(),
+        )
+        s.open(rt)
+        if (userAgentOverride.isNotBlank()) {
+            try {
+                s.settings.userAgentOverride = userAgentOverride
+            } catch (e: Throwable) {
+                Log.w(TAG, "userAgentOverride falhou: ${e.message}")
+            }
+        }
+        attachDelegates(s, rt)
+        return s
+    }
+
+    private fun attachDelegates(s: GeckoSession, rt: GeckoRuntime) {
+        s.navigationDelegate = object : GeckoSession.NavigationDelegate {
+            override fun onCanGoBack(ses: GeckoSession, value: Boolean) {
                 canGoBack = value
                 btnBack.alpha = if (value) 1f else 0.3f
             }
 
-            override fun onCanGoForward(s: GeckoSession, value: Boolean) {
+            override fun onCanGoForward(ses: GeckoSession, value: Boolean) {
                 canGoForward = value
                 btnForward.alpha = if (value) 1f else 0.3f
             }
 
-            override fun onNewSession(s: GeckoSession, uri: String): GeckoResult<GeckoSession> {
-                // Popups (Marcar/Desmarcar, iNotes) — abre na mesma view.
-                val newSession = GeckoSession()
-                newSession.open(rt)
-                attachDelegates(newSession, rt)
-                geckoView.releaseSession()
-                geckoView.setSession(newSession)
-                session = newSession
-                return GeckoResult.fromValue(newSession)
+            override fun onLocationChange(
+                ses: GeckoSession,
+                url: String?,
+                perms: MutableList<org.mozilla.geckoview.ContentBlocking.LogEntry>?,
+                hasUserGesture: Boolean,
+            ) {
+                Log.d(TAG, "onLocationChange $url")
+            }
+
+            override fun onLoadRequest(
+                ses: GeckoSession,
+                request: GeckoSession.NavigationDelegate.LoadRequest,
+            ): GeckoResult<AllowOrDeny>? {
+                Log.d(TAG, "onLoadRequest ${request.uri} target=${request.target}")
+                return GeckoResult.fromValue(AllowOrDeny.ALLOW)
+            }
+
+            override fun onNewSession(ses: GeckoSession, uri: String): GeckoResult<GeckoSession>? {
+                // Em vez de abrir popup (que costuma virar tela branca),
+                // carrega o link na sessão atual.
+                Log.i(TAG, "onNewSession redirecionado para sessão atual: $uri")
+                mainHandler.post { loadUrl(uri) }
+                return null
             }
 
             override fun onLoadError(
-                s: GeckoSession,
+                ses: GeckoSession,
                 uri: String?,
                 error: org.mozilla.geckoview.WebRequestError,
             ): GeckoResult<String>? {
                 Log.e(TAG, "onLoadError uri=$uri code=${error.code} cat=${error.category}")
-                val safeUrl = uri.orEmpty()
-                val html = buildErrorHtml(safeUrl, "ERR_${error.code}", error.message ?: "Erro de carregamento")
-                return GeckoResult.fromValue("data:text/html;base64,${android.util.Base64.encodeToString(html.toByteArray(Charsets.UTF_8), android.util.Base64.NO_WRAP)}")
+                mainHandler.post {
+                    showErrorOverlay(uri.orEmpty(), "ERR_${error.code}", error.message ?: "Erro de carregamento")
+                }
+                return null
             }
         }
 
-        session.progressDelegate = object : GeckoSession.ProgressDelegate {
-            override fun onProgressChange(s: GeckoSession, progress: Int) {
+        s.progressDelegate = object : GeckoSession.ProgressDelegate {
+            override fun onPageStart(ses: GeckoSession, url: String) {
+                Log.d(TAG, "onPageStart $url")
+                firstPaintReceived = false
+                mainHandler.removeCallbacks(timeoutRunnable)
+                mainHandler.postDelayed(timeoutRunnable, LOAD_TIMEOUT_MS)
+                progressBar.visibility = View.VISIBLE
+                loadingOverlay.visibility = View.VISIBLE
+                hideErrorOverlay()
+            }
+
+            override fun onProgressChange(ses: GeckoSession, progress: Int) {
                 progressBar.progress = progress
-                progressBar.visibility = if (progress >= 100) View.GONE else View.VISIBLE
+                if (progress >= 30) {
+                    firstPaintReceived = true
+                    loadingOverlay.visibility = View.GONE
+                }
+                if (progress >= 100) progressBar.visibility = View.GONE
+            }
+
+            override fun onPageStop(ses: GeckoSession, success: Boolean) {
+                Log.d(TAG, "onPageStop success=$success")
+                mainHandler.removeCallbacks(timeoutRunnable)
+                progressBar.visibility = View.GONE
+                loadingOverlay.visibility = View.GONE
+                firstPaintReceived = true
             }
         }
 
-        session.contentDelegate = object : GeckoSession.ContentDelegate {
-            override fun onTitleChange(s: GeckoSession, t: String?) {
+        s.contentDelegate = object : GeckoSession.ContentDelegate {
+            override fun onTitleChange(ses: GeckoSession, t: String?) {
                 if (pageTitleFixed.isBlank() && !t.isNullOrBlank()) titleView.text = t
+                Log.d(TAG, "title=$t")
             }
 
-            override fun onExternalResponse(s: GeckoSession, response: WebResponse) {
-                // Arquivos não-renderizáveis (PDF não-inline, anexos) → baixa.
+            override fun onFirstContentfulPaint(ses: GeckoSession) {
+                firstPaintReceived = true
+                loadingOverlay.visibility = View.GONE
+                Log.d(TAG, "firstContentfulPaint")
+            }
+
+            override fun onCrash(ses: GeckoSession) {
+                Log.e(TAG, "GeckoSession crash — recriando")
+                mainHandler.post {
+                    try { ses.close() } catch (_: Throwable) {}
+                    val rt = runtime(this@InAppWebViewActivity)
+                    session = newSession(rt)
+                    geckoView.setSession(session)
+                    loadUrl(initialUrl)
+                }
+            }
+
+            override fun onExternalResponse(ses: GeckoSession, response: WebResponse) {
                 downloadResponseToDownloads(response)
             }
         }
 
-        session.loadUri(url)
+        s.promptDelegate = object : GeckoSession.PromptDelegate {}
     }
 
-    private fun attachDelegates(s: GeckoSession, rt: GeckoRuntime) {
-        s.navigationDelegate = session.navigationDelegate
-        s.progressDelegate = session.progressDelegate
-        s.contentDelegate = session.contentDelegate
+    private fun loadUrl(url: String) {
+        Log.i(TAG, "loadUrl $url")
+        firstPaintReceived = false
+        mainHandler.removeCallbacks(timeoutRunnable)
+        mainHandler.postDelayed(timeoutRunnable, LOAD_TIMEOUT_MS)
+        try {
+            session.loadUri(url)
+        } catch (e: Throwable) {
+            Log.e(TAG, "loadUri falhou", e)
+            showErrorOverlay(url, "LOAD_FAIL", e.message ?: "Falha ao iniciar carregamento")
+        }
     }
 
     private fun buildLayout(title: String): View {
@@ -195,7 +297,10 @@ class InAppWebViewActivity : Activity() {
             setImageResource(android.R.drawable.ic_menu_rotate)
             setColorFilter(TOOLBAR_FG)
             background = null
-            setOnClickListener { session.reload() }
+            setOnClickListener {
+                hideErrorOverlay()
+                session.reload()
+            }
             layoutParams = LinearLayout.LayoutParams(dp(40), dp(40))
         }
         toolbar.addView(btnClose)
@@ -212,15 +317,81 @@ class InAppWebViewActivity : Activity() {
         }
 
         geckoView = GeckoView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f,
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
+            setBackgroundColor(Color.WHITE)
+        }
+
+        // Overlay de loading (cobre o GeckoView enquanto não pinta nada)
+        loadingOverlay = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = android.view.Gravity.CENTER
+            setBackgroundColor(Color.WHITE)
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
+            addView(ProgressBar(this@InAppWebViewActivity).apply {
+                isIndeterminate = true
+            })
+            addView(TextView(this@InAppWebViewActivity).apply {
+                text = "Carregando…"
+                setTextColor(TOOLBAR_BG)
+                setPadding(0, dp(12), 0, 0)
+            })
+        }
+
+        // Overlay de erro
+        errorOverlay = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = android.view.Gravity.CENTER
+            setBackgroundColor(Color.WHITE)
+            setPadding(dp(24), dp(24), dp(24), dp(24))
+            visibility = View.GONE
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
             )
         }
+        val errTitle = TextView(this).apply {
+            text = "Não foi possível abrir a página"
+            setTextColor(TOOLBAR_BG)
+            textSize = 18f
+            gravity = android.view.Gravity.CENTER
+            setPadding(0, 0, 0, dp(8))
+        }
+        errorMessage = TextView(this).apply {
+            text = ""
+            setTextColor(0xFF5B7A8F.toInt())
+            textSize = 14f
+            gravity = android.view.Gravity.CENTER
+            setPadding(0, 0, 0, dp(16))
+        }
+        val btnRetry = TextView(this).apply {
+            text = "Tentar novamente"
+            setTextColor(Color.WHITE)
+            setBackgroundColor(TOOLBAR_BG)
+            gravity = android.view.Gravity.CENTER
+            setPadding(dp(20), dp(12), dp(20), dp(12))
+            setOnClickListener {
+                hideErrorOverlay()
+                loadUrl(initialUrl)
+            }
+        }
+        errorOverlay.addView(errTitle)
+        errorOverlay.addView(errorMessage)
+        errorOverlay.addView(btnRetry)
+
         val webContainer = FrameLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f,
             )
+            setBackgroundColor(Color.WHITE)
             addView(geckoView)
+            addView(loadingOverlay)
+            addView(errorOverlay)
         }
 
         val bottomBar = LinearLayout(this).apply {
@@ -258,6 +429,20 @@ class InAppWebViewActivity : Activity() {
         return root
     }
 
+    private fun showErrorOverlay(url: String, code: String, description: String) {
+        val ehIntranet = url.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
+            url.contains("intranet", ignoreCase = true)
+        val hintVpn = if (ehIntranet) "\n\n⚠️ Verifique se o AnyConnect (VPN) está conectado." else ""
+        errorMessage.text = "$description\n\n[$code]\n$url$hintVpn"
+        errorOverlay.visibility = View.VISIBLE
+        loadingOverlay.visibility = View.GONE
+        progressBar.visibility = View.GONE
+    }
+
+    private fun hideErrorOverlay() {
+        errorOverlay.visibility = View.GONE
+    }
+
     override fun onBackPressed() {
         if (::session.isInitialized && canGoBack) {
             session.goBack()
@@ -268,6 +453,7 @@ class InAppWebViewActivity : Activity() {
     }
 
     override fun onDestroy() {
+        mainHandler.removeCallbacks(timeoutRunnable)
         if (::session.isInitialized) {
             try { session.close() } catch (_: Throwable) {}
         }
@@ -298,7 +484,6 @@ class InAppWebViewActivity : Activity() {
 
                 runOnUiThread {
                     Toast.makeText(this, "Baixado: $fileName", Toast.LENGTH_LONG).show()
-                    // Registra no DownloadManager para aparecer nas notificações
                     try {
                         val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                         @Suppress("DEPRECATION")
@@ -310,47 +495,5 @@ class InAppWebViewActivity : Activity() {
                 runOnUiThread { Toast.makeText(this, "Falha no download: ${e.message}", Toast.LENGTH_LONG).show() }
             }
         }
-    }
-
-    private fun buildErrorHtml(failingUrl: String, codeName: String, description: String): String {
-        val ehIntranet = failingUrl.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
-            failingUrl.contains("intranet", ignoreCase = true)
-        val dicaVpn = if (ehIntranet) {
-            "<div class='warn'>⚠️ Este é um endereço da intranet PMESP. " +
-                "Verifique se o <b>AnyConnect</b> está conectado antes de tentar novamente.</div>"
-        } else ""
-        val safeUrl = failingUrl.replace("&", "&amp;").replace("<", "&lt;")
-        val safeDesc = description.replace("&", "&amp;").replace("<", "&lt;")
-        return """
-            <!DOCTYPE html>
-            <html lang="pt-br"><head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width,initial-scale=1">
-            <style>
-              body{font-family:-apple-system,Roboto,sans-serif;margin:0;padding:24px;
-                   background:#f6f8fb;color:#1f2d3d}
-              .card{background:#fff;border-radius:16px;padding:24px;
-                    box-shadow:0 4px 16px rgba(46,107,138,.08);max-width:520px;margin:24px auto}
-              h1{color:#2e6b8a;font-size:20px;margin:0 0 8px}
-              p{line-height:1.5;color:#5b7a8f;font-size:14px;margin:8px 0}
-              .code{font-family:monospace;background:#eef3f8;color:#2e6b8a;
-                    padding:6px 10px;border-radius:8px;display:inline-block;
-                    font-size:12px;margin-top:8px;word-break:break-all}
-              .url{font-size:12px;color:#7a8fa3;word-break:break-all;margin-top:12px}
-              .warn{background:#fff4e0;border-left:4px solid #f0a020;
-                    padding:12px;border-radius:8px;margin:16px 0;font-size:14px;color:#8a5a00}
-              button{width:100%;height:44px;border-radius:12px;border:0;background:#2e6b8a;color:#fff;font-size:14px;font-weight:600;margin-top:18px}
-            </style></head>
-            <body>
-              <div class="card">
-                <h1>Não foi possível abrir a página</h1>
-                <p>$safeDesc</p>
-                <div class="code">$codeName</div>
-                $dicaVpn
-                <div class="url">$safeUrl</div>
-                <button onclick="location.href='$safeUrl'">Tentar de novo</button>
-              </div>
-            </body></html>
-        """.trimIndent()
     }
 }
