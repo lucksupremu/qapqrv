@@ -1,35 +1,41 @@
-Do I know what the issue is? Sim.
+## Bug 1 — PDF abre em branco no APK
 
-O problema real é: o PDF está baixando, mas o app tenta abrir com um leitor externo via Intent Android. Quando essa abertura falha por qualquer motivo, o código mostra a mensagem incorreta “não há leitor de PDF disponível”, mesmo que exista leitor instalado. Além disso, depender de app externo/Google/Chrome pode voltar para tela branca ou não receber permissão para ler o arquivo local.
+**Causa**
+Após o download, o app tenta abrir no visualizador interno (`PdfViewerActivity` com `PdfRenderer` nativo do Android). O `PdfRenderer` não consegue renderizar muitos PDFs da PMESP (gerados pelo Crystal Reports/aspx) — não suporta PDFs criptografados, com formulários AcroForm ou versões mais novas, e quando falha silenciosamente entrega bitmaps em branco. No app web isso "funciona" porque o Chrome usa o PDFium completo.
 
-Plano de correção:
+**Correção**
+Inverter a ordem: abrir **sempre primeiro no leitor de PDF do aparelho** (Google PDF Viewer / Drive / Adobe), que é o que o usuário pediu. O visualizador interno vira apenas fallback caso não exista nenhum leitor instalado.
 
-1. Criar um visualizador de PDF nativo dentro do próprio app
-   - Adicionar uma Activity Android própria para visualizar PDFs salvos.
-   - Usar o renderizador nativo do Android para desenhar as páginas do PDF dentro do app.
-   - Assim o APK não depende mais de leitor externo instalado no aparelho.
+- `src/routes/index.tsx` (`handleConsultar`): após `downloadPdf`, chamar `openPdfExternal` primeiro; se falhar, tentar `openPdf` interno; se ambos falharem, mostrar mensagem clara com o erro real (não a mensagem genérica de "sem leitor").
+- `src/routes/escalas-baixadas.tsx` (`handleAbrir`): mesma inversão.
+- `android-plugin/InAppWebViewPlugin.kt` (`openPdfExternal`): usar `packageManager.queryIntentActivities(intent, 0)` antes do `createChooser` para diferenciar "nenhum leitor instalado" de "leitor falhou", e propagar a mensagem real. Caso a lista esteja vazia, rejeitar com código `NO_VIEWER` para o JS decidir o fallback interno.
 
-2. Alterar a abertura após baixar a escala
-   - Depois de `downloadPdf`, abrir automaticamente o PDF no visualizador interno.
-   - Manter o arquivo salvo em “Escalas baixadas”.
-   - Não abrir navegador nem WebView branca ao pesquisar pelo ID.
+## Bug 2 — App fecha ao voltar do AnyConnect
 
-3. Corrigir “Escalas baixadas”
-   - Ao tocar em “Abrir”, usar o mesmo visualizador interno.
-   - Se for uma escala antiga sem caminho local, baixar novamente e abrir no visualizador interno.
+**Causa**
+Dois problemas combinados:
 
-4. Manter fallback externo apenas como emergência
-   - Se o visualizador interno falhar, aí sim tentar abrir com apps externos como Google/Chrome/leitor de PDF.
-   - Trocar a mensagem de erro para mostrar o erro real, sem afirmar falsamente que não há leitor.
+1. `MainActivity` (Capacitor `BridgeActivity`) não declara `android:launchMode` nem `configChanges` para mudanças de rede/VPN. Quando o AnyConnect altera a interface de rede, o Android recria a Activity; com pouca RAM o processo é finalizado em background e ao retornar o sistema cria uma task nova → o app "fecha" (na verdade reinicia em estado vazio e às vezes morre antes de pintar).
+2. Em `src/routes/__root.tsx`, o listener `appStateChange` chama `showAppOpenAd()` toda vez que o app volta a ficar ativo. Ao retornar do AnyConnect, isso dispara o App Open Ad antes do bridge estar pronto e pode derrubar a Activity recém-criada.
 
-5. Ajustar o instalador Android
-   - Garantir que a nova Activity do leitor PDF seja copiada e registrada no APK.
-   - Preservar o FileProvider e o download nativo já existentes.
+**Correção**
 
-Resultado esperado:
+- `android-plugin/install.sh`: ao reescrever `MainActivity`, registrar também no `AndroidManifest.xml` os atributos `android:launchMode="singleTask"`, `android:alwaysRetainTaskState="true"` e `android:configChanges="orientation|screenSize|keyboardHidden|keyboard|screenLayout|uiMode|smallestScreenSize"`. Adicionar um `sed` que faz patch idempotente da tag `<activity android:name=".MainActivity" ...>` existente.
+- `src/routes/__root.tsx`: só chamar `showAppOpenAd()` no `appStateChange` quando o app ficou em background por mais de 30 segundos (registrar timestamp em `pause`/`isActive=false`). Envolver a chamada em `try/catch`. Mantém o ad em cold start.
+- `src/lib/admob.ts`: já tem cooldown de 4 min — manter, mas garantir que `showAppOpenAd` nunca propague exceções (já trata, OK).
 
-- Inserir o ID e tocar no botão amarelo baixa o PDF.
-- O PDF abre imediatamente dentro do app.
-- A escala aparece em “Escalas baixadas”.
-- Não abre navegador branco.
-- Não aparece mais a mensagem falsa dizendo que não existe leitor de PDF.
+## Detalhes técnicos
+
+- Não mexer no `client.ts`, `types.ts` nem em arquivos auto-gerados.
+- `InAppWebView` em `src/lib/in-app-webview.ts` não precisa de mudança — assinaturas já existem.
+- `PdfViewerActivity.kt` continua no projeto como fallback, sem alterações.
+- Testar fluxo no APK: consultar escala → deve abrir o seletor "Abrir PDF com" (Google PDF, Drive, etc.). Em "Escalas baixadas" → idem.
+- Testar abrir AnyConnect e voltar: app deve resumir a Home, sem fechar.
+
+## Arquivos a alterar
+
+1. `src/routes/index.tsx` — inverter ordem em `handleConsultar`.
+2. `src/routes/escalas-baixadas.tsx` — inverter ordem em `handleAbrir`.
+3. `android-plugin/InAppWebViewPlugin.kt` — `openPdfExternal` retorna `NO_VIEWER` quando lista de apps vazia.
+4. `android-plugin/install.sh` — patch idempotente em `MainActivity` no manifest com `launchMode` + `configChanges` + `alwaysRetainTaskState`.
+5. `src/routes/__root.tsx` — gating de tempo no `appStateChange` para o App Open Ad.

@@ -225,6 +225,12 @@ class InAppWebViewPlugin : Plugin() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
+            // Verifica se existe pelo menos um leitor de PDF instalado.
+            val resolvers = context.packageManager.queryIntentActivities(intent, 0)
+            if (resolvers.isEmpty()) {
+                call.reject("NO_VIEWER: nenhum leitor de PDF instalado")
+                return
+            }
             val chooser = Intent.createChooser(intent, "Abrir PDF com").apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
