@@ -154,8 +154,6 @@ function HomeScreen() {
       .then(() => {
         // Verifica se o PDF foi de fato salvo.
         try {
-          // import dinâmico evita ciclos
-          const { lerLista } = require("@/lib/escalas-baixadas") as typeof import("@/lib/escalas-baixadas");
           const item = lerLista().find((x) => x.id === id);
           if (item?.hasPdf) {
             toast.success(`Escala #${id} carregada.`, { id: loadingId });
