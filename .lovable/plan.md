@@ -1,35 +1,27 @@
-## Problema
+Plano para resolver definitivamente o botão amarelo de pesquisa de escala:
 
-Ao clicar **Consultar** na home (com um ID de escala):
+1. Alterar o fluxo do botão amarelo na home
+- No APK, ao inserir o ID e tocar em Pesquisar, não abrir mais o navegador/WebView como fallback.
+- O fluxo será: registrar a escala, baixar o PDF automaticamente e, se der certo, oferecer/abrir o PDF pelo app adequado do aparelho.
+- Se o download falhar, mostrar uma mensagem clara pedindo VPN/login ativo, sem abrir a tela branca.
 
-1. A WebView abre em branco, porque a URL é montada como
-   `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?123456` — **sem o nome do parâmetro**. O sistema da PMESP espera `?nuesc=123456` (já está documentado no próprio código em `src/routes/intranet.tsx:95` no regex `(?:nuesc=|arrelconesc\.aspx\?)(\d+)`). Sem o nome do parâmetro, o ASP.NET devolve uma página vazia.
+2. Fortalecer o download nativo do PDF
+- Ajustar o plugin Android `InAppWebViewPlugin.downloadPdf` para validar que o arquivo baixado é realmente PDF.
+- Rejeitar respostas HTML/login/página vazia para evitar salvar arquivo inválido.
+- Salvar o PDF em local acessível e manter o registro em “Escalas Baixadas”.
 
-2. A escala não aparece em **Escalas baixadas** porque `salvarEscalaEmBackground(...)` (que faz o `upsertEscala`) só é chamado quando `isNativeApp() === true`. No navegador (preview/web) o registro nunca é salvo, mesmo quando o usuário pediu para consultar. Em outras palavras: hoje a lista de "Escalas baixadas" só é alimentada no APK.
+3. Criar abertura do PDF pelo aplicativo do aparelho
+- Adicionar no plugin Android um método para abrir o PDF salvo usando `Intent.ACTION_VIEW` com `application/pdf`.
+- Usar `FileProvider`/URI segura para o Android permitir que outro app leia o PDF.
+- Atualizar o script `android-plugin/install.sh` para registrar o `FileProvider` e copiar o XML necessário no build do APK.
 
-## Correção
+4. Ajustar o JavaScript do app
+- Expandir `src/lib/in-app-webview.ts` com o novo método nativo de abrir PDF.
+- Atualizar `src/lib/escala-download.ts` para retornar sucesso/falha do download em vez de apenas executar em segundo plano.
+- Atualizar `src/routes/index.tsx` para chamar download + abrir PDF nativo; sem `openInAppBrowser` no caso da consulta por ID.
 
-Arquivo: `src/routes/index.tsx`, função `handleConsultar` (linhas ~114–136).
+5. Manter “Escalas Baixadas” funcionando
+- O PDF baixado continuará aparecendo em “Escalas baixadas”.
+- Ao tocar em Abrir, se houver PDF local, pode abrir pelo visualizador interno atual ou pelo app do aparelho conforme o novo método ficar disponível.
 
-1. **Montar a URL correta** com o nome do parâmetro:
-   ```ts
-   const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?nuesc=${encodeURIComponent(id)}`;
-   ```
-
-2. **Registrar a escala em "Escalas baixadas" em todos os ambientes**, não só no APK. No web, basta criar o registro via `upsertEscala` (o download do PDF continua sendo apenas no APK, por causa de CORS):
-   - Sempre chamar `upsertEscala({ id, url, titulo: \`Escala ${id}\`, dataSalva: new Date().toISOString() })` antes de abrir.
-   - No APK, continuar chamando `salvarEscalaEmBackground(id, url)` em segundo plano (ele já faz o `upsertEscala` + tenta baixar o PDF).
-   - No web, manter o `window.open(url, "_blank")` como hoje (vai exigir VPN/intranet para carregar, mas o registro fica salvo).
-
-3. Garantir que `setConsultando(false)` é sempre chamado, inclusive quando o `guardIntranet` rejeita.
-
-## Detalhes técnicos
-
-- Importar `upsertEscala` de `@/lib/escalas-baixadas` em `src/routes/index.tsx`.
-- Não alterar `salvarEscalaEmBackground` nem a tela `escalas-baixadas.tsx`. A tela já lida com itens sem PDF (mostra badge "Intranet PMESP" e tenta abrir via `openInAppBrowser` quando o usuário toca em "Abrir").
-- O aviso "Disponível apenas no aplicativo" na tela de Escalas baixadas (mostrado quando `!native`) continua válido para download offline do PDF, mas o registro do ID/URL passará a aparecer também no preview/web — ajustar a cópia desse aviso para deixar claro que **a lista funciona, só o download offline do PDF exige o APK**.
-
-## Fora do escopo
-
-- Não mexer no plugin Android, no build do APK, nem em outras telas/intranet.
-- Não alterar o mock `consultarEscala` em `src/lib/escala.ts` nem a rota `/ferramenta/consulta-escala` (essa não é a tela usada pelo botão "Consultar" da home).
+Resultado esperado: no APK, pesquisar uma escala por ID nunca mais deve abrir a WebView branca; deve baixar o PDF, salvar em “Escalas baixadas” e abrir/oferecer abertura por aplicativo PDF instalado no celular.

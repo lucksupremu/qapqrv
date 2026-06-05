@@ -1,6 +1,7 @@
 package br.com.qapqrv.app.plugins
 
 import android.content.Intent
+import androidx.core.content.FileProvider
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
@@ -13,14 +14,10 @@ import java.net.URL
 import kotlin.concurrent.thread
 
 /**
- * Plugin Capacitor próprio que abre uma WebView Android nativa em uma
- * Activity dedicada. Substitui o navegador externo que estava com
- * problemas de UA / cookies em sites .gov.br (intranet PMESP).
- *
- * Uso (TS):
- *   import { registerPlugin } from '@capacitor/core';
- *   const InAppWebView = registerPlugin<InAppWebViewPlugin>('InAppWebView');
- *   await InAppWebView.open({ url, title, userAgent });
+ * Plugin Capacitor próprio:
+ *  - open: abre WebView interna (Activity dedicada).
+ *  - downloadPdf: baixa PDF da intranet validando header %PDF.
+ *  - openPdf: abre PDF salvo no app do aparelho via FileProvider + ACTION_VIEW.
  */
 @CapacitorPlugin(name = "InAppWebView")
 class InAppWebViewPlugin : Plugin() {
@@ -81,8 +78,25 @@ class InAppWebViewPlugin : Plugin() {
                     conn.disconnect()
                     return@thread
                 }
+                val contentType = conn.contentType?.lowercase() ?: ""
                 conn.inputStream.use { input -> out.outputStream().use { output -> input.copyTo(output) } }
                 conn.disconnect()
+
+                // Valida que é PDF real (header %PDF) — evita salvar HTML de login.
+                val isPdf = out.length() > 4 && run {
+                    val head = ByteArray(4)
+                    out.inputStream().use { it.read(head) }
+                    head[0] == 0x25.toByte() && head[1] == 0x50.toByte() &&
+                        head[2] == 0x44.toByte() && head[3] == 0x46.toByte()
+                }
+                if (!isPdf) {
+                    out.delete()
+                    val motivo = if (contentType.contains("html"))
+                        "Sessão expirou ou VPN inativa (servidor retornou página HTML)."
+                    else "Resposta não é um PDF válido (tipo: $contentType)."
+                    getActivity().runOnUiThread { call.reject(motivo) }
+                    return@thread
+                }
 
                 val ret = JSObject()
                 ret.put("path", "escalas/$safeId.pdf")
@@ -92,6 +106,42 @@ class InAppWebViewPlugin : Plugin() {
             } catch (e: Throwable) {
                 getActivity().runOnUiThread { call.reject(e.message ?: "Falha ao baixar PDF") }
             }
+        }
+    }
+
+    /**
+     * Abre um PDF salvo (path relativo dentro de filesDir) usando o app PDF
+     * preferido do aparelho. Usa FileProvider para conceder URI segura.
+     */
+    @PluginMethod
+    fun openPdf(call: PluginCall) {
+        val path = call.getString("path")
+        if (path.isNullOrBlank()) {
+            call.reject("path ausente")
+            return
+        }
+        try {
+            val file = File(context.filesDir, path)
+            if (!file.exists()) {
+                call.reject("Arquivo não encontrado: $path")
+                return
+            }
+            val authority = "${context.packageName}.fileprovider"
+            val uri = FileProvider.getUriForFile(context, authority, file)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/pdf")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val chooser = Intent.createChooser(intent, "Abrir PDF com").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(chooser)
+            val ret = JSObject()
+            ret.put("opened", true)
+            call.resolve(ret)
+        } catch (e: Throwable) {
+            call.reject(e.message ?: "Falha ao abrir PDF")
         }
     }
 }
