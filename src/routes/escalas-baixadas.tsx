@@ -76,16 +76,16 @@ function DownloadedReportsScreen() {
 
 
   const handleAbrir = async (e: EscalaSalva) => {
-    // APK: abre sempre no visualizador interno (PdfViewerActivity).
+    // APK: tenta primeiro o leitor de PDF do aparelho; fallback interno.
     if (native && (e.localPath || e.hasPdf)) {
       try {
         const { InAppWebView } = await import("@/lib/in-app-webview");
         const path = e.localPath ?? (await InAppWebView.downloadPdf({ id: e.id, url: e.url })).path;
         try {
-          await InAppWebView.openPdf({ path, title: e.titulo ?? `Escala ${e.id}` });
-        } catch (openErr) {
-          console.warn("Visualizador interno falhou, tentando externo", openErr);
           await InAppWebView.openPdfExternal({ path });
+        } catch (extErr) {
+          console.warn("Leitor externo falhou, tentando visualizador interno", extErr);
+          await InAppWebView.openPdf({ path, title: e.titulo ?? `Escala ${e.id}` });
         }
         if (!e.localPath) {
           setEscalas((prev) =>
