@@ -6,6 +6,7 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
+import android.webkit.CookieManager
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -72,6 +73,7 @@ class InAppWebViewPlugin : Plugin() {
                         "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 " +
                             "(KHTML, like Gecko) Version/4.0 Mobile Safari/537.36 QAPQRVWebView/1.0",
                     )
+                    CookieManager.getInstance().getCookie(url)?.let { setRequestProperty("Cookie", it) }
                 }
                 val status = conn.responseCode
                 if (status !in 200..299) {
