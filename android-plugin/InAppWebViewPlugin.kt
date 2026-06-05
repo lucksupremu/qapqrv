@@ -151,7 +151,21 @@ class InAppWebViewPlugin : Plugin() {
                 ret.put("mime", "application/pdf")
                 getActivity().runOnUiThread { call.resolve(ret) }
             } catch (e: Throwable) {
-                getActivity().runOnUiThread { call.reject(e.message ?: "Falha ao baixar PDF") }
+                android.util.Log.e("InAppWebView", "downloadPdf falhou", e)
+                val raw = e.message ?: ""
+                val friendly = when {
+                    raw.contains("Trust anchor", ignoreCase = true) ||
+                        raw.contains("CertPath", ignoreCase = true) ||
+                        raw.contains("SSL", ignoreCase = true) ->
+                        "Não foi possível validar o acesso à intranet. Confirme a VPN ativa e tente novamente."
+                    raw.contains("Unable to resolve host", ignoreCase = true) ||
+                        raw.contains("No address associated", ignoreCase = true) ->
+                        "Sem conexão com a intranet. Confirme a VPN ativa."
+                    raw.contains("timeout", ignoreCase = true) ->
+                        "Tempo esgotado ao baixar a escala. Tente novamente."
+                    else -> "Falha ao baixar PDF da escala."
+                }
+                getActivity().runOnUiThread { call.reject(friendly) }
             }
         }
     }
