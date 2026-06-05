@@ -8,8 +8,8 @@
 import { registerPlugin } from "@capacitor/core";
 import { isNativeApp } from "./in-app-browser";
 
-export const ADMOB_APP_ID = "ca-app-pub-4966192764194561~2515666476";
-export const ADMOB_APP_OPEN_ID = "ca-app-pub-4966192764194561/9412551231";
+export const ADMOB_APP_ID = "ca-app-pub-9197484743954603~4917243774";
+export const ADMOB_APP_OPEN_ID = "ca-app-pub-9197484743954603/8424254265";
 export const ADMOB_INTERSTITIAL_ID = "ca-app-pub-4966192764194561/3034845147";
 
 interface AppOpenAdPlugin {
