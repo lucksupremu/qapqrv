@@ -119,11 +119,11 @@ function RootComponent() {
         });
 
         import("@capacitor/app").then(({ App }) => {
-          App.addListener("appStateChange", (state) => {
+          App.addListener("appStateChange", (state: { isActive: boolean }) => {
             if (state.isActive) {
               showAppOpenAd();
             }
-          }).then((handle) => {
+          }).then((handle: { remove: () => void }) => {
             removeAppListener = () => handle.remove();
           });
         }).catch(() => {});
