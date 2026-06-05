@@ -59,7 +59,6 @@ class InAppWebViewActivity : Activity() {
                 .javaScriptEnabled(true)
                 .aboutConfigEnabled(false)
                 .consoleOutput(true)
-                .remoteDebuggingService(false)
                 .build()
             val r = GeckoRuntime.create(ctx.applicationContext, settings)
             sRuntime = r
@@ -149,7 +148,7 @@ class InAppWebViewActivity : Activity() {
             override fun onLocationChange(
                 ses: GeckoSession,
                 url: String?,
-                perms: MutableList<org.mozilla.geckoview.ContentBlocking.LogEntry>?,
+                perms: MutableList<GeckoSession.PermissionDelegate.ContentPermission>,
                 hasUserGesture: Boolean,
             ) {
                 Log.d(TAG, "onLocationChange $url")
