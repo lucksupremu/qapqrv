@@ -1,87 +1,35 @@
-## Objetivo
+## Problema
 
-1. **Reduzir drasticamente o tamanho do APK** (hoje ~70–90 MB por causa do GeckoView do Firefox embutido).
-2. **Corrigir o navegador interno** que vinha quebrando em loop (erros de Kotlin, certificado, tela branca em iNotes/folha).
+Ao clicar **Consultar** na home (com um ID de escala):
 
----
+1. A WebView abre em branco, porque a URL é montada como
+   `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?123456` — **sem o nome do parâmetro**. O sistema da PMESP espera `?nuesc=123456` (já está documentado no próprio código em `src/routes/intranet.tsx:95` no regex `(?:nuesc=|arrelconesc\.aspx\?)(\d+)`). Sem o nome do parâmetro, o ASP.NET devolve uma página vazia.
 
-## Diagnóstico
+2. A escala não aparece em **Escalas baixadas** porque `salvarEscalaEmBackground(...)` (que faz o `upsertEscala`) só é chamado quando `isNativeApp() === true`. No navegador (preview/web) o registro nunca é salvo, mesmo quando o usuário pediu para consultar. Em outras palavras: hoje a lista de "Escalas baixadas" só é alimentada no APK.
 
-O GeckoView (`org.mozilla.geckoview:geckoview`) é responsável por:
-- ~60–70 MB do APK final (bibliotecas nativas `.so` por arquitetura).
-- Boa parte das falhas de build recentes (incompatibilidade `minSdk`, Kotlin metadata 2.3 vs 2.1, assinaturas de delegate quebradas, `remoteDebuggingService` inexistente, ERR_50 de certificado).
-- Atrito permanente: cada update do GeckoView muda APIs internas e quebra o build.
+## Correção
 
-O Android já tem um motor web nativo embutido no sistema (**Android System WebView**, baseado no Chromium). Ele:
-- Adiciona **0 MB** ao APK (já está no aparelho).
-- É o mesmo motor que o Capacitor já usa para rodar o app web.
-- Suporta tudo que o iNotes/folha precisa: cookies, JS, popups, downloads, certificados customizados.
-- Permite aceitar certificados específicos da PMESP via `onReceivedSslError` apenas para domínios confiáveis.
+Arquivo: `src/routes/index.tsx`, função `handleConsultar` (linhas ~114–136).
 
-A justificativa original para o GeckoView (“independente do System WebView”) não compensa o custo: praticamente todo Android ≥ 7 tem WebView atualizada via Play Store automaticamente.
+1. **Montar a URL correta** com o nome do parâmetro:
+   ```ts
+   const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?nuesc=${encodeURIComponent(id)}`;
+   ```
 
----
+2. **Registrar a escala em "Escalas baixadas" em todos os ambientes**, não só no APK. No web, basta criar o registro via `upsertEscala` (o download do PDF continua sendo apenas no APK, por causa de CORS):
+   - Sempre chamar `upsertEscala({ id, url, titulo: \`Escala ${id}\`, dataSalva: new Date().toISOString() })` antes de abrir.
+   - No APK, continuar chamando `salvarEscalaEmBackground(id, url)` em segundo plano (ele já faz o `upsertEscala` + tenta baixar o PDF).
+   - No web, manter o `window.open(url, "_blank")` como hoje (vai exigir VPN/intranet para carregar, mas o registro fica salvo).
 
-## Plano
+3. Garantir que `setConsultando(false)` é sempre chamado, inclusive quando o `guardIntranet` rejeita.
 
-### 1. Trocar o motor do navegador interno: GeckoView → Android WebView
+## Detalhes técnicos
 
-Reescrever `android-plugin/InAppWebViewActivity.kt` usando `android.webkit.WebView` em vez de `GeckoView`. Mantém a mesma Activity, mesma toolbar, mesmos botões (voltar/avançar/recarregar/fechar), mesmo overlay de loading e de erro.
+- Importar `upsertEscala` de `@/lib/escalas-baixadas` em `src/routes/index.tsx`.
+- Não alterar `salvarEscalaEmBackground` nem a tela `escalas-baixadas.tsx`. A tela já lida com itens sem PDF (mostra badge "Intranet PMESP" e tenta abrir via `openInAppBrowser` quando o usuário toca em "Abrir").
+- O aviso "Disponível apenas no aplicativo" na tela de Escalas baixadas (mostrado quando `!native`) continua válido para download offline do PDF, mas o registro do ID/URL passará a aparecer também no preview/web — ajustar a cópia desse aviso para deixar claro que **a lista funciona, só o download offline do PDF exige o APK**.
 
-Configuração da WebView para compatibilidade total com sites legados da PMESP:
-- `javaScriptEnabled = true`
-- `domStorageEnabled = true`
-- `databaseEnabled = true`
-- `useWideViewPort = true`, `loadWithOverviewMode = true`
-- `setSupportZoom(true)`, `builtInZoomControls = true`, `displayZoomControls = false`
-- `mixedContentMode = MIXED_CONTENT_ALWAYS_ALLOW` (intranet usa http em alguns endpoints)
-- `userAgentString = <UA mobile recebido do app>`
-- `CookieManager.setAcceptCookie(true)` e `setAcceptThirdPartyCookies(webView, true)`
-- `setSupportMultipleWindows(true)` + `onCreateWindow` que carrega o link na própria WebView (corrige tela branca de popups do iNotes).
+## Fora do escopo
 
-### 2. Tratar certificado da PMESP corretamente
-
-No `WebViewClient.onReceivedSslError`:
-- Se o host for `*.policiamilitar.sp.gov.br` (ou `correio.policiamilitar.sp.gov.br`): `handler.proceed()` (aceita).
-- Qualquer outro host: `handler.cancel()` e mostra o overlay de erro com mensagem clara.
-
-Em `onReceivedError` / `onReceivedHttpError`: mostra overlay com botão “Tentar novamente” e dica de VPN se for domínio de intranet.
-
-### 3. Downloads (PDFs de escala, etc.)
-
-Manter `DownloadListener` da WebView usando o `DownloadManager` do Android — mesmo comportamento que já existe hoje, sem precisar de `WebResponse` do GeckoView.
-
-### 4. Remover GeckoView do build
-
-Em `android-plugin/install.sh`:
-- Remover a dependência `org.mozilla.geckoview:geckoview`.
-- Remover a injeção do repositório `maven.mozilla.org` (não é mais necessária).
-- Manter `minSdkVersion 24` (WebView funciona desde API 21, então não precisa mais forçar 26).
-- Manter `multiDexEnabled` (inofensivo).
-
-### 5. Encolher mais o APK (ganho adicional ~30–40%)
-
-No `android/app/build.gradle`, no bloco `buildTypes.debug` e `release`:
-- `minifyEnabled true` + `shrinkResources true` (com `proguard-rules.pro` padrão do Capacitor).
-- `splits.abi { enable true; reset(); include 'armeabi-v7a','arm64-v8a','x86_64'; universalApk false }` — gera 3 APKs pequenos por arquitetura em vez de um universal gigante.
-
-O workflow `.github/workflows/build-apk.yml` passa a publicar como artefato a pasta `android/app/build/outputs/apk/debug/` inteira (3 APKs pequenos), e adicionamos um passo extra para listar tamanhos no log.
-
-### 6. Validar
-
-- Build do APK no GitHub Actions deve passar sem erros de Kotlin/Gecko.
-- Tamanho esperado por APK: **~6–10 MB** (vs ~80 MB hoje).
-- Testes manuais sugeridos: abrir iNotes, abrir folha de pagamento, abrir um PDF de escala, ligar VPN AnyConnect e confirmar acesso.
-
----
-
-## Arquivos a alterar
-
-- `android-plugin/InAppWebViewActivity.kt` — reescrita completa (Gecko → WebView).
-- `android-plugin/install.sh` — remove dependência/maven do Gecko, ajusta minSdk, adiciona splits ABI e minify no `app/build.gradle`.
-- `.github/workflows/build-apk.yml` — upload da pasta de APKs e log de tamanhos.
-- `src/lib/in-app-browser.ts` / `src/lib/in-app-webview.ts` — sem mudanças (interface do plugin permanece a mesma).
-
-## Risco
-
-Baixo. O Android System WebView está disponível em 100% dos aparelhos Android 7+ via Play Store e é o mesmo motor que o app já usa para sua própria UI. Se um aparelho específico tiver WebView desatualizada, o Play Store atualiza automaticamente.
+- Não mexer no plugin Android, no build do APK, nem em outras telas/intranet.
+- Não alterar o mock `consultarEscala` em `src/lib/escala.ts` nem a rota `/ferramenta/consulta-escala` (essa não é a tela usada pelo botão "Consultar" da home).
