@@ -53,6 +53,9 @@ jobs:
       - name: Capacitor sync
         run: bunx cap sync android
 
+      - name: Install native Android plugins (VpnStatus + InAppWebView)
+        run: bash android-plugin/install.sh
+
       - name: Patch AndroidManifest with AdMob APPLICATION_ID
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
@@ -61,6 +64,8 @@ jobs:
           fi
           echo "--- AndroidManifest.xml ---"
           cat "$MANIFEST"
+
+
 
       - name: Build debug APK
         working-directory: android
