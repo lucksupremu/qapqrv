@@ -1,36 +1,35 @@
-O erro não é do PDF nem do ID. É diferença entre navegador e APK:
+Do I know what the issue is? Sim.
 
-- No navegador/Chrome, o certificado da intranet é aceito pelo próprio navegador, ou ele consegue contornar/usar a sessão da VPN.
-- No APK, o download é feito por código nativo (`HttpURLConnection`). Esse caminho é mais rígido e está recusando o certificado da intranet/VPN: `Trust anchor for certification path not found`.
-- Quando antes abria em branco, era porque a WebView até entrava no link, mas Android WebView não renderiza PDF direto.
-
-Do I know what the issue is? Sim. O problema é a validação TLS/certificado no download nativo do APK para o domínio da intranet da PMESP.
+O problema real é: o PDF está baixando, mas o app tenta abrir com um leitor externo via Intent Android. Quando essa abertura falha por qualquer motivo, o código mostra a mensagem incorreta “não há leitor de PDF disponível”, mesmo que exista leitor instalado. Além disso, depender de app externo/Google/Chrome pode voltar para tela branca ou não receber permissão para ler o arquivo local.
 
 Plano de correção:
 
-1. Criar configuração de segurança de rede do Android
-- Adicionar um `network_security_config.xml` no build Android.
-- Permitir, para `policiamilitar.sp.gov.br` e subdomínios, certificados do sistema e certificados instalados no aparelho/VPN.
-- Registrar essa configuração no `AndroidManifest.xml` pelo `install.sh`.
+1. Criar um visualizador de PDF nativo dentro do próprio app
+   - Adicionar uma Activity Android própria para visualizar PDFs salvos.
+   - Usar o renderizador nativo do Android para desenhar as páginas do PDF dentro do app.
+   - Assim o APK não depende mais de leitor externo instalado no aparelho.
 
-2. Blindar o downloader nativo da escala
-- Ajustar `InAppWebViewPlugin.downloadPdf` para aplicar a correção apenas nos domínios oficiais da PMESP.
-- Manter a validação de que o arquivo baixado começa com `%PDF`, para não salvar página de login/erro como se fosse PDF.
-- Se o servidor retornar HTML, mensagem clara: sessão expirada, login/VPN necessário.
+2. Alterar a abertura após baixar a escala
+   - Depois de `downloadPdf`, abrir automaticamente o PDF no visualizador interno.
+   - Manter o arquivo salvo em “Escalas baixadas”.
+   - Não abrir navegador nem WebView branca ao pesquisar pelo ID.
 
-3. Eliminar definitivamente a tela branca nesse fluxo
-- No botão amarelo de pesquisa por ID, o APK não vai abrir navegador/WebView como fallback.
-- Fluxo final: pesquisar ID -> baixar PDF -> salvar em “Escalas Baixadas” -> abrir com app PDF do aparelho.
-- Se falhar, apenas mostrar erro útil; não abrir tela branca.
+3. Corrigir “Escalas baixadas”
+   - Ao tocar em “Abrir”, usar o mesmo visualizador interno.
+   - Se for uma escala antiga sem caminho local, baixar novamente e abrir no visualizador interno.
 
-4. Melhorar mensagem de erro para o usuário
-- Trocar o erro técnico Java por uma mensagem em português, por exemplo:
-  “Não foi possível validar o acesso à intranet. Confirme a VPN ativa e tente novamente.”
-- Guardar o detalhe técnico só no log do Android, não no alerta principal.
+4. Manter fallback externo apenas como emergência
+   - Se o visualizador interno falhar, aí sim tentar abrir com apps externos como Google/Chrome/leitor de PDF.
+   - Trocar a mensagem de erro para mostrar o erro real, sem afirmar falsamente que não há leitor.
 
-Arquivos a ajustar:
-- `android-plugin/InAppWebViewPlugin.kt`
-- `android-plugin/install.sh`
-- `src/routes/index.tsx`
+5. Ajustar o instalador Android
+   - Garantir que a nova Activity do leitor PDF seja copiada e registrada no APK.
+   - Preservar o FileProvider e o download nativo já existentes.
 
-Resultado esperado: no APK, pesquisar a escala por ID não abre navegador branco; baixa o PDF, salva em Escalas Baixadas e oferece abrir no app de PDF do celular.
+Resultado esperado:
+
+- Inserir o ID e tocar no botão amarelo baixa o PDF.
+- O PDF abre imediatamente dentro do app.
+- A escala aparece em “Escalas baixadas”.
+- Não abre navegador branco.
+- Não aparece mais a mensagem falsa dizendo que não existe leitor de PDF.

@@ -171,10 +171,15 @@ function HomeScreen() {
 
       toast.success(`Escala #${id} baixada. Abrindo…`, { id: loadingId });
       try {
-        await InAppWebView.openPdf({ path: result.path });
+        await InAppWebView.openPdf({ path: result.path, title: `Escala ${id}` });
       } catch (openErr) {
-        console.warn("Falha ao abrir PDF externo", openErr);
-        toast.error("PDF baixado, mas não há leitor de PDF disponível no aparelho.");
+        console.warn("Visualizador interno falhou, tentando externo", openErr);
+        try {
+          await InAppWebView.openPdfExternal({ path: result.path });
+        } catch (extErr) {
+          const m = extErr instanceof Error ? extErr.message : String(extErr);
+          toast.error(`PDF baixado, mas não foi possível abri-lo: ${m}`);
+        }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
