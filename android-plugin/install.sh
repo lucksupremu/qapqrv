@@ -268,6 +268,13 @@ if ! grep -q "androidx.core.content.FileProvider" "$MANIFEST"; then
   sed -i "s#</application>#$PROVIDER_BLOCK#" "$MANIFEST"
 fi
 
+# ----- <queries> para descobrir leitores/compartilhadores de PDF (Android 11+) -----
+if ! grep -q "<!-- qapqrv-pdf-queries -->" "$MANIFEST"; then
+  echo "==> Adicionando bloco <queries> ao AndroidManifest"
+  QUERIES_BLOCK='    <!-- qapqrv-pdf-queries -->\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" \/>\n            <data android:mimeType="application\/pdf" \/>\n        <\/intent>\n        <intent>\n            <action android:name="android.intent.action.SEND" \/>\n            <data android:mimeType="application\/pdf" \/>\n        <\/intent>\n    <\/queries>\n    <application'
+  sed -i "0,/<application/s##$QUERIES_BLOCK#" "$MANIFEST"
+fi
+
 # ----- Network Security Config: confia em CAs do sistema + do usuário (VPN) -----
 # Resolve `CertPathValidatorException: Trust anchor for certification path not found`
 # ao baixar PDFs da intranet PMESP via HttpURLConnection nativo.

@@ -1,25 +1,52 @@
-## Atualizar IDs do AdMob no APK
+# Corrigir Salvar e Compartilhar no visualizador de PDF (APK)
 
-Vou trocar os IDs antigos do AdMob pelos novos que você passou. Mudança simples — só substituir constantes.
+## Problemas atuais
 
-### Arquivos afetados
+1. **Compartilhar dá erro** — no Android 11+ a "package visibility" bloqueia `queryIntentActivities` para PDF, e o `EXTRA_INITIAL_INTENTS` é montado sem tipagem `Parcelable[]`, o que pode disparar `ClassCastException` em alguns aparelhos. Sem `<queries>` no manifest, leitores de PDF instalados também ficam invisíveis para o chooser.
+2. **Salvar não sai do APK** — o caminho via `MediaStore.Downloads` falha silenciosamente em alguns OEMs (Xiaomi/MIUI, alguns Samsung) e o arquivo nunca aparece em `/Downloads`. Hoje o fallback SAF só roda em Android 9-.
 
-1. **`capacitor.config.ts`** (linha 12)
-   - `appId` do AdMob: `ca-app-pub-4966192764194561~2515666476` → **`ca-app-pub-9197484743954603~4917243774`**
+## Solução
 
-2. **`src/lib/admob.ts`** (linhas 11–12)
-   - `ADMOB_APP_ID` → **`ca-app-pub-9197484743954603~4917243774`**
-   - `ADMOB_APP_OPEN_ID` → **`ca-app-pub-9197484743954603/8424254265`**
+### `android-plugin/PdfViewerActivity.kt`
 
-3. **`android-plugin/AppOpenAdPlugin.kt`** (linha 40)
-   - `AD_UNIT_ID` (App Open) → **`ca-app-pub-9197484743954603/8424254265`**
+**Salvar (sempre via SAF):**
+- Substituir a lógica atual por `ACTION_CREATE_DOCUMENT` em **todas** as versões do Android. O usuário escolhe onde salvar (Downloads, Drive, cartão SD, etc.) e isso funciona em todo OEM sem permissão.
+- Sugerir nome `Escala_<id>.pdf`.
+- Após salvar com sucesso, mostrar um pequeno diálogo: "PDF salvo. Abrir com leitor de PDF?" — botão "Abrir" dispara `Intent.ACTION_VIEW` na URI escolhida via chooser, listando todos os leitores instalados.
 
-### O que NÃO vou alterar
+**Compartilhar / Abrir com:**
+- Manter `FileProvider` (já configurado em `qapqrv_file_paths.xml` com `<files-path path="."/>` — cobre `filesDir/escalas/...`).
+- Corrigir o `EXTRA_INITIAL_INTENTS` tipando como `Array<android.os.Parcelable>`.
+- Adicionar `FLAG_GRANT_READ_URI_PERMISSION` também no chooser (não só nas intents internas).
+- Envolver tudo em `try/catch` com mensagem de erro detalhada via `Toast`/`Log`.
+- Se nenhum app conseguir tratar `ACTION_SEND` para `application/pdf`, cair de volta direto em `ACTION_VIEW`.
 
-- **AdSense (web)** em `adsense-banner.tsx` e `__root.tsx` (`ca-pub-4966192764194561`) — é outro produto (anúncios na web), você não passou novo ID.
-- **`ADMOB_INTERSTITIAL_ID`** — você não passou ID novo de intersticial e ele já está sem uso no fluxo atual (ver comentário no `admob.ts`). Deixo a constante como está para não quebrar tipos; podemos remover/atualizar quando você gerar esse bloco.
+### `android-plugin/install.sh`
 
-### Lógica do App Open Ad
-A lógica nativa já está implementada conforme o guia do Google (cold start + retorno do background, cooldown de 4 min entre exibições, expiração de 4 h do ad carregado, pré-carregamento após dismiss). Não precisa mudar — só os IDs.
+Adicionar bloco `<queries>` ao `AndroidManifest.xml` (necessário a partir do Android 11 para descobrir apps externos). Inserir antes da tag `<application>`:
 
-Depois é gerar APK novo pra validar.
+```xml
+<queries>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:mimeType="application/pdf" />
+    </intent>
+    <intent>
+        <action android:name="android.intent.action.SEND" />
+        <data android:mimeType="application/pdf" />
+    </intent>
+</queries>
+```
+
+Idempotente (`grep -q` antes de injetar), seguindo o padrão dos outros blocos do `install.sh`.
+
+## Resultado esperado
+
+- **Salvar**: abre seletor nativo do Android, usuário escolhe pasta (Downloads, etc.), arquivo fica visível fora do APK, e logo após oferece "Abrir com leitor de PDF".
+- **Compartilhar**: lista corretamente WhatsApp, Gmail, Drive, leitores de PDF (Adobe, Xodo, etc.) sem erro.
+
+## Fora do escopo
+
+- Sem mudanças no fluxo web/PWA.
+- Sem mexer em `InAppWebViewPlugin.kt` (o download em background continua igual; só muda o que acontece dentro do `PdfViewerActivity`).
+- Não vou regenerar APK — você roda o workflow depois para validar.

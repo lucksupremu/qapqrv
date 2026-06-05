@@ -1,18 +1,15 @@
 package br.com.qapqrv.app.plugins
 
 import android.app.Activity
-import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.ParcelFileDescriptor
-import android.provider.MediaStore
+import android.util.Log
 import android.util.Log
 import android.view.GestureDetector
 import android.view.Gravity
@@ -208,9 +205,18 @@ class PdfViewerActivity : Activity() {
                 setDataAndType(uri, "application/pdf")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            val chooser = Intent.createChooser(share, "Compartilhar / abrir com").apply {
-                if (packageManager.queryIntentActivities(view, 0).isNotEmpty()) {
-                    putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(view))
+
+            val sendTargets = packageManager.queryIntentActivities(share, 0)
+            val viewTargets = packageManager.queryIntentActivities(view, 0)
+
+            // Se nenhum app aceita SEND mas há leitor de PDF, abre direto.
+            val base: Intent = if (sendTargets.isEmpty() && viewTargets.isNotEmpty()) view else share
+
+            val chooser = Intent.createChooser(base, "Compartilhar / abrir com").apply {
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                if (base === share && viewTargets.isNotEmpty()) {
+                    val initial: Array<android.os.Parcelable> = arrayOf(view)
+                    putExtra(Intent.EXTRA_INITIAL_INTENTS, initial)
                 }
             }
             startActivity(chooser)
@@ -221,43 +227,24 @@ class PdfViewerActivity : Activity() {
     }
 
     private fun salvarPdf() {
-        val f = pdfFile ?: return
+        if (pdfFile == null) return
         val fileName = "${sanitize(pdfTitle)}.pdf"
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Android 10+: usa MediaStore.Downloads — não pede permissão.
-                val values = ContentValues().apply {
-                    put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-                    put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
-                    put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                    put(MediaStore.Downloads.IS_PENDING, 1)
-                }
-                val resolver = contentResolver
-                val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-                val uri = resolver.insert(collection, values) ?: throw IllegalStateException("URI nula")
-                resolver.openOutputStream(uri)?.use { out ->
-                    FileInputStream(f).use { input -> input.copyTo(out) }
-                } ?: throw IllegalStateException("OutputStream nulo")
-                values.clear()
-                values.put(MediaStore.Downloads.IS_PENDING, 0)
-                resolver.update(uri, values, null, null)
-                Toast.makeText(this, "Salvo em Downloads/$fileName", Toast.LENGTH_LONG).show()
-            } else {
-                // Android 9-: deixa o usuário escolher o local via SAF.
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "application/pdf"
-                    putExtra(Intent.EXTRA_TITLE, fileName)
-                }
-                startActivityForResult(intent, REQ_CREATE_DOC)
+            // SAF em todas as versões: o usuário escolhe onde salvar e o arquivo
+            // fica visível fora do APK (Downloads, Drive, cartão SD, etc.).
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_TITLE, fileName)
             }
+            startActivityForResult(intent, REQ_CREATE_DOC)
         } catch (e: Throwable) {
             Log.e(TAG, "salvar falhou", e)
             Toast.makeText(this, "Falha ao salvar: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
-    @Deprecated("Compat: usado apenas no fallback SAF do Android < 10")
+    @Deprecated("Compat: API usada para receber o resultado do SAF")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQ_CREATE_DOC && resultCode == RESULT_OK) {
@@ -266,11 +253,30 @@ class PdfViewerActivity : Activity() {
             try {
                 contentResolver.openOutputStream(uri)?.use { out ->
                     FileInputStream(f).use { input -> input.copyTo(out) }
-                }
-                Toast.makeText(this, "PDF salvo", Toast.LENGTH_SHORT).show()
+                } ?: throw IllegalStateException("OutputStream nulo")
+                Toast.makeText(this, "PDF salvo no dispositivo", Toast.LENGTH_SHORT).show()
+                promptAbrirComLeitor(uri)
             } catch (e: Throwable) {
+                Log.e(TAG, "gravar PDF falhou", e)
                 Toast.makeText(this, "Falha ao salvar: ${e.message}", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private fun promptAbrirComLeitor(uri: Uri) {
+        try {
+            val view = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/pdf")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            val targets = packageManager.queryIntentActivities(view, 0)
+            if (targets.isEmpty()) return
+            val chooser = Intent.createChooser(view, "Abrir PDF com").apply {
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(chooser)
+        } catch (e: Throwable) {
+            Log.w(TAG, "abrir com leitor falhou", e)
         }
     }
 
