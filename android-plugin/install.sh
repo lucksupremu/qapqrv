@@ -97,7 +97,10 @@ fi
 # ----- Registrar InAppWebViewActivity no AndroidManifest -----
 if ! grep -q "InAppWebViewActivity" "$MANIFEST"; then
   echo "==> Registrando InAppWebViewActivity no AndroidManifest"
-  sed -i 's#</application>#    <activity android:name=".plugins.InAppWebViewActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:exported="false" />\n    </application>#' "$MANIFEST"
+  sed -i 's#</application>#    <activity android:name=".plugins.InAppWebViewActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
+elif grep -q 'InAppWebViewActivity' "$MANIFEST" && ! grep -q 'InAppWebViewActivity.*hardwareAccelerated' "$MANIFEST"; then
+  echo "==> Habilitando hardwareAccelerated na InAppWebViewActivity"
+  sed -i 's#android:name=".plugins.InAppWebViewActivity"#android:name=".plugins.InAppWebViewActivity" android:hardwareAccelerated="true"#' "$MANIFEST"
 fi
 
 # Garante INTERNET (já vem do Capacitor por padrão, mas a gente reforça)

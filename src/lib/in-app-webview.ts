@@ -5,12 +5,13 @@ import { registerPlugin } from "@capacitor/core";
 export interface InAppWebViewOpenOptions {
   url: string;
   title?: string;
-  /** UA customizado. Default: Chrome Mobile (definido no lado Kotlin). */
+  /** UA customizado. Default: navegador interno Android (definido no lado Kotlin). */
   userAgent?: string;
 }
 
 export interface InAppWebViewPlugin {
   open(options: InAppWebViewOpenOptions): Promise<{ opened: boolean }>;
+  downloadPdf(options: { url: string; id: string }): Promise<{ path: string; size: number; mime: string }>;
 }
 
 export const InAppWebView =

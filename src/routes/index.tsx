@@ -61,7 +61,7 @@ function HomeScreen() {
   const [idEscala, setIdEscala] = useState("");
   // Inicia vazio para casar com o HTML do SSR (sem acesso a localStorage).
   // Após hidratar, o useEffect abaixo popula a lista — evita hydration mismatch
-  // que estava derrubando os event handlers da Home em alguns Chromes Android.
+  // que estava derrubando os event handlers da Home em alguns navegadores Android.
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
@@ -122,24 +122,17 @@ function HomeScreen() {
 
     setConsultando(true);
     void guardIntranet(() => {
-      if (isNativeApp()) {
+      const nativeApp = isNativeApp();
+      const salvar = nativeApp ? salvarEscalaEmBackground(id, url) : Promise.resolve();
+
+      if (nativeApp) {
         void openInAppBrowser(url, { titulo: `Escala ${id}` });
+        void salvar.finally(() => setConsultando(false));
       } else if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
+        setConsultando(false);
       }
-      setTimeout(() => {
-        // Salvar offline só faz sentido no APK (no web o fetch da intranet
-        // bate em CORS e a função não consegue persistir o PDF).
-        if (isNativeApp()) {
-          void salvarEscalaEmBackground(id, url).finally(() => setConsultando(false));
-        } else {
-          setConsultando(false);
-        }
-      }, 0);
-    }, `a escala #${id}`).finally(() => {
-      // se o guard recusou (toast), libera o botão
-      setTimeout(() => setConsultando(false), 300);
-    });
+    }, `a escala #${id}`).catch(() => setConsultando(false));
   };
 
   // Paleta sistemática: primário (azul institucional) e accent (dourado do logo),

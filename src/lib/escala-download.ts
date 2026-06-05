@@ -13,6 +13,7 @@ import {
   lerLista,
   salvarLista,
 } from "./escalas-baixadas";
+import { InAppWebView } from "./in-app-webview";
 
 const emAndamento = new Set<string>();
 
@@ -28,6 +29,26 @@ async function isNative(): Promise<boolean> {
 
 async function baixarNoNativo(id: string, url: string): Promise<boolean> {
   try {
+    try {
+      const result = await InAppWebView.downloadPdf({ id, url });
+      const lista = lerLista();
+      const next = lista.map((x) =>
+        x.id === id
+          ? {
+              ...x,
+              hasPdf: true,
+              pdfSize: result.size,
+              pdfMime: result.mime || "application/pdf",
+              localPath: result.path,
+            }
+          : x,
+      );
+      salvarLista(next);
+      return true;
+    } catch (nativePluginError) {
+      console.warn("[escala-download] plugin nativo direto falhou", nativePluginError);
+    }
+
     const { CapacitorHttp } = await import("@capacitor/core");
     const resp = await CapacitorHttp.request({
       method: "GET",
