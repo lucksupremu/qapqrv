@@ -10,7 +10,7 @@ export function getStoredTheme(): Theme {
   } catch {
     /* ignore */
   }
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "light";
 }
 
 export function applyTheme(theme: Theme) {
@@ -33,4 +33,4 @@ export function toggleTheme(): Theme {
 }
 
 /** Inline script string, injected in <head> to prevent flash of wrong theme. */
-export const THEME_BOOT_SCRIPT = `(function(){try{var t=localStorage.getItem('${KEY}');if(!t){t=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}document.documentElement.style.colorScheme=t;}catch(e){}})();`;
+export const THEME_BOOT_SCRIPT = `(function(){try{var t=localStorage.getItem('${KEY}');if(t!=='dark'&&t!=='light'){t='light';}if(t==='dark'){document.documentElement.classList.add('dark');}document.documentElement.style.colorScheme=t;}catch(e){}})();`;
