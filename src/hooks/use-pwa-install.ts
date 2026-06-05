@@ -23,6 +23,22 @@ function detectAndroid(): boolean {
   return /Android/i.test(navigator.userAgent || "");
 }
 
+function detectFirefox(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  // Firefox desktop e Firefox Android (Fennec/Fenix)
+  return /Firefox\//i.test(ua) || /FxiOS\//i.test(ua);
+}
+
+function detectChromeFamily(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  // Chrome, Chromium, Edge, Brave, Opera, Samsung Internet, etc. — qualquer Chromium.
+  // Excluímos explicitamente Firefox.
+  if (/Firefox\//i.test(ua) || /FxiOS\//i.test(ua)) return false;
+  return /Chrome\//i.test(ua) || /Chromium\//i.test(ua) || /CriOS\//i.test(ua);
+}
+
 function detectStandalone(): boolean {
   if (typeof window === "undefined") return false;
   const mql = window.matchMedia?.("(display-mode: standalone)").matches;
