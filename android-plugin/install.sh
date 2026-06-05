@@ -22,6 +22,7 @@ mkdir -p "$PKG_DIR"
 cp "$ROOT/android-plugin/VpnStatusPlugin.kt"      "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
+cp "$ROOT/android-plugin/PdfViewerActivity.kt"    "$PKG_DIR/"
 cp "$ROOT/android-plugin/AppOpenAdPlugin.kt"      "$PKG_DIR/"
 
 ADMOB_APP_ID="ca-app-pub-4966192764194561~2515666476"
@@ -180,6 +181,11 @@ fi
 if ! grep -q "InAppWebViewActivity" "$MANIFEST"; then
   echo "==> Registrando InAppWebViewActivity no AndroidManifest"
   sed -i 's#</application>#    <activity android:name=".plugins.InAppWebViewActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
+fi
+
+if ! grep -q "PdfViewerActivity" "$MANIFEST"; then
+  echo "==> Registrando PdfViewerActivity no AndroidManifest"
+  sed -i 's#</application>#    <activity android:name=".plugins.PdfViewerActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
 fi
 
 # Permissões
