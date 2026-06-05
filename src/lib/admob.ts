@@ -1,63 +1,63 @@
 /**
  * AdMob — integração para o APK Capacitor.
- * Não roda no navegador (PWA). Na web, os anúncios usam AdSense.
+ * - App Open Ad: plugin nativo próprio (`AppOpenAdPlugin.kt`).
+ * - Intersticial: @capacitor-community/admob v8 (reservado para uso futuro).
  *
- * Nota: @capacitor-community/admob v8 ainda não tem suporte oficial a
- * "App Open Ads". Como substituto, mostramos um intersticial logo após
- * a abertura do app.
+ * Web/PWA: estas funções são no-op. Os anúncios na web usam AdSense.
  */
+import { registerPlugin } from "@capacitor/core";
 import { isNativeApp } from "./in-app-browser";
 
 export const ADMOB_APP_ID = "ca-app-pub-4966192764194561~2515666476";
-/** Reservado para quando o plugin suportar App Open Ads. */
 export const ADMOB_APP_OPEN_ID = "ca-app-pub-4966192764194561/9412551231";
 export const ADMOB_INTERSTITIAL_ID = "ca-app-pub-4966192764194561/3034845147";
 
+interface AppOpenAdPlugin {
+  initialize(): Promise<{ initialized: boolean }>;
+  show(): Promise<{ shown: boolean; reason?: string; dismissed?: boolean }>;
+}
+
+const AppOpenAd = registerPlugin<AppOpenAdPlugin>("AppOpenAd");
+
 let initialized = false;
-let interstitialPrepared = false;
+let lastShownAt = 0;
+const MIN_INTERVAL_MS = 4 * 60 * 1000; // 4 min — não mostra de novo logo após exibir
 
 /** Inicializa o SDK do AdMob (uma única vez, apenas no APK). */
 export async function initAdMob(): Promise<void> {
   if (!isNativeApp() || initialized) return;
   try {
-    const { AdMob } = await import("@capacitor-community/admob");
-    await AdMob.initialize({ initializeForTesting: false });
+    await AppOpenAd.initialize();
     initialized = true;
   } catch (e) {
     console.warn("[admob] init falhou:", e);
   }
 }
 
-/** Pré-carrega o intersticial. */
-export async function prepareInterstitial(): Promise<void> {
-  if (!isNativeApp() || interstitialPrepared) return;
-  try {
-    await initAdMob();
-    const { AdMob } = await import("@capacitor-community/admob");
-    await AdMob.prepareInterstitial({ adId: ADMOB_INTERSTITIAL_ID });
-    interstitialPrepared = true;
-  } catch (e) {
-    console.warn("[admob] prepare interstitial falhou:", e);
-  }
-}
-
-/** Mostra o intersticial. Se não estiver preparado, prepara antes. */
-export async function showInterstitial(): Promise<void> {
-  if (!isNativeApp()) return;
-  try {
-    if (!interstitialPrepared) await prepareInterstitial();
-    const { AdMob } = await import("@capacitor-community/admob");
-    await AdMob.showInterstitial();
-    interstitialPrepared = false;
-    void prepareInterstitial(); // pré-carrega o próximo
-  } catch (e) {
-    console.warn("[admob] show interstitial falhou:", e);
-  }
-}
-
 /**
- * Substituto de App Open: mostra um intersticial logo após o app abrir.
+ * Mostra o App Open Ad. Só dispara se:
+ *  - estiver no APK
+ *  - o SDK já estiver inicializado
+ *  - tiver passado o intervalo mínimo desde o último ad
  */
 export async function showAppOpenAd(): Promise<void> {
-  await showInterstitial();
+  if (!isNativeApp()) return;
+  const now = Date.now();
+  if (now - lastShownAt < MIN_INTERVAL_MS) return;
+  try {
+    if (!initialized) await initAdMob();
+    const res = await AppOpenAd.show();
+    if (res?.shown) lastShownAt = now;
+  } catch (e) {
+    console.warn("[admob] app open falhou:", e);
+  }
+}
+
+/** Compat: o intersticial não é mais usado, mas mantém a API antiga. */
+export async function prepareInterstitial(): Promise<void> {
+  /* no-op */
+}
+
+export async function showInterstitial(): Promise<void> {
+  await showAppOpenAd();
 }

@@ -22,6 +22,9 @@ mkdir -p "$PKG_DIR"
 cp "$ROOT/android-plugin/VpnStatusPlugin.kt"      "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
+cp "$ROOT/android-plugin/AppOpenAdPlugin.kt"      "$PKG_DIR/"
+
+ADMOB_APP_ID="ca-app-pub-4966192764194561~2515666476"
 
 # ----- Habilita Kotlin no módulo :app -----
 if [ -f "$APP_GRADLE" ] && ! grep -q "kotlin-android" "$APP_GRADLE"; then
@@ -136,11 +139,13 @@ import android.os.Bundle
 import com.getcapacitor.BridgeActivity
 import br.com.qapqrv.app.plugins.VpnStatusPlugin
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin
+import br.com.qapqrv.app.plugins.AppOpenAdPlugin
 
 class MainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         registerPlugin(VpnStatusPlugin::class.java)
         registerPlugin(InAppWebViewPlugin::class.java)
+        registerPlugin(AppOpenAdPlugin::class.java)
         super.onCreate(savedInstanceState)
     }
 }
@@ -154,12 +159,14 @@ import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
 import br.com.qapqrv.app.plugins.VpnStatusPlugin;
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin;
+import br.com.qapqrv.app.plugins.AppOpenAdPlugin;
 
 public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     registerPlugin(VpnStatusPlugin.class);
     registerPlugin(InAppWebViewPlugin.class);
+    registerPlugin(AppOpenAdPlugin.class);
     super.onCreate(savedInstanceState);
   }
 }
@@ -186,6 +193,18 @@ grep -q "WRITE_EXTERNAL_STORAGE" "$MANIFEST" || \
 if ! grep -q 'usesCleartextTraffic="true"' "$MANIFEST"; then
   echo "==> Habilitando android:usesCleartextTraffic no AndroidManifest"
   sed -i 's#<application#<application android:usesCleartextTraffic="true"#' "$MANIFEST"
+fi
+
+# ----- AdMob: meta-data APPLICATION_ID no Manifest -----
+if ! grep -q "com.google.android.gms.ads.APPLICATION_ID" "$MANIFEST"; then
+  echo "==> Adicionando meta-data AdMob APPLICATION_ID no AndroidManifest"
+  sed -i "s#</application>#    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"$ADMOB_APP_ID\" />\n    </application>#" "$MANIFEST"
+fi
+
+# ----- AdMob: dependência play-services-ads no app/build.gradle -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "play-services-ads" "$APP_GRADLE"; then
+  echo "==> Adicionando dependência play-services-ads em $APP_GRADLE"
+  sed -i "s#dependencies {#dependencies {\n    implementation \"com.google.android.gms:play-services-ads:23.6.0\"#" "$APP_GRADLE"
 fi
 
 echo "==> install.sh: OK (Android System WebView, sem GeckoView)"
