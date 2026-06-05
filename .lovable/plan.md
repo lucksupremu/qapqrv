@@ -1,49 +1,22 @@
-Do I know what the issue is? Sim.
+Vou corrigir o navegador interno com uma abordagem mais estável e observável:
 
-O navegador interno atual ainda usa Android WebView. Em muitos aparelhos Samsung/Android, esse WebView é fornecido pelo Chrome/Android System WebView; se ele estiver bloqueado, desatualizado ou com problema de rede, o app abre a Activity, mostra a barra superior e o conteúdo fica branco — exatamente como na imagem.
+1. Ajustar o GeckoView nativo
+- Aplicar o User-Agent recebido do app na sessão do GeckoView.
+- Ativar configurações essenciais de compatibilidade para páginas antigas/intranet.
+- Garantir foco, visibilidade e carregamento correto do GeckoView após abrir a Activity.
 
-Plano de correção definitiva:
+2. Corrigir popups e novas janelas
+- Trocar o tratamento atual de `onNewSession`, que pode deixar a tela branca, para carregar a nova URL na sessão atual sempre que possível.
+- Manter iNotes, folha e links internos abrindo na mesma tela do navegador interno.
 
-1. Trocar o motor do navegador interno
-   - Substituir o uso de `android.webkit.WebView` por `Mozilla GeckoView`, o mesmo motor usado pelo Firefox.
-   - Isso remove a dependência prática do Chrome/Android System WebView.
-   - Manter tudo dentro do app, sem abrir navegador externo.
+3. Adicionar fallback visual contra tela branca
+- Mostrar uma mensagem dentro da própria Activity se o carregamento travar por tempo demais.
+- Exibir botão para tentar novamente e dica de VPN quando for domínio da intranet.
 
-2. Manter a estrutura de navegador normal dentro do aplicativo
-   - Barra superior com título, recarregar e fechar.
-   - Barra inferior com voltar e avançar.
-   - Suporte a JavaScript, cookies, DOM storage, redirecionamentos e páginas de login.
-   - Links `target=_blank` / popups devem abrir na mesma aba interna, não em tela branca.
+4. Melhorar diagnóstico do APK
+- Adicionar logs nativos claros no GeckoView: URL inicial, início/fim de carregamento, erros e popups.
+- Assim, se ainda houver falha específica de VPN/certificado/site, o próximo log dirá exatamente onde parou.
 
-3. Corrigir iNotes, folha e demais links
-   - `Email iNotes` e `Folha de Pagamento` abrirão direto no GeckoView interno.
-   - Links da intranet continuarão abrindo no mesmo navegador interno quando a VPN estiver ativa.
-   - Quando a VPN estiver desligada em link de intranet, exibir erro claro em vez de tela branca.
-
-4. Preservar PDFs de escala
-   - Consulta de escala continuará abrindo o fluxo de PDF.
-   - O PDF continuará sendo baixado automaticamente e registrado em `Escalas baixadas`.
-   - O visualizador offline já criado continuará sendo usado para abrir PDFs salvos sem internet.
-
-5. Ajustar build Android
-   - Atualizar `android-plugin/install.sh` para adicionar a dependência do GeckoView e o repositório Maven da Mozilla.
-   - Instalar/copiar a nova Activity Kotlin no projeto Android durante o build do APK.
-   - Manter permissões de internet, cleartext para domínios PMESP e aceleração de hardware.
-
-Arquivos previstos:
-
-```text
-android-plugin/InAppWebViewActivity.kt
-android-plugin/install.sh
-android-plugin/InAppWebViewPlugin.kt, se precisar adaptar extras
-src/lib/in-app-browser.ts, se precisar ajustar user-agent/título
-APK-BUILD.md, apenas para documentar que o APK agora usa GeckoView/Firefox engine
-```
-
-Resultado esperado após novo APK:
-
-- iNotes não fica mais em tela branca.
-- Folha de pagamento abre no navegador interno.
-- Marcar/Desmarcar, Agenda e Delegada abrem no navegador interno com VPN ligada.
-- Consulta de escala baixa o PDF e aparece em `Escalas baixadas`.
-- O app não depende mais do Chrome para renderizar páginas internas.
+5. Validar sem mexer no fluxo web
+- Manter o app web e as rotas atuais como estão.
+- A correção fica concentrada em `android-plugin/InAppWebViewActivity.kt` e, se necessário, em `android-plugin/install.sh` para permissões/configuração Android.
