@@ -184,7 +184,7 @@ function AnyConnectGuideScreen() {
             controls
             playsInline
             preload="metadata"
-            crossOrigin="anonymous"
+            controlsList="nodownload"
             className="block h-[420px] w-full bg-black"
             style={{ objectFit: "contain" }}
           />
