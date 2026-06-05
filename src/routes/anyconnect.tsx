@@ -223,33 +223,6 @@ function AnyConnectGuideScreen() {
         <CopyServerButton />
       </div>
 
-      {/* Vídeo tutorial */}
-      <div className="mx-3 mt-3">
-        <div
-          className="overflow-hidden rounded-[16px] border bg-white"
-          style={{ borderColor: "#cfe0ec" }}
-        >
-          <div
-            className="flex items-center gap-2 px-3 py-2"
-            style={{ background: "#e8f0f8" }}
-          >
-            <PlayCircle size={18} style={{ color: "#2e6b8a" }} />
-            <p className="text-[13px] font-bold" style={{ color: "#1a3348" }}>
-              Vídeo tutorial — veja o passo a passo
-            </p>
-          </div>
-          <video
-            src={tutorialVideo.url}
-            controls
-            playsInline
-            preload="metadata"
-            className="block w-full bg-black"
-            style={{ maxHeight: 380 }}
-          />
-        </div>
-      </div>
-
-
       {/* Carrossel */}
       <div
         ref={cardRef}
@@ -276,29 +249,24 @@ function AnyConnectGuideScreen() {
           </div>
         </div>
 
-        {/* Imagem */}
-        <div className="mt-3 overflow-hidden">
-          <div
-            className="flex transition-transform duration-300 ease-out"
-            style={{ transform: `translateX(-${step * 100}%)` }}
-          >
-            {PASSOS.map((p, i) => (
-              <div key={i} className="w-full shrink-0 px-1">
-                <div
-                  className="flex h-[420px] w-full items-center justify-center overflow-hidden rounded-[16px]"
-                  style={{ background: "#f4f8fc" }}
-                >
-                  <img
-                    src={p.src}
-                    alt={p.alt}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-              </div>
-            ))}
+        {/* Vídeo tutorial (substitui as imagens) */}
+        <div className="mt-3 overflow-hidden rounded-[16px]" style={{ background: "#000" }}>
+          <div className="flex items-center gap-2 px-3 py-2" style={{ background: "#e8f0f8" }}>
+            <PlayCircle size={18} style={{ color: "#2e6b8a" }} />
+            <p className="text-[13px] font-bold" style={{ color: "#1a3348" }}>
+              Vídeo tutorial — toque para reproduzir
+            </p>
           </div>
+          <video
+            src={tutorialVideo.url}
+            controls
+            playsInline
+            preload="metadata"
+            className="block h-[420px] w-full bg-black"
+            style={{ objectFit: "contain" }}
+          />
         </div>
+
 
         {/* Conteúdo do passo atual com animação */}
         <div
