@@ -146,6 +146,13 @@ function HomeScreen() {
     // APK: baixar PDF nativamente e abrir com app PDF do aparelho.
     const loadingId = toast.loading(`Baixando escala #${id}…`);
     try {
+      // Garante cookies de sessão da intranet antes do download.
+      try {
+        const { warmupIntranetSession } = await import("@/lib/intranet-warmup");
+        await warmupIntranetSession();
+      } catch {
+        /* ignore — segue tentativa do download */
+      }
       const { InAppWebView } = await import("@/lib/in-app-webview");
       const result = await InAppWebView.downloadPdf({ id, url });
 

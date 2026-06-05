@@ -14,6 +14,7 @@ export interface InAppWebViewPlugin {
   downloadPdf(options: { url: string; id: string }): Promise<{ path: string; size: number; mime: string }>;
   openPdf(options: { path: string; title?: string }): Promise<{ opened: boolean }>;
   openPdfExternal(options: { path: string }): Promise<{ opened: boolean }>;
+  warmupIntranet(options: { url: string; timeoutMs?: number }): Promise<{ ok: boolean; reason?: string }>;
 }
 
 export const InAppWebView =

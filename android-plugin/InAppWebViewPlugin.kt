@@ -1,6 +1,11 @@
 package br.com.qapqrv.app.plugins
 
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.core.content.FileProvider
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
@@ -240,6 +245,78 @@ class InAppWebViewPlugin : Plugin() {
             call.resolve(ret)
         } catch (e: Throwable) {
             call.reject(e.message ?: "Falha ao abrir PDF externo")
+        }
+    }
+
+    /**
+     * Warm-up de sessão na intranet PMESP: cria uma WebView invisível,
+     * carrega a URL informada e aguarda `onPageFinished`. O CookieManager
+     * é compartilhado entre WebView e HttpURLConnection, então os cookies
+     * de sessão (autenticação via VPN) ficam disponíveis para o
+     * downloadPdf subsequente.
+     *
+     * Não exibe nenhuma UI. Sempre resolve (success ou timeout) — nunca
+     * derruba a JS thread.
+     */
+    @PluginMethod
+    fun warmupIntranet(call: PluginCall) {
+        val url = call.getString("url")
+        if (url.isNullOrBlank()) {
+            call.reject("URL ausente")
+            return
+        }
+        val act = activity ?: run {
+            call.resolve(JSObject().put("ok", false).put("reason", "no_activity"))
+            return
+        }
+        val timeoutMs = (call.getInt("timeoutMs") ?: 15000).coerceIn(2000, 60000)
+
+        Handler(Looper.getMainLooper()).post {
+            try {
+                val wv = WebView(act).apply {
+                    visibility = View.GONE
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.userAgentString =
+                        "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 " +
+                            "(KHTML, like Gecko) Version/4.0 Mobile Safari/537.36 QAPQRVWebView/1.0"
+                }
+                val cm = CookieManager.getInstance()
+                cm.setAcceptCookie(true)
+                cm.setAcceptThirdPartyCookies(wv, true)
+
+                var resolved = false
+                fun finish(ok: Boolean, reason: String?) {
+                    if (resolved) return
+                    resolved = true
+                    try {
+                        cm.flush()
+                    } catch (_: Throwable) {}
+                    try {
+                        wv.stopLoading()
+                        wv.loadUrl("about:blank")
+                        wv.destroy()
+                    } catch (_: Throwable) {}
+                    val ret = JSObject().put("ok", ok)
+                    if (reason != null) ret.put("reason", reason)
+                    call.resolve(ret)
+                }
+
+                wv.webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                        finish(true, null)
+                    }
+                }
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    finish(false, "timeout")
+                }, timeoutMs.toLong())
+
+                wv.loadUrl(url)
+            } catch (e: Throwable) {
+                android.util.Log.w("InAppWebView", "warmupIntranet falhou", e)
+                call.resolve(JSObject().put("ok", false).put("reason", e.message ?: "erro"))
+            }
         }
     }
 }

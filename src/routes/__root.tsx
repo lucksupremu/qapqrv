@@ -115,6 +115,12 @@ function RootComponent() {
     // AnyConnect ou de outro app.
     let removeAppListener: (() => void) | null = null;
     if (isNativeApp()) {
+      // Warm-up de sessão da intranet em background, para garantir os cookies
+      // antes da primeira consulta de PDF de escala.
+      import("@/lib/intranet-warmup").then(({ warmupIntranetSession }) => {
+        warmupIntranetSession().catch(() => {});
+      });
+
       import("@/lib/admob").then(({ initAdMob, showAppOpenAd }) => {
         initAdMob().then(() => {
           try { showAppOpenAd(); } catch (e) { console.warn("[admob] cold start show falhou", e); }
@@ -132,6 +138,10 @@ function RootComponent() {
               if (lastBackgroundedAt === 0) return;
               if (Date.now() - lastBackgroundedAt < MIN_BG_MS) return;
               showAppOpenAd();
+              // Re-warm da intranet ao voltar de background longo.
+              import("@/lib/intranet-warmup").then(({ warmupIntranetSession }) => {
+                warmupIntranetSession().catch(() => {});
+              });
             } catch (e) {
               console.warn("[admob] resume show falhou", e);
             }
