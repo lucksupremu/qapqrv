@@ -70,49 +70,10 @@ function DownloadedReportsScreen() {
     salvarLista(escalas);
   }, [escalas, hydrated]);
 
-  // Na web esse recurso não funciona (CORS da intranet impede salvar o PDF),
-  // então mostramos uma tela orientando o uso do APK.
-  if (mounted && !native) {
-    return (
-      <div className="min-h-screen pb-10" style={{ background: "var(--bg)" }}>
-        <header className="flex items-center gap-2 px-3 py-3">
-          <button
-            aria-label="Voltar"
-            onClick={() => navigate({ to: "/" })}
-            className="flex h-10 w-10 items-center justify-center rounded-full"
-            style={{ background: "#e8f0f8", color: "#2e6b8a" }}
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <h1 className="flex-1 text-center text-[18px] font-bold" style={{ color: "#2e6b8a" }}>
-            Escalas baixadas
-          </h1>
-          <span className="h-10 w-10" aria-hidden />
-        </header>
-        <div
-          className="mx-4 mt-6 rounded-2xl border bg-white p-6 text-center"
-          style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-card)" }}
-        >
-          <Smartphone size={56} className="mx-auto" style={{ color: "#2e6b8a" }} />
-          <h2 className="mt-3 text-[18px] font-bold" style={{ color: "var(--text-dark)" }}>
-            Disponível apenas no aplicativo
-          </h2>
-          <p className="mt-2 text-[14px]" style={{ color: "var(--muted-fg)" }}>
-            Salvar escalas offline depende de acesso direto à intranet da PMESP, o que o navegador
-            não permite (bloqueio de CORS). Use o app instalado (APK) para baixar e abrir os PDFs
-            sem internet.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/" })}
-            className="mt-5 rounded-xl px-5 py-3 font-bold text-white"
-            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-          >
-            Voltar ao início
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // A lista funciona em qualquer ambiente. Apenas o download offline do PDF
+  // (que depende de acesso direto à intranet PMESP) exige o APK.
+  const mostrarAvisoWeb = mounted && !native;
+
 
   const handleAbrir = (e: EscalaSalva) => {
     // Tem PDF salvo (web ou APK): abre no visualizador offline embutido.
@@ -149,6 +110,20 @@ function DownloadedReportsScreen() {
         </h1>
         <span className="h-10 w-10" aria-hidden />
       </header>
+
+      {mostrarAvisoWeb && (
+        <div
+          className="mx-2 mb-2 flex items-start gap-3 rounded-[14px] border bg-white p-3"
+          style={{ borderColor: "var(--border-soft)" }}
+        >
+          <Smartphone size={20} className="mt-0.5 shrink-0" style={{ color: "#2e6b8a" }} />
+          <p className="text-[12px] leading-relaxed" style={{ color: "#5b7a8f" }}>
+            A lista de escalas funciona no navegador. Para baixar e abrir o PDF
+            <strong> sem internet</strong>, use o aplicativo (APK).
+          </p>
+        </div>
+      )}
+
 
       {escalas.length === 0 ? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
