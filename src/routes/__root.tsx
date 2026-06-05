@@ -109,15 +109,27 @@ function RootComponent() {
       ? ric(loadAds, { timeout: 3000 })
       : window.setTimeout(loadAds, 1500);
 
-    // Inicializa AdMob e mostra App Open ad (apenas no APK nativo).
+    // Inicializa AdMob e mostra App Open Ad (apenas no APK nativo).
+    // Também dispara o ad quando o app volta de background.
+    let removeAppListener: (() => void) | null = null;
     if (isNativeApp()) {
-      import("@/lib/admob").then(({ initAdMob, showAppOpenAd, prepareInterstitial }) => {
+      import("@/lib/admob").then(({ initAdMob, showAppOpenAd }) => {
         initAdMob().then(() => {
           showAppOpenAd();
-          prepareInterstitial();
         });
+
+        import("@capacitor/app").then(({ App }) => {
+          App.addListener("appStateChange", (state) => {
+            if (state.isActive) {
+              showAppOpenAd();
+            }
+          }).then((handle) => {
+            removeAppListener = () => handle.remove();
+          });
+        }).catch(() => {});
       });
     }
+
 
     // Rehydrate reminder timers and re-check every hour for distant reminders.
     import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
