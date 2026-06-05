@@ -383,6 +383,9 @@ class InAppWebViewActivity : Activity() {
                 .setMimeType("application/pdf")
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
+            req.addRequestHeader("Accept", "application/pdf,*/*")
+            req.addRequestHeader("User-Agent", webView.settings.userAgentString)
+            webView.url?.let { req.addRequestHeader("Referer", it) }
             CookieManager.getInstance().getCookie(dlUrl)?.let { req.addRequestHeader("Cookie", it) }
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(req)
