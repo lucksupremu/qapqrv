@@ -188,6 +188,38 @@ if ! grep -q "PdfViewerActivity" "$MANIFEST"; then
   sed -i 's#</application>#    <activity android:name=".plugins.PdfViewerActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
 fi
 
+# ----- Endurece MainActivity: singleTask + configChanges + alwaysRetainTaskState -----
+# Garante que ao voltar do AnyConnect (ou de outro app que mexe na rede/VPN) o
+# Android resuma a Activity existente em vez de criar uma nova task vazia.
+if [ -f "$MANIFEST" ] && grep -q 'android:name="\.MainActivity"' "$MANIFEST"; then
+  echo "==> Reforçando MainActivity (launchMode + configChanges) no AndroidManifest"
+  python3 - "$MANIFEST" <<'PY'
+import sys, re
+p = sys.argv[1]
+s = open(p).read()
+
+CONFIG_CHANGES = "orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode|navigation|mcc|mnc"
+
+def patch_attr(tag, name, value):
+    pat = re.compile(r'(\s' + re.escape(name) + r'=")[^"]*(")')
+    if pat.search(tag):
+        return pat.sub(r'\g<1>' + value + r'\g<2>', tag)
+    # injeta antes do fechamento da tag
+    return re.sub(r'(\s*/?>)', ' ' + name + '="' + value + r'"\1', tag, count=1)
+
+def fix_main(m):
+    tag = m.group(0)
+    tag = patch_attr(tag, "android:launchMode", "singleTask")
+    tag = patch_attr(tag, "android:alwaysRetainTaskState", "true")
+    tag = patch_attr(tag, "android:configChanges", CONFIG_CHANGES)
+    return tag
+
+s2 = re.sub(r'<activity\b[^>]*android:name="\.MainActivity"[^>]*/?>', fix_main, s)
+if s2 != s:
+    open(p, 'w').write(s2)
+PY
+fi
+
 # Permissões
 grep -q "android.permission.INTERNET" "$MANIFEST" || \
   sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET" />\n    <application#' "$MANIFEST"
