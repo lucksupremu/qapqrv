@@ -436,8 +436,10 @@ class InAppWebViewActivity : Activity() {
     }
 
     private fun showErrorOverlay(url: String, code: String, description: String) {
-        val ehIntranet = url.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
+        val isCorreioPmesp = url.contains("correio.policiamilitar.sp.gov.br", ignoreCase = true)
+        val ehIntranet = !isCorreioPmesp && (url.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
             url.contains("intranet", ignoreCase = true)
+        )
         val hintVpn = if (ehIntranet) "\n\n⚠️ Verifique se o AnyConnect (VPN) está conectado." else ""
         errorMessage.text = "$description\n\n[$code]\n$url$hintVpn"
         errorOverlay.visibility = View.VISIBLE
