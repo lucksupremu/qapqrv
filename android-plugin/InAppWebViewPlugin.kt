@@ -1,6 +1,11 @@
 package br.com.qapqrv.app.plugins
 
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.core.content.FileProvider
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
