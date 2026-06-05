@@ -13,12 +13,32 @@ PKG_DIR="android/app/src/main/java/br/com/qapqrv/app/plugins"
 MAIN_ACT_JAVA="android/app/src/main/java/br/com/qapqrv/app/MainActivity.java"
 MAIN_ACT_KT="android/app/src/main/java/br/com/qapqrv/app/MainActivity.kt"
 MANIFEST="android/app/src/main/AndroidManifest.xml"
+APP_GRADLE="android/app/build.gradle"
+ROOT_GRADLE="android/build.gradle"
 
 echo "==> Copiando plugins Kotlin para $PKG_DIR"
 mkdir -p "$PKG_DIR"
 cp "$ROOT/android-plugin/VpnStatusPlugin.kt"      "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
+
+# ----- Habilita Kotlin no módulo :app (plugins são .kt) -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "kotlin-android" "$APP_GRADLE"; then
+  echo "==> Habilitando kotlin-android em $APP_GRADLE"
+  # Adiciona apply plugin: 'kotlin-android' após a primeira linha apply plugin
+  sed -i "0,/apply plugin: 'com.android.application'/{s//apply plugin: 'com.android.application'\napply plugin: 'kotlin-android'/}" "$APP_GRADLE"
+  # Adiciona dependência kotlin-stdlib se faltar
+  if ! grep -q "kotlin-stdlib" "$APP_GRADLE"; then
+    sed -i "s#dependencies {#dependencies {\n    implementation \"org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlin_version ?: '1.9.25'}\"#" "$APP_GRADLE"
+  fi
+fi
+
+# Garante classpath do plugin Kotlin no root build.gradle (Capacitor já inclui kotlin_version)
+if [ -f "$ROOT_GRADLE" ] && ! grep -q "kotlin-gradle-plugin" "$ROOT_GRADLE"; then
+  echo "==> Adicionando classpath kotlin-gradle-plugin em $ROOT_GRADLE"
+  sed -i "s#classpath 'com.android.tools.build:gradle.*#&\n        classpath \"org.jetbrains.kotlin:kotlin-gradle-plugin:\${kotlin_version ?: '1.9.25'}\"#" "$ROOT_GRADLE"
+fi
+
 
 # ----- Reescreve MainActivity com registro dos plugins (idempotente) -----
 if [ -f "$MAIN_ACT_KT" ]; then
@@ -76,5 +96,7 @@ grep -q "android.permission.INTERNET" "$MANIFEST" || \
 echo "==> install.sh: OK"
 echo "--- MainActivity ---"
 cat "${MAIN_ACT_JAVA:-$MAIN_ACT_KT}" 2>/dev/null || cat "$MAIN_ACT_KT"
+echo "--- app/build.gradle ---"
+cat "$APP_GRADLE"
 echo "--- AndroidManifest ---"
 cat "$MANIFEST"
