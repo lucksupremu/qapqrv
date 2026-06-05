@@ -97,6 +97,13 @@ class InAppWebViewActivity : Activity() {
         s.allowFileAccess = true
         s.allowContentAccess = true
         s.cacheMode = WebSettings.LOAD_DEFAULT
+        // Permite que o serviço de Autofill do Android (Google, Samsung Pass, 1Password…)
+        // detecte os campos de usuário/senha do WebView e ofereça "Salvar senha?".
+        @Suppress("DEPRECATION")
+        s.saveFormData = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS
+        }
         if (userAgent.isNotBlank()) s.userAgentString = userAgent
 
         val cm = CookieManager.getInstance()
