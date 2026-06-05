@@ -11,7 +11,35 @@ import android.webkit.CookieManager
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 import kotlin.concurrent.thread
+
+/** Hosts oficiais da PMESP/intranet — recebem TLS relaxado por causa de CA própria/VPN. */
+private val TRUSTED_PMESP_HOSTS = listOf(
+    "policiamilitar.sp.gov.br",
+)
+
+private fun isTrustedPmespHost(host: String?): Boolean {
+    if (host.isNullOrBlank()) return false
+    val h = host.lowercase()
+    return TRUSTED_PMESP_HOSTS.any { h == it || h.endsWith(".$it") }
+}
+
+/** SSLContext que aceita qualquer certificado — usar APENAS em hosts confiáveis. */
+private fun trustAllSslContext(): SSLContext {
+    val trustAll = arrayOf<TrustManager>(object : X509TrustManager {
+        override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+        override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+    })
+    return SSLContext.getInstance("TLS").apply { init(null, trustAll, SecureRandom()) }
+}
 
 /**
  * Plugin Capacitor próprio:
