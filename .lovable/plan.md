@@ -1,62 +1,42 @@
-Foco: apenas a versão APK (Android via Capacitor). O repositório não contém a pasta `android/` — ela é gerada localmente / no AI Studio com `npx cap add android`. Por isso a solução precisa funcionar **automaticamente** quando o build do APK for feito.
+## Problema
 
-## 1. Ícone do app (robusto e infalível)
+O build do APK falha em `:app:processDebugMainManifest` com:
 
-Hoje só existem PNGs em `public/` (web/PWA). O Android ignora isso — ele usa `android/app/src/main/res/mipmap-*/ic_launcher*.png`. Por isso o ícone "não funciona" no APK.
+```
+uses-sdk:minSdkVersion 24 cannot be smaller than version 26
+declared in library [io.ionic.libs:ioninappbrowser-android:2.0.0]
+```
 
-Solução: adicionar o gerador oficial do Capacitor para que **um único arquivo de origem** vire todos os tamanhos certos automaticamente.
+Causa: o `@capacitor/inappbrowser` (que é justamente o que dá o "navegador interno robusto que não é Chrome") exige **Android 8.0+ (minSdk 26)**. O `npx cap add android` gera o projeto com `minSdkVersion = 24` por padrão. Como a pasta `android/` é criada do zero a cada run do GitHub Actions, qualquer ajuste tem que ser feito pelo próprio workflow.
 
-- Adicionar dependência dev `@capacitor/assets`.
-- Criar pasta `resources/` na raiz com:
-  - `icon.png` — 1024×1024 (logo "QAP, QRV!" com fundo opaco, sem transparência, área de segurança ~10% nas bordas para o adaptive icon).
-  - `icon-foreground.png` — 1024×1024 transparente (só a marca, centralizada, ocupando ~60% do canvas — exigência do adaptive icon do Android).
-  - `icon-background.png` — 1024×1024 cor sólida `#0b1733` (combina com o theme/background do manifest).
-  - `splash.png` — 2732×2732 com a logo centralizada sobre `#0b1733`.
-  - `splash-dark.png` — igual ao splash (mantém o mesmo visual no modo escuro).
-- Adicionar script em `package.json`: `"cap:assets": "capacitor-assets generate --android"`.
-- Atualizar `android-plugin/README.md` (renomear para `APK-BUILD.md` ou adicionar seção) com o passo a passo definitivo para o AI Studio:
-  1. `npm install`
-  2. `npm run build`
-  3. `npx cap add android` (se ainda não tiver)
-  4. `npm run cap:assets` → gera mipmaps, adaptive icon e splash
-  5. `npx cap sync android`
-  6. Abrir no Android Studio e gerar APK
-- O `capacitor.config.ts` ganha um bloco `SplashScreen` para garantir cor de fundo `#0b1733` enquanto a WebView carrega.
+## Correção
 
-Resultado: o ícone do APK passa a ser sempre a logo do app (não mais o robozinho padrão do Capacitor), em todas as densidades e no formato adaptive icon do Android moderno.
+Editar `.github/workflows/build-apk.yml` para, **logo após** o `cap add android` e **antes** do `gradlew assembleDebug`, sobrescrever `android/variables.gradle` elevando `minSdkVersion` de 24 → 26.
 
-## 2. Navegador interno robusto (sem Chrome)
+### Passo novo no workflow
 
-Problema: o Chrome (e o Custom Tabs, que é o Chrome por baixo) está bloqueando o acesso à intranet PMESP. Hoje:
-- `src/routes/intranet.tsx` no APK chama `openInAppBrowser(url, { modo: "system" })` → abre **Custom Tabs do Chrome**.
-- `src/routes/index.tsx` linha 178 (Correio PMESP) também usa `modo: "system"`.
-- `src/lib/in-app-browser.ts` tem um timeout de 22s que, se a página não carregar, **cai para o Custom Tabs (Chrome)** — fallback indesejado.
+Adicionar entre "Add Android platform" e "Generate APK assets":
 
-Solução: forçar sempre a WebView interna do Capacitor (que é um WebView Android puro, não o app Chrome) com User-Agent mobile próprio.
+```yaml
+- name: Patch minSdkVersion to 26 (required by @capacitor/inappbrowser)
+  run: |
+    sed -i 's/minSdkVersion = 24/minSdkVersion = 26/' android/variables.gradle
+    echo "--- variables.gradle ---"
+    cat android/variables.gradle
+```
 
-Mudanças em `src/lib/in-app-browser.ts`:
-- Tornar `forceMobileUA: true` o **padrão** quando nenhum `modo` é informado.
-- Remover o fallback automático para `openSystemBrowser` no timeout. Em vez disso, mostrar/fechar a WebView com um aviso ("Falha ao carregar — ligue a VPN AnyConnect") via evento `browserClosed` — o componente já trata isso.
-- Manter `modo: "system"` e `modo: "external"` disponíveis mas só se chamados explicitamente (não vamos mais usar).
-- UA continua `Mozilla/5.0 (Linux; Android 13; Mobile) ... Chrome/120 Mobile Safari/537.36` (a string identifica como "Chrome" para o servidor aceitar, mas a engine que renderiza é a WebView do app — não o app Chrome do usuário, então não sofre os bloqueios do Chrome).
+Impacto prático: o APK passa a exigir Android 8.0+ em vez de 7.0+. Android 8.0 é de 2017 e cobre >97% dos aparelhos ativos — perda irrelevante, e é o mínimo do plugin.
 
-Mudanças nas chamadas:
-- `src/routes/intranet.tsx`: remover o `useEffect` que redireciona para `system` e volta para `/`. No APK, abrir `openInAppBrowser(url, { titulo, modo: "webview", forceMobileUA: true })` e voltar para `/` (a WebView fica por cima como uma janela nativa). Adicionar `try/catch` com toast de erro.
-- `src/routes/index.tsx` linha 178 (Correio PMESP): trocar `modo: "system"` por `modo: "webview", forceMobileUA: true`.
-- As outras chamadas sem `modo` continuam funcionando (vão herdar o novo padrão webview+forceMobileUA).
+### Por que não usar `tools:overrideLibrary`
 
-## 3. Popup de aviso do Chrome
+A alternativa que o próprio Gradle sugere (`tools:overrideLibrary`) força a build mas o plugin pode crashar em runtime no Android 7 porque usa APIs novas. Subir o minSdk é o caminho correto e o que a doc do `@capacitor/inappbrowser` recomenda.
 
-Manter como está no web. No APK ele já não aparece (guard `useIsNative()`).
+### Arquivos alterados
 
-## Resumo dos arquivos alterados
+- `.github/workflows/build-apk.yml` — adiciona o step de patch do `variables.gradle`.
 
-- `package.json` — adicionar `@capacitor/assets` (dev) + script `cap:assets`.
-- `capacitor.config.ts` — adicionar plugin `SplashScreen` com `backgroundColor: "#0b1733"`.
-- `resources/icon.png`, `resources/icon-foreground.png`, `resources/icon-background.png`, `resources/splash.png`, `resources/splash-dark.png` — novos (gerados via imagegen com a logo).
-- `src/lib/in-app-browser.ts` — padrão `forceMobileUA: true`, remover fallback para Custom Tabs.
-- `src/routes/intranet.tsx` — abrir intranet sempre na WebView interna no APK.
-- `src/routes/index.tsx` linha 178 — trocar Correio PMESP para WebView interna.
-- `android-plugin/README.md` — adicionar seção "Build do APK no AI Studio" com passo a passo completo (assets, sync, build).
+Nada de código TypeScript / app web é tocado. Só o workflow.
 
-Nenhuma mudança no web/PWA. Nenhuma mudança em business logic (escalas, notificações, auth).
+## Como usar depois
+
+Mesmo fluxo: push pra `main` (ou Run workflow manual) → aguardar ~5–8 min → baixar o artifact `qapqrv-debug-apk` → instalar no celular. Agora o build vai até o fim.
