@@ -53,6 +53,15 @@ jobs:
       - name: Capacitor sync
         run: bunx cap sync android
 
+      - name: Patch AndroidManifest with AdMob APPLICATION_ID
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          if ! grep -q "com.google.android.gms.ads.APPLICATION_ID" "$MANIFEST"; then
+            sed -i 's#</application>#    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-4966192764194561~2515666476"/>\n    </application>#' "$MANIFEST"
+          fi
+          echo "--- AndroidManifest.xml ---"
+          cat "$MANIFEST"
+
       - name: Build debug APK
         working-directory: android
         run: |
