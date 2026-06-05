@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Copy,
   Smartphone,
+  PlayCircle,
 } from "lucide-react";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import passo1 from "@/assets/anyconnect/passo-1.jpg";
@@ -16,6 +17,7 @@ import passo4 from "@/assets/anyconnect/passo-4.jpg";
 import passo5 from "@/assets/anyconnect/passo-5.jpg";
 import passo6 from "@/assets/anyconnect/passo-6.jpg";
 import passo7 from "@/assets/anyconnect/passo-7.jpg";
+import tutorialVideo from "@/assets/anyconnect/tutorial.mp4.asset.json";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({ meta: [{ title: "Configurar AnyConnect — QAP, QRV!" }] }),
@@ -220,6 +222,33 @@ function AnyConnectGuideScreen() {
       <div className="mx-3 mt-1">
         <CopyServerButton />
       </div>
+
+      {/* Vídeo tutorial */}
+      <div className="mx-3 mt-3">
+        <div
+          className="overflow-hidden rounded-[16px] border bg-white"
+          style={{ borderColor: "#cfe0ec" }}
+        >
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={{ background: "#e8f0f8" }}
+          >
+            <PlayCircle size={18} style={{ color: "#2e6b8a" }} />
+            <p className="text-[13px] font-bold" style={{ color: "#1a3348" }}>
+              Vídeo tutorial — veja o passo a passo
+            </p>
+          </div>
+          <video
+            src={tutorialVideo.url}
+            controls
+            playsInline
+            preload="metadata"
+            className="block w-full bg-black"
+            style={{ maxHeight: 380 }}
+          />
+        </div>
+      </div>
+
 
       {/* Carrossel */}
       <div
