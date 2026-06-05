@@ -118,7 +118,7 @@ function HomeScreen() {
       return;
     }
 
-    const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?nuesc=${encodeURIComponent(id)}`;
+    const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
 
     try {
       upsertEscala({
