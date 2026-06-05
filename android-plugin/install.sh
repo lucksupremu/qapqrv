@@ -207,6 +207,29 @@ if [ -f "$APP_GRADLE" ] && ! grep -q "play-services-ads" "$APP_GRADLE"; then
   sed -i "s#dependencies {#dependencies {\n    implementation \"com.google.android.gms:play-services-ads:23.6.0\"#" "$APP_GRADLE"
 fi
 
+# ----- androidx.core (FileProvider) -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "androidx.core:core-ktx" "$APP_GRADLE"; then
+  echo "==> Adicionando dependência androidx.core:core-ktx em $APP_GRADLE"
+  sed -i "s#dependencies {#dependencies {\n    implementation \"androidx.core:core-ktx:1.13.1\"#" "$APP_GRADLE"
+fi
+
+# ----- FileProvider para abrir PDF baixado em apps externos -----
+RES_XML_DIR="android/app/src/main/res/xml"
+mkdir -p "$RES_XML_DIR"
+cat > "$RES_XML_DIR/qapqrv_file_paths.xml" <<'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <files-path name="escalas" path="escalas/" />
+    <files-path name="files_root" path="." />
+</paths>
+EOF
+
+if ! grep -q "androidx.core.content.FileProvider" "$MANIFEST"; then
+  echo "==> Registrando FileProvider no AndroidManifest"
+  PROVIDER_BLOCK='        <provider\n            android:name="androidx.core.content.FileProvider"\n            android:authorities="${applicationId}.fileprovider"\n            android:exported="false"\n            android:grantUriPermissions="true">\n            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml\/qapqrv_file_paths" \/>\n        <\/provider>\n    <\/application>'
+  sed -i "s#</application>#$PROVIDER_BLOCK#" "$MANIFEST"
+fi
+
 echo "==> install.sh: OK (Android System WebView, sem GeckoView)"
 echo "--- app/build.gradle ---"
 cat "$APP_GRADLE"
