@@ -1,26 +1,25 @@
-## O que vou corrigir
+## Atualizar IDs do AdMob no APK
 
-### 1) Visualizador de PDF no APK (escala consultada)
-Hoje o `PdfViewerActivity` nativo só mostra páginas como imagens fixas — não tem zoom nem botões de ação. Vou adicionar:
+Vou trocar os IDs antigos do AdMob pelos novos que você passou. Mudança simples — só substituir constantes.
 
-- **Pinch-to-zoom + duplo-toque**: envolver cada página numa view com `ScaleGestureDetector` (zoom de 1x a 5x) preservando o scroll vertical entre páginas.
-- **Botão "Compartilhar / Abrir com outro app"** na toolbar: dispara `Intent.ACTION_SEND` (com `application/pdf`) via `FileProvider`, mostrando o chooser do Android — o usuário escolhe Drive, Gmail, WhatsApp, leitor de PDF externo, etc.
-- **Botão "Salvar / Baixar"** na toolbar: usa `MediaStore.Downloads` (Android 10+) ou `ACTION_CREATE_DOCUMENT` para o usuário escolher a pasta e salvar o PDF na memória do aparelho.
+### Arquivos afetados
 
-Arquivo afetado: `android-plugin/PdfViewerActivity.kt`.
+1. **`capacitor.config.ts`** (linha 12)
+   - `appId` do AdMob: `ca-app-pub-4966192764194561~2515666476` → **`ca-app-pub-9197484743954603~4917243774`**
 
-### 2) Vídeo do guia AnyConnect no APK
-Hoje `tutorial.mp4.asset.json` traz `url: "/__l5e/assets-v1/..."` — caminho relativo. Na web abre como `https://qapqrv.lovable.app/__l5e/...` e funciona. No APK o app roda em `https://localhost` (Capacitor) e esse caminho não existe localmente, então o vídeo nunca carrega.
+2. **`src/lib/admob.ts`** (linhas 11–12)
+   - `ADMOB_APP_ID` → **`ca-app-pub-9197484743954603~4917243774`**
+   - `ADMOB_APP_OPEN_ID` → **`ca-app-pub-9197484743954603/8424254265`**
 
-Correção: ao montar o `<video>`, se estiver rodando no Capacitor (nativo), prefixar a URL com o host publicado (`https://qapqrv.lovable.app`) para que o `src` aponte para o domínio público. Na web fica como está (URL relativa).
+3. **`android-plugin/AppOpenAdPlugin.kt`** (linha 40)
+   - `AD_UNIT_ID` (App Open) → **`ca-app-pub-9197484743954603/8424254265`**
 
-Arquivo afetado: `src/routes/anyconnect.tsx` (lógica simples de `isNativeApp()` + base URL).
+### O que NÃO vou alterar
 
-### Detalhes técnicos
+- **AdSense (web)** em `adsense-banner.tsx` e `__root.tsx` (`ca-pub-4966192764194561`) — é outro produto (anúncios na web), você não passou novo ID.
+- **`ADMOB_INTERSTITIAL_ID`** — você não passou ID novo de intersticial e ele já está sem uso no fluxo atual (ver comentário no `admob.ts`). Deixo a constante como está para não quebrar tipos; podemos remover/atualizar quando você gerar esse bloco.
 
-- `FileProvider` (authority `${packageName}.fileprovider`) já está configurado — usado em `openPdfExternal`.
-- Para o `ACTION_SEND` preciso passar `Intent.EXTRA_STREAM = uri` + `FLAG_GRANT_READ_URI_PERMISSION`.
-- Zoom: implementar uma `ZoomableImageView` (extende `ImageView`) ou usar `Matrix` + `ScaleGestureDetector` num wrapper. Para manter simples, encapsulo cada `ImageView` numa `FrameLayout` que intercepta o gesto de pinça e aplica `setScaleX/setScaleY` + `pivot` no toque; scroll do `ScrollView` continua funcionando quando não está em pinça.
-- Vídeo: detectar via `Capacitor.isNativePlatform()` (já usado em outras telas) e montar `const videoSrc = isNative ? \`https://qapqrv.lovable.app${tutorialVideo.url}\` : tutorialVideo.url`.
+### Lógica do App Open Ad
+A lógica nativa já está implementada conforme o guia do Google (cold start + retorno do background, cooldown de 4 min entre exibições, expiração de 4 h do ad carregado, pré-carregamento após dismiss). Não precisa mudar — só os IDs.
 
-Nenhuma mudança de UI no lado React do PDF (a tela de escala no APK já abre direto no `PdfViewerActivity` nativo).
+Depois é gerar APK novo pra validar.

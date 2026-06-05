@@ -9,7 +9,7 @@ const config: CapacitorConfig = {
   },
   plugins: {
     AdMob: {
-      appId: "ca-app-pub-4966192764194561~2515666476",
+      appId: "ca-app-pub-9197484743954603~4917243774",
     },
     SplashScreen: {
       launchShowDuration: 1500,

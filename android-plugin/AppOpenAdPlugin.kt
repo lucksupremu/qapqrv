@@ -37,7 +37,7 @@ class AppOpenAdPlugin : Plugin() {
 
     companion object {
         private const val TAG = "AppOpenAdPlugin"
-        private const val AD_UNIT_ID = "ca-app-pub-4966192764194561/9412551231"
+        private const val AD_UNIT_ID = "ca-app-pub-9197484743954603/8424254265"
         private const val EXPIRATION_MS = 4L * 60L * 60L * 1000L // 4 horas
     }
 
