@@ -101,11 +101,24 @@ if [ -f "$APP_GRADLE" ] && ! grep -q "org.mozilla.geckoview:geckoview" "$APP_GRA
   sed -i "s#dependencies {#dependencies {\n    implementation \"org.mozilla.geckoview:geckoview:$GECKOVIEW_VERSION\"#" "$APP_GRADLE"
 fi
 
-# ----- Garante minSdkVersion >= 21 e multiDexEnabled (GeckoView é grande) -----
+# ----- Garante minSdkVersion >= 26 (GeckoView exige) e multiDexEnabled -----
 if [ -f "$APP_GRADLE" ]; then
-  # multiDex
   if ! grep -q "multiDexEnabled" "$APP_GRADLE"; then
     sed -i "s#defaultConfig {#defaultConfig {\n        multiDexEnabled true#" "$APP_GRADLE"
+  fi
+  # Força minSdkVersion no defaultConfig do módulo :app
+  if grep -q "minSdkVersion" "$APP_GRADLE"; then
+    sed -i -E "s#minSdkVersion[[:space:]]+[A-Za-z0-9._]+#minSdkVersion 26#g" "$APP_GRADLE"
+  else
+    sed -i "s#defaultConfig {#defaultConfig {\n        minSdkVersion 26#" "$APP_GRADLE"
+  fi
+fi
+
+# variables.gradle do Capacitor define minSdkVersion globalmente
+VARS_GRADLE="android/variables.gradle"
+if [ -f "$VARS_GRADLE" ]; then
+  if grep -q "minSdkVersion" "$VARS_GRADLE"; then
+    sed -i -E "s#minSdkVersion[[:space:]]*=[[:space:]]*[0-9]+#minSdkVersion = 26#g" "$VARS_GRADLE"
   fi
 fi
 
