@@ -114,36 +114,16 @@ function DownloadedReportsScreen() {
     );
   }
 
-  const handleAbrir = async (e: EscalaSalva) => {
-    // APK: se tiver arquivo salvo no Filesystem, abre por URI nativa.
-    if (e.localPath) {
-      try {
-        const { Capacitor } = await import("@capacitor/core");
-        if (Capacitor.isNativePlatform()) {
-          const { Filesystem, Directory } = await import("@capacitor/filesystem");
-          const { uri } = await Filesystem.getUri({
-            path: e.localPath,
-            directory: Directory.Data,
-          });
-          window.open(uri, "_blank");
-          return;
-        }
-      } catch (err) {
-        console.warn("Falha ao abrir PDF nativo, caindo para intranet", err);
-      }
+  const handleAbrir = (e: EscalaSalva) => {
+    // Tem PDF salvo (web ou APK): abre no visualizador offline embutido.
+    if (e.hasPdf || e.localPath) {
+      void navigate({ to: "/escala-viewer/$id", params: { id: e.id } });
+      return;
     }
-    // Web: blob salvo no IndexedDB.
-    if (e.hasPdf) {
-      const blob = await lerPdfBlob(e.id);
-      if (blob) {
-        const objUrl = URL.createObjectURL(blob);
-        window.open(objUrl, "_blank", "noopener,noreferrer");
-        setTimeout(() => URL.revokeObjectURL(objUrl), 60_000);
-        return;
-      }
-    }
+    // Sem PDF salvo: tenta a intranet (requer VPN).
     void openInAppBrowser(e.url, { titulo: e.titulo ?? `Escala ${e.id}` });
   };
+
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
