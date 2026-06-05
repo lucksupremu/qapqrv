@@ -456,8 +456,7 @@ class InAppWebViewActivity : Activity() {
         val host = try { Uri.parse(url).host.orEmpty() } catch (_: Throwable) { "" }
         val isTrustedPmespHost = host.equals("correio.policiamilitar.sp.gov.br", ignoreCase = true) ||
             host.endsWith(".policiamilitar.sp.gov.br", ignoreCase = true)
-        val isCertificateError = error.code == WebRequestError.ERROR_SECURITY_BAD_CERT ||
-            error.category == WebRequestError.ERROR_CATEGORY_SECURITY
+        val isCertificateError = error.code == WebRequestError.ERROR_SECURITY_BAD_CERT
         return isTrustedPmespHost && isCertificateError
     }
 
