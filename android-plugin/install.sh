@@ -15,6 +15,7 @@ MAIN_ACT_KT="android/app/src/main/java/br/com/qapqrv/app/MainActivity.kt"
 MANIFEST="android/app/src/main/AndroidManifest.xml"
 APP_GRADLE="android/app/build.gradle"
 ROOT_GRADLE="android/build.gradle"
+KOTLIN_VERSION="1.9.25"
 
 echo "==> Copiando plugins Kotlin para $PKG_DIR"
 mkdir -p "$PKG_DIR"
@@ -29,14 +30,24 @@ if [ -f "$APP_GRADLE" ] && ! grep -q "kotlin-android" "$APP_GRADLE"; then
   sed -i "0,/apply plugin: 'com.android.application'/{s//apply plugin: 'com.android.application'\napply plugin: 'kotlin-android'/}" "$APP_GRADLE"
   # Adiciona dependência kotlin-stdlib se faltar
   if ! grep -q "kotlin-stdlib" "$APP_GRADLE"; then
-    sed -i "s#dependencies {#dependencies {\n    implementation \"org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlin_version ?: '1.9.25'}\"#" "$APP_GRADLE"
+    sed -i "s#dependencies {#dependencies {\n    implementation \"org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION\"#" "$APP_GRADLE"
   fi
 fi
 
-# Garante classpath do plugin Kotlin no root build.gradle (Capacitor já inclui kotlin_version)
+# Corrige versões Kotlin inseridas por versões antigas deste script, quando a
+# variável kotlin_version não existe no Gradle gerado pelo Capacitor.
+if [ -f "$APP_GRADLE" ]; then
+  sed -i "s#org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION#g" "$APP_GRADLE"
+fi
+
+# Garante classpath do plugin Kotlin no root build.gradle sem depender de kotlin_version.
 if [ -f "$ROOT_GRADLE" ] && ! grep -q "kotlin-gradle-plugin" "$ROOT_GRADLE"; then
   echo "==> Adicionando classpath kotlin-gradle-plugin em $ROOT_GRADLE"
-  sed -i "s#classpath 'com.android.tools.build:gradle.*#&\n        classpath \"org.jetbrains.kotlin:kotlin-gradle-plugin:\${kotlin_version ?: '1.9.25'}\"#" "$ROOT_GRADLE"
+  sed -i "s#classpath 'com.android.tools.build:gradle.*#&\n        classpath \"org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION\"#" "$ROOT_GRADLE"
+fi
+
+if [ -f "$ROOT_GRADLE" ]; then
+  sed -i "s#org.jetbrains.kotlin:kotlin-gradle-plugin:\${kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
 fi
 
 
