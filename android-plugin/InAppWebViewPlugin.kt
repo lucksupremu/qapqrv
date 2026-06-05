@@ -9,7 +9,7 @@ import com.getcapacitor.annotation.CapacitorPlugin
 
 /**
  * Plugin Capacitor próprio que abre uma WebView Android nativa em uma
- * Activity dedicada. Substitui o @capacitor/inappbrowser que estava com
+ * Activity dedicada. Substitui o navegador externo que estava com
  * problemas de UA / cookies em sites .gov.br (intranet PMESP).
  *
  * Uso (TS):
