@@ -287,6 +287,38 @@ class InAppWebViewActivity : Activity() {
         if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else super.onBackPressed()
     }
 
+    /**
+     * Trata esquemas de URL que não são http/https (mailto:, tel:, intent:, market:, etc.).
+     * Retorna true se a URL foi delegada a um app externo (e o WebView NÃO deve carregá-la).
+     * Para http/https, retorna false (deixa o WebView lidar normalmente).
+     */
+    private fun handleExternalScheme(uri: Uri): Boolean {
+        val scheme = uri.scheme?.lowercase() ?: return false
+        if (scheme == "http" || scheme == "https" || scheme == "about" || scheme == "data") {
+            return false
+        }
+        return try {
+            if (scheme == "intent") {
+                val intent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            } else {
+                val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            }
+            true
+        } catch (e: ActivityNotFoundException) {
+            Log.w(TAG, "Sem app para abrir $uri")
+            Toast.makeText(this, "Nenhum app instalado para abrir este link.", Toast.LENGTH_SHORT).show()
+            true
+        } catch (e: Throwable) {
+            Log.e(TAG, "Falha ao abrir $uri", e)
+            true
+        }
+    }
+
     override fun onDestroy() {
         try {
             webView.stopLoading()
