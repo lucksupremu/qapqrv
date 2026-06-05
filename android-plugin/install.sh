@@ -96,5 +96,7 @@ grep -q "android.permission.INTERNET" "$MANIFEST" || \
 echo "==> install.sh: OK"
 echo "--- MainActivity ---"
 cat "${MAIN_ACT_JAVA:-$MAIN_ACT_KT}" 2>/dev/null || cat "$MAIN_ACT_KT"
+echo "--- app/build.gradle ---"
+cat "$APP_GRADLE"
 echo "--- AndroidManifest ---"
 cat "$MANIFEST"
