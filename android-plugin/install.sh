@@ -22,6 +22,9 @@ mkdir -p "$PKG_DIR"
 cp "$ROOT/android-plugin/VpnStatusPlugin.kt"      "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
+cp "$ROOT/android-plugin/AppOpenAdPlugin.kt"      "$PKG_DIR/"
+
+ADMOB_APP_ID="ca-app-pub-4966192764194561~2515666476"
 
 # ----- Habilita Kotlin no módulo :app -----
 if [ -f "$APP_GRADLE" ] && ! grep -q "kotlin-android" "$APP_GRADLE"; then
