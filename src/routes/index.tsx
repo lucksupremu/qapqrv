@@ -173,8 +173,8 @@ function HomeScreen() {
       try {
         await InAppWebView.openPdf({ path: result.path });
       } catch (openErr) {
-        console.warn("Falha ao abrir PDF externo, usando visualizador interno", openErr);
-        navigate({ to: "/escala-viewer/$id", params: { id } });
+        console.warn("Falha ao abrir PDF externo", openErr);
+        toast.error("PDF baixado, mas não há leitor de PDF disponível no aparelho.");
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
