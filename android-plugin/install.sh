@@ -15,7 +15,7 @@ MAIN_ACT_KT="android/app/src/main/java/br/com/qapqrv/app/MainActivity.kt"
 MANIFEST="android/app/src/main/AndroidManifest.xml"
 APP_GRADLE="android/app/build.gradle"
 ROOT_GRADLE="android/build.gradle"
-KOTLIN_VERSION="1.9.25"
+KOTLIN_VERSION="2.1.0"
 
 echo "==> Copiando plugins Kotlin para $PKG_DIR"
 mkdir -p "$PKG_DIR"
