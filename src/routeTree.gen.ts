@@ -28,6 +28,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
+import { Route as EscalaViewerIdRouteImport } from './routes/escala-viewer.$id'
 
 const Char91indexChar93Route = Char91indexChar93RouteImport.update({
   id: '/index',
@@ -127,6 +128,11 @@ const FerramentaSlugRoute = FerramentaSlugRouteImport.update({
   path: '/ferramenta/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EscalaViewerIdRoute = EscalaViewerIdRouteImport.update({
+  id: '/escala-viewer/$id',
+  path: '/escala-viewer/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
+  '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
+  '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
+  '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
+    | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
+    | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
+    | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   SplashRoute: typeof SplashRoute
+  EscalaViewerIdRoute: typeof EscalaViewerIdRoute
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
   FerramentaMinhaLocalizacaoRoute: typeof FerramentaMinhaLocalizacaoRoute
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FerramentaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/escala-viewer/$id': {
+      id: '/escala-viewer/$id'
+      path: '/escala-viewer/$id'
+      fullPath: '/escala-viewer/$id'
+      preLoaderRoute: typeof EscalaViewerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -435,6 +455,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   SplashRoute: SplashRoute,
+  EscalaViewerIdRoute: EscalaViewerIdRoute,
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
   FerramentaMinhaLocalizacaoRoute: FerramentaMinhaLocalizacaoRoute,
