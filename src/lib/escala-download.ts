@@ -1,10 +1,8 @@
 // Download em segundo plano da escala — totalmente isolado da navegação.
 // Web: tenta fetch (geralmente falha por CORS, sem ruído).
-// APK (Capacitor): usa CapacitorHttp (bypassa CORS) + Filesystem.
-//
-// Para ativar persistência no APK:
-//   bun add @capacitor/filesystem
-//   npx cap sync
+// APK (Capacitor): usa o plugin nativo InAppWebView para baixar em context.filesDir
+// e abrir depois via FileProvider. Não usa Capacitor Filesystem para evitar
+// caminhos incompatíveis com o abridor nativo.
 import { toast } from "sonner";
 import {
   upsertEscala,
@@ -29,63 +27,17 @@ async function isNative(): Promise<boolean> {
 
 async function baixarNoNativo(id: string, url: string): Promise<boolean> {
   try {
-    try {
-      const result = await InAppWebView.downloadPdf({ id, url });
-      const lista = lerLista();
-      const next = lista.map((x) =>
-        x.id === id
-          ? {
-              ...x,
-              hasPdf: true,
-              pdfSize: result.size,
-              pdfMime: result.mime || "application/pdf",
-              localPath: result.path,
-            }
-          : x,
-      );
-      salvarLista(next);
-      return true;
-    } catch (nativePluginError) {
-      console.warn("[escala-download] plugin nativo direto falhou", nativePluginError);
-    }
-
-    const { CapacitorHttp } = await import("@capacitor/core");
-    const resp = await CapacitorHttp.request({
-      method: "GET",
-      url,
-      responseType: "blob",
-    });
-    if (resp.status < 200 || resp.status >= 300) return false;
-
-    // CapacitorHttp retorna base64 quando responseType=blob
-    const data: string = resp.data;
-    if (!data || typeof data !== "string") return false;
-
-    let Filesystem: any;
-    let Directory: any;
-    try {
-      // @ts-ignore — plugin opcional, instalar com: bun add @capacitor/filesystem
-      const mod = await import(/* @vite-ignore */ "@capacitor/filesystem");
-      Filesystem = mod.Filesystem;
-      Directory = mod.Directory;
-    } catch {
-      // Plugin não instalado — degrada silenciosamente.
-      return false;
-    }
-
-    const path = `escalas/${id}.pdf`;
-    await Filesystem.writeFile({
-      path,
-      data,
-      directory: Directory.Data,
-      recursive: true,
-    });
-
-    const sizeApprox = Math.floor((data.length * 3) / 4);
+    const result = await InAppWebView.downloadPdf({ id, url });
     const lista = lerLista();
     const next = lista.map((x) =>
       x.id === id
-        ? { ...x, hasPdf: true, pdfSize: sizeApprox, pdfMime: "application/pdf", localPath: path }
+        ? {
+            ...x,
+            hasPdf: true,
+            pdfSize: result.size,
+            pdfMime: result.mime || "application/pdf",
+            localPath: result.path,
+          }
         : x,
     );
     salvarLista(next);
