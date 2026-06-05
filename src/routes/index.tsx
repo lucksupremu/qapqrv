@@ -27,7 +27,6 @@ import { useIsNative } from "@/hooks/use-is-native";
 import appLogo from "@/assets/app-logo.png";
 
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
-import { salvarEscalaEmBackground } from "@/lib/escala-download";
 import { upsertEscala, lerLista } from "@/lib/escalas-baixadas";
 import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
