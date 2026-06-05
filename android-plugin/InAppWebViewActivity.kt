@@ -268,6 +268,10 @@ class InAppWebViewActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
             )
             setBackgroundColor(Color.WHITE)
+            // Aceleração de hardware explícita — melhora scroll e render.
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            isScrollbarFadingEnabled = true
+            overScrollMode = View.OVER_SCROLL_NEVER
         }
 
         errorOverlay = LinearLayout(this).apply {
