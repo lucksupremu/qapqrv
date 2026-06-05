@@ -114,6 +114,38 @@ class InAppWebViewActivity : Activity() {
                 handler?.proceed()
             }
 
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: android.webkit.WebResourceError?,
+            ) {
+                super.onReceivedError(view, request, error)
+                // Só mostra a tela de erro se for o frame principal
+                if (request?.isForMainFrame != true) return
+                val code = error?.errorCode ?: 0
+                val desc = error?.description?.toString() ?: "Erro desconhecido"
+                val failingUrl = request.url?.toString() ?: ""
+                Log.e("InAppWebView", "onReceivedError code=$code desc=$desc url=$failingUrl")
+                showErrorPage(failingUrl, errorCodeName(code), desc)
+            }
+
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: android.webkit.WebResourceResponse?,
+            ) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                if (request?.isForMainFrame != true) return
+                val status = errorResponse?.statusCode ?: 0
+                val reason = errorResponse?.reasonPhrase ?: ""
+                val failingUrl = request.url?.toString() ?: ""
+                Log.e("InAppWebView", "onReceivedHttpError $status $reason url=$failingUrl")
+                // Só sobrescreve a tela em 4xx/5xx do documento principal
+                if (status >= 400) {
+                    showErrorPage(failingUrl, "HTTP $status", reason.ifBlank { "Erro do servidor" })
+                }
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 btnBack.alpha = if (webView.canGoBack()) 1f else 0.3f
