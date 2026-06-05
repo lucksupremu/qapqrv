@@ -1,6 +1,5 @@
 package br.com.qapqrv.app.plugins
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
@@ -9,33 +8,33 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Message
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.webkit.CookieManager
-import android.webkit.DownloadListener
-import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import org.mozilla.geckoview.GeckoResult
+import org.mozilla.geckoview.GeckoRuntime
+import org.mozilla.geckoview.GeckoRuntimeSettings
+import org.mozilla.geckoview.GeckoSession
+import org.mozilla.geckoview.GeckoSessionSettings
+import org.mozilla.geckoview.GeckoView
+import org.mozilla.geckoview.WebResponse
+import java.io.InputStream
+import kotlin.concurrent.thread
 
 /**
- * Activity que hospeda uma WebView Android nativa em tela cheia. Controle
- * total de User-Agent, cookies (inclusive third-party — essencial pra
- * .gov.br), JS, zoom, downloads e botão voltar.
+ * Navegador interno baseado em Mozilla GeckoView (mesmo motor do Firefox).
+ * Não depende do Android System WebView / Chrome — resolve a tela branca
+ * em aparelhos onde o WebView do sistema está desatualizado ou bloqueado.
  *
- * Layout é construído em código pra não depender de um arquivo XML que
- * precisaria ser copiado pra res/layout/ no CI (mais simples).
+ * Layout em código pra evitar XML em res/.
  */
 class InAppWebViewActivity : Activity() {
 
@@ -44,187 +43,116 @@ class InAppWebViewActivity : Activity() {
         const val EXTRA_TITLE = "extra_title"
         const val EXTRA_USER_AGENT = "extra_user_agent"
 
-        private const val DEFAULT_UA =
-            "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Version/4.0 Mobile Safari/537.36 QAPQRVWebView/1.0"
-
         private const val TOOLBAR_BG = 0xFF2E6B8A.toInt()
         private const val TOOLBAR_FG = Color.WHITE
+        private const val TAG = "InAppGecko"
+
+        @Volatile
+        private var sRuntime: GeckoRuntime? = null
+
+        @Synchronized
+        fun runtime(ctx: Context): GeckoRuntime {
+            val cached = sRuntime
+            if (cached != null) return cached
+            val settings = GeckoRuntimeSettings.Builder()
+                .javaScriptEnabled(true)
+                .aboutConfigEnabled(false)
+                .build()
+            val r = GeckoRuntime.create(ctx.applicationContext, settings)
+            sRuntime = r
+            return r
+        }
     }
 
-    private lateinit var webView: WebView
+    private lateinit var geckoView: GeckoView
+    private lateinit var session: GeckoSession
     private lateinit var titleView: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var btnBack: ImageButton
     private lateinit var btnForward: ImageButton
 
-    @SuppressLint("SetJavaScriptEnabled")
+    private var canGoBack = false
+    private var canGoForward = false
+    private var pageTitleFixed = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         val url = intent.getStringExtra(EXTRA_URL) ?: run { finish(); return }
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
-        val ua = intent.getStringExtra(EXTRA_USER_AGENT).takeUnless { it.isNullOrBlank() }
-            ?: DEFAULT_UA
+        pageTitleFixed = title
 
         setContentView(buildLayout(title))
 
-        // Cookies (essencial pra autenticação em .gov.br)
-        val cm = CookieManager.getInstance()
-        cm.setAcceptCookie(true)
-        cm.setAcceptThirdPartyCookies(webView, true)
+        val rt = runtime(this)
+        session = GeckoSession(
+            GeckoSessionSettings.Builder()
+                .usePrivateMode(false)
+                .build(),
+        )
+        session.open(rt)
+        geckoView.setSession(session)
 
-        webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            databaseEnabled = true
-            loadWithOverviewMode = true
-            useWideViewPort = true
-            setSupportMultipleWindows(true)
-            javaScriptCanOpenWindowsAutomatically = true
-            setSupportZoom(true)
-            builtInZoomControls = true
-            displayZoomControls = false
-            userAgentString = ua
-            mediaPlaybackRequiresUserGesture = false
-            mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        }
-
-        webView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(
-                view: WebView,
-                request: WebResourceRequest,
-            ): Boolean {
-                val u = request.url.toString()
-                // mailto: / tel: / intent: → deixa o Android resolver
-                if (!u.startsWith("http://") && !u.startsWith("https://")) {
-                    return try {
-                        startActivity(Intent(Intent.ACTION_VIEW, request.url))
-                        true
-                    } catch (_: Throwable) { true }
-                }
-                return handleHttpNavigation(u)
+        session.navigationDelegate = object : GeckoSession.NavigationDelegate {
+            override fun onCanGoBack(s: GeckoSession, value: Boolean) {
+                canGoBack = value
+                btnBack.alpha = if (value) 1f else 0.3f
             }
 
-            @Deprecated("Deprecated in Java")
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                val u = url ?: return false
-                if (!u.startsWith("http://") && !u.startsWith("https://")) {
-                    return try {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(u)))
-                        true
-                    } catch (_: Throwable) { true }
-                }
-                return handleHttpNavigation(u)
+            override fun onCanGoForward(s: GeckoSession, value: Boolean) {
+                canGoForward = value
+                btnForward.alpha = if (value) 1f else 0.3f
             }
 
-            override fun onReceivedSslError(
-                view: WebView?,
-                handler: SslErrorHandler?,
-                error: android.net.http.SslError?,
-            ) {
-                val host = error?.url.orEmpty().lowercase()
-                if (host.contains("policiamilitar.sp.gov.br")) {
-                    handler?.proceed()
-                } else {
-                    handler?.cancel()
-                }
+            override fun onNewSession(s: GeckoSession, uri: String): GeckoResult<GeckoSession> {
+                // Popups (Marcar/Desmarcar, iNotes) — abre na mesma view.
+                val newSession = GeckoSession()
+                newSession.open(rt)
+                attachDelegates(newSession, rt)
+                geckoView.releaseSession()
+                geckoView.setSession(newSession)
+                session = newSession
+                return GeckoResult.fromValue(newSession)
             }
 
-            override fun onReceivedError(
-                view: WebView?,
-                request: WebResourceRequest?,
-                error: android.webkit.WebResourceError?,
-            ) {
-                super.onReceivedError(view, request, error)
-                // Só mostra a tela de erro se for o frame principal
-                if (request?.isForMainFrame != true) return
-                val code = error?.errorCode ?: 0
-                val desc = error?.description?.toString() ?: "Erro desconhecido"
-                val failingUrl = request.url?.toString() ?: ""
-                Log.e("InAppWebView", "onReceivedError code=$code desc=$desc url=$failingUrl")
-                showErrorPage(failingUrl, errorCodeName(code), desc)
-            }
-
-            override fun onReceivedHttpError(
-                view: WebView?,
-                request: WebResourceRequest?,
-                errorResponse: android.webkit.WebResourceResponse?,
-            ) {
-                super.onReceivedHttpError(view, request, errorResponse)
-                if (request?.isForMainFrame != true) return
-                val status = errorResponse?.statusCode ?: 0
-                val reason = errorResponse?.reasonPhrase ?: ""
-                val failingUrl = request.url?.toString() ?: ""
-                Log.e("InAppWebView", "onReceivedHttpError $status $reason url=$failingUrl")
-                // Só sobrescreve a tela em 4xx/5xx do documento principal
-                if (status >= 400) {
-                    showErrorPage(failingUrl, "HTTP $status", reason.ifBlank { "Erro do servidor" })
-                }
-            }
-
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                btnBack.alpha = if (webView.canGoBack()) 1f else 0.3f
-                btnForward.alpha = if (webView.canGoForward()) 1f else 0.3f
+            override fun onLoadError(
+                s: GeckoSession,
+                uri: String?,
+                error: org.mozilla.geckoview.WebRequestError,
+            ): GeckoResult<String>? {
+                Log.e(TAG, "onLoadError uri=$uri code=${error.code} cat=${error.category}")
+                val safeUrl = uri.orEmpty()
+                val html = buildErrorHtml(safeUrl, "ERR_${error.code}", error.message ?: "Erro de carregamento")
+                return GeckoResult.fromValue("data:text/html;base64,${android.util.Base64.encodeToString(html.toByteArray(Charsets.UTF_8), android.util.Base64.NO_WRAP)}")
             }
         }
 
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onCreateWindow(
-                view: WebView?,
-                isDialog: Boolean,
-                isUserGesture: Boolean,
-                resultMsg: Message?,
-            ): Boolean {
-                val popup = WebView(this@InAppWebViewActivity)
-                popup.settings.javaScriptEnabled = true
-                popup.settings.domStorageEnabled = true
-                popup.webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(v: WebView, request: WebResourceRequest): Boolean {
-                        val target = request.url.toString()
-                        handlePopupNavigation(target)
-                        return true
-                    }
-
-                    @Deprecated("Deprecated in Java")
-                    override fun shouldOverrideUrlLoading(v: WebView?, url: String?): Boolean {
-                        handlePopupNavigation(url ?: return false)
-                        return true
-                    }
-                }
-                val msg = resultMsg ?: return false
-                val transport = msg.obj as? WebView.WebViewTransport ?: return false
-                transport.webView = popup
-                msg.sendToTarget()
-                return true
-            }
-
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                progressBar.progress = newProgress
-                progressBar.visibility = if (newProgress >= 100) View.GONE else View.VISIBLE
-            }
-
-            override fun onReceivedTitle(view: WebView?, t: String?) {
-                if (title.isBlank() && !t.isNullOrBlank()) titleView.text = t
+        session.progressDelegate = object : GeckoSession.ProgressDelegate {
+            override fun onProgressChange(s: GeckoSession, progress: Int) {
+                progressBar.progress = progress
+                progressBar.visibility = if (progress >= 100) View.GONE else View.VISIBLE
             }
         }
 
-        // Downloads (PDFs de escala, etc.) → DownloadManager do Android
-        webView.setDownloadListener(DownloadListener { dlUrl, _, contentDisposition, mimeType, _ ->
-            downloadPdfToDownloads(dlUrl, contentDisposition, mimeType)
-            if ((mimeType ?: "").contains("pdf", ignoreCase = true) || isPdfLikeUrl(dlUrl)) {
-                showDownloadedPdfPage(dlUrl)
+        session.contentDelegate = object : GeckoSession.ContentDelegate {
+            override fun onTitleChange(s: GeckoSession, t: String?) {
+                if (pageTitleFixed.isBlank() && !t.isNullOrBlank()) titleView.text = t
             }
-        })
 
-        if (isPdfLikeUrl(url)) {
-            downloadPdfToDownloads(url, null, "application/pdf")
-            showDownloadedPdfPage(url)
-        } else {
-            webView.loadUrl(url)
+            override fun onExternalResponse(s: GeckoSession, response: WebResponse) {
+                // Arquivos não-renderizáveis (PDF não-inline, anexos) → baixa.
+                downloadResponseToDownloads(response)
+            }
         }
+
+        session.loadUri(url)
+    }
+
+    private fun attachDelegates(s: GeckoSession, rt: GeckoRuntime) {
+        s.navigationDelegate = session.navigationDelegate
+        s.progressDelegate = session.progressDelegate
+        s.contentDelegate = session.contentDelegate
     }
 
     private fun buildLayout(title: String): View {
@@ -237,7 +165,6 @@ class InAppWebViewActivity : Activity() {
             setBackgroundColor(Color.WHITE)
         }
 
-        // ---- Toolbar superior ----
         val toolbar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(TOOLBAR_BG)
@@ -268,14 +195,13 @@ class InAppWebViewActivity : Activity() {
             setImageResource(android.R.drawable.ic_menu_rotate)
             setColorFilter(TOOLBAR_FG)
             background = null
-            setOnClickListener { webView.reload() }
+            setOnClickListener { session.reload() }
             layoutParams = LinearLayout.LayoutParams(dp(40), dp(40))
         }
         toolbar.addView(btnClose)
         toolbar.addView(titleView)
         toolbar.addView(btnReload)
 
-        // ---- Progress bar ----
         progressBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
             progress = 0
@@ -285,8 +211,7 @@ class InAppWebViewActivity : Activity() {
             )
         }
 
-        // ---- WebView ----
-        webView = WebView(this).apply {
+        geckoView = GeckoView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f,
             )
@@ -295,10 +220,9 @@ class InAppWebViewActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f,
             )
-            addView(webView)
+            addView(geckoView)
         }
 
-        // ---- Bottom bar (voltar / avançar) ----
         val bottomBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(Color.WHITE)
@@ -313,7 +237,7 @@ class InAppWebViewActivity : Activity() {
             setColorFilter(TOOLBAR_BG)
             background = null
             alpha = 0.3f
-            setOnClickListener { if (webView.canGoBack()) webView.goBack() }
+            setOnClickListener { if (canGoBack) session.goBack() }
             layoutParams = LinearLayout.LayoutParams(0, dp(44), 1f)
         }
         btnForward = ImageButton(this).apply {
@@ -321,7 +245,7 @@ class InAppWebViewActivity : Activity() {
             setColorFilter(TOOLBAR_BG)
             background = null
             alpha = 0.3f
-            setOnClickListener { if (webView.canGoForward()) webView.goForward() }
+            setOnClickListener { if (canGoForward) session.goForward() }
             layoutParams = LinearLayout.LayoutParams(0, dp(44), 1f)
         }
         bottomBar.addView(btnBack)
@@ -335,8 +259,8 @@ class InAppWebViewActivity : Activity() {
     }
 
     override fun onBackPressed() {
-        if (::webView.isInitialized && webView.canGoBack()) {
-            webView.goBack()
+        if (::session.isInitialized && canGoBack) {
+            session.goBack()
         } else {
             @Suppress("DEPRECATION")
             super.onBackPressed()
@@ -344,10 +268,8 @@ class InAppWebViewActivity : Activity() {
     }
 
     override fun onDestroy() {
-        if (::webView.isInitialized) {
-            (webView.parent as? ViewGroup)?.removeView(webView)
-            webView.stopLoading()
-            webView.destroy()
+        if (::session.isInitialized) {
+            try { session.close() } catch (_: Throwable) {}
         }
         super.onDestroy()
     }
@@ -355,117 +277,51 @@ class InAppWebViewActivity : Activity() {
     private fun dp(v: Int): Int =
         (v * resources.displayMetrics.density).toInt()
 
-    private fun errorCodeName(code: Int): String = when (code) {
-        WebViewClient.ERROR_HOST_LOOKUP -> "ERR_NAME_NOT_RESOLVED"
-        WebViewClient.ERROR_CONNECT -> "ERR_CONNECTION_REFUSED"
-        WebViewClient.ERROR_TIMEOUT -> "ERR_CONNECTION_TIMED_OUT"
-        WebViewClient.ERROR_UNKNOWN -> "ERR_UNKNOWN"
-        WebViewClient.ERROR_BAD_URL -> "ERR_BAD_URL"
-        WebViewClient.ERROR_FAILED_SSL_HANDSHAKE -> "ERR_SSL_HANDSHAKE"
-        WebViewClient.ERROR_PROXY_AUTHENTICATION -> "ERR_PROXY_AUTH"
-        WebViewClient.ERROR_REDIRECT_LOOP -> "ERR_REDIRECT_LOOP"
-        WebViewClient.ERROR_UNSUPPORTED_AUTH_SCHEME -> "ERR_UNSUPPORTED_AUTH"
-        WebViewClient.ERROR_UNSUPPORTED_SCHEME -> "ERR_UNSUPPORTED_SCHEME"
-        WebViewClient.ERROR_AUTHENTICATION -> "ERR_AUTHENTICATION"
-        WebViewClient.ERROR_FILE -> "ERR_FILE"
-        WebViewClient.ERROR_FILE_NOT_FOUND -> "ERR_FILE_NOT_FOUND"
-        WebViewClient.ERROR_TOO_MANY_REQUESTS -> "ERR_TOO_MANY_REQUESTS"
-        -10 -> "ERR_UNSUPPORTED_SCHEME"
-        else -> "ERR_$code"
-    }
+    private fun downloadResponseToDownloads(response: WebResponse) {
+        thread(name = "QapQrvDownload") {
+            try {
+                val url = response.uri
+                val mime = response.headers["Content-Type"]?.substringBefore(';')?.trim() ?: "application/octet-stream"
+                val cd = response.headers["Content-Disposition"]
+                val guessed = URLUtil.guessFileName(url, cd, mime)
+                val fileName = if (mime.contains("pdf", true) && !guessed.endsWith(".pdf", true)) "$guessed.pdf" else guessed
 
-    private fun handleHttpNavigation(url: String): Boolean {
-        if (isPdfLikeUrl(url)) {
-            downloadPdfToDownloads(url, null, "application/pdf")
-            showDownloadedPdfPage(url)
-            return true
-        }
-        return false
-    }
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                downloadsDir.mkdirs()
+                val out = java.io.File(downloadsDir, fileName)
 
-    private fun handlePopupNavigation(url: String) {
-        if (isPdfLikeUrl(url)) {
-            downloadPdfToDownloads(url, null, "application/pdf")
-            showDownloadedPdfPage(url)
-        } else {
-            webView.loadUrl(url)
+                val body: InputStream = response.body ?: run {
+                    runOnUiThread { Toast.makeText(this, "Download vazio.", Toast.LENGTH_SHORT).show() }
+                    return@thread
+                }
+                body.use { input -> out.outputStream().use { o -> input.copyTo(o) } }
+
+                runOnUiThread {
+                    Toast.makeText(this, "Baixado: $fileName", Toast.LENGTH_LONG).show()
+                    // Registra no DownloadManager para aparecer nas notificações
+                    try {
+                        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                        @Suppress("DEPRECATION")
+                        dm.addCompletedDownload(fileName, fileName, true, mime, out.absolutePath, out.length(), true)
+                    } catch (_: Throwable) {}
+                }
+            } catch (e: Throwable) {
+                Log.e(TAG, "download falhou", e)
+                runOnUiThread { Toast.makeText(this, "Falha no download: ${e.message}", Toast.LENGTH_LONG).show() }
+            }
         }
     }
 
-    private fun isPdfLikeUrl(url: String): Boolean {
-        val lower = url.lowercase()
-        return lower.endsWith(".pdf") ||
-            lower.contains(".pdf?") ||
-            lower.contains("arrelconesc.aspx")
-    }
-
-    private fun downloadPdfToDownloads(dlUrl: String, contentDisposition: String?, mimeType: String?) {
-        try {
-            val safeMime = mimeType?.takeIf { it.isNotBlank() } ?: "application/pdf"
-            val guessed = URLUtil.guessFileName(dlUrl, contentDisposition, safeMime)
-            val fileName = if (guessed.endsWith(".pdf", ignoreCase = true)) guessed else "$guessed.pdf"
-            val req = DownloadManager.Request(Uri.parse(dlUrl))
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                .setMimeType("application/pdf")
-                .setAllowedOverMetered(true)
-                .setAllowedOverRoaming(true)
-            req.addRequestHeader("Accept", "application/pdf,*/*")
-            req.addRequestHeader("User-Agent", webView.settings.userAgentString)
-            webView.url?.let { req.addRequestHeader("Referer", it) }
-            CookieManager.getInstance().getCookie(dlUrl)?.let { req.addRequestHeader("Cookie", it) }
-            val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            dm.enqueue(req)
-            Toast.makeText(this, "PDF baixando: $fileName", Toast.LENGTH_SHORT).show()
-        } catch (e: Throwable) {
-            Log.e("InAppWebView", "downloadPdfToDownloads falhou url=$dlUrl", e)
-            Toast.makeText(this, "Falha ao baixar PDF: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun showDownloadedPdfPage(pdfUrl: String) {
-        val safeUrl = pdfUrl.replace("&", "&amp;").replace("<", "&lt;")
-        val html = """
-            <!DOCTYPE html>
-            <html lang="pt-br"><head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width,initial-scale=1">
-            <style>
-              body{font-family:-apple-system,Roboto,sans-serif;margin:0;padding:24px;background:#f6f8fb;color:#1f2d3d}
-              .card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 4px 16px rgba(46,107,138,.08);max-width:520px;margin:24px auto}
-              h1{color:#2e6b8a;font-size:20px;margin:0 0 8px}
-              p{line-height:1.5;color:#5b7a8f;font-size:14px;margin:8px 0}
-              .url{font-size:12px;color:#7a8fa3;word-break:break-all;margin-top:12px}
-              button{width:100%;height:44px;border-radius:12px;border:0;background:#2e6b8a;color:#fff;font-size:14px;font-weight:600;margin-top:18px}
-            </style></head>
-            <body>
-              <div class="card">
-                <h1>PDF enviado para download</h1>
-                <p>O Android está baixando este PDF. A escala consultada também ficará registrada em <b>Escalas baixadas</b> dentro do aplicativo.</p>
-                <div class="url">$safeUrl</div>
-                <button onclick="location.href='$safeUrl'">Baixar novamente</button>
-              </div>
-            </body></html>
-        """.trimIndent()
-        webView.loadDataWithBaseURL(pdfUrl, html, "text/html", "UTF-8", pdfUrl)
-    }
-
-    private fun showErrorPage(failingUrl: String, codeName: String, description: String) {
+    private fun buildErrorHtml(failingUrl: String, codeName: String, description: String): String {
         val ehIntranet = failingUrl.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
             failingUrl.contains("intranet", ignoreCase = true)
         val dicaVpn = if (ehIntranet) {
             "<div class='warn'>⚠️ Este é um endereço da intranet PMESP. " +
                 "Verifique se o <b>AnyConnect</b> está conectado antes de tentar novamente.</div>"
         } else ""
-        val cleartext = if (codeName == "ERR_CLEARTEXT_NOT_PERMITTED" ||
-            description.contains("cleartext", ignoreCase = true)
-        ) {
-            "<div class='warn'>O sistema bloqueou uma conexão HTTP não-segura. " +
-                "Reinstale a versão mais recente do APK.</div>"
-        } else ""
         val safeUrl = failingUrl.replace("&", "&amp;").replace("<", "&lt;")
         val safeDesc = description.replace("&", "&amp;").replace("<", "&lt;")
-        val html = """
+        return """
             <!DOCTYPE html>
             <html lang="pt-br"><head>
             <meta charset="utf-8">
@@ -483,11 +339,7 @@ class InAppWebViewActivity : Activity() {
               .url{font-size:12px;color:#7a8fa3;word-break:break-all;margin-top:12px}
               .warn{background:#fff4e0;border-left:4px solid #f0a020;
                     padding:12px;border-radius:8px;margin:16px 0;font-size:14px;color:#8a5a00}
-              .row{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
-              button{flex:1;min-width:140px;height:44px;border-radius:12px;border:0;
-                     font-size:14px;font-weight:600;cursor:pointer}
-              .primary{background:#2e6b8a;color:#fff}
-              .ghost{background:#fff;color:#2e6b8a;border:2px solid #2e6b8a}
+              button{width:100%;height:44px;border-radius:12px;border:0;background:#2e6b8a;color:#fff;font-size:14px;font-weight:600;margin-top:18px}
             </style></head>
             <body>
               <div class="card">
@@ -495,15 +347,10 @@ class InAppWebViewActivity : Activity() {
                 <p>$safeDesc</p>
                 <div class="code">$codeName</div>
                 $dicaVpn
-                $cleartext
                 <div class="url">$safeUrl</div>
-                <div class="row">
-                  <button class="primary" onclick="location.href='$safeUrl'">Tentar de novo</button>
-                </div>
+                <button onclick="location.href='$safeUrl'">Tentar de novo</button>
               </div>
             </body></html>
         """.trimIndent()
-        // Carrega com base URL pra manter o histórico/recarregar funcionando
-        webView.loadDataWithBaseURL(failingUrl, html, "text/html", "UTF-8", failingUrl)
     }
 }
