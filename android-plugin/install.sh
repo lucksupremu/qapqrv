@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Instala os plugins Android nativos do projeto (VpnStatus + InAppWebView)
-# DENTRO da pasta android/ que o `cap add android` gera. Idempotente —
-# pode rodar várias vezes sem efeito colateral.
+# Instala os plugins Android nativos do projeto (VpnStatus + InAppWebView baseado em GeckoView)
+# DENTRO da pasta android/ que o `cap add android` gera. Idempotente.
 #
 # Uso (no CI, após `bunx cap sync android`):
 #   bash android-plugin/install.sh
@@ -15,7 +14,10 @@ MAIN_ACT_KT="android/app/src/main/java/br/com/qapqrv/app/MainActivity.kt"
 MANIFEST="android/app/src/main/AndroidManifest.xml"
 APP_GRADLE="android/app/build.gradle"
 ROOT_GRADLE="android/build.gradle"
+SETTINGS_GRADLE="android/settings.gradle"
 KOTLIN_VERSION="2.1.0"
+# GeckoView estável (motor do Firefox) — independe do Android System WebView / Chrome.
+GECKOVIEW_VERSION="149.0.20260403140140"
 
 echo "==> Copiando plugins Kotlin para $PKG_DIR"
 mkdir -p "$PKG_DIR"
@@ -23,24 +25,20 @@ cp "$ROOT/android-plugin/VpnStatusPlugin.kt"      "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
 
-# ----- Habilita Kotlin no módulo :app (plugins são .kt) -----
+# ----- Habilita Kotlin no módulo :app -----
 if [ -f "$APP_GRADLE" ] && ! grep -q "kotlin-android" "$APP_GRADLE"; then
   echo "==> Habilitando kotlin-android em $APP_GRADLE"
-  # Adiciona apply plugin: 'kotlin-android' após a primeira linha apply plugin
   sed -i "0,/apply plugin: 'com.android.application'/{s//apply plugin: 'com.android.application'\napply plugin: 'kotlin-android'/}" "$APP_GRADLE"
-  # Adiciona dependência kotlin-stdlib se faltar
   if ! grep -q "kotlin-stdlib" "$APP_GRADLE"; then
     sed -i "s#dependencies {#dependencies {\n    implementation \"org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION\"#" "$APP_GRADLE"
   fi
 fi
 
-# Corrige versões Kotlin inseridas por versões antigas deste script, quando a
-# variável kotlin_version não existe no Gradle gerado pelo Capacitor.
 if [ -f "$APP_GRADLE" ]; then
   sed -i "s#org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION#g" "$APP_GRADLE"
 fi
 
-# Garante classpath do plugin Kotlin no root build.gradle sem depender de kotlin_version.
+# ----- Classpath Kotlin no root build.gradle -----
 if [ -f "$ROOT_GRADLE" ] && ! grep -q "kotlin-gradle-plugin" "$ROOT_GRADLE"; then
   echo "==> Adicionando classpath kotlin-gradle-plugin em $ROOT_GRADLE"
   sed -i "s#classpath 'com.android.tools.build:gradle.*#&\n        classpath \"org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION\"#" "$ROOT_GRADLE"
@@ -50,8 +48,35 @@ if [ -f "$ROOT_GRADLE" ]; then
   sed -i "s#org.jetbrains.kotlin:kotlin-gradle-plugin:\${kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
 fi
 
+# ----- Adiciona repositório Maven da Mozilla (necessário para GeckoView) -----
+add_mozilla_repo() {
+  local file="$1"
+  if [ -f "$file" ] && ! grep -q "maven.mozilla.org" "$file"; then
+    echo "==> Adicionando repositório Mozilla em $file"
+    # Tenta inserir dentro de allprojects { repositories { ... } } ou repositories { ... }
+    if grep -q "repositories {" "$file"; then
+      sed -i '0,/repositories {/{s#repositories {#repositories {\n        maven { url "https://maven.mozilla.org/maven2/" }#}' "$file"
+    fi
+  fi
+}
+add_mozilla_repo "$ROOT_GRADLE"
+add_mozilla_repo "$SETTINGS_GRADLE"
 
-# ----- Reescreve MainActivity com registro dos plugins (idempotente) -----
+# ----- Adiciona dependência GeckoView ao módulo :app -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "org.mozilla.geckoview:geckoview" "$APP_GRADLE"; then
+  echo "==> Adicionando dependência GeckoView ($GECKOVIEW_VERSION) em $APP_GRADLE"
+  sed -i "s#dependencies {#dependencies {\n    implementation \"org.mozilla.geckoview:geckoview:$GECKOVIEW_VERSION\"#" "$APP_GRADLE"
+fi
+
+# ----- Garante minSdkVersion >= 21 e multiDexEnabled (GeckoView é grande) -----
+if [ -f "$APP_GRADLE" ]; then
+  # multiDex
+  if ! grep -q "multiDexEnabled" "$APP_GRADLE"; then
+    sed -i "s#defaultConfig {#defaultConfig {\n        multiDexEnabled true#" "$APP_GRADLE"
+  fi
+fi
+
+# ----- Reescreve MainActivity registrando os plugins -----
 if [ -f "$MAIN_ACT_KT" ]; then
   echo "==> Reescrevendo $MAIN_ACT_KT"
   cat > "$MAIN_ACT_KT" <<'EOF'
@@ -90,7 +115,7 @@ public class MainActivity extends BridgeActivity {
 }
 EOF
 else
-  echo "!! MainActivity não encontrada em $MAIN_ACT_JAVA nem $MAIN_ACT_KT" >&2
+  echo "!! MainActivity não encontrada" >&2
   exit 1
 fi
 
@@ -99,16 +124,17 @@ if ! grep -q "InAppWebViewActivity" "$MANIFEST"; then
   echo "==> Registrando InAppWebViewActivity no AndroidManifest"
   sed -i 's#</application>#    <activity android:name=".plugins.InAppWebViewActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
 elif grep -q 'InAppWebViewActivity' "$MANIFEST" && ! grep -q 'InAppWebViewActivity.*hardwareAccelerated' "$MANIFEST"; then
-  echo "==> Habilitando hardwareAccelerated na InAppWebViewActivity"
   sed -i 's#android:name=".plugins.InAppWebViewActivity"#android:name=".plugins.InAppWebViewActivity" android:hardwareAccelerated="true"#' "$MANIFEST"
 fi
 
-# Garante INTERNET (já vem do Capacitor por padrão, mas a gente reforça)
+# Permissões: INTERNET + WRITE_EXTERNAL_STORAGE (para Downloads em SDK<=28)
 grep -q "android.permission.INTERNET" "$MANIFEST" || \
   sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET" />\n    <application#' "$MANIFEST"
 
-# Habilita cleartext HTTP (intranet PMESP tem endpoints http:// que o WebView
-# bloqueia por padrão desde Android 9 — sintoma: tela branca sem erro).
+grep -q "WRITE_EXTERNAL_STORAGE" "$MANIFEST" || \
+  sed -i 's#<application#<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />\n    <application#' "$MANIFEST"
+
+# Cleartext HTTP (intranet PMESP usa http:// em alguns endpoints)
 if ! grep -q 'usesCleartextTraffic="true"' "$MANIFEST"; then
   echo "==> Habilitando android:usesCleartextTraffic no AndroidManifest"
   if grep -q '<application' "$MANIFEST" && ! grep -q 'usesCleartextTraffic' "$MANIFEST"; then
@@ -116,10 +142,14 @@ if ! grep -q 'usesCleartextTraffic="true"' "$MANIFEST"; then
   fi
 fi
 
-echo "==> install.sh: OK"
+echo "==> install.sh: OK (GeckoView $GECKOVIEW_VERSION)"
 echo "--- MainActivity ---"
 cat "${MAIN_ACT_JAVA:-$MAIN_ACT_KT}" 2>/dev/null || cat "$MAIN_ACT_KT"
 echo "--- app/build.gradle ---"
 cat "$APP_GRADLE"
+echo "--- root build.gradle ---"
+cat "$ROOT_GRADLE"
+echo "--- settings.gradle ---"
+cat "$SETTINGS_GRADLE" 2>/dev/null || true
 echo "--- AndroidManifest ---"
 cat "$MANIFEST"

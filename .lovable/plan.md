@@ -1,37 +1,49 @@
-## Diagnóstico
+Do I know what the issue is? Sim.
 
-O plugin nativo `InAppWebView` está sendo aberto (a Activity sobe), mas a WebView mostra **tela branca**. Três causas prováveis, todas tratáveis de uma vez:
+O navegador interno atual ainda usa Android WebView. Em muitos aparelhos Samsung/Android, esse WebView é fornecido pelo Chrome/Android System WebView; se ele estiver bloqueado, desatualizado ou com problema de rede, o app abre a Activity, mostra a barra superior e o conteúdo fica branco — exatamente como na imagem.
 
-1. **Cleartext HTTP bloqueado**. A intranet PMESP tem endpoints `http://ms.policiamilitar.sp.gov.br/...`. Desde o Android 9, WebView **bloqueia HTTP por padrão** e mostra página em branco sem mensagem. Falta `android:usesCleartextTraffic="true"` no `<application>` do `AndroidManifest.xml`.
-2. **Sem feedback de erro**. Hoje o `WebViewClient` não implementa `onReceivedError`/`onReceivedHttpError` — se a URL falha (VPN desligada, DNS, timeout, certificado), a tela simplesmente fica branca em vez de explicar o motivo.
-3. **VPN AnyConnect desligada**. Domínios `*.intranet.policiamilitar.sp.gov.br` e `correio.policiamilitar.sp.gov.br` exigem AnyConnect ativo. Sem feedback (item 2), parece bug do app.
+Plano de correção definitiva:
 
-## Mudanças
+1. Trocar o motor do navegador interno
+   - Substituir o uso de `android.webkit.WebView` por `Mozilla GeckoView`, o mesmo motor usado pelo Firefox.
+   - Isso remove a dependência prática do Chrome/Android System WebView.
+   - Manter tudo dentro do app, sem abrir navegador externo.
 
-### 1) `android-plugin/install.sh`
-Adicionar passo idempotente que injeta `android:usesCleartextTraffic="true"` no `<application>` do `AndroidManifest.xml` (só se ainda não estiver lá).
+2. Manter a estrutura de navegador normal dentro do aplicativo
+   - Barra superior com título, recarregar e fechar.
+   - Barra inferior com voltar e avançar.
+   - Suporte a JavaScript, cookies, DOM storage, redirecionamentos e páginas de login.
+   - Links `target=_blank` / popups devem abrir na mesma aba interna, não em tela branca.
 
-### 2) `android-plugin/InAppWebViewActivity.kt`
-- Implementar `onReceivedError`, `onReceivedHttpError` e `onReceivedSslError` para renderizar uma **página de erro HTML embutida** dentro da própria WebView, com:
-  - Título do erro + URL que falhou
-  - Código/descrição (ex: `ERR_CLEARTEXT_NOT_PERMITTED`, `ERR_NAME_NOT_RESOLVED`, `ERR_CONNECTION_TIMED_OUT`)
-  - Aviso visível: "Verifique se o AnyConnect está conectado"
-  - Botão "Tentar de novo" (recarrega) e "Abrir no Chrome externo"
-- Logar via `android.util.Log.e("InAppWebView", …)` pra facilitar `adb logcat`.
-- Manter `onReceivedSslError` aceitando certs (já está) mas só pra hosts `.policiamilitar.sp.gov.br`.
+3. Corrigir iNotes, folha e demais links
+   - `Email iNotes` e `Folha de Pagamento` abrirão direto no GeckoView interno.
+   - Links da intranet continuarão abrindo no mesmo navegador interno quando a VPN estiver ativa.
+   - Quando a VPN estiver desligada em link de intranet, exibir erro claro em vez de tela branca.
 
-### 3) Nada muda no frontend
-O fluxo TS (`openInAppBrowser` → `InAppWebView.open`) já está correto. Tudo é correção no lado Android nativo + script de instalação.
+4. Preservar PDFs de escala
+   - Consulta de escala continuará abrindo o fluxo de PDF.
+   - O PDF continuará sendo baixado automaticamente e registrado em `Escalas baixadas`.
+   - O visualizador offline já criado continuará sendo usado para abrir PDFs salvos sem internet.
 
-## Como validar depois do próximo build
+5. Ajustar build Android
+   - Atualizar `android-plugin/install.sh` para adicionar a dependência do GeckoView e o repositório Maven da Mozilla.
+   - Instalar/copiar a nova Activity Kotlin no projeto Android durante o build do APK.
+   - Manter permissões de internet, cleartext para domínios PMESP e aceleração de hardware.
 
-1. Build do APK no GitHub Actions deve continuar verde (mudanças são em `install.sh` e `.kt`, não em Gradle).
-2. Instalar APK novo, abrir "Email iNotes" SEM AnyConnect → deve mostrar a tela de erro com mensagem clara (e não mais tela branca).
-3. Conectar AnyConnect, abrir o mesmo link → deve carregar normalmente.
-4. Abrir "Marcar / Desmarcar" (HTTPS intranet) com VPN → deve carregar.
+Arquivos previstos:
 
-## O que NÃO faz parte
+```text
+android-plugin/InAppWebViewActivity.kt
+android-plugin/install.sh
+android-plugin/InAppWebViewPlugin.kt, se precisar adaptar extras
+src/lib/in-app-browser.ts, se precisar ajustar user-agent/título
+APK-BUILD.md, apenas para documentar que o APK agora usa GeckoView/Firefox engine
+```
 
-- Não mexer no fluxo de VPN nem em `vpn-guard.tsx`.
-- Não mexer no `package.json`/Gradle/Kotlin (já estabilizado em 2.1.0).
-- Não trocar o plugin por `@capacitor/inappbrowser` — já foi descartado por incompatibilidade com `.gov.br`.
+Resultado esperado após novo APK:
+
+- iNotes não fica mais em tela branca.
+- Folha de pagamento abre no navegador interno.
+- Marcar/Desmarcar, Agenda e Delegada abrem no navegador interno com VPN ligada.
+- Consulta de escala baixa o PDF e aparece em `Escalas baixadas`.
+- O app não depende mais do Chrome para renderizar páginas internas.
