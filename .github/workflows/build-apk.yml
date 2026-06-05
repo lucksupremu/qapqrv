@@ -70,10 +70,15 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK artifact
+      - name: List APK sizes
+        run: |
+          echo "--- APKs gerados ---"
+          ls -lh android/app/build/outputs/apk/debug/ || true
+
+      - name: Upload APK artifacts (por arquitetura)
         uses: actions/upload-artifact@v4
         with:
           name: qapqrv-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
