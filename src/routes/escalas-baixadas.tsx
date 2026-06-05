@@ -89,8 +89,9 @@ function DownloadedReportsScreen() {
             prev.map((item) => (item.id === e.id ? { ...item, localPath: path, hasPdf: true } : item)),
           );
         }
-      } catch {
-        toast.error("Não foi possível abrir o PDF. Instale um leitor de PDF e tente novamente.");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        toast.error(msg || "Não foi possível abrir o PDF. Instale um leitor de PDF e tente novamente.");
       }
       return;
     }
