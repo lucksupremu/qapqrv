@@ -28,7 +28,7 @@ import appLogo from "@/assets/app-logo.png";
 
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { salvarEscalaEmBackground } from "@/lib/escala-download";
-import { upsertEscala } from "@/lib/escalas-baixadas";
+import { upsertEscala, lerLista } from "@/lib/escalas-baixadas";
 import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 
@@ -121,8 +121,7 @@ function HomeScreen() {
 
     const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?nuesc=${encodeURIComponent(id)}`;
 
-    // Registra a escala em "Escalas baixadas" sempre — no APK também tenta
-    // baixar o PDF em segundo plano.
+    // Registra sempre a escala na lista.
     try {
       upsertEscala({
         id,
@@ -135,20 +134,44 @@ function HomeScreen() {
     }
 
     setConsultando(true);
-    void guardIntranet(() => {
-      const nativeApp = isNativeApp();
-      const salvar = nativeApp ? salvarEscalaEmBackground(id, url) : Promise.resolve();
 
-      if (nativeApp) {
-        void openInAppBrowser(url, { titulo: `Escala ${id}` });
-        void salvar.finally(() => setConsultando(false));
-      } else if (typeof window !== "undefined") {
+    const nativeApp = isNativeApp();
+
+    // No web/PWA: a intranet retorna PDF — abre em nova aba (navegador desktop
+    // renderiza PDF nativamente). VPN é responsabilidade do usuário.
+    if (!nativeApp) {
+      if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
-        setConsultando(false);
-      } else {
-        setConsultando(false);
       }
-    }, `a escala #${id}`).catch(() => setConsultando(false));
+      setConsultando(false);
+      return;
+    }
+
+    // APK: o WebView do Android NÃO renderiza PDF inline (ficava em branco).
+    // Baixa via plugin nativo e abre no visualizador interno (react-pdf).
+    const loadingId = toast.loading(`Buscando escala #${id}…`);
+    void salvarEscalaEmBackground(id, url)
+      .then(() => {
+        // Verifica se o PDF foi de fato salvo.
+        try {
+          const item = lerLista().find((x) => x.id === id);
+          if (item?.hasPdf) {
+            toast.success(`Escala #${id} carregada.`, { id: loadingId });
+            navigate({ to: "/escala-viewer/$id", params: { id } });
+            return;
+          }
+        } catch {
+          /* ignore */
+        }
+        // Fallback: download falhou (sem VPN, sem cookies, etc.) — abre no WebView.
+        toast.dismiss(loadingId);
+        void openInAppBrowser(url, { titulo: `Escala ${id}` });
+      })
+      .catch(() => {
+        toast.dismiss(loadingId);
+        void openInAppBrowser(url, { titulo: `Escala ${id}` });
+      })
+      .finally(() => setConsultando(false));
   };
 
   // Paleta sistemática: primário (azul institucional) e accent (dourado do logo),
