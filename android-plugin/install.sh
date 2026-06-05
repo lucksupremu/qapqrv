@@ -48,6 +48,13 @@ fi
 if [ -f "$ROOT_GRADLE" ]; then
   sed -i -E "s#org.jetbrains.kotlin:kotlin-gradle-plugin:[0-9A-Za-z.+_-]+#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
   sed -i "s#org.jetbrains.kotlin:kotlin-gradle-plugin:\${kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
+  sed -i -E "s#kotlin_version[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]#kotlin_version = '$KOTLIN_VERSION'#g" "$ROOT_GRADLE"
+  sed -i -E "s#kotlinVersion[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]#kotlinVersion = '$KOTLIN_VERSION'#g" "$ROOT_GRADLE"
+  sed -i -E "s#(id[[:space:]]+['\"]org\.jetbrains\.kotlin\.(android|jvm)['\"][[:space:]]+version[[:space:]]+['\"])[^'\"]+(['\"])#\1$KOTLIN_VERSION\3#g" "$ROOT_GRADLE"
+fi
+
+if [ -f "$SETTINGS_GRADLE" ]; then
+  sed -i -E "s#(id[[:space:]]+['\"]org\.jetbrains\.kotlin\.(android|jvm)['\"][[:space:]]+version[[:space:]]+['\"])[^'\"]+(['\"])#\1$KOTLIN_VERSION\3#g" "$SETTINGS_GRADLE"
 fi
 
 VARS_GRADLE="android/variables.gradle"
