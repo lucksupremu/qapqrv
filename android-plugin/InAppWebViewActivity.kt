@@ -315,21 +315,8 @@ class InAppWebViewActivity : Activity() {
             setOnClickListener { if (webView.canGoForward()) webView.goForward() }
             layoutParams = LinearLayout.LayoutParams(0, dp(44), 1f)
         }
-        val btnExternal = ImageButton(this).apply {
-            setImageResource(android.R.drawable.ic_menu_share)
-            setColorFilter(TOOLBAR_BG)
-            background = null
-            setOnClickListener {
-                try {
-                    val u = webView.url ?: return@setOnClickListener
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(u)))
-                } catch (_: Throwable) {}
-            }
-            layoutParams = LinearLayout.LayoutParams(0, dp(44), 1f)
-        }
         bottomBar.addView(btnBack)
         bottomBar.addView(btnForward)
-        bottomBar.addView(btnExternal)
 
         root.addView(toolbar)
         root.addView(progressBar)
@@ -376,6 +363,61 @@ class InAppWebViewActivity : Activity() {
         WebViewClient.ERROR_TOO_MANY_REQUESTS -> "ERR_TOO_MANY_REQUESTS"
         -10 -> "ERR_UNSUPPORTED_SCHEME"
         else -> "ERR_$code"
+    }
+
+    private fun isPdfLikeUrl(url: String): Boolean {
+        val lower = url.lowercase()
+        return lower.endsWith(".pdf") ||
+            lower.contains(".pdf?") ||
+            lower.contains("arrelconesc.aspx")
+    }
+
+    private fun downloadPdfToDownloads(dlUrl: String, contentDisposition: String?, mimeType: String?) {
+        try {
+            val safeMime = mimeType?.takeIf { it.isNotBlank() } ?: "application/pdf"
+            val guessed = URLUtil.guessFileName(dlUrl, contentDisposition, safeMime)
+            val fileName = if (guessed.endsWith(".pdf", ignoreCase = true)) guessed else "$guessed.pdf"
+            val req = DownloadManager.Request(Uri.parse(dlUrl))
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+                .setMimeType("application/pdf")
+                .setAllowedOverMetered(true)
+                .setAllowedOverRoaming(true)
+            CookieManager.getInstance().getCookie(dlUrl)?.let { req.addRequestHeader("Cookie", it) }
+            val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            dm.enqueue(req)
+            Toast.makeText(this, "PDF baixando: $fileName", Toast.LENGTH_SHORT).show()
+        } catch (e: Throwable) {
+            Log.e("InAppWebView", "downloadPdfToDownloads falhou url=$dlUrl", e)
+            Toast.makeText(this, "Falha ao baixar PDF: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun showDownloadedPdfPage(pdfUrl: String) {
+        val safeUrl = pdfUrl.replace("&", "&amp;").replace("<", "&lt;")
+        val html = """
+            <!DOCTYPE html>
+            <html lang="pt-br"><head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <style>
+              body{font-family:-apple-system,Roboto,sans-serif;margin:0;padding:24px;background:#f6f8fb;color:#1f2d3d}
+              .card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 4px 16px rgba(46,107,138,.08);max-width:520px;margin:24px auto}
+              h1{color:#2e6b8a;font-size:20px;margin:0 0 8px}
+              p{line-height:1.5;color:#5b7a8f;font-size:14px;margin:8px 0}
+              .url{font-size:12px;color:#7a8fa3;word-break:break-all;margin-top:12px}
+              button{width:100%;height:44px;border-radius:12px;border:0;background:#2e6b8a;color:#fff;font-size:14px;font-weight:600;margin-top:18px}
+            </style></head>
+            <body>
+              <div class="card">
+                <h1>PDF enviado para download</h1>
+                <p>O Android está baixando este PDF. A escala consultada também ficará registrada em <b>Escalas baixadas</b> dentro do aplicativo.</p>
+                <div class="url">$safeUrl</div>
+                <button onclick="location.href='$safeUrl'">Baixar novamente</button>
+              </div>
+            </body></html>
+        """.trimIndent()
+        webView.loadDataWithBaseURL(pdfUrl, html, "text/html", "UTF-8", pdfUrl)
     }
 
     private fun showErrorPage(failingUrl: String, codeName: String, description: String) {
@@ -427,7 +469,6 @@ class InAppWebViewActivity : Activity() {
                 <div class="url">$safeUrl</div>
                 <div class="row">
                   <button class="primary" onclick="location.href='$safeUrl'">Tentar de novo</button>
-                  <button class="ghost" onclick="window.AndroidOpenExternal && window.AndroidOpenExternal.open()">Abrir no Chrome</button>
                 </div>
               </div>
             </body></html>
