@@ -194,9 +194,10 @@ class InAppWebViewActivity : Activity() {
                         return true
                     }
                 }
-                val transport = resultMsg?.obj as? WebView.WebViewTransport ?: return false
+                val msg = resultMsg ?: return false
+                val transport = msg.obj as? WebView.WebViewTransport ?: return false
                 transport.webView = popup
-                resultMsg.sendToTarget()
+                msg.sendToTarget()
                 return true
             }
 
