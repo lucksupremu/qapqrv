@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -111,6 +112,38 @@ class InAppWebViewActivity : Activity() {
                 // Intranet PMESP tem cert auto-assinado em algumas pontas.
                 // Em vez de bloquear, prossegue (usuário já está na VPN).
                 handler?.proceed()
+            }
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: android.webkit.WebResourceError?,
+            ) {
+                super.onReceivedError(view, request, error)
+                // Só mostra a tela de erro se for o frame principal
+                if (request?.isForMainFrame != true) return
+                val code = error?.errorCode ?: 0
+                val desc = error?.description?.toString() ?: "Erro desconhecido"
+                val failingUrl = request.url?.toString() ?: ""
+                Log.e("InAppWebView", "onReceivedError code=$code desc=$desc url=$failingUrl")
+                showErrorPage(failingUrl, errorCodeName(code), desc)
+            }
+
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: android.webkit.WebResourceResponse?,
+            ) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                if (request?.isForMainFrame != true) return
+                val status = errorResponse?.statusCode ?: 0
+                val reason = errorResponse?.reasonPhrase ?: ""
+                val failingUrl = request.url?.toString() ?: ""
+                Log.e("InAppWebView", "onReceivedHttpError $status $reason url=$failingUrl")
+                // Só sobrescreve a tela em 4xx/5xx do documento principal
+                if (status >= 400) {
+                    showErrorPage(failingUrl, "HTTP $status", reason.ifBlank { "Erro do servidor" })
+                }
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -292,4 +325,81 @@ class InAppWebViewActivity : Activity() {
 
     private fun dp(v: Int): Int =
         (v * resources.displayMetrics.density).toInt()
+
+    private fun errorCodeName(code: Int): String = when (code) {
+        WebViewClient.ERROR_HOST_LOOKUP -> "ERR_NAME_NOT_RESOLVED"
+        WebViewClient.ERROR_CONNECT -> "ERR_CONNECTION_REFUSED"
+        WebViewClient.ERROR_TIMEOUT -> "ERR_CONNECTION_TIMED_OUT"
+        WebViewClient.ERROR_UNKNOWN -> "ERR_UNKNOWN"
+        WebViewClient.ERROR_BAD_URL -> "ERR_BAD_URL"
+        WebViewClient.ERROR_FAILED_SSL_HANDSHAKE -> "ERR_SSL_HANDSHAKE"
+        WebViewClient.ERROR_PROXY_AUTHENTICATION -> "ERR_PROXY_AUTH"
+        WebViewClient.ERROR_REDIRECT_LOOP -> "ERR_REDIRECT_LOOP"
+        WebViewClient.ERROR_UNSUPPORTED_AUTH_SCHEME -> "ERR_UNSUPPORTED_AUTH"
+        WebViewClient.ERROR_UNSUPPORTED_SCHEME -> "ERR_UNSUPPORTED_SCHEME"
+        WebViewClient.ERROR_AUTHENTICATION -> "ERR_AUTHENTICATION"
+        WebViewClient.ERROR_FILE -> "ERR_FILE"
+        WebViewClient.ERROR_FILE_NOT_FOUND -> "ERR_FILE_NOT_FOUND"
+        WebViewClient.ERROR_TOO_MANY_REQUESTS -> "ERR_TOO_MANY_REQUESTS"
+        -10 -> "ERR_UNSUPPORTED_SCHEME"
+        else -> "ERR_$code"
+    }
+
+    private fun showErrorPage(failingUrl: String, codeName: String, description: String) {
+        val ehIntranet = failingUrl.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
+            failingUrl.contains("intranet", ignoreCase = true)
+        val dicaVpn = if (ehIntranet) {
+            "<div class='warn'>⚠️ Este é um endereço da intranet PMESP. " +
+                "Verifique se o <b>AnyConnect</b> está conectado antes de tentar novamente.</div>"
+        } else ""
+        val cleartext = if (codeName == "ERR_CLEARTEXT_NOT_PERMITTED" ||
+            description.contains("cleartext", ignoreCase = true)
+        ) {
+            "<div class='warn'>O sistema bloqueou uma conexão HTTP não-segura. " +
+                "Reinstale a versão mais recente do APK.</div>"
+        } else ""
+        val safeUrl = failingUrl.replace("&", "&amp;").replace("<", "&lt;")
+        val safeDesc = description.replace("&", "&amp;").replace("<", "&lt;")
+        val html = """
+            <!DOCTYPE html>
+            <html lang="pt-br"><head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <style>
+              body{font-family:-apple-system,Roboto,sans-serif;margin:0;padding:24px;
+                   background:#f6f8fb;color:#1f2d3d}
+              .card{background:#fff;border-radius:16px;padding:24px;
+                    box-shadow:0 4px 16px rgba(46,107,138,.08);max-width:520px;margin:24px auto}
+              h1{color:#2e6b8a;font-size:20px;margin:0 0 8px}
+              p{line-height:1.5;color:#5b7a8f;font-size:14px;margin:8px 0}
+              .code{font-family:monospace;background:#eef3f8;color:#2e6b8a;
+                    padding:6px 10px;border-radius:8px;display:inline-block;
+                    font-size:12px;margin-top:8px;word-break:break-all}
+              .url{font-size:12px;color:#7a8fa3;word-break:break-all;margin-top:12px}
+              .warn{background:#fff4e0;border-left:4px solid #f0a020;
+                    padding:12px;border-radius:8px;margin:16px 0;font-size:14px;color:#8a5a00}
+              .row{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+              button{flex:1;min-width:140px;height:44px;border-radius:12px;border:0;
+                     font-size:14px;font-weight:600;cursor:pointer}
+              .primary{background:#2e6b8a;color:#fff}
+              .ghost{background:#fff;color:#2e6b8a;border:2px solid #2e6b8a}
+            </style></head>
+            <body>
+              <div class="card">
+                <h1>Não foi possível abrir a página</h1>
+                <p>$safeDesc</p>
+                <div class="code">$codeName</div>
+                $dicaVpn
+                $cleartext
+                <div class="url">$safeUrl</div>
+                <div class="row">
+                  <button class="primary" onclick="location.href='$safeUrl'">Tentar de novo</button>
+                  <button class="ghost" onclick="window.AndroidOpenExternal && window.AndroidOpenExternal.open()">Abrir no Chrome</button>
+                </div>
+              </div>
+            </body></html>
+        """.trimIndent()
+        // Carrega com base URL pra manter o histórico/recarregar funcionando
+        webView.loadDataWithBaseURL(failingUrl, html, "text/html", "UTF-8", failingUrl)
+    }
 }
