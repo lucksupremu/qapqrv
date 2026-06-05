@@ -41,17 +41,17 @@ jobs:
             bunx cap add android
           fi
 
-      - name: Patch minSdkVersion to 26 (required by @capacitor/inappbrowser)
-        run: |
-          sed -i 's/minSdkVersion = 24/minSdkVersion = 26/' android/variables.gradle
-          echo "--- variables.gradle ---"
-          cat android/variables.gradle
+
+
 
       - name: Generate APK assets (icon + splash)
         run: bunx capacitor-assets generate --android || true
 
       - name: Capacitor sync
         run: bunx cap sync android
+
+      - name: Install native Android plugins (VpnStatus + InAppWebView)
+        run: bash android-plugin/install.sh
 
       - name: Patch AndroidManifest with AdMob APPLICATION_ID
         run: |
@@ -61,6 +61,8 @@ jobs:
           fi
           echo "--- AndroidManifest.xml ---"
           cat "$MANIFEST"
+
+
 
       - name: Build debug APK
         working-directory: android

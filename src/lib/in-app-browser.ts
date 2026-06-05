@@ -1,12 +1,11 @@
 // Abre links externos em um navegador interno.
-// - No app nativo (Capacitor): usa @capacitor/inappbrowser
-// - No web (navegador comum): abre nova aba
-//
-// Importes do Capacitor são DINÂMICOS para evitar quebrar o SSR — o
-// pacote toca `window`/`navigator` no carregamento.
-import type { InAppBrowserPlugin } from "@capacitor/inappbrowser";
+// - No app nativo (Capacitor Android): usa nosso plugin próprio
+//   `InAppWebView` (WebView nativa em Activity dedicada — controle total
+//   de UA, cookies, JS, zoom). Resolve o problema de acesso à intranet
+//   PMESP que o @capacitor/inappbrowser não conseguia.
+// - No web (navegador comum): abre nova aba.
 
-type InAppBrowserModule = typeof import("@capacitor/inappbrowser");
+import { InAppWebView } from "./in-app-webview";
 
 type CapacitorWindow = Window & {
   Capacitor?: {
@@ -16,10 +15,11 @@ type CapacitorWindow = Window & {
 
 export type AbrirOpts = {
   titulo?: string;
-  /** Mantém no WebView interno por padrão; usa Custom Tabs como fallback. */
+  /** Mantido por compatibilidade — não tem mais efeito (sempre WebView interna). */
   modo?: "webview" | "system" | "external";
+  /** Mantido por compatibilidade — sem efeito. */
   timeoutMs?: number;
-  /** Força UA mobile e desabilita fallback p/ Custom Tabs (que herda UA do Chrome do device). */
+  /** Mantido por compatibilidade — sempre força UA mobile interno. */
   forceMobileUA?: boolean;
 };
 
@@ -32,33 +32,9 @@ function normalizarUrl(url: string) {
   return `https://${clean}`;
 }
 
-async function openSystemBrowser(
-  InAppBrowser: InAppBrowserPlugin,
-  mod: InAppBrowserModule,
-  url: string,
-) {
-  await InAppBrowser.openInSystemBrowser({
-    url,
-    options: {
-      ...mod.DefaultSystemBrowserOptions,
-      android: {
-        ...mod.DefaultAndroidSystemBrowserOptions,
-        showTitle: true,
-        hideToolbarOnScroll: false,
-      },
-      iOS: {
-        ...mod.DefaultiOSSystemBrowserOptions,
-        closeButtonText: mod.DismissStyle.DONE,
-      },
-    },
-  });
-}
-
 export function isNativeApp(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    // require síncrono não funciona em ESM; usamos a global que o Capacitor
-    // injeta no runtime nativo. Em web, retorna false.
     const cap = (window as CapacitorWindow).Capacitor;
     return !!cap?.isNativePlatform?.();
   } catch {
@@ -67,97 +43,18 @@ export function isNativeApp(): boolean {
 }
 
 export async function openInAppBrowser(url: string, opts: AbrirOpts = {}) {
-  void opts.titulo; // reservado para futura customização da toolbar
   const targetUrl = normalizarUrl(url);
-  // Padrão: forçar WebView interna do app + UA mobile próprio.
-  // O Chrome / Custom Tabs está bloqueando o acesso à intranet PMESP, então
-  // NÃO caímos mais para o navegador do sistema automaticamente.
-  const forceMobileUA = opts.forceMobileUA ?? true;
 
   if (isNativeApp()) {
     try {
-      const mod = await import("@capacitor/inappbrowser");
-      const { InAppBrowser } = mod;
-
-      if (opts.modo === "external") {
-        await InAppBrowser.openInExternalBrowser({ url: targetUrl });
-        return;
-      }
-
-      if (opts.modo === "system") {
-        await openSystemBrowser(InAppBrowser, mod, targetUrl);
-        return;
-      }
-
-      let loaded = false;
-      let closed = false;
-      const fallbackTimer: { current?: number } = {};
-      const removeHandles: Array<{ remove: () => Promise<void> }> = [];
-
-      const cleanup = () => {
-        if (fallbackTimer.current) window.clearTimeout(fallbackTimer.current);
-        void Promise.allSettled(removeHandles.map((handle) => handle.remove()));
-      };
-
-      await InAppBrowser.removeAllListeners?.();
-      removeHandles.push(
-        await InAppBrowser.addListener("browserPageLoaded", () => {
-          loaded = true;
-          cleanup();
-        }),
-      );
-      removeHandles.push(
-        await InAppBrowser.addListener("browserPageNavigationCompleted", () => {
-          loaded = true;
-          cleanup();
-        }),
-      );
-      removeHandles.push(
-        await InAppBrowser.addListener("browserClosed", () => {
-          closed = true;
-          cleanup();
-        }),
-      );
-
-      fallbackTimer.current = window.setTimeout(() => {
-        if (loaded || closed) return;
-        // Não cai mais para o Custom Tabs (Chrome). Apenas fecha a WebView;
-        // o usuário vê a tela anterior com aviso de VPN/erro.
-        if (forceMobileUA) return;
-        closed = true;
-        void InAppBrowser.close()
-          .catch(() => undefined)
-          .finally(() => openSystemBrowser(InAppBrowser, mod, targetUrl).catch(() => undefined));
-      }, opts.timeoutMs ?? 22000);
-
-      await InAppBrowser.openInWebView({
+      await InAppWebView.open({
         url: targetUrl,
-        options: {
-          ...mod.DefaultWebViewOptions,
-          clearCache: false,
-          clearSessionCache: false,
-          showToolbar: true,
-          showURL: true,
-          showNavigationButtons: true,
-          closeButtonText: "Fechar",
-          customWebViewUserAgent: ANDROID_CHROME_UA,
-          android: {
-            ...mod.DefaultAndroidWebViewOptions,
-            allowZoom: true,
-            hardwareBack: true,
-            pauseMedia: true,
-            isIsolated: false,
-          },
-          iOS: {
-            ...mod.DefaultiOSWebViewOptions,
-            allowsBackForwardNavigationGestures: true,
-            enableViewportScale: true,
-          },
-        },
+        title: opts.titulo ?? "",
+        userAgent: ANDROID_CHROME_UA,
       });
       return;
     } catch (e) {
-      console.warn("InAppBrowser indisponível, fallback web", e);
+      console.warn("InAppWebView indisponível, fallback web", e);
     }
   }
 
