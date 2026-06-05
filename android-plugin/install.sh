@@ -15,7 +15,7 @@ MANIFEST="android/app/src/main/AndroidManifest.xml"
 APP_GRADLE="android/app/build.gradle"
 ROOT_GRADLE="android/build.gradle"
 SETTINGS_GRADLE="android/settings.gradle"
-KOTLIN_VERSION="2.1.0"
+KOTLIN_VERSION="2.3.10"
 # GeckoView estável (motor do Firefox) — independe do Android System WebView / Chrome.
 GECKOVIEW_VERSION="149.0.20260403140140"
 
@@ -35,6 +35,7 @@ if [ -f "$APP_GRADLE" ] && ! grep -q "kotlin-android" "$APP_GRADLE"; then
 fi
 
 if [ -f "$APP_GRADLE" ]; then
+  sed -i -E "s#org.jetbrains.kotlin:kotlin-stdlib:[0-9A-Za-z.+_-]+#org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION#g" "$APP_GRADLE"
   sed -i "s#org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION#g" "$APP_GRADLE"
 fi
 
@@ -45,7 +46,13 @@ if [ -f "$ROOT_GRADLE" ] && ! grep -q "kotlin-gradle-plugin" "$ROOT_GRADLE"; the
 fi
 
 if [ -f "$ROOT_GRADLE" ]; then
+  sed -i -E "s#org.jetbrains.kotlin:kotlin-gradle-plugin:[0-9A-Za-z.+_-]+#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
   sed -i "s#org.jetbrains.kotlin:kotlin-gradle-plugin:\${kotlin_version ?: '1.9.25'}#org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION#g" "$ROOT_GRADLE"
+fi
+
+VARS_GRADLE="android/variables.gradle"
+if [ -f "$VARS_GRADLE" ] && grep -q "kotlin_version" "$VARS_GRADLE"; then
+  sed -i -E "s#kotlin_version[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]#kotlin_version = '$KOTLIN_VERSION'#g" "$VARS_GRADLE"
 fi
 
 # ----- Adiciona repositório Maven da Mozilla (necessário para GeckoView) -----
