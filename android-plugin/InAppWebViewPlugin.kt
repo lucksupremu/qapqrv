@@ -75,7 +75,7 @@ class InAppWebViewPlugin : Plugin() {
                 }
                 val status = conn.responseCode
                 if (status !in 200..299) {
-                    call.reject("HTTP $status")
+                    getActivity().runOnUiThread { call.reject("HTTP $status") }
                     conn.disconnect()
                     return@thread
                 }
@@ -86,9 +86,9 @@ class InAppWebViewPlugin : Plugin() {
                 ret.put("path", "escalas/$safeId.pdf")
                 ret.put("size", out.length())
                 ret.put("mime", "application/pdf")
-                call.resolve(ret)
+                getActivity().runOnUiThread { call.resolve(ret) }
             } catch (e: Throwable) {
-                call.reject(e.message ?: "Falha ao baixar PDF", e)
+                getActivity().runOnUiThread { call.reject(e.message ?: "Falha ao baixar PDF", e) }
             }
         }
     }
