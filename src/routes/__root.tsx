@@ -110,18 +110,30 @@ function RootComponent() {
       : window.setTimeout(loadAds, 1500);
 
     // Inicializa AdMob e mostra App Open Ad (apenas no APK nativo).
-    // Também dispara o ad quando o app volta de background.
+    // Só dispara após retorno de background longo (>30s) — evita derrubar
+    // a Activity recém-resumida quando o usuário volta rapidamente do
+    // AnyConnect ou de outro app.
     let removeAppListener: (() => void) | null = null;
     if (isNativeApp()) {
       import("@/lib/admob").then(({ initAdMob, showAppOpenAd }) => {
         initAdMob().then(() => {
-          showAppOpenAd();
+          try { showAppOpenAd(); } catch (e) { console.warn("[admob] cold start show falhou", e); }
         });
 
+        let lastBackgroundedAt = 0;
+        const MIN_BG_MS = 30_000;
         import("@capacitor/app").then(({ App }) => {
           App.addListener("appStateChange", (state: { isActive: boolean }) => {
-            if (state.isActive) {
+            try {
+              if (!state.isActive) {
+                lastBackgroundedAt = Date.now();
+                return;
+              }
+              if (lastBackgroundedAt === 0) return;
+              if (Date.now() - lastBackgroundedAt < MIN_BG_MS) return;
               showAppOpenAd();
+            } catch (e) {
+              console.warn("[admob] resume show falhou", e);
             }
           }).then((handle: { remove: () => void }) => {
             removeAppListener = () => handle.remove();
