@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Message
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -45,7 +46,7 @@ class InAppWebViewActivity : Activity() {
 
         private const val DEFAULT_UA =
             "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                "(KHTML, like Gecko) Version/4.0 Mobile Safari/537.36 QAPQRVWebView/1.0"
 
         private const val TOOLBAR_BG = 0xFF2E6B8A.toInt()
         private const val TOOLBAR_FG = Color.WHITE
@@ -80,6 +81,8 @@ class InAppWebViewActivity : Activity() {
             databaseEnabled = true
             loadWithOverviewMode = true
             useWideViewPort = true
+            setSupportMultipleWindows(true)
+            javaScriptCanOpenWindowsAutomatically = true
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = false
@@ -101,6 +104,11 @@ class InAppWebViewActivity : Activity() {
                         true
                     } catch (_: Throwable) { true }
                 }
+                if (isPdfLikeUrl(u)) {
+                    downloadPdfToDownloads(u, null, "application/pdf")
+                    showDownloadedPdfPage(u)
+                    return true
+                }
                 return false
             }
 
@@ -109,9 +117,12 @@ class InAppWebViewActivity : Activity() {
                 handler: SslErrorHandler?,
                 error: android.net.http.SslError?,
             ) {
-                // Intranet PMESP tem cert auto-assinado em algumas pontas.
-                // Em vez de bloquear, prossegue (usuário já está na VPN).
-                handler?.proceed()
+                val host = error?.url.orEmpty().lowercase()
+                if (host.contains("policiamilitar.sp.gov.br")) {
+                    handler?.proceed()
+                } else {
+                    handler?.cancel()
+                }
             }
 
             override fun onReceivedError(
@@ -154,6 +165,33 @@ class InAppWebViewActivity : Activity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(
+                view: WebView?,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message?,
+            ): Boolean {
+                val popup = WebView(this@InAppWebViewActivity)
+                popup.settings.javaScriptEnabled = true
+                popup.settings.domStorageEnabled = true
+                popup.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(v: WebView, request: WebResourceRequest): Boolean {
+                        val target = request.url.toString()
+                        if (isPdfLikeUrl(target)) {
+                            downloadPdfToDownloads(target, null, "application/pdf")
+                            showDownloadedPdfPage(target)
+                        } else {
+                            webView.loadUrl(target)
+                        }
+                        return true
+                    }
+                }
+                val transport = resultMsg?.obj as? WebView.WebViewTransport ?: return false
+                transport.webView = popup
+                resultMsg.sendToTarget()
+                return true
+            }
+
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 progressBar.progress = newProgress
                 progressBar.visibility = if (newProgress >= 100) View.GONE else View.VISIBLE
@@ -166,23 +204,18 @@ class InAppWebViewActivity : Activity() {
 
         // Downloads (PDFs de escala, etc.) → DownloadManager do Android
         webView.setDownloadListener(DownloadListener { dlUrl, _, contentDisposition, mimeType, _ ->
-            try {
-                val fileName = URLUtil.guessFileName(dlUrl, contentDisposition, mimeType)
-                val req = DownloadManager.Request(Uri.parse(dlUrl))
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                    .setMimeType(mimeType)
-                    .setAllowedOverMetered(true)
-                    .setAllowedOverRoaming(true)
-                val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                dm.enqueue(req)
-                Toast.makeText(this, "Baixando $fileName…", Toast.LENGTH_SHORT).show()
-            } catch (e: Throwable) {
-                Toast.makeText(this, "Falha ao baixar: ${e.message}", Toast.LENGTH_LONG).show()
+            downloadPdfToDownloads(dlUrl, contentDisposition, mimeType)
+            if ((mimeType ?: "").contains("pdf", ignoreCase = true) || isPdfLikeUrl(dlUrl)) {
+                showDownloadedPdfPage(dlUrl)
             }
         })
 
-        webView.loadUrl(url)
+        if (isPdfLikeUrl(url)) {
+            downloadPdfToDownloads(url, null, "application/pdf")
+            showDownloadedPdfPage(url)
+        } else {
+            webView.loadUrl(url)
+        }
     }
 
     private fun buildLayout(title: String): View {
