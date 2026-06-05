@@ -75,7 +75,7 @@ function EscalaViewer() {
       }
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, navigate]);
 
   // Largura responsiva
   useEffect(() => {
