@@ -23,26 +23,10 @@ async function carregarBlob(escala: EscalaSalva | undefined): Promise<Blob | nul
   } catch {
     /* ignore */
   }
-  // APK: lê do Filesystem
+  // PDFs baixados pelo plugin Android ficam em context.filesDir privado e devem
+  // ser abertos pelo FileProvider nativo, não pelo Capacitor Filesystem/react-pdf.
   if (escala.localPath) {
-    try {
-      const { Capacitor } = await import("@capacitor/core");
-      if (Capacitor.isNativePlatform()) {
-        const { Filesystem, Directory } = await import("@capacitor/filesystem");
-        const res = await Filesystem.readFile({
-          path: escala.localPath,
-          directory: Directory.Data,
-        });
-        const b64 = typeof res.data === "string" ? res.data : "";
-        if (!b64) return null;
-        const bin = atob(b64);
-        const bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        return new Blob([bytes], { type: "application/pdf" });
-      }
-    } catch (err) {
-      console.warn("Falha ao ler PDF do Filesystem", err);
-    }
+    return null;
   }
   return null;
 }
@@ -65,6 +49,22 @@ function EscalaViewer() {
     const e = all.find((x) => x.id === id);
     setEscala(e);
     (async () => {
+      if (e?.localPath) {
+        try {
+          const { Capacitor } = await import("@capacitor/core");
+          if (Capacitor.isNativePlatform()) {
+            const { InAppWebView } = await import("@/lib/in-app-webview");
+            await InAppWebView.openPdf({ path: e.localPath });
+            navigate({ to: "/escalas-baixadas" });
+            return;
+          }
+        } catch (err) {
+          console.warn("Falha ao abrir PDF nativo", err);
+          setErro("PDF baixado, mas não há leitor de PDF disponível no aparelho.");
+          setLoading(false);
+          return;
+        }
+      }
       const b = await carregarBlob(e);
       if (!b) {
         setErro(
