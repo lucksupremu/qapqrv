@@ -227,15 +227,11 @@ function HomeScreen() {
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
       onClick: () =>
-        void guardIntranet(
-          () =>
-            openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
-              titulo: "Email iNotes",
-              modo: "webview",
-              forceMobileUA: true,
-            }),
-          "o Email iNotes",
-        ),
+        openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
+          titulo: "Email iNotes",
+          modo: "webview",
+          forceMobileUA: true,
+        }),
     },
     {
       label: "Calendário",
@@ -265,13 +261,9 @@ function HomeScreen() {
       gradient: GRAD_GOLD,
       shadow: SHADOW_GOLD,
       onClick: () =>
-        void guardIntranet(
-          () =>
-            openInAppBrowser(
-              "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
-              { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
-            ),
-          "a Folha de Pagamento",
+        openInAppBrowser(
+          "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
+          { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
         ),
     },
     {
