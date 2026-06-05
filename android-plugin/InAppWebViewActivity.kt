@@ -28,6 +28,7 @@ import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.GeckoView
+import org.mozilla.geckoview.WebRequestError
 import org.mozilla.geckoview.WebResponse
 import java.io.InputStream
 import kotlin.concurrent.thread
@@ -173,9 +174,15 @@ class InAppWebViewActivity : Activity() {
             override fun onLoadError(
                 ses: GeckoSession,
                 uri: String?,
-                error: org.mozilla.geckoview.WebRequestError,
+                error: WebRequestError,
             ): GeckoResult<String>? {
                 Log.e(TAG, "onLoadError uri=$uri code=${error.code} cat=${error.category}")
+
+                if (shouldAutoAcceptPmespCertificate(uri, error)) {
+                    Log.w(TAG, "Certificado PMESP/iNotes aceito temporariamente para $uri")
+                    return GeckoResult.fromValue(buildCertificateExceptionPage(uri.orEmpty()))
+                }
+
                 mainHandler.post {
                     showErrorOverlay(uri.orEmpty(), "ERR_${error.code}", error.message ?: "Erro de carregamento")
                 }
@@ -429,8 +436,10 @@ class InAppWebViewActivity : Activity() {
     }
 
     private fun showErrorOverlay(url: String, code: String, description: String) {
-        val ehIntranet = url.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
+        val isCorreioPmesp = url.contains("correio.policiamilitar.sp.gov.br", ignoreCase = true)
+        val ehIntranet = !isCorreioPmesp && (url.contains("policiamilitar.sp.gov.br", ignoreCase = true) ||
             url.contains("intranet", ignoreCase = true)
+        )
         val hintVpn = if (ehIntranet) "\n\n⚠️ Verifique se o AnyConnect (VPN) está conectado." else ""
         errorMessage.text = "$description\n\n[$code]\n$url$hintVpn"
         errorOverlay.visibility = View.VISIBLE
@@ -440,6 +449,41 @@ class InAppWebViewActivity : Activity() {
 
     private fun hideErrorOverlay() {
         errorOverlay.visibility = View.GONE
+    }
+
+    private fun shouldAutoAcceptPmespCertificate(url: String?, error: WebRequestError): Boolean {
+        if (url.isNullOrBlank()) return false
+        val host = try { Uri.parse(url).host.orEmpty() } catch (_: Throwable) { "" }
+        val isTrustedPmespHost = host.equals("correio.policiamilitar.sp.gov.br", ignoreCase = true) ||
+            host.endsWith(".policiamilitar.sp.gov.br", ignoreCase = true)
+        val isCertificateError = error.code == WebRequestError.ERROR_SECURITY_BAD_CERT
+        return isTrustedPmespHost && isCertificateError
+    }
+
+    private fun buildCertificateExceptionPage(failedUrl: String): String {
+        val safeMessage = "Abrindo iNotes…"
+        val html = """
+            <!doctype html>
+            <html>
+            <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: sans-serif; color: #2e6b8a; background: #fff; }
+              </style>
+            </head>
+            <body>
+              <p>$safeMessage</p>
+              <script>
+                document.addCertException(true).then(function () {
+                  location.href = ${org.json.JSONObject.quote(failedUrl)};
+                }, function () {
+                  location.reload();
+                });
+              </script>
+            </body>
+            </html>
+        """.trimIndent()
+        return "data:text/html;charset=utf-8," + Uri.encode(html)
     }
 
     override fun onBackPressed() {
