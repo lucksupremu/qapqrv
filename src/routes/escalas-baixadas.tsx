@@ -75,9 +75,22 @@ function DownloadedReportsScreen() {
   const mostrarAvisoWeb = mounted && !native;
 
 
-  const handleAbrir = (e: EscalaSalva) => {
-    // Tem PDF salvo (web ou APK): abre no visualizador offline embutido.
-    if (e.hasPdf || e.localPath) {
+  const handleAbrir = async (e: EscalaSalva) => {
+    // APK: PDFs baixados pelo plugin ficam no armazenamento nativo privado.
+    // Reabre sempre pelo app PDF do aparelho; não passa pelo react-pdf/WebView,
+    // que é a origem do erro "Failed to load PDF file" visto no print.
+    if (native && e.localPath) {
+      try {
+        const { InAppWebView } = await import("@/lib/in-app-webview");
+        await InAppWebView.openPdf({ path: e.localPath });
+      } catch {
+        toast.error("Não foi possível abrir o PDF. Instale um leitor de PDF e tente novamente.");
+      }
+      return;
+    }
+
+    // Web/PWA: PDFs em IndexedDB continuam abrindo no visualizador embutido.
+    if (e.hasPdf) {
       void navigate({ to: "/escala-viewer/$id", params: { id: e.id } });
       return;
     }
