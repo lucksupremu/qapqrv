@@ -49,18 +49,51 @@ if [ -f "$ROOT_GRADLE" ]; then
 fi
 
 # ----- Adiciona repositório Maven da Mozilla (necessário para GeckoView) -----
-add_mozilla_repo() {
-  local file="$1"
-  if [ -f "$file" ] && ! grep -q "maven.mozilla.org" "$file"; then
-    echo "==> Adicionando repositório Mozilla em $file"
-    # Tenta inserir dentro de allprojects { repositories { ... } } ou repositories { ... }
-    if grep -q "repositories {" "$file"; then
-      sed -i '0,/repositories {/{s#repositories {#repositories {\n        maven { url "https://maven.mozilla.org/maven2/" }#}' "$file"
-    fi
+# Capacitor 5+/Gradle 8 usa dependencyResolutionManagement em settings.gradle
+# com RepositoriesMode.FAIL_ON_PROJECT_REPOS — então precisamos injetar lá.
+# Em projetos antigos ainda existe allprojects { repositories } no root build.gradle.
+MOZILLA_REPO_LINE='        maven { url "https://maven.mozilla.org/maven2/" }'
+
+# settings.gradle: dependencyResolutionManagement -> repositories
+if [ -f "$SETTINGS_GRADLE" ] && ! grep -q "maven.mozilla.org" "$SETTINGS_GRADLE"; then
+  if grep -q "dependencyResolutionManagement" "$SETTINGS_GRADLE"; then
+    echo "==> Adicionando repositório Mozilla em dependencyResolutionManagement ($SETTINGS_GRADLE)"
+    # Insere depois da PRIMEIRA "repositories {" que aparece após dependencyResolutionManagement
+    python3 - "$SETTINGS_GRADLE" <<'PY'
+import sys, re
+p = sys.argv[1]
+s = open(p).read()
+m = re.search(r'dependencyResolutionManagement\s*\{', s)
+if m:
+    rest = s[m.end():]
+    rm = re.search(r'repositories\s*\{', rest)
+    if rm:
+        ins_at = m.end() + rm.end()
+        s = s[:ins_at] + '\n        maven { url "https://maven.mozilla.org/maven2/" }' + s[ins_at:]
+        open(p,'w').write(s)
+PY
   fi
-}
-add_mozilla_repo "$ROOT_GRADLE"
-add_mozilla_repo "$SETTINGS_GRADLE"
+fi
+
+# root build.gradle: allprojects { repositories { ... } } (fallback)
+if [ -f "$ROOT_GRADLE" ] && ! grep -q "maven.mozilla.org" "$ROOT_GRADLE"; then
+  if grep -q "allprojects" "$ROOT_GRADLE"; then
+    echo "==> Adicionando repositório Mozilla em allprojects ($ROOT_GRADLE)"
+    python3 - "$ROOT_GRADLE" <<'PY'
+import sys, re
+p = sys.argv[1]
+s = open(p).read()
+m = re.search(r'allprojects\s*\{', s)
+if m:
+    rest = s[m.end():]
+    rm = re.search(r'repositories\s*\{', rest)
+    if rm:
+        ins_at = m.end() + rm.end()
+        s = s[:ins_at] + '\n        maven { url "https://maven.mozilla.org/maven2/" }' + s[ins_at:]
+        open(p,'w').write(s)
+PY
+  fi
+fi
 
 # ----- Adiciona dependência GeckoView ao módulo :app -----
 if [ -f "$APP_GRADLE" ] && ! grep -q "org.mozilla.geckoview:geckoview" "$APP_GRADLE"; then
