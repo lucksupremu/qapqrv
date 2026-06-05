@@ -90,7 +90,7 @@ class InAppWebViewPlugin : Plugin() {
                 ret.put("mime", "application/pdf")
                 getActivity().runOnUiThread { call.resolve(ret) }
             } catch (e: Throwable) {
-                getActivity().runOnUiThread { call.reject(e.message ?: "Falha ao baixar PDF", e) }
+                getActivity().runOnUiThread { call.reject(e.message ?: "Falha ao baixar PDF") }
             }
         }
     }
