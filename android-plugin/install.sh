@@ -104,6 +104,15 @@ fi
 grep -q "android.permission.INTERNET" "$MANIFEST" || \
   sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET" />\n    <application#' "$MANIFEST"
 
+# Habilita cleartext HTTP (intranet PMESP tem endpoints http:// que o WebView
+# bloqueia por padrão desde Android 9 — sintoma: tela branca sem erro).
+if ! grep -q 'usesCleartextTraffic="true"' "$MANIFEST"; then
+  echo "==> Habilitando android:usesCleartextTraffic no AndroidManifest"
+  if grep -q '<application' "$MANIFEST" && ! grep -q 'usesCleartextTraffic' "$MANIFEST"; then
+    sed -i 's#<application#<application android:usesCleartextTraffic="true"#' "$MANIFEST"
+  fi
+fi
+
 echo "==> install.sh: OK"
 echo "--- MainActivity ---"
 cat "${MAIN_ACT_JAVA:-$MAIN_ACT_KT}" 2>/dev/null || cat "$MAIN_ACT_KT"

@@ -1,82 +1,37 @@
+## Diagnóstico
 
-## Objetivo
+O plugin nativo `InAppWebView` está sendo aberto (a Activity sobe), mas a WebView mostra **tela branca**. Três causas prováveis, todas tratáveis de uma vez:
 
-Trocar o navegador interno atual (`@capacitor/inappbrowser`, que está com problemas de UA/renderização) por uma **WebView Android nativa customizada**, empacotada como plugin Capacitor próprio dentro do projeto. Isso dá controle total sobre User-Agent, cookies, JavaScript, zoom, downloads e botão "voltar" — resolvendo de vez o acesso à intranet PMESP no APK.
+1. **Cleartext HTTP bloqueado**. A intranet PMESP tem endpoints `http://ms.policiamilitar.sp.gov.br/...`. Desde o Android 9, WebView **bloqueia HTTP por padrão** e mostra página em branco sem mensagem. Falta `android:usesCleartextTraffic="true"` no `<application>` do `AndroidManifest.xml`.
+2. **Sem feedback de erro**. Hoje o `WebViewClient` não implementa `onReceivedError`/`onReceivedHttpError` — se a URL falha (VPN desligada, DNS, timeout, certificado), a tela simplesmente fica branca em vez de explicar o motivo.
+3. **VPN AnyConnect desligada**. Domínios `*.intranet.policiamilitar.sp.gov.br` e `correio.policiamilitar.sp.gov.br` exigem AnyConnect ativo. Sem feedback (item 2), parece bug do app.
 
-## O que muda
+## Mudanças
 
-### 1. Novo plugin Capacitor local: `InAppWebView`
+### 1) `android-plugin/install.sh`
+Adicionar passo idempotente que injeta `android:usesCleartextTraffic="true"` no `<application>` do `AndroidManifest.xml` (só se ainda não estiver lá).
 
-Criar `android-plugin/InAppWebViewPlugin.kt` (e arquivos de suporte) que registra um plugin Capacitor com um método `open({ url, title, userAgent })`. Esse método abre uma `Activity` Android nativa contendo:
+### 2) `android-plugin/InAppWebViewActivity.kt`
+- Implementar `onReceivedError`, `onReceivedHttpError` e `onReceivedSslError` para renderizar uma **página de erro HTML embutida** dentro da própria WebView, com:
+  - Título do erro + URL que falhou
+  - Código/descrição (ex: `ERR_CLEARTEXT_NOT_PERMITTED`, `ERR_NAME_NOT_RESOLVED`, `ERR_CONNECTION_TIMED_OUT`)
+  - Aviso visível: "Verifique se o AnyConnect está conectado"
+  - Botão "Tentar de novo" (recarrega) e "Abrir no Chrome externo"
+- Logar via `android.util.Log.e("InAppWebView", …)` pra facilitar `adb logcat`.
+- Manter `onReceivedSslError` aceitando certs (já está) mas só pra hosts `.policiamilitar.sp.gov.br`.
 
-- Toolbar superior com título, botão fechar, recarregar, voltar/avançar
-- `android.webkit.WebView` em tela cheia com:
-  - `javaScriptEnabled = true`
-  - `domStorageEnabled = true`
-  - `setSupportZoom(true)` + pinch-to-zoom
-  - `userAgentString` configurável (default: UA mobile Chrome)
-  - `CookieManager.setAcceptThirdPartyCookies(true)` (essencial pra .gov.br)
-  - `WebViewClient` customizado pra interceptar `http://` (intranet sem TLS) e erros SSL
-  - `setDownloadListener` pra baixar PDFs de escala direto pro `Downloads/`
-- Barra inferior com voltar/avançar/recarregar/compartilhar
+### 3) Nada muda no frontend
+O fluxo TS (`openInAppBrowser` → `InAppWebView.open`) já está correto. Tudo é correção no lado Android nativo + script de instalação.
 
-Registrar o plugin no `MainActivity.java` gerado pelo Capacitor (via patch no CI).
+## Como validar depois do próximo build
 
-### 2. Substituir `src/lib/in-app-browser.ts`
+1. Build do APK no GitHub Actions deve continuar verde (mudanças são em `install.sh` e `.kt`, não em Gradle).
+2. Instalar APK novo, abrir "Email iNotes" SEM AnyConnect → deve mostrar a tela de erro com mensagem clara (e não mais tela branca).
+3. Conectar AnyConnect, abrir o mesmo link → deve carregar normalmente.
+4. Abrir "Marcar / Desmarcar" (HTTPS intranet) com VPN → deve carregar.
 
-- No nativo: chama `InAppWebView.open({ url, title, userAgent })` em vez de `@capacitor/inappbrowser`.
-- No web: mantém `window.open` como hoje.
-- Remove toda a lógica de fallback pra Custom Tabs, listeners de `browserPageLoaded`, timeout de 22s — não são mais necessários.
+## O que NÃO faz parte
 
-### 3. Remover dependência `@capacitor/inappbrowser`
-
-- `bun remove @capacitor/inappbrowser`
-- Reverter o patch de `minSdkVersion 26` no workflow (volta pra 24, que é o default do Capacitor) — o requisito de SDK 26 vinha desse plugin.
-
-### 4. Atualizar `src/routes/intranet.tsx`
-
-Continua redirecionando pro novo plugin quando `isNativeApp()`, só muda a chamada interna (transparente — já usa `openInAppBrowser`).
-
-### 5. Patch no workflow `.github/workflows/build-apk.yml`
-
-Adicionar step após `cap sync android` que:
-1. Copia `android-plugin/InAppWebViewPlugin.kt` (e `AndroidManifest.xml` da nova Activity) para dentro de `android/app/src/main/java/br/com/qapqrv/app/plugins/`.
-2. Registra o plugin no `MainActivity.java` (adiciona `registerPlugin(InAppWebViewPlugin.class)`).
-3. Adiciona a `<activity android:name=".plugins.InAppWebViewActivity" />` no `AndroidManifest.xml`.
-4. Mantém o patch do AdMob `APPLICATION_ID` (já funcionando).
-
-## Detalhes técnicos
-
-**Por que plugin próprio e não fork do `@capacitor/inappbrowser`?**
-O OutSystems plugin abstrai demais e não expõe `WebSettings` cruas — não dá pra configurar cookies de terceiros nem interceptar erros SSL. Plugin próprio = 1 arquivo Kotlin + 1 layout XML, totalmente sob controle.
-
-**Estrutura de arquivos do plugin:**
-```text
-android-plugin/
-├── InAppWebViewPlugin.kt        (registra @CapacitorPlugin, método open)
-├── InAppWebViewActivity.kt       (Activity com WebView)
-├── activity_webview.xml          (layout: Toolbar + WebView + BottomBar)
-└── install.sh                    (copia arquivos pra android/ no CI)
-```
-
-**Compatibilidade com VpnStatusPlugin existente:** já existe `android-plugin/VpnStatusPlugin.kt` no projeto — vou seguir o mesmo padrão de instalação via script no CI, então a infraestrutura já está parcialmente lá.
-
-**TypeScript wrapper:** novo arquivo `src/lib/in-app-webview.ts` declara o plugin via `registerPlugin<InAppWebViewPlugin>('InAppWebView')` do `@capacitor/core`.
-
-## Riscos
-
-- **Primeiro build pode falhar** se o patch do `MainActivity.java` quebrar a sintaxe — vou validar o sed com `grep` antes do gradle.
-- **Renderização da intranet PMESP** depende do servidor aceitar o UA + cookies — se ainda assim bloquear, plano B é adicionar header `X-Requested-With` customizado.
-
-## Entregáveis
-
-1. `android-plugin/InAppWebViewPlugin.kt`
-2. `android-plugin/InAppWebViewActivity.kt`
-3. `android-plugin/activity_webview.xml`
-4. `android-plugin/install.sh` (idempotente, roda no CI)
-5. `src/lib/in-app-webview.ts` (wrapper TS)
-6. `src/lib/in-app-browser.ts` reescrito pra usar o novo plugin
-7. `.github/workflows/build-apk.yml` com novo step de instalação
-8. `package.json` sem `@capacitor/inappbrowser`
-
-Depois de aprovar, faço todas as mudanças num único batch e você roda o workflow pra gerar o novo APK.
+- Não mexer no fluxo de VPN nem em `vpn-guard.tsx`.
+- Não mexer no `package.json`/Gradle/Kotlin (já estabilizado em 2.1.0).
+- Não trocar o plugin por `@capacitor/inappbrowser` — já foi descartado por incompatibilidade com `.gov.br`.
