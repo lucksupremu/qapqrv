@@ -87,7 +87,10 @@ class InAppWebViewPlugin : Plugin() {
                 val safeId = id.replace(Regex("[^A-Za-z0-9_-]"), "_")
                 val dir = File(context.filesDir, "escalas").apply { mkdirs() }
                 val out = File(dir, "$safeId.pdf")
-                val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+                val parsed = URL(url)
+                val trusted = isTrustedPmespHost(parsed.host)
+
+                val conn = (parsed.openConnection() as HttpURLConnection).apply {
                     instanceFollowRedirects = true
                     connectTimeout = 20_000
                     readTimeout = 60_000
@@ -99,10 +102,26 @@ class InAppWebViewPlugin : Plugin() {
                             "(KHTML, like Gecko) Version/4.0 Mobile Safari/537.36 QAPQRVWebView/1.0",
                     )
                     CookieManager.getInstance().getCookie(url)?.let { setRequestProperty("Cookie", it) }
+
+                    // Em hosts oficiais da PMESP (intranet via VPN), o certificado pode
+                    // estar fora do trust-store padrão do Android. Aplica TLS relaxado
+                    // SOMENTE nesses hosts para evitar CertPathValidatorException.
+                    if (this is HttpsURLConnection && trusted) {
+                        sslSocketFactory = trustAllSslContext().socketFactory
+                        hostnameVerifier = HostnameVerifier { _, _ -> true }
+                    }
                 }
-                val status = conn.responseCode
+                val status = try {
+                    conn.responseCode
+                } catch (sslErr: javax.net.ssl.SSLHandshakeException) {
+                    conn.disconnect()
+                    getActivity().runOnUiThread {
+                        call.reject("Não foi possível validar o acesso à intranet. Confirme a VPN ativa.")
+                    }
+                    return@thread
+                }
                 if (status !in 200..299) {
-                    getActivity().runOnUiThread { call.reject("HTTP $status") }
+                    getActivity().runOnUiThread { call.reject("Servidor respondeu HTTP $status. Verifique a VPN/login.") }
                     conn.disconnect()
                     return@thread
                 }
@@ -120,7 +139,7 @@ class InAppWebViewPlugin : Plugin() {
                 if (!isPdf) {
                     out.delete()
                     val motivo = if (contentType.contains("html"))
-                        "Sessão expirou ou VPN inativa (servidor retornou página HTML)."
+                        "Sessão expirou ou VPN inativa. Faça login na intranet e tente novamente."
                     else "Resposta não é um PDF válido (tipo: $contentType)."
                     getActivity().runOnUiThread { call.reject(motivo) }
                     return@thread
