@@ -104,12 +104,19 @@ class InAppWebViewActivity : Activity() {
                         true
                     } catch (_: Throwable) { true }
                 }
-                if (isPdfLikeUrl(u)) {
-                    downloadPdfToDownloads(u, null, "application/pdf")
-                    showDownloadedPdfPage(u)
-                    return true
+                return handleHttpNavigation(u)
+            }
+
+            @Deprecated("Deprecated in Java")
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                val u = url ?: return false
+                if (!u.startsWith("http://") && !u.startsWith("https://")) {
+                    return try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(u)))
+                        true
+                    } catch (_: Throwable) { true }
                 }
-                return false
+                return handleHttpNavigation(u)
             }
 
             override fun onReceivedSslError(
@@ -177,12 +184,13 @@ class InAppWebViewActivity : Activity() {
                 popup.webViewClient = object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(v: WebView, request: WebResourceRequest): Boolean {
                         val target = request.url.toString()
-                        if (isPdfLikeUrl(target)) {
-                            downloadPdfToDownloads(target, null, "application/pdf")
-                            showDownloadedPdfPage(target)
-                        } else {
-                            webView.loadUrl(target)
-                        }
+                        handlePopupNavigation(target)
+                        return true
+                    }
+
+                    @Deprecated("Deprecated in Java")
+                    override fun shouldOverrideUrlLoading(v: WebView?, url: String?): Boolean {
+                        handlePopupNavigation(url ?: return false)
                         return true
                     }
                 }
@@ -289,7 +297,7 @@ class InAppWebViewActivity : Activity() {
             addView(webView)
         }
 
-        // ---- Bottom bar (voltar / avançar / abrir externo) ----
+        // ---- Bottom bar (voltar / avançar) ----
         val bottomBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(Color.WHITE)
