@@ -3,6 +3,12 @@ import { useState } from "react";
 import { ArrowLeft, Check, Copy, PlayCircle, Smartphone } from "lucide-react";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import tutorialVideo from "@/assets/anyconnect/tutorial.mp4.asset.json";
+import { useIsNative } from "@/hooks/use-is-native";
+
+// No APK (Capacitor) o app roda em https://localhost e não tem acesso ao
+// caminho relativo `/__l5e/...`. Para o vídeo carregar, prefixamos com o
+// host público.
+const PUBLIC_HOST = "https://qapqrv.lovable.app";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({ meta: [{ title: "Configurar AnyConnect — QAP, QRV!" }] }),
@@ -122,7 +128,9 @@ function CopyServerButton({ compact = false }: { compact?: boolean }) {
 
 function AnyConnectGuideScreen() {
   const navigate = useNavigate();
+  const isNative = useIsNative();
   const abrirAnyConnect = () => openAnyConnect();
+  const videoSrc = isNative ? `${PUBLIC_HOST}${tutorialVideo.url}` : tutorialVideo.url;
 
   return (
     <div
@@ -172,10 +180,11 @@ function AnyConnectGuideScreen() {
             </p>
           </div>
           <video
-            src={tutorialVideo.url}
+            src={videoSrc}
             controls
             playsInline
             preload="metadata"
+            crossOrigin="anonymous"
             className="block h-[420px] w-full bg-black"
             style={{ objectFit: "contain" }}
           />
