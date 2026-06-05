@@ -12,8 +12,10 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
 import android.os.Environment
+import android.os.Build
 import android.util.Log
 import android.view.View
+import android.view.autofill.AutofillManager
 import android.view.ViewGroup
 import android.view.Window
 import android.webkit.CookieManager
@@ -95,6 +97,13 @@ class InAppWebViewActivity : Activity() {
         s.allowFileAccess = true
         s.allowContentAccess = true
         s.cacheMode = WebSettings.LOAD_DEFAULT
+        // Permite que o serviço de Autofill do Android (Google, Samsung Pass, 1Password…)
+        // detecte os campos de usuário/senha do WebView e ofereça "Salvar senha?".
+        @Suppress("DEPRECATION")
+        s.saveFormData = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS
+        }
         if (userAgent.isNotBlank()) s.userAgentString = userAgent
 
         val cm = CookieManager.getInstance()
@@ -106,6 +115,16 @@ class InAppWebViewActivity : Activity() {
                 Log.d(TAG, "onPageStarted $url")
                 progressBar.visibility = View.VISIBLE
                 hideErrorOverlay()
+                // Liga autofill só em hosts da PMESP — evita oferecer salvar senha
+                // em sites aleatórios abertos pelo navegador interno.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val host = try { Uri.parse(url).host.orEmpty() } catch (_: Throwable) { "" }
+                    val isPmesp = host.endsWith("policiamilitar.sp.gov.br", ignoreCase = true)
+                    webView.importantForAutofill = if (isPmesp)
+                        View.IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS
+                    else
+                        View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
+                }
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -113,6 +132,13 @@ class InAppWebViewActivity : Activity() {
                 progressBar.visibility = View.GONE
                 btnBack.alpha = if (webView.canGoBack()) 1f else 0.3f
                 btnForward.alpha = if (webView.canGoForward()) 1f else 0.3f
+                // Sinaliza ao framework que terminou um fluxo — aciona o
+                // diálogo "Salvar senha?" em ROMs que só disparam no commit().
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        getSystemService(AutofillManager::class.java)?.commit()
+                    } catch (_: Throwable) {}
+                }
             }
 
             override fun shouldOverrideUrlLoading(
