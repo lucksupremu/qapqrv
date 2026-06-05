@@ -5,7 +5,7 @@ import { registerPlugin } from "@capacitor/core";
 export interface InAppWebViewOpenOptions {
   url: string;
   title?: string;
-  /** UA customizado. Default: Chrome Mobile (definido no lado Kotlin). */
+  /** UA customizado. Default: navegador interno Android (definido no lado Kotlin). */
   userAgent?: string;
 }
 
