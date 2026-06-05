@@ -11,6 +11,7 @@ export interface InAppWebViewOpenOptions {
 
 export interface InAppWebViewPlugin {
   open(options: InAppWebViewOpenOptions): Promise<{ opened: boolean }>;
+  downloadPdf(options: { url: string; id: string }): Promise<{ path: string; size: number; mime: string }>;
 }
 
 export const InAppWebView =
