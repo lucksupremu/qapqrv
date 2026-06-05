@@ -119,7 +119,20 @@ function HomeScreen() {
       return;
     }
 
-    const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?${encodeURIComponent(id)}`;
+    const url = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelconesc.aspx?nuesc=${encodeURIComponent(id)}`;
+
+    // Registra a escala em "Escalas baixadas" sempre — no APK também tenta
+    // baixar o PDF em segundo plano.
+    try {
+      upsertEscala({
+        id,
+        url,
+        titulo: `Escala ${id}`,
+        dataSalva: new Date().toISOString(),
+      });
+    } catch {
+      /* ignore */
+    }
 
     setConsultando(true);
     void guardIntranet(() => {
@@ -131,6 +144,8 @@ function HomeScreen() {
         void salvar.finally(() => setConsultando(false));
       } else if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
+        setConsultando(false);
+      } else {
         setConsultando(false);
       }
     }, `a escala #${id}`).catch(() => setConsultando(false));
