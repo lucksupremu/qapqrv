@@ -139,11 +139,13 @@ import android.os.Bundle
 import com.getcapacitor.BridgeActivity
 import br.com.qapqrv.app.plugins.VpnStatusPlugin
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin
+import br.com.qapqrv.app.plugins.AppOpenAdPlugin
 
 class MainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         registerPlugin(VpnStatusPlugin::class.java)
         registerPlugin(InAppWebViewPlugin::class.java)
+        registerPlugin(AppOpenAdPlugin::class.java)
         super.onCreate(savedInstanceState)
     }
 }
@@ -157,12 +159,14 @@ import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
 import br.com.qapqrv.app.plugins.VpnStatusPlugin;
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin;
+import br.com.qapqrv.app.plugins.AppOpenAdPlugin;
 
 public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     registerPlugin(VpnStatusPlugin.class);
     registerPlugin(InAppWebViewPlugin.class);
+    registerPlugin(AppOpenAdPlugin.class);
     super.onCreate(savedInstanceState);
   }
 }
