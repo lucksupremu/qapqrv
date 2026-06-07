@@ -137,31 +137,27 @@ function EscalaViewer() {
         )}
 
         {!loading && fileObj && (
-          <Document
-            file={fileObj}
-            onLoadSuccess={({ numPages }) => {
-              setNumPages(numPages);
-              setPageNum(1);
-            }}
-            onLoadError={(err) => {
-              console.error("Erro ao renderizar PDF", err);
-              setErro("Arquivo PDF corrompido. Baixe a escala novamente.");
-            }}
-            loading={
+          <Suspense
+            fallback={
               <div className="mt-20 flex items-center gap-2 text-[14px]" style={{ color: "#5b7a8f" }}>
                 <Loader2 className="animate-spin" size={20} /> Processando PDF…
               </div>
             }
           >
-            <div className="overflow-auto rounded-lg bg-white shadow-[0_2px_12px_rgba(0,0,0,0.25)]">
-              <Page
-                pageNumber={pageNum}
-                width={width * scale}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-              />
-            </div>
-          </Document>
+            <PdfViewerInner
+              file={fileObj}
+              pageNum={pageNum}
+              width={width * scale}
+              onLoadSuccess={({ numPages }) => {
+                setNumPages(numPages);
+                setPageNum(1);
+              }}
+              onLoadError={(err) => {
+                console.error("Erro ao renderizar PDF", err);
+                setErro("Arquivo PDF corrompido. Baixe a escala novamente.");
+              }}
+            />
+          </Suspense>
         )}
       </div>
 
