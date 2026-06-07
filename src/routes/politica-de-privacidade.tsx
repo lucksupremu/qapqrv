@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/politica-de-privacidade")({
   head: () => ({
@@ -112,7 +113,7 @@ function PrivacyPolicyPage() {
   );
 }
 
-function PolicySection({ title, children }: { title: string; children: React.ReactNode }) {
+function PolicySection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-2">
       <h2 className="text-xl font-extrabold leading-tight text-primary">{title}</h2>
