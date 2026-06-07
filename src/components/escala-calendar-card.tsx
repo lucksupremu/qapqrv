@@ -128,6 +128,25 @@ export function EscalaCalendarCard() {
     return map;
   }, [marcas, cursor]);
 
+  const eventosPorDia = useMemo(() => {
+    const map = new Map<string, EventoPersonalizado[]>();
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth();
+    for (const ev of eventos) {
+      const d = new Date(ev.data);
+      if (Number.isNaN(d.getTime())) continue;
+      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const cur = map.get(key) ?? [];
+      cur.push(ev);
+      map.set(key, cur);
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => +new Date(a.data) - +new Date(b.data));
+    }
+    return map;
+  }, [eventos, cursor]);
+
   const goPrev = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() - 1, 1));
   const goNext = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() + 1, 1));
 
