@@ -7,7 +7,7 @@ export const Route = createFileRoute("/privacidade")({
       { title: "Política de Privacidade — QAP, QRV!" },
       {
         name: "description",
-        content: "Política de Privacidade do QAP, QRV! para dados, permissões e contato.",
+        content: "Política de Privacidade do QAP, QRV! sobre dados, permissões e contato.",
       },
     ],
   }),
