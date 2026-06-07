@@ -91,7 +91,7 @@ signing = """
         }
     }
 """
-            # insert signingConfigs as first child of android { ... }
+# insert signingConfigs as first child of android { ... }
 src = re.sub(r"(android\s*\{\s*\n)", r"\1" + signing, src, count=1)
 # attach signingConfig to buildTypes.release
 src = re.sub(
