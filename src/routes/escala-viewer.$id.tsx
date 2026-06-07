@@ -1,13 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, AlertTriangle, Loader2 } from "lucide-react";
-import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { lerLista, lerPdfBlob, type EscalaSalva } from "@/lib/escalas-baixadas";
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+const PdfViewerInner = lazy(() => import("@/components/pdf-viewer-inner"));
 
 export const Route = createFileRoute("/escala-viewer/$id")({
   head: ({ params }) => ({ meta: [{ title: `Escala ${params.id} — QAP, QRV!` }] }),
@@ -141,31 +137,27 @@ function EscalaViewer() {
         )}
 
         {!loading && fileObj && (
-          <Document
-            file={fileObj}
-            onLoadSuccess={({ numPages }) => {
-              setNumPages(numPages);
-              setPageNum(1);
-            }}
-            onLoadError={(err) => {
-              console.error("Erro ao renderizar PDF", err);
-              setErro("Arquivo PDF corrompido. Baixe a escala novamente.");
-            }}
-            loading={
+          <Suspense
+            fallback={
               <div className="mt-20 flex items-center gap-2 text-[14px]" style={{ color: "#5b7a8f" }}>
                 <Loader2 className="animate-spin" size={20} /> Processando PDF…
               </div>
             }
           >
-            <div className="overflow-auto rounded-lg bg-white shadow-[0_2px_12px_rgba(0,0,0,0.25)]">
-              <Page
-                pageNumber={pageNum}
-                width={width * scale}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-              />
-            </div>
-          </Document>
+            <PdfViewerInner
+              file={fileObj}
+              pageNum={pageNum}
+              width={width * scale}
+              onLoadSuccess={({ numPages }) => {
+                setNumPages(numPages);
+                setPageNum(1);
+              }}
+              onLoadError={(err) => {
+                console.error("Erro ao renderizar PDF", err);
+                setErro("Arquivo PDF corrompido. Baixe a escala novamente.");
+              }}
+            />
+          </Suspense>
         )}
       </div>
 
