@@ -1,17 +1,46 @@
-Vou corrigir isso em ordem para parar o ciclo de erro:
+## Plano para corrigir `/privacidade`
 
-1. Restaurar o componente ausente `EscalaViewerClient`
-   - Criar `src/components/escala-viewer-client.tsx` com o conteúdo do visualizador de PDF que foi movido para lazy-load.
-   - Isso corrige o erro de build: `Cannot find module '@/components/escala-viewer-client'`.
+### Causa exata
+- O domínio publicado ainda está servindo `/privacidade` como um recurso estático sem extensão/MIME correto, retornando `Content-Type: application/octet-stream`.
+- Com `X-Content-Type-Options: nosniff`, o navegador não tenta interpretar o conteúdo como HTML e por isso baixa o arquivo.
+- A correção precisa eliminar qualquer caminho estático conflitante e fazer `/privacidade` ser tratado como rota web normal, com resposta HTML explícita.
 
-2. Manter o SSR seguro
-   - `src/router.tsx` já foi ajustado para usar `createMemoryHistory` no servidor, evitando o erro `reading 'history'`.
-   - O visualizador de PDF continuará carregando apenas no navegador para evitar `DOMMatrix is not defined` no servidor.
+### Correção proposta
+1. **Manter `/privacidade` como rota pública TanStack Start**
+   - Usar `src/routes/privacidade.tsx` com `createFileRoute('/privacidade')`.
+   - Sem autenticação, sem middleware privado, acessível diretamente pelo navegador.
 
-3. Garantir a rota `/privacidade`
-   - Conferir que `src/routes/privacidade.tsx` continua com `createFileRoute('/privacidade')`.
-   - Manter também o fallback estático `public/privacidade` para o domínio publicado conseguir servir a política mesmo fora do roteador.
+2. **Forçar resposta HTML no servidor**
+   - A rota terá `server.handlers.GET` retornando `new Response(html, ...)`.
+   - Headers explícitos:
+     - `Content-Type: text/html; charset=utf-8`
+     - `X-Content-Type-Options: nosniff`
+     - sem `Content-Disposition`
+   - Isso impede que o deploy trate a rota como arquivo de download.
 
-4. Validar antes de concluir
-   - Abrir/testar `/privacidade` no preview local.
-   - Se responder 200, orientar você a clicar em Publish/Update para atualizar `https://miketools.top/privacidade`.
+3. **Remover conflito estático**
+   - Garantir que não exista mais `public/privacidade` nem `public/privacidade/index.html`.
+   - Assim o servidor publicado não prioriza um arquivo estático sem MIME correto antes da rota da aplicação.
+
+4. **Completar o conteúdo da política**
+   - Página com:
+     - Título: Política de Privacidade
+     - Data de atualização
+     - Coleta de dados
+     - Uso das informações
+     - Compartilhamento de dados
+     - Segurança
+     - Direitos do usuário
+     - Contato
+
+5. **Validar após implementar**
+   - Verificar local/preview que a rota existe.
+   - Após publicar/atualizar, validar no domínio:
+     - `https://miketools.top/privacidade` abre no navegador
+     - status HTTP `200`
+     - `Content-Type: text/html; charset=utf-8`
+     - sem `Content-Disposition: attachment`
+     - não baixa arquivo
+
+### Observação importante
+- A correção de código só entra no domínio `miketools.top` depois de clicar em **Publish / Update**. Enquanto o domínio publicado estiver numa versão antiga, ele continuará podendo responder `application/octet-stream`.
