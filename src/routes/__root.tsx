@@ -1,10 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  HeadContent,
   Outlet,
   Link,
+  Scripts,
   createRootRouteWithContext,
   useRouter,
 } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { useEffect } from "react";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -81,10 +84,64 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no",
+      },
+      { name: "theme-color", content: "#f4f8fc" },
+      { title: "QAP, QRV! — Ferramentas operacionais" },
+      {
+        name: "description",
+        content: "Central de ferramentas operacionais para o policial militar.",
+      },
+      { property: "og:title", content: "QAP, QRV! — Ferramentas operacionais" },
+      { property: "og:description", content: "Ferramentas operacionais em um só lugar." },
+      { property: "og:type", content: "website" },
+      { property: "og:image", content: "/icon-512.png" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "QAP, QRV! — Ferramentas operacionais" },
+      { name: "twitter:image", content: "/icon-512.png" },
+    ],
+    links: [
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        children: `(function(){try{var t=localStorage.getItem("app_theme");if(t!=="dark"&&t!=="light")t="light";if(t==="dark")document.documentElement.classList.add("dark");document.documentElement.style.colorScheme=t;}catch(e){}})();`,
+      },
+    ],
+  }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  return (
+    <html lang="pt-BR">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -182,22 +239,24 @@ function RootComponent() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={200}>
-        <DrawerProvider>
-          <div
-            className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
-            style={{ background: "var(--bg)" }}
-          >
-            <Outlet />
-          </div>
-          <BottomNav />
-          <PrivacyConsent />
-          <PushPermissionPrompt />
-          <BrowserWarningModal />
-          <Toaster />
-        </DrawerProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <RootDocument>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider delayDuration={200}>
+          <DrawerProvider>
+            <div
+              className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
+              style={{ background: "var(--bg)" }}
+            >
+              <Outlet />
+            </div>
+            <BottomNav />
+            <PrivacyConsent />
+            <PushPermissionPrompt />
+            <BrowserWarningModal />
+            <Toaster />
+          </DrawerProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </RootDocument>
   );
 }
