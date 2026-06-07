@@ -91,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" style={{ colorScheme: "light" }} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta
