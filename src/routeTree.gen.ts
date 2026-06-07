@@ -13,7 +13,7 @@ import { Route as Char91indexChar93RouteImport } from './routes/[index]'
 import { Route as SplashRouteImport } from './routes/splash'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as IntranetRouteImport } from './routes/intranet'
 import { Route as InicioRouteImport } from './routes/inicio'
@@ -50,9 +50,9 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
-  id: '/politica-de-privacidade',
-  path: '/politica-de-privacidade',
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManualRoute = ManualRouteImport.update({
@@ -147,7 +147,7 @@ export interface FileRoutesByFullPath {
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
-  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
@@ -169,7 +169,7 @@ export interface FileRoutesByTo {
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
-  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
@@ -192,7 +192,7 @@ export interface FileRoutesById {
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
-  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
@@ -216,7 +216,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/intranet'
     | '/manual'
-    | '/politica-de-privacidade'
+    | '/privacidade'
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
@@ -238,7 +238,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/intranet'
     | '/manual'
-    | '/politica-de-privacidade'
+    | '/privacidade'
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
@@ -260,7 +260,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/intranet'
     | '/manual'
-    | '/politica-de-privacidade'
+    | '/privacidade'
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
@@ -283,7 +283,7 @@ export interface RootRouteChildren {
   InicioRoute: typeof InicioRoute
   IntranetRoute: typeof IntranetRoute
   ManualRoute: typeof ManualRoute
-  PoliticaDePrivacidadeRoute: typeof PoliticaDePrivacidadeRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   SplashRoute: typeof SplashRoute
@@ -323,11 +323,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/politica-de-privacidade': {
-      id: '/politica-de-privacidade'
-      path: '/politica-de-privacidade'
-      fullPath: '/politica-de-privacidade'
-      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manual': {
@@ -451,7 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   InicioRoute: InicioRoute,
   IntranetRoute: IntranetRoute,
   ManualRoute: ManualRoute,
-  PoliticaDePrivacidadeRoute: PoliticaDePrivacidadeRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   SplashRoute: SplashRoute,

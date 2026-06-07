@@ -535,12 +535,12 @@ function HomeScreen() {
 
       {/* FOOTER */}
       <footer className="mt-8 text-center">
-        <a
-          href="/politica-de-privacidade"
+        <button
+          onClick={() => navigate({ to: "/privacidade" })}
           className="text-[11px] uppercase tracking-wider text-slate-600 dark:text-slate-600 underline underline-offset-4 decoration-slate-400 dark:decoration-slate-800"
         >
           Política de Privacidade
-        </a>
+        </button>
       </footer>
     </div>
   );
