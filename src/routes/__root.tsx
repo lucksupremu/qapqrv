@@ -118,12 +118,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap",
       },
     ],
+    scripts: [
+      {
+        children: `(function(){try{var t=localStorage.getItem("app_theme");if(t!=="dark"&&t!=="light")t="light";if(t==="dark")document.documentElement.classList.add("dark");document.documentElement.style.colorScheme=t;}catch(e){}})();`,
+      },
+    ],
   }),
-  scripts: () => [
-    {
-      children: `(function(){try{var t=localStorage.getItem("app_theme");if(t!=="dark"&&t!=="light")t="light";if(t==="dark")document.documentElement.classList.add("dark");document.documentElement.style.colorScheme=t;}catch(e){}})();`,
-    },
-  ],
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
