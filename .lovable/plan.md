@@ -1,12 +1,17 @@
-Plano para corrigir o erro Not Found em `https://miketools.top/privacidade`:
+Vou corrigir isso em ordem para parar o ciclo de erro:
 
-1. Garantir que a página de privacidade exista como rota real do app em `/privacidade`.
-2. Remover a dependência da versão estática em `public/privacidade/index.html`, porque o site publicado não está servindo esse arquivo como esperado.
-3. Ajustar a configuração de rotas/publicação para que links diretos como `/privacidade` funcionem no domínio publicado.
-4. Fazer uma pequena alteração visível/segura na página para forçar uma nova versão publicável.
-5. Após implementar, validar a rota no preview e orientar a publicar novamente para o domínio `miketools.top` receber a correção.
+1. Restaurar o componente ausente `EscalaViewerClient`
+   - Criar `src/components/escala-viewer-client.tsx` com o conteúdo do visualizador de PDF que foi movido para lazy-load.
+   - Isso corrige o erro de build: `Cannot find module '@/components/escala-viewer-client'`.
 
-Detalhes técnicos:
-- A rota `src/routes/privacidade.tsx` já existe localmente, mas o domínio publicado ainda retorna 404.
-- O site publicado está público, então não é problema de visibilidade.
-- A correção deve focar no fallback/roteamento do app publicado para permitir acesso direto à URL `/privacidade`.
+2. Manter o SSR seguro
+   - `src/router.tsx` já foi ajustado para usar `createMemoryHistory` no servidor, evitando o erro `reading 'history'`.
+   - O visualizador de PDF continuará carregando apenas no navegador para evitar `DOMMatrix is not defined` no servidor.
+
+3. Garantir a rota `/privacidade`
+   - Conferir que `src/routes/privacidade.tsx` continua com `createFileRoute('/privacidade')`.
+   - Manter também o fallback estático `public/privacidade` para o domínio publicado conseguir servir a política mesmo fora do roteador.
+
+4. Validar antes de concluir
+   - Abrir/testar `/privacidade` no preview local.
+   - Se responder 200, orientar você a clicar em Publish/Update para atualizar `https://miketools.top/privacidade`.
