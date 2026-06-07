@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, BookmarkPlus } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
+import { EventoLivreModal } from "@/components/evento-livre-modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   type EscalaRegra,
@@ -12,6 +13,7 @@ import {
   saveEscalas,
 } from "@/lib/escala-trabalho";
 import { loadMarcas, type Marca } from "@/lib/marcas";
+import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
@@ -56,19 +58,30 @@ export function EscalaCalendarCard() {
   const today = useMemo(() => new Date(), []);
   const [regras, setRegras] = useState<EscalaRegra[]>([]);
   const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [eventos, setEventos] = useState<EventoPersonalizado[]>([]);
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [modalOpen, setModalOpen] = useState(false);
+  const [eventoModalOpen, setEventoModalOpen] = useState(false);
+  const [eventoEditing, setEventoEditing] = useState<EventoPersonalizado | null>(null);
+  const [eventoBaseDate, setEventoBaseDate] = useState<Date | null>(null);
 
   useEffect(() => {
     setRegras(loadEscalas());
     setMarcas(loadMarcas());
+    setEventos(loadEventos());
     if (typeof window === "undefined") return;
     const refresh = () => {
       setRegras(loadEscalas());
       setMarcas(loadMarcas());
+      setEventos(loadEventos());
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === null || e.key === "marcas_atividade_d" || e.key === "qap-escalas-trabalho") {
+      if (
+        e.key === null ||
+        e.key === "marcas_atividade_d" ||
+        e.key === "qap-escalas-trabalho" ||
+        e.key === "eventos_personalizados_v1"
+      ) {
         refresh();
       }
     };
@@ -78,11 +91,13 @@ export function EscalaCalendarCard() {
     window.addEventListener("focus", refresh);
     window.addEventListener("storage", onStorage);
     window.addEventListener("marcas-changed", refresh);
+    window.addEventListener("eventos-changed", refresh);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("marcas-changed", refresh);
+      window.removeEventListener("eventos-changed", refresh);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
@@ -112,6 +127,25 @@ export function EscalaCalendarCard() {
     }
     return map;
   }, [marcas, cursor]);
+
+  const eventosPorDia = useMemo(() => {
+    const map = new Map<string, EventoPersonalizado[]>();
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth();
+    for (const ev of eventos) {
+      const d = new Date(ev.data);
+      if (Number.isNaN(d.getTime())) continue;
+      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const cur = map.get(key) ?? [];
+      cur.push(ev);
+      map.set(key, cur);
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => +new Date(a.data) - +new Date(b.data));
+    }
+    return map;
+  }, [eventos, cursor]);
 
   const goPrev = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() - 1, 1));
   const goNext = () => setCursor((c) => new Date(c.getFullYear(), c.getMonth() + 1, 1));
@@ -264,6 +298,7 @@ export function EscalaCalendarCard() {
           const dia = plantoes.get(key);
           const entries: PlantaoEntry[] = dia?.plantoes ?? [];
           const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
+          const eventosDia = cell.inMonth ? eventosPorDia.get(key) ?? [] : [];
           const colunas = cell.inMonth ? colunasDoDia(entries, marcasDia, cell.date) : [];
           const MAX_COL = 3;
           const colunasVisiveis = colunas.slice(0, MAX_COL);
@@ -272,10 +307,11 @@ export function EscalaCalendarCard() {
           const extras = slotsTotais - slotsVisiveis;
           const temPlantao = entries.length > 0;
           const temMarca = marcasDia.length > 0;
-          const temAlgo = temPlantao || temMarca;
+          const temEvento = eventosDia.length > 0;
+          const temAlgo = temPlantao || temMarca || temEvento;
           const isToday = sameDay(cell.date, today);
           const corMarca = temMarca ? MARCA_COR[marcasDia[marcasDia.length - 1]!.tipo] ?? "#3498DB" : null;
-          const interativo = cell.inMonth && temAlgo;
+          const interativo = cell.inMonth;
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
           const totalCol = colunasVisiveis.length;
           const cellW = 36; // 40 - 2*2 inset
@@ -376,6 +412,23 @@ export function EscalaCalendarCard() {
                     height: 6,
                     borderRadius: "50%",
                     background: corMarca ?? "#3498DB",
+                    boxShadow: "0 0 0 1.5px #fff",
+                    zIndex: 3,
+                  }}
+                />
+              )}
+
+              {temEvento && (
+                <span
+                  aria-hidden
+                  className="absolute"
+                  style={{
+                    left: 2,
+                    bottom: 2,
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#7C3AED",
                     boxShadow: "0 0 0 1.5px #fff",
                     zIndex: 3,
                   }}
@@ -492,6 +545,51 @@ export function EscalaCalendarCard() {
                     })}
                   </div>
                 )}
+                {eventosDia.length > 0 && (
+                  <div className="mt-2 space-y-1 border-t pt-2" style={{ borderColor: COR_BG_SOFT }}>
+                    {eventosDia.map((ev) => {
+                      const dEv = new Date(ev.data);
+                      return (
+                        <button
+                          key={ev.id}
+                          onClick={() => {
+                            setOpenKey(null);
+                            setEventoEditing(ev);
+                            setEventoBaseDate(cell.date);
+                            setEventoModalOpen(true);
+                          }}
+                          className="flex w-full items-start gap-2 rounded-md px-1 py-1 text-left hover:bg-muted/40"
+                        >
+                          <span
+                            className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ background: "#7C3AED" }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[12px] font-bold text-foreground">
+                              {ev.titulo}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {fmtHora(dEv)}
+                              {ev.observacao ? ` · ${ev.observacao}` : ""}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    setOpenKey(null);
+                    setEventoEditing(null);
+                    setEventoBaseDate(cell.date);
+                    setEventoModalOpen(true);
+                  }}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
+                  style={{ borderColor: "#7C3AED", color: "#7C3AED" }}
+                >
+                  <BookmarkPlus size={13} /> Adicionar evento
+                </button>
               </PopoverContent>
             </Popover>
           );
@@ -599,6 +697,14 @@ export function EscalaCalendarCard() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         onSave={handleSave}
+      />
+
+      <EventoLivreModal
+        open={eventoModalOpen}
+        onOpenChange={setEventoModalOpen}
+        baseDate={eventoBaseDate}
+        editing={eventoEditing}
+        onChanged={() => setEventos(loadEventos())}
       />
     </div>
   );
