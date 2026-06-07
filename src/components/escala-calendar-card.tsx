@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, BookmarkPlus } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
+import { EventoLivreModal } from "@/components/evento-livre-modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   type EscalaRegra,
@@ -12,6 +13,7 @@ import {
   saveEscalas,
 } from "@/lib/escala-trabalho";
 import { loadMarcas, type Marca } from "@/lib/marcas";
+import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
@@ -56,19 +58,30 @@ export function EscalaCalendarCard() {
   const today = useMemo(() => new Date(), []);
   const [regras, setRegras] = useState<EscalaRegra[]>([]);
   const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [eventos, setEventos] = useState<EventoPersonalizado[]>([]);
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [modalOpen, setModalOpen] = useState(false);
+  const [eventoModalOpen, setEventoModalOpen] = useState(false);
+  const [eventoEditing, setEventoEditing] = useState<EventoPersonalizado | null>(null);
+  const [eventoBaseDate, setEventoBaseDate] = useState<Date | null>(null);
 
   useEffect(() => {
     setRegras(loadEscalas());
     setMarcas(loadMarcas());
+    setEventos(loadEventos());
     if (typeof window === "undefined") return;
     const refresh = () => {
       setRegras(loadEscalas());
       setMarcas(loadMarcas());
+      setEventos(loadEventos());
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === null || e.key === "marcas_atividade_d" || e.key === "qap-escalas-trabalho") {
+      if (
+        e.key === null ||
+        e.key === "marcas_atividade_d" ||
+        e.key === "qap-escalas-trabalho" ||
+        e.key === "eventos_personalizados_v1"
+      ) {
         refresh();
       }
     };
@@ -78,11 +91,13 @@ export function EscalaCalendarCard() {
     window.addEventListener("focus", refresh);
     window.addEventListener("storage", onStorage);
     window.addEventListener("marcas-changed", refresh);
+    window.addEventListener("eventos-changed", refresh);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("marcas-changed", refresh);
+      window.removeEventListener("eventos-changed", refresh);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
