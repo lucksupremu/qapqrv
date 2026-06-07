@@ -16,7 +16,6 @@
         --primary: #2e6b8a;
         --text: #3a4a60;
         --muted: #5b7a8f;
-        --soft: #e8f0f8;
       }
       * { box-sizing: border-box; }
       body {

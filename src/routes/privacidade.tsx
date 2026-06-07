@@ -2,7 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/privacidade")({
-  head: () => ({ meta: [{ title: "Política de Privacidade — QAP, QRV!" }] }),
+  head: () => ({
+    meta: [
+      { title: "Política de Privacidade — QAP, QRV!" },
+      {
+        name: "description",
+        content: "Política de Privacidade do QAP, QRV! para dados, permissões e contato.",
+      },
+    ],
+  }),
   component: PrivacidadeScreen,
 });
 
@@ -41,7 +49,7 @@ function PrivacidadeScreen() {
           Política de Privacidade — QAP, QRV!
         </h1>
         <p className="mt-1 text-[13px]" style={{ color: "#5b7a8f" }}>
-          Última atualização: 2025
+          Última atualização: 2026
         </p>
 
         <Section title="1. Sobre o aplicativo">
