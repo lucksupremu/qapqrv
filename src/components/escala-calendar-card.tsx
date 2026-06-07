@@ -298,6 +298,7 @@ export function EscalaCalendarCard() {
           const dia = plantoes.get(key);
           const entries: PlantaoEntry[] = dia?.plantoes ?? [];
           const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
+          const eventosDia = cell.inMonth ? eventosPorDia.get(key) ?? [] : [];
           const colunas = cell.inMonth ? colunasDoDia(entries, marcasDia, cell.date) : [];
           const MAX_COL = 3;
           const colunasVisiveis = colunas.slice(0, MAX_COL);
@@ -306,10 +307,11 @@ export function EscalaCalendarCard() {
           const extras = slotsTotais - slotsVisiveis;
           const temPlantao = entries.length > 0;
           const temMarca = marcasDia.length > 0;
-          const temAlgo = temPlantao || temMarca;
+          const temEvento = eventosDia.length > 0;
+          const temAlgo = temPlantao || temMarca || temEvento;
           const isToday = sameDay(cell.date, today);
           const corMarca = temMarca ? MARCA_COR[marcasDia[marcasDia.length - 1]!.tipo] ?? "#3498DB" : null;
-          const interativo = cell.inMonth && temAlgo;
+          const interativo = cell.inMonth;
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
           const totalCol = colunasVisiveis.length;
           const cellW = 36; // 40 - 2*2 inset
