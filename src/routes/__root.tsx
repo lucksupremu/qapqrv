@@ -1,10 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  HeadContent,
   Outlet,
   Link,
+  Scripts,
   createRootRouteWithContext,
   useRouter,
 } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { useEffect } from "react";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -85,6 +88,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  return (
+    <html lang="pt-BR">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -182,22 +199,24 @@ function RootComponent() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={200}>
-        <DrawerProvider>
-          <div
-            className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
-            style={{ background: "var(--bg)" }}
-          >
-            <Outlet />
-          </div>
-          <BottomNav />
-          <PrivacyConsent />
-          <PushPermissionPrompt />
-          <BrowserWarningModal />
-          <Toaster />
-        </DrawerProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <RootDocument>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider delayDuration={200}>
+          <DrawerProvider>
+            <div
+              className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
+              style={{ background: "var(--bg)" }}
+            >
+              <Outlet />
+            </div>
+            <BottomNav />
+            <PrivacyConsent />
+            <PushPermissionPrompt />
+            <BrowserWarningModal />
+            <Toaster />
+          </DrawerProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </RootDocument>
   );
 }
