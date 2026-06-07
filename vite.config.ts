@@ -9,12 +9,14 @@ export default defineConfig({
       generatedRouteTree: "routeTree.gen.ts",
     },
   },
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  build: {
-    outDir: "dist",
-    sourcemap: false,
+  vite: {
+    server: {
+      host: "::",
+      port: 8080,
+    },
+    build: {
+      outDir: "dist",
+      sourcemap: false,
+    },
   },
 });
