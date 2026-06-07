@@ -1,13 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, AlertTriangle, Loader2 } from "lucide-react";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
 import { lerLista, lerPdfBlob, type EscalaSalva } from "@/lib/escalas-baixadas";
 
 type PdfComponents = {
-  Document: typeof import("react-pdf").Document;
-  Page: typeof import("react-pdf").Page;
+  Document: ComponentType<any>;
+  Page: ComponentType<any>;
 };
 
 export const Route = createFileRoute("/escala-viewer/$id")({
@@ -53,6 +51,8 @@ function EscalaViewer() {
         const [{ Document, Page, pdfjs }, worker] = await Promise.all([
           import("react-pdf"),
           import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+          import("react-pdf/dist/Page/AnnotationLayer.css"),
+          import("react-pdf/dist/Page/TextLayer.css"),
         ]);
         pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
         if (!cancelled) setPdfComponents({ Document, Page });
@@ -171,11 +171,11 @@ function EscalaViewer() {
         {!loading && fileObj && pdfComponents && (
           <pdfComponents.Document
             file={fileObj}
-            onLoadSuccess={({ numPages }) => {
+            onLoadSuccess={({ numPages }: { numPages: number }) => {
               setNumPages(numPages);
               setPageNum(1);
             }}
-            onLoadError={(err) => {
+            onLoadError={(err: Error) => {
               console.error("Erro ao renderizar PDF", err);
               setErro("Arquivo PDF corrompido. Baixe a escala novamente.");
             }}
