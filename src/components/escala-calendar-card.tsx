@@ -545,6 +545,51 @@ export function EscalaCalendarCard() {
                     })}
                   </div>
                 )}
+                {eventosDia.length > 0 && (
+                  <div className="mt-2 space-y-1 border-t pt-2" style={{ borderColor: COR_BG_SOFT }}>
+                    {eventosDia.map((ev) => {
+                      const dEv = new Date(ev.data);
+                      return (
+                        <button
+                          key={ev.id}
+                          onClick={() => {
+                            setOpenKey(null);
+                            setEventoEditing(ev);
+                            setEventoBaseDate(cell.date);
+                            setEventoModalOpen(true);
+                          }}
+                          className="flex w-full items-start gap-2 rounded-md px-1 py-1 text-left hover:bg-muted/40"
+                        >
+                          <span
+                            className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ background: "#7C3AED" }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[12px] font-bold text-foreground">
+                              {ev.titulo}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {fmtHora(dEv)}
+                              {ev.observacao ? ` · ${ev.observacao}` : ""}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    setOpenKey(null);
+                    setEventoEditing(null);
+                    setEventoBaseDate(cell.date);
+                    setEventoModalOpen(true);
+                  }}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
+                  style={{ borderColor: "#7C3AED", color: "#7C3AED" }}
+                >
+                  <BookmarkPlus size={13} /> Adicionar evento
+                </button>
               </PopoverContent>
             </Popover>
           );
