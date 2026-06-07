@@ -71,41 +71,15 @@ jobs:
       - name: Patch build.gradle with signing config + version
         run: |
           GRADLE=android/app/build.gradle
-          # versionCode / versionName
-          sed -i 's/versionCode [0-9][0-9]*/versionCode 1/'             "$GRADLE"
-          sed -i 's/versionName "[^"]*"/versionName "1.0.0"/'           "$GRADLE"
-
-          # signingConfigs.release
+          sed -i 's/versionCode [0-9][0-9]*/versionCode 1/'   "$GRADLE"
+          sed -i 's/versionName "[^"]*"/versionName "1.0.0"/' "$GRADLE"
           if ! grep -q "signingConfigs {" "$GRADLE"; then
-            python3 - <<'PY'
-import re, pathlib
-p = pathlib.Path("android/app/build.gradle")
-src = p.read_text()
-signing = """
-    signingConfigs {
-        release {
-            storeFile file("qapqrv-release.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias      System.getenv("KEY_ALIAS")
-            keyPassword   System.getenv("KEY_PASSWORD")
-        }
-    }
-"""
-# insert signingConfigs as first child of android { ... }
-src = re.sub(r"(android\s*\{\s*\n)", r"\1" + signing, src, count=1)
-# attach signingConfig to buildTypes.release
-src = re.sub(
-    r"(buildTypes\s*\{\s*\n\s*release\s*\{\s*\n)",
-    r"\1            signingConfig signingConfigs.release\n",
-    src,
-    count=1,
-)
-p.write_text(src)
-PY
+            python3 .github/scripts/patch-gradle-signing.py
           fi
-
           echo "--- build.gradle (preview) ---"
           sed -n '1,80p' "$GRADLE"
+
+
 
       - name: Build signed AAB (release)
         working-directory: android
