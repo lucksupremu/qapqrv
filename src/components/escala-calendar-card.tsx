@@ -698,6 +698,14 @@ export function EscalaCalendarCard() {
         onOpenChange={setModalOpen}
         onSave={handleSave}
       />
+
+      <EventoLivreModal
+        open={eventoModalOpen}
+        onOpenChange={setEventoModalOpen}
+        baseDate={eventoBaseDate}
+        editing={eventoEditing}
+        onChanged={() => setEventos(loadEventos())}
+      />
     </div>
   );
 }
