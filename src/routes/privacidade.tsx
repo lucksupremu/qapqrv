@@ -54,26 +54,44 @@ function PrivacidadeScreen() {
         <Section title="2. Dados coletados">
           Não coletamos nenhum dado pessoal. Todas as informações inseridas
           (marcas, escalas, lembretes) ficam armazenadas exclusivamente no seu
-          dispositivo.
+          dispositivo. Também podem ficar salvos localmente favoritos,
+          histórico, preferências, escalas baixadas e configurações do app.
         </Section>
 
-        <Section title="3. AnyConnect e sistemas da PMESP">
+        <Section title="3. Permissões do dispositivo">
+          Algumas funções podem solicitar permissões do dispositivo, sempre com
+          autorização do usuário: localização, para mostrar sua posição quando
+          você usa a ferramenta de localização; notificações, para lembretes de
+          escala; e armazenamento/arquivos, para abrir ou salvar documentos
+          baixados. Essas informações são usadas apenas para executar a função
+          solicitada e não são enviadas aos nossos servidores.
+        </Section>
+
+        <Section title="4. Retenção e exclusão de dados">
+          Como os dados ficam no próprio dispositivo, você pode excluí-los
+          limpando os dados do navegador/app, removendo favoritos e histórico
+          dentro do aplicativo ou desinstalando o app.
+        </Section>
+
+        <Section title="5. AnyConnect e sistemas da PMESP">
           O app não administra, controla nem se responsabiliza pelo aplicativo
           AnyConnect ou pelos sistemas da Polícia Militar. Qualquer problema de
           acesso ou autenticação é de responsabilidade dos sistemas da PMESP.
         </Section>
 
-        <Section title="4. Responsabilidade sobre escalas">
+        <Section title="6. Responsabilidade sobre escalas">
           O QAP, QRV! é uma ferramenta de apoio. Não nos responsabilizamos por
           atrasos, faltas ou quaisquer consequências decorrentes do uso do app.
         </Section>
 
-        <Section title="5. Publicidade">
+        <Section title="7. Publicidade">
           O app pode exibir anúncios para manter o uso gratuito. Os anúncios são
-          fornecidos por parceiros externos.
+          fornecidos por parceiros externos, como o Google AdSense/AdMob, que
+          podem usar cookies, identificadores do dispositivo ou ID de publicidade
+          conforme suas próprias políticas.
         </Section>
 
-        <Section title="6. Contato">
+        <Section title="8. Contato">
           Em caso de dúvidas, entre em contato:
           <br />
           <a
