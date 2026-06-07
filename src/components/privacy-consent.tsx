@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 
 const STORAGE_KEY = "privacy_consent_v1";
@@ -80,14 +79,14 @@ export function PrivacyConsent() {
           </ul>
           <p className="mt-3">
             Ao continuar, você confirma que leu e aceita a{" "}
-            <Link
-              to="/politica-de-privacidade"
+            <a
+              href="/politica-de-privacidade.html"
               className="font-semibold underline"
               style={{ color: "#2e6b8a" }}
               onClick={accept}
             >
               Política de Privacidade completa
-            </Link>
+            </a>
             .
           </p>
         </div>
@@ -101,14 +100,14 @@ export function PrivacyConsent() {
           >
             Li e aceito
           </button>
-          <Link
-            to="/politica-de-privacidade"
+          <a
+            href="/politica-de-privacidade.html"
             onClick={accept}
             className="h-11 w-full text-center text-[14px] font-semibold leading-[44px]"
             style={{ color: "#2e6b8a" }}
           >
             Ler política completa
-          </Link>
+          </a>
         </div>
       </div>
     </div>
