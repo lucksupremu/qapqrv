@@ -2,14 +2,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
-  HeadContent,
-  Scripts,
   createRootRouteWithContext,
   useRouter,
 } from "@tanstack/react-router";
-import { type ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 
-import "@/styles.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
@@ -91,31 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
-  return (
-    <RootDocument>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={200}>
-          <DrawerProvider>
-            <div
-              className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
-              style={{ background: "var(--bg)" }}
-            >
-              <Outlet />
-            </div>
-            <BottomNav />
-            <PrivacyConsent />
-            <PushPermissionPrompt />
-            <BrowserWarningModal />
-            <Toaster />
-          </DrawerProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </RootDocument>
-  );
-}
-
-function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -210,11 +182,22 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   }, []);
 
   return (
-    <html lang="pt-BR">
-      <head>
-        <HeadContent />
-      </head>
-      <body>{children}<Scripts /></body>
-    </html>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider delayDuration={200}>
+        <DrawerProvider>
+          <div
+            className="mx-auto w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl min-h-screen pb-[72px] scroll-smooth"
+            style={{ background: "var(--bg)" }}
+          >
+            <Outlet />
+          </div>
+          <BottomNav />
+          <PrivacyConsent />
+          <PushPermissionPrompt />
+          <BrowserWarningModal />
+          <Toaster />
+        </DrawerProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
