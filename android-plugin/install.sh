@@ -91,10 +91,7 @@ if m:
     block = """
     splits {
         abi {
-            enable true
-            reset()
-            include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
-            universalApk false
+            enable false
         }
     }
     packagingOptions {
@@ -103,6 +100,7 @@ if m:
         }
     }
 """
+
     s = s[:ins] + block + s[ins:]
     open(p,'w').write(s)
 PY
