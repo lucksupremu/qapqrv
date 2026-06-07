@@ -80,7 +80,7 @@ export function PrivacyConsent() {
           <p className="mt-3">
             Ao continuar, você confirma que leu e aceita a{" "}
             <a
-              href="/politica-de-privacidade.html"
+              href="/politica-de-privacidade"
               className="font-semibold underline"
               style={{ color: "#2e6b8a" }}
               onClick={accept}
@@ -101,7 +101,7 @@ export function PrivacyConsent() {
             Li e aceito
           </button>
           <a
-            href="/politica-de-privacidade.html"
+            href="/politica-de-privacidade"
             onClick={accept}
             className="h-11 w-full text-center text-[14px] font-semibold leading-[44px]"
             style={{ color: "#2e6b8a" }}
