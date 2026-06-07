@@ -1,15 +1,13 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
-  plugins: [
-    tanstackRouter({
-      target: "react",
+  tanstackStart: {
+    router: {
       autoCodeSplitting: true,
-      routesDirectory: "src/routes",
-      generatedRouteTree: "src/routeTree.gen.ts",
-    }),
-  ],
+      routesDirectory: "routes",
+      generatedRouteTree: "routeTree.gen.ts",
+    },
+  },
   vite: {
     server: {
       host: "::",
