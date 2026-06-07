@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
+const PRIVACY_ROUTE_BUILD_MARKER = "react-route-2026-06-07";
+
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
@@ -29,7 +31,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function PrivacidadeScreen() {
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+    <div className="min-h-screen" data-route-build={PRIVACY_ROUTE_BUILD_MARKER} style={{ background: "var(--bg)" }}>
       <header className="flex items-center gap-3 px-4 py-4">
         <Link
           to="/"
