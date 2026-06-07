@@ -418,6 +418,23 @@ export function EscalaCalendarCard() {
                 />
               )}
 
+              {temEvento && (
+                <span
+                  aria-hidden
+                  className="absolute"
+                  style={{
+                    left: 2,
+                    bottom: 2,
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#7C3AED",
+                    boxShadow: "0 0 0 1.5px #fff",
+                    zIndex: 3,
+                  }}
+                />
+              )}
+
               {extras > 0 && (
                 <span
                   aria-hidden
