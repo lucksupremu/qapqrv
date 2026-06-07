@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, AlertTriangle, Loader2 } from "lucide-react";
-import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { lerLista, lerPdfBlob, type EscalaSalva } from "@/lib/escalas-baixadas";
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+type PdfComponents = {
+  Document: typeof import("react-pdf").Document;
+  Page: typeof import("react-pdf").Page;
+};
 
 export const Route = createFileRoute("/escala-viewer/$id")({
   head: ({ params }) => ({ meta: [{ title: `Escala ${params.id} — QAP, QRV!` }] }),
@@ -43,6 +44,27 @@ function EscalaViewer() {
   const [pageNum, setPageNum] = useState(1);
   const [width, setWidth] = useState(360);
   const [scale, setScale] = useState(1);
+  const [pdfComponents, setPdfComponents] = useState<PdfComponents | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [{ Document, Page, pdfjs }, worker] = await Promise.all([
+          import("react-pdf"),
+          import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+        ]);
+        pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+        if (!cancelled) setPdfComponents({ Document, Page });
+      } catch (err) {
+        console.error("Falha ao carregar leitor de PDF", err);
+        if (!cancelled) setErro("Não foi possível carregar o leitor de PDF neste ambiente.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const all = lerLista();
@@ -140,8 +162,14 @@ function EscalaViewer() {
           </div>
         )}
 
-        {!loading && fileObj && (
-          <Document
+        {!loading && fileObj && !pdfComponents && (
+          <div className="mt-20 flex items-center gap-2 text-[14px]" style={{ color: "#5b7a8f" }}>
+            <Loader2 className="animate-spin" size={20} /> Preparando leitor…
+          </div>
+        )}
+
+        {!loading && fileObj && pdfComponents && (
+          <pdfComponents.Document
             file={fileObj}
             onLoadSuccess={({ numPages }) => {
               setNumPages(numPages);
@@ -158,14 +186,14 @@ function EscalaViewer() {
             }
           >
             <div className="overflow-auto rounded-lg bg-white shadow-[0_2px_12px_rgba(0,0,0,0.25)]">
-              <Page
+              <pdfComponents.Page
                 pageNumber={pageNum}
                 width={width * scale}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
               />
             </div>
-          </Document>
+          </pdfComponents.Document>
         )}
       </div>
 
