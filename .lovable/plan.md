@@ -1,42 +1,89 @@
-# Ativar salvamento de credenciais (autofill nativo) no navegador interno
-
 ## Objetivo
-Permitir que gerenciadores de senha do Android (Google, Samsung Pass, 1Password etc.) detectem os campos de login das páginas da PMESP (intranet, iNotes, CIAF) abertas no WebView interno, oferecendo "Salvar senha?" e autopreenchimento nos próximos acessos.
 
-## Por que não funciona hoje
-O `WebView` do Android suporta o Autofill Framework desde Android 8, mas precisa de algumas flags habilitadas explicitamente — caso contrário o sistema operacional ignora os campos e o gerenciador de senhas não aparece. Hoje o `InAppWebViewActivity` não liga nenhuma dessas flags.
+Permitir que, ao tocar em qualquer dia do card **Minha Escala** (home), o usuário possa **criar um evento livre** apenas para aquele dia, com título, hora e observação opcional, e receber lembrete antes do evento.
 
-## Mudanças (apenas Android nativo)
+Esses eventos aparecem **somente** no card Minha Escala (não no Calendário cheio).
 
-Arquivo: `android-plugin/InAppWebViewActivity.kt`
+---
 
-Dentro de `configureWebView(...)`, acrescentar:
+## Comportamento de UI
 
-1. **Salvar dados de formulário** (necessário para o gerenciador identificar o par usuário/senha):
-   - `s.saveFormData = true` (deprecated mas ainda usado pelo Chromium do WebView para sinalizar autofill).
-   - Remover qualquer chamada futura a `WebSettings.setSavePassword(false)`.
+1. Hoje, tocar num dia da grade só abre o Popover se houver plantão ou marca. **Mudança:** todo dia do mês corrente fica clicável.
+2. O Popover do dia passa a mostrar, no rodapé, um botão **"+ Adicionar evento"**.
+3. Ao clicar, abre um modal `EventoLivreModal` com:
+   - Título (texto, obrigatório, ex.: "Curso", "Médico", "Audiência")
+   - Hora (input time, padrão 08:00)
+   - Observação (textarea, opcional)
+   - Lembrete: select com opções **No horário / 30 min antes / 1 h antes / 2 h antes / 1 dia antes / Sem lembrete** (padrão: 1 h antes)
+   - Botões **Salvar** / **Cancelar** (e **Excluir** quando estiver editando)
+4. Eventos já existentes aparecem **listados dentro do mesmo Popover do dia**, acima do botão "+ Adicionar evento", com ícone próprio (📌 / lucide `BookmarkPlus`) e cor distinta (roxo/violeta) para diferenciar de plantões e marcas Dejem/Delegada. Tocar num evento abre o modal em modo edição.
+5. Indicador visual no dia: além das faixas atuais de plantão/marca, dias com evento livre ganham um **pequeno selo no canto inferior esquerdo** (bolinha violeta) — sem ocupar coluna na grade, para não atrapalhar o layout estilo Google Agenda.
 
-2. **Marcar a WebView como elegível para autofill** (Android 8+):
-   - `webView.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS`
-   - Restringir o autofill aos hosts confiáveis: em `onPageStarted`, se o host **não** terminar em `policiamilitar.sp.gov.br`, trocar para `IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS`; senão voltar para `YES_EXCLUDE_DESCENDANTS`. Isso atende o escopo "só PMESP".
+---
 
-3. **Notificar o framework quando o usuário sair do campo** (algumas ROMs só disparam o "Salvar senha?" se isso for chamado):
-   - No `onPageFinished`, chamar `getSystemService(AutofillManager::class.java)?.commit()` antes de qualquer navegação interna (também acionado no `onBackPressed`).
+## Persistência (`src/lib/eventos-personalizados.ts` — novo)
 
-4. **Garantir que a Activity não esteja excluída do autofill**:
-   - Conferir que não há `android:importantForAutofill="no"` no bloco da `InAppWebViewActivity` no `AndroidManifest.xml`. Se o `install.sh` registrar a activity sem esse atributo, está OK; nada a mudar. Se ele injetar `no`, removo do template.
+```ts
+export type EventoPersonalizado = {
+  id: string;
+  titulo: string;
+  data: string;          // ISO (data + hora)
+  observacao?: string;
+  lembreteMin: number | null; // minutos antes; null = sem lembrete
+  criado: string;        // ISO
+};
+```
 
-## Não muda
-- `src/lib/in-app-browser.ts`, rotas, JS do app: nada.
-- Sem armazenamento próprio de senha, sem JS injetado, sem criptografia custom — quem guarda é o gerenciador de senhas do próprio Android escolhido pelo usuário.
-- iOS/PWA: fora de escopo (o app é Android).
+- Chave em `localStorage`: `eventos_personalizados_v1`.
+- Funções: `loadEventos()`, `saveEventos(list)`, `upsertEvento(e)`, `removeEvento(id)`.
+- Dispara `window.dispatchEvent(new CustomEvent("eventos-changed"))` no save, no mesmo padrão de `marcas.ts`.
 
-## Como testar depois do novo APK
-1. Abrir "Marcar/Desmarcar Dejem" → intranet PMESP → digitar usuário/senha → entrar.
-2. O Android deve mostrar a barra "Salvar senha para policiamilitar.sp.gov.br?" do gerenciador padrão.
-3. Sair do app, abrir de novo a mesma página: os campos devem aparecer com sugestão de autopreenchimento.
-4. Repetir para iNotes (`correio.policiamilitar.sp.gov.br`) e CIAF (`ciaf.policiamilitar.sp.gov.br`).
-5. Abrir um site fora do domínio PMESP: confirmar que o autofill **não** é oferecido (escopo restrito).
+---
 
-## Observação
-O comportamento depende de o usuário ter um gerenciador de senhas configurado em **Configurações → Senhas e contas → Serviço de preenchimento automático**. Se estiver "Nenhum", nada aparece — isso é configuração do aparelho, não do app.
+## Lembretes
+
+Reutiliza `scheduleRemindersForMarca` de `src/lib/notifications-adapter.ts` (já suporta qualquer id de origem):
+
+- `marcaId = \`evento:\${evento.id}\``
+- `whenISOs = [dataDoEvento - lembreteMin]` (vazio se `lembreteMin === null`)
+- `buildContent` → título `"Lembrete: <titulo>"`, corpo `"Hoje às HH:mm — <obs?>"`.
+
+Ao excluir o evento, chamar `cancelForMarca(\`evento:\${id}\`)`.
+
+---
+
+## Arquivos a criar / editar
+
+**Novo**
+- `src/lib/eventos-personalizados.ts` — storage + tipos.
+- `src/components/evento-livre-modal.tsx` — modal de criação/edição usando `Dialog` do shadcn.
+
+**Editar**
+- `src/components/escala-calendar-card.tsx`
+  - Carregar eventos + listener `eventos-changed` (espelhando o padrão atual de `marcas`).
+  - Mapa `eventosPorDia` (igual `marcasPorDia`).
+  - Tornar todas as células do mês clicáveis (`interativo = cell.inMonth`).
+  - Renderizar selo violeta quando o dia tiver evento.
+  - No `PopoverContent`, listar `eventosDia` (título + hora + observação) com clique para editar.
+  - Adicionar botão **+ Adicionar evento** que fecha o popover e abre o modal já com a data selecionada.
+  - Estado novo: `eventoModalOpen`, `eventoEditing`, `eventoBaseDate`.
+
+Nenhuma mudança no `src/routes/calendario.tsx` — eventos ficam restritos à home conforme pedido.
+
+---
+
+## Detalhes técnicos
+
+- O modal reusa tokens do design system (`bg-card`, `text-foreground`, `--primary`) e segue o estilo dos modais existentes (`marcar-modal.tsx`, `escala-config-modal.tsx`).
+- Validação: título obrigatório (`trim().length > 0`), data válida.
+- IDs gerados com `crypto.randomUUID()`.
+- SSR-safe: storage funcs checam `typeof window`.
+- Tipos exportados via barrel — sem alteração em outros componentes.
+
+---
+
+## Fora de escopo
+
+- Exportar eventos para o iCal/compartilhar.
+- Recorrência (semanal/mensal). Cada evento vale apenas para o dia escolhido.
+- Sincronização entre dispositivos (segue local apenas, como as marcas).
