@@ -297,9 +297,9 @@ function ManualScreen() {
           </p>
           <p>
             Para mais detalhes, leia a{" "}
-            <Link to="/politica-de-privacidade" className="font-semibold text-blue-700 underline dark:text-blue-400">
+            <a href="/politica-de-privacidade.html" className="font-semibold text-blue-700 underline dark:text-blue-400">
               Política de Privacidade
-            </Link>
+            </a>
             .
           </p>
         </Bloco>
