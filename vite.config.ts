@@ -5,9 +5,7 @@ export default defineConfig({
     router: {
       routesDirectory: "src/routes",
       generatedRouteTree: "src/routeTree.gen.ts",
-      experimental: {
-        enableCodeSplitting: true,
-      },
+      autoCodeSplitting: true,
     },
   },
   vite: {
