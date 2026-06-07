@@ -1,0 +1,11 @@
+/privacidade
+  Content-Type: text/html; charset=utf-8
+  X-Content-Type-Options: nosniff
+
+/privacidade/
+  Content-Type: text/html; charset=utf-8
+  X-Content-Type-Options: nosniff
+
+/privacidade/index.html
+  Content-Type: text/html; charset=utf-8
+  X-Content-Type-Options: nosniff
