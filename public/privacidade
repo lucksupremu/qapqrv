@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Política de Privacidade — QAP, QRV!</title>
+    <meta
+      name="description"
+      content="Política de Privacidade do aplicativo QAP, QRV!, incluindo dados, permissões, publicidade, retenção e contato."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f3f7fb;
+        --panel: #ffffff;
+        --primary: #2e6b8a;
+        --text: #3a4a60;
+        --muted: #5b7a8f;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+      main {
+        width: min(100%, 760px);
+        margin: 0 auto;
+        padding: 24px 16px 56px;
+      }
+      .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        margin-bottom: 16px;
+        color: var(--primary);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      article {
+        background: var(--panel);
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 2px 14px rgba(0, 0, 0, 0.12);
+      }
+      h1 {
+        margin: 0;
+        color: var(--primary);
+        font-size: 24px;
+        line-height: 1.2;
+      }
+      .updated {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      section { margin-top: 24px; }
+      h2 {
+        margin: 0 0 8px;
+        color: var(--primary);
+        font-size: 18px;
+        line-height: 1.3;
+      }
+      p { margin: 0; }
+      a { color: var(--primary); font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="back" href="/">← Voltar ao app</a>
+      <article>
+        <h1>Política de Privacidade — QAP, QRV!</h1>
+        <p class="updated">Última atualização: 2026</p>
+
+        <section>
+          <h2>1. Sobre o aplicativo</h2>
+          <p>
+            O QAP, QRV! é uma ferramenta de apoio pessoal para policiais
+            militares do Estado de São Paulo acompanharem suas escalas de Dejem
+            e Delegada. O app funciona localmente, sem cadastro e sem envio de
+            dados pessoais para nossos servidores.
+          </p>
+        </section>
+
+        <section>
+          <h2>2. Dados coletados</h2>
+          <p>
+            Não coletamos nenhum dado pessoal. Todas as informações inseridas,
+            como marcas, escalas, lembretes, favoritos, histórico, preferências,
+            escalas baixadas e configurações, ficam armazenadas exclusivamente no
+            seu dispositivo.
+          </p>
+        </section>
+
+        <section>
+          <h2>3. Permissões do dispositivo</h2>
+          <p>
+            Algumas funções podem solicitar permissões do dispositivo, sempre com
+            autorização do usuário: localização, para mostrar sua posição quando
+            você usa a ferramenta de localização; notificações, para lembretes de
+            escala; e armazenamento/arquivos, para abrir ou salvar documentos
+            baixados. Essas informações são usadas apenas para executar a função
+            solicitada e não são enviadas aos nossos servidores.
+          </p>
+        </section>
+
+        <section>
+          <h2>4. Retenção e exclusão de dados</h2>
+          <p>
+            Como os dados ficam no próprio dispositivo, você pode excluí-los
+            limpando os dados do navegador/app, removendo favoritos e histórico
+            dentro do aplicativo ou desinstalando o app.
+          </p>
+        </section>
+
+        <section>
+          <h2>5. AnyConnect e sistemas da PMESP</h2>
+          <p>
+            O app não administra, controla nem se responsabiliza pelo aplicativo
+            AnyConnect ou pelos sistemas da Polícia Militar. Qualquer problema de
+            acesso ou autenticação é de responsabilidade dos sistemas da PMESP.
+          </p>
+        </section>
+
+        <section>
+          <h2>6. Responsabilidade sobre escalas</h2>
+          <p>
+            O QAP, QRV! é uma ferramenta de apoio. Não nos responsabilizamos por
+            atrasos, faltas ou quaisquer consequências decorrentes do uso do app.
+          </p>
+        </section>
+
+        <section>
+          <h2>7. Publicidade</h2>
+          <p>
+            O app pode exibir anúncios para manter o uso gratuito. Os anúncios
+            são fornecidos por parceiros externos, como o Google AdSense/AdMob,
+            que podem usar cookies, identificadores do dispositivo ou ID de
+            publicidade conforme suas próprias políticas.
+          </p>
+        </section>
+
+        <section>
+          <h2>8. Contato</h2>
+          <p>
+            Em caso de dúvidas, entre em contato:
+            <a href="mailto:Suporte.qapqrv@gmail.com">Suporte.qapqrv@gmail.com</a>
+          </p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
