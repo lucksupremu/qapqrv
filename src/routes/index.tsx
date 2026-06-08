@@ -249,7 +249,7 @@ function HomeScreen() {
       nativeOnly: true,
     },
     {
-      label: "Guia AnyConnect",
+      label: "Vídeo tutorial ANYCONECT",
       icon: BookOpen,
       gradient: GRAD_PRIMARY,
       shadow: SHADOW_PRIMARY,

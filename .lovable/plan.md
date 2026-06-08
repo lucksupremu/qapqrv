@@ -1,12 +1,19 @@
-Plano para corrigir o erro Not Found em `https://miketools.top/privacidade`:
+## Verificação do vídeo tutorial
 
-1. Garantir que a página de privacidade exista como rota real do app em `/privacidade`.
-2. Remover a dependência da versão estática em `public/privacidade/index.html`, porque o site publicado não está servindo esse arquivo como esperado.
-3. Ajustar a configuração de rotas/publicação para que links diretos como `/privacidade` funcionem no domínio publicado.
-4. Fazer uma pequena alteração visível/segura na página para forçar uma nova versão publicável.
-5. Após implementar, validar a rota no preview e orientar a publicar novamente para o domínio `miketools.top` receber a correção.
+O vídeo está corretamente configurado:
 
-Detalhes técnicos:
-- A rota `src/routes/privacidade.tsx` já existe localmente, mas o domínio publicado ainda retorna 404.
-- O site publicado está público, então não é problema de visibilidade.
-- A correção deve focar no fallback/roteamento do app publicado para permitir acesso direto à URL `/privacidade`.
+- Asset CDN ativo: `tutorial-anyconnect.mp4` (~105 MB, `video/mp4`) em `src/assets/anyconnect/tutorial.mp4.asset.json`.
+- Web (preview/publicado): carrega via `tutorial.url` → `/__l5e/assets-v1/.../tutorial-anyconnect.mp4` ✓
+- APK nativo (Capacitor): já há fallback no `src/routes/anyconnect.tsx` prefixando com `https://qapqrv.lovable.app` (linha 11/133), porque o `localhost` do APK não resolve o caminho relativo do CDN ✓
+- O `<video controls playsInline preload="metadata">` está correto para tocar ao toque tanto no navegador quanto no WebView do Android.
+
+Conclusão: o vídeo abre corretamente. Não há mudança técnica a fazer aqui.
+
+## Renomear o item do menu
+
+Hoje aparece "Guia AnyConnect" em dois lugares. Vou trocar para **"Vídeo tutorial ANYCONECT"** (mantendo o ANYCONECT em caixa alta, como pedido):
+
+1. `src/components/side-drawer.tsx` (linha 73) — item do menu lateral.
+2. `src/routes/index.tsx` (linha 252) — atalho na home.
+
+Nenhuma rota, ícone ou navegação muda. O título da própria tela `/anyconnect` ("Configurar AnyConnect") permanece como está, já que descreve o conteúdo da página em si — me avise se quiser trocar esse título também.
