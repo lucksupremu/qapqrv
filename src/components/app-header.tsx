@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { Bell, Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { VpnIndicator } from "@/components/vpn-indicator";
+import { GlobalSearchButton } from "@/components/global-search";
 
 type Props = {
   subtitle?: string;
@@ -17,7 +19,7 @@ export function AppHeader({ subtitle, showBrand = true, title }: Props) {
       className="relative px-5 pt-6 pb-12 text-brand-navy-foreground"
       style={{ background: "var(--gradient-header)" }}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger
             aria-label="Abrir menu"
@@ -49,13 +51,17 @@ export function AppHeader({ subtitle, showBrand = true, title }: Props) {
           </SheetContent>
         </Sheet>
 
-        <button
-          aria-label="Notificações"
-          className="relative rounded-lg p-1.5 -mr-1.5 hover:bg-white/10 active:bg-white/15 transition"
-        >
-          <Bell className="size-6" />
-          <span className="absolute top-1 right-1 size-2 rounded-full bg-brand-blue ring-2 ring-[oklch(0.18_0.06_270)]" />
-        </button>
+        <div className="flex items-center gap-1">
+          <VpnIndicator />
+          <GlobalSearchButton />
+          <button
+            aria-label="Notificações"
+            className="relative rounded-lg p-1.5 -mr-1.5 hover:bg-white/10 active:bg-white/15 transition"
+          >
+            <Bell className="size-6" />
+            <span className="absolute top-1 right-1 size-2 rounded-full bg-brand-blue ring-2 ring-[oklch(0.18_0.06_270)]" />
+          </button>
+        </div>
       </div>
 
       <div className="mt-3 text-center">
