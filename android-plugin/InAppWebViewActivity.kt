@@ -141,6 +141,8 @@ class InAppWebViewActivity : Activity() {
                         getSystemService(AutofillManager::class.java)?.commit()
                     } catch (_: Throwable) {}
                 }
+                // Autofill da intranet PMESP via cofre local do app.
+                tryIntranetAutofill(url)
             }
 
             override fun shouldOverrideUrlLoading(
