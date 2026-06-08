@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, AlertTriangle, Loader2 } from "lucide-react";
 import { lerLista, lerPdfBlob, type EscalaSalva } from "@/lib/escalas-baixadas";
+import { OfflineBadge } from "@/components/offline-badge";
+
 
 type PdfComponents = {
   Document: ComponentType<any>;
@@ -131,8 +133,11 @@ function EscalaViewer() {
         <h1 className="flex-1 truncate text-center text-[16px] font-bold" style={{ color: "#2e6b8a" }}>
           Escala {id}
         </h1>
-        <span className="h-10 w-10" aria-hidden />
+        <div className="flex h-10 w-10 items-center justify-end">
+          <OfflineBadge />
+        </div>
       </header>
+
 
       <div ref={containerRef} className="mx-auto flex w-full max-w-[920px] flex-col items-center px-2">
         {loading && (

@@ -55,6 +55,21 @@ private fun trustAllSslContext(): SSLContext {
 @CapacitorPlugin(name = "InAppWebView")
 class InAppWebViewPlugin : Plugin() {
 
+    companion object {
+        /** Credenciais de autofill (apenas em memória do processo). */
+        @Volatile var autofillCpf: String? = null
+        @Volatile var autofillSenha: String? = null
+    }
+
+    @PluginMethod
+    fun setAutofillCredentials(call: PluginCall) {
+        autofillCpf = call.getString("cpf")
+        autofillSenha = call.getString("senha")
+        val ret = JSObject()
+        ret.put("ok", true)
+        call.resolve(ret)
+    }
+
     @PluginMethod
     fun open(call: PluginCall) {
         val url = call.getString("url")

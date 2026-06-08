@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, FolderOpen, FileDown, Smartphone } from "lucide-react";
+import { ArrowLeft, FolderOpen, FileDown, Smartphone, CheckCircle2 } from "lucide-react";
 import { useIsNative } from "@/hooks/use-is-native";
 import { toast } from "sonner";
 import { openInAppBrowser } from "@/lib/in-app-browser";
+import { OfflineBadge } from "@/components/offline-badge";
+
 
 import {
   AlertDialog,
@@ -131,8 +133,11 @@ function DownloadedReportsScreen() {
         <h1 className="flex-1 text-center text-[18px] font-bold" style={{ color: "#2e6b8a" }}>
           Escalas baixadas
         </h1>
-        <span className="h-10 w-10" aria-hidden />
+        <div className="flex h-10 w-10 items-center justify-end">
+          <OfflineBadge />
+        </div>
       </header>
+
 
       {mostrarAvisoWeb && (
         <div
@@ -186,9 +191,18 @@ function DownloadedReportsScreen() {
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-[13px]" style={{ color: "#5b7a8f" }}>
-                Salvo em {formatBR(e.dataSalva ?? e.savedAt)}
+              <p className="mt-1 flex items-center gap-2 text-[13px]" style={{ color: "#5b7a8f" }}>
+                <span>Salvo em {formatBR(e.dataSalva ?? e.savedAt)}</span>
+                {(e.hasPdf || e.localPath) && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    style={{ background: "#dcfce7", color: "#166534" }}
+                  >
+                    <CheckCircle2 size={10} /> Offline OK
+                  </span>
+                )}
               </p>
+
               <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => handleAbrir(e)}

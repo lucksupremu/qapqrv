@@ -122,6 +122,22 @@ function CalendarScreen() {
 
   useEffect(() => { saveMarcas(marcas); }, [marcas]);
 
+  // Deep link / atalho rápido: /calendario?action=nova-marca abre o modal direto.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "nova-marca") {
+      setEditing(null);
+      setNewDate(new Date().toISOString().slice(0, 10));
+      setModalOpen(true);
+      // Remove o parâmetro para não reabrir ao voltar.
+      const url = new URL(window.location.href);
+      url.searchParams.delete("action");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
+
+
   const grid = useMemo(
     () => buildGrid(cursor.getFullYear(), cursor.getMonth()),
     [cursor],
