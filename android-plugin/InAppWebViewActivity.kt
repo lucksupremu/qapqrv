@@ -109,6 +109,8 @@ class InAppWebViewActivity : Activity() {
         val cm = CookieManager.getInstance()
         cm.setAcceptCookie(true)
         cm.setAcceptThirdPartyCookies(webView, true)
+        // Garante que cookies já gravados sejam carregados nesta sessão.
+        try { cm.flush() } catch (_: Throwable) {}
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -345,7 +347,15 @@ class InAppWebViewActivity : Activity() {
         }
     }
 
+    override fun onPause() {
+        // Persiste cookies em disco para que a sessão da intranet
+        // continue válida na próxima abertura (login "lembrado").
+        try { CookieManager.getInstance().flush() } catch (_: Throwable) {}
+        super.onPause()
+    }
+
     override fun onDestroy() {
+        try { CookieManager.getInstance().flush() } catch (_: Throwable) {}
         try {
             webView.stopLoading()
             webView.loadUrl("about:blank")
