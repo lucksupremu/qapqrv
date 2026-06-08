@@ -31,6 +31,7 @@ class MainActivity : BridgeActivity() {
     registerPlugin(VpnStatusPlugin::class.java)
     registerPlugin(InAppWebViewPlugin::class.java)
     registerPlugin(AppOpenAdPlugin::class.java)
+    registerPlugin(NativeAdPlugin::class.java)
     registerPlugin(WidgetDataPlugin::class.java)
     super.onCreate(savedInstanceState)
   }
