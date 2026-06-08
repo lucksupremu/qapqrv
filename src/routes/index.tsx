@@ -665,3 +665,52 @@ function VpnDetailRow() {
     </div>
   );
 }
+
+function BrowserHintBanner() {
+  const native = useIsNative();
+  const [open, setOpen] = useState(false);
+  const KEY = "home_browser_hint_dismissed_v1";
+
+  useEffect(() => {
+    if (typeof window === "undefined" || native) return;
+    try {
+      if (!window.localStorage.getItem(KEY)) setOpen(true);
+    } catch {
+      /* ignore */
+    }
+  }, [native]);
+
+  if (!open || native) return null;
+
+  const dismiss = () => {
+    try {
+      window.localStorage.setItem(KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setOpen(false);
+  };
+
+  return (
+    <div className="px-5 pt-1">
+      <div className="flex items-start gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-3.5 py-2.5">
+        <Info
+          size={16}
+          className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-400"
+        />
+        <p className="flex-1 text-[12px] leading-snug text-amber-900 dark:text-amber-200">
+          Se o Chrome bloquear o acesso a escalas ou à marcação Dejem/Delegada,
+          abra em outro navegador (Firefox ou Edge).
+        </p>
+        <button
+          aria-label="Dispensar"
+          onClick={dismiss}
+          className="-mr-1 -mt-1 shrink-0 rounded-full p-1 text-amber-700/70 hover:bg-amber-500/10 dark:text-amber-300/70"
+        >
+          <X size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
