@@ -347,7 +347,15 @@ class InAppWebViewActivity : Activity() {
         }
     }
 
+    override fun onPause() {
+        // Persiste cookies em disco para que a sessão da intranet
+        // continue válida na próxima abertura (login "lembrado").
+        try { CookieManager.getInstance().flush() } catch (_: Throwable) {}
+        super.onPause()
+    }
+
     override fun onDestroy() {
+        try { CookieManager.getInstance().flush() } catch (_: Throwable) {}
         try {
             webView.stopLoading()
             webView.loadUrl("about:blank")
