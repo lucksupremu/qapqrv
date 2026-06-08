@@ -9,6 +9,7 @@ o projeto Android gerado pelo Capacitor (`android/`).
 | `InAppWebViewPlugin.kt` + `InAppWebViewActivity.kt` | Navegador interno (intranet PMESP) + autofill do cofre local. |
 | `PdfViewerActivity.kt` | Visualizador de PDF embutido (fallback se não houver leitor externo). |
 | `AppOpenAdPlugin.kt` | AdMob — App Open. |
+| `NativeAdPlugin.kt` | AdMob — Native Ads desenhados sobre o WebView (usado no histórico). |
 | `WidgetDataPlugin.kt` | Bridge JS → SharedPreferences usadas pelo widget. |
 | `ProximaEscalaWidget.kt` | Widget home-screen "Próxima escala". |
 
