@@ -55,12 +55,14 @@ function hadRecentError(): boolean {
 async function openNativeReview(): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
-    // Tenta plugin oficial (se instalado no APK).
-    const mod = await import(/* @vite-ignore */ "@capacitor-community/in-app-review").catch(
-      () => null,
-    );
-    if (mod && typeof (mod as any).InAppReview?.requestReview === "function") {
-      await (mod as any).InAppReview.requestReview();
+    // Tenta plugin oficial @capacitor-community/in-app-review se estiver
+    // instalado no APK. Import dinâmico por string montada em runtime para
+    // evitar erro de typecheck quando o pacote não está nas devDependencies.
+    const pkg = ["@capacitor-community", "in-app-review"].join("/");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod: any = await import(/* @vite-ignore */ pkg).catch(() => null);
+    if (mod && typeof mod.InAppReview?.requestReview === "function") {
+      await mod.InAppReview.requestReview();
       return true;
     }
   } catch {
@@ -68,6 +70,7 @@ async function openNativeReview(): Promise<boolean> {
   }
   return false;
 }
+
 
 function openPlayStoreFallback() {
   try {
