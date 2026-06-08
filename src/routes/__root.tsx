@@ -16,7 +16,9 @@ import { BottomNav } from "@/components/bottom-nav";
 import { PrivacyConsent } from "@/components/privacy-consent";
 import { PushPermissionPrompt } from "@/components/push-permission-prompt";
 import { BrowserWarningModal } from "@/components/browser-warning-modal";
+import { WhatsNewModal } from "@/components/whats-new-modal";
 import { isNativeApp } from "@/lib/in-app-browser";
+
 
 /** Google AdSense client ID */
 const ADSENSE_CLIENT = "ca-pub-4966192764194561";
@@ -190,14 +192,36 @@ function RootComponent() {
         ensureServiceWorker().catch(() => {});
       });
     }
+
+    // Revalida silenciosamente as últimas escalas baixadas quando VPN está ativa (APK).
+    if (isNativeApp()) {
+      const t = window.setTimeout(() => {
+        import("@/lib/escalas-revalidate")
+          .then(({ revalidateRecentEscalas }) => revalidateRecentEscalas())
+          .catch(() => {});
+      }, 4000);
+      // limpa no unmount
+      void t;
+    }
+
+    // Avaliação inteligente — pede review depois de uso recorrente.
+    const reviewTimer = window.setTimeout(() => {
+      import("@/lib/review-prompt")
+        .then(({ maybePromptReview }) => maybePromptReview())
+        .catch(() => {});
+    }, 8000);
+
     return () => {
       clearInterval(id);
+      window.clearTimeout(reviewTimer);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (ric && (window as any).cancelIdleCallback)
         (window as any).cancelIdleCallback(adTimer);
       else clearTimeout(adTimer);
+      if (removeAppListener) removeAppListener();
     };
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -213,7 +237,9 @@ function RootComponent() {
           <PrivacyConsent />
           <PushPermissionPrompt />
           <BrowserWarningModal />
+          <WhatsNewModal />
           <Toaster />
+
         </DrawerProvider>
       </TooltipProvider>
     </QueryClientProvider>
