@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Fragment } from "react";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
 import { ToolCard } from "@/components/tool-card";
-import { AdSlot } from "@/components/ad-slot";
 import { tools } from "@/lib/tools";
 import { useHistory } from "@/hooks/use-local-list";
 
@@ -17,23 +15,11 @@ export const Route = createFileRoute("/historico")({
   component: Historico,
 });
 
-// Anúncio nativo intercalado a cada N itens do histórico.
-const AD_EVERY = 4;
-
 function Historico() {
   const { history, clear } = useHistory();
   const list = history
     .map((slug) => tools.find((t) => t.slug === slug))
     .filter((t): t is NonNullable<typeof t> => Boolean(t));
-
-  // Quebra em "linhas" do grid (2 colunas) e injeta um ad como linha cheia a cada AD_EVERY itens.
-  const rows: Array<{ kind: "items"; items: typeof list } | { kind: "ad"; key: string }> = [];
-  for (let i = 0; i < list.length; i += 2) {
-    rows.push({ kind: "items", items: list.slice(i, i + 2) });
-    if ((i + 2) % AD_EVERY === 0 && i + 2 < list.length) {
-      rows.push({ kind: "ad", key: `ad-${i}` });
-    }
-  }
 
   return (
     <div className="min-h-screen pb-24 bg-background">
@@ -46,22 +32,10 @@ function Historico() {
           </p>
         ) : (
           <>
-            <div className="space-y-3">
-              {rows.map((row, i) =>
-                row.kind === "items" ? (
-                  <div key={`row-${i}`} className="grid grid-cols-2 gap-3">
-                    {row.items.map((t) => (
-                      <ToolCard key={t.slug} tool={t} />
-                    ))}
-                  </div>
-                ) : (
-                  <Fragment key={row.key}>
-                    <div className="flex justify-center">
-                      <AdSlot type="in-feed" />
-                    </div>
-                  </Fragment>
-                ),
-              )}
+            <div className="grid grid-cols-2 gap-3">
+              {list.map((t) => (
+                <ToolCard key={t.slug} tool={t} />
+              ))}
             </div>
             <button
               onClick={clear}
