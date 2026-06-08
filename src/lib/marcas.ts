@@ -38,6 +38,9 @@ export function saveMarcas(marcas: Marca[]) {
   try {
     window.localStorage.setItem(MARCAS_STORAGE_KEY, JSON.stringify(marcas));
     window.dispatchEvent(new CustomEvent("marcas-changed"));
+    // Atualiza widget Android com a próxima escala (no-op no web).
+    void import("@/lib/widget-bridge").then((m) => m.syncWidgetFromMarcas(marcas)).catch(() => {});
+
   } catch {
     /* ignore */
   }
