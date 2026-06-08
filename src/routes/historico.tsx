@@ -57,7 +57,7 @@ function Historico() {
                 ) : (
                   <Fragment key={row.key}>
                     <div className="flex justify-center">
-                      <AdSlot type="banner" />
+                      <AdSlot type="in-feed" />
                     </div>
                   </Fragment>
                 ),

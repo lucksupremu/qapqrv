@@ -5,7 +5,12 @@ const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT ?? "ca-pub-4966192764
 
 type Props = {
   adSlot: string;           // data-ad-slot
-  adFormat?: string;        // ex: "auto", "rectangle", "fluid"
+  /** "auto" (banner responsivo), "fluid" (in-feed/in-article), "rectangle" etc. */
+  adFormat?: string;
+  /** `data-ad-layout-key` para in-feed (obrigatório se adFormat="fluid" sem layout). */
+  layoutKey?: string;
+  /** `data-ad-layout` para in-article ("in-article"). */
+  layout?: string;
   style?: React.CSSProperties;
   className?: string;
   /** Altura mínima reservada (evita CLS / layout quebrado). Padrão: 100px. */
@@ -18,10 +23,14 @@ type Props = {
  * - Reserva espaço fixo para evitar Cumulative Layout Shift.
  * - Mostra placeholder discreto enquanto carrega ou se o anúncio falhar
  *   (sem rede, AdBlock, slot vazio, script bloqueado etc.).
+ * - Suporta banner responsivo (`adFormat="auto"`), in-feed (`adFormat="fluid"`
+ *   + `layoutKey`) e in-article (`adFormat="fluid"` + `layout="in-article"`).
  */
 export function AdSenseBanner({
   adSlot,
   adFormat = "auto",
+  layoutKey,
+  layout,
   style,
   className,
   minHeight = 100,
@@ -58,6 +67,12 @@ export function AdSenseBanner({
 
   const showPlaceholder = status !== "filled";
 
+  // Atributos opcionais só são adicionados quando definidos — AdSense ignora
+  // chaves vazias mas alguns linters reclamam, e in-feed exige `layoutKey`.
+  const extraAttrs: Record<string, string> = {};
+  if (layoutKey) extraAttrs["data-ad-layout-key"] = layoutKey;
+  if (layout) extraAttrs["data-ad-layout"] = layout;
+
   return (
     <div
       className={`relative w-full ${className ?? ""}`}
@@ -71,6 +86,7 @@ export function AdSenseBanner({
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-full-width-responsive="true"
+        {...extraAttrs}
       />
       {showPlaceholder && (
         <div
