@@ -109,9 +109,7 @@ function IntranetWebviewScreen() {
     }
   };
 
-  const openAnyConnect = () => {
-    void launchAnyConnect();
-  };
+  const reloadPage = () => reload();
 
   return (
     <div className="flex h-screen flex-col" style={{ background: "var(--bg)" }}>
@@ -168,35 +166,8 @@ function IntranetWebviewScreen() {
         )}
 
         {error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#ffffff] px-6 text-center">
-            <div
-              className="flex h-20 w-20 items-center justify-center rounded-full"
-              style={{ background: "#e8f0f8", color: "#2e6b8a" }}
-            >
-              <Lock size={36} />
-            </div>
-            <p className="text-[18px] font-bold" style={{ color: "#2e6b8a" }}>
-              Sem acesso à intranet
-            </p>
-            <p className="max-w-xs text-[14px]" style={{ color: "#5b7a8f" }}>
-              Ligue a VPN AnyConnect para acessar este sistema.
-            </p>
-            <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
-              <button
-                onClick={openAnyConnect}
-                className="h-12 rounded-[14px] font-bold text-white"
-                style={{ background: "#2e6b8a" }}
-              >
-                Abrir AnyConnect
-              </button>
-              <button
-                onClick={() => navigate({ to: "/" })}
-                className="h-12 rounded-[14px] border-2 bg-[#ffffff] font-bold"
-                style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
-              >
-                Voltar
-              </button>
-            </div>
+          <div className="absolute inset-0">
+            <NetworkErrorState kind="vpn-off" onRetry={reloadPage} />
           </div>
         )}
       </div>
