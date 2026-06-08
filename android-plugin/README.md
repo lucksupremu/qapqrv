@@ -9,6 +9,7 @@ o projeto Android gerado pelo Capacitor (`android/`).
 | `InAppWebViewPlugin.kt` + `InAppWebViewActivity.kt` | Navegador interno (intranet PMESP) + autofill do cofre local. |
 | `PdfViewerActivity.kt` | Visualizador de PDF embutido (fallback se não houver leitor externo). |
 | `AppOpenAdPlugin.kt` | AdMob — App Open. |
+| `NativeAdPlugin.kt` | AdMob — Native Ads desenhados sobre o WebView (usado no histórico). |
 | `WidgetDataPlugin.kt` | Bridge JS → SharedPreferences usadas pelo widget. |
 | `ProximaEscalaWidget.kt` | Widget home-screen "Próxima escala". |
 
@@ -30,6 +31,7 @@ class MainActivity : BridgeActivity() {
     registerPlugin(VpnStatusPlugin::class.java)
     registerPlugin(InAppWebViewPlugin::class.java)
     registerPlugin(AppOpenAdPlugin::class.java)
+    registerPlugin(NativeAdPlugin::class.java)
     registerPlugin(WidgetDataPlugin::class.java)
     super.onCreate(savedInstanceState)
   }
@@ -181,6 +183,32 @@ E em `res/values/strings.xml`:
 <string name="shortcut_proxima">Próxima escala</string>
 <string name="shortcut_intranet">Abrir intranet</string>
 ```
+
+## Native Ads (histórico)
+
+O `NativeAdPlugin.kt` desenha uma `NativeAdView` por cima do WebView nas posições
+informadas pelo JS (`src/lib/native-ad.ts` via `useNativeAd`). Não precisa de XML
+extra — o layout do anúncio é construído programaticamente.
+
+Dependências obrigatórias em `android/app/build.gradle`:
+
+```gradle
+dependencies {
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+}
+```
+
+E em `AndroidManifest.xml` (já necessário pro App Open Ad):
+
+```xml
+<meta-data
+    android:name="com.google.android.gms.ads.APPLICATION_ID"
+    android:value="ca-app-pub-9197484743954603~4917243774"/>
+```
+
+Em debug o plugin usa o ad unit de teste do Google
+(`ca-app-pub-3940256099942544/2247696110`). Trocar para o ID de produção em
+`NativeAdPlugin.AD_UNIT_ID` antes de publicar.
 
 ## Build
 

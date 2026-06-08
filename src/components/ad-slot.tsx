@@ -1,13 +1,17 @@
+import { useRef } from "react";
 import { AdSenseBanner } from "./adsense-banner";
+import { useNativeAd } from "@/lib/native-ad";
 
 /**
  * AdSlot — seletor de anúncio conforme a plataforma.
- * - Web:      usa Google AdSense via AdSenseBanner
- * - Nativo:   placeholder para AdMob (integrar com Capacitor)
+ * - Web:    Google AdSense (banner responsivo).
+ * - APK:    Native Ad do AdMob desenhado sobre o slot por NativeAdPlugin.
+ *           O elemento DOM funciona como "placeholder" — reserva o espaço,
+ *           e o plugin Kotlin posiciona a NativeAdView por cima dele.
  */
 type Props = { type?: "app-open" | "interstitial" | "banner" };
 
-export function AdSlot({ type = "app-open" }: Props) {
+export function AdSlot({ type = "banner" }: Props) {
   const isNative =
     typeof window !== "undefined" &&
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,26 +20,30 @@ export function AdSlot({ type = "app-open" }: Props) {
   if (!isNative) {
     return (
       <div className="w-full max-w-sm">
-        <AdSenseBanner
-          adSlot="7036302359"
-          adFormat="auto"
-          className="w-full"
-        />
+        <AdSenseBanner adSlot="7036302359" adFormat="auto" className="w-full" />
       </div>
     );
   }
 
+  // No APK, app-open/interstitial são tratados em fluxos próprios — aqui só renderiza native.
+  if (type !== "banner") {
+    return null;
+  }
+
+  return <NativeAdHost />;
+}
+
+function NativeAdHost() {
+  const ref = useRef<HTMLDivElement>(null);
+  useNativeAd(ref);
+  // O conteúdo "placeholder" só aparece enquanto o ad não carregou; depois é coberto.
   return (
-    <div className="w-full rounded-xl border border-dashed border-border bg-muted/60 p-6 text-center">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground">
-        Espaço para anúncio
-      </p>
-      <p className="mt-2 text-sm text-foreground/70">
-        {type === "app-open" ? "Anúncio de abertura (AdMob)" : "Anúncio (AdMob)"}
-      </p>
-      <div className="mt-4 h-32 rounded-lg bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-xs text-muted-foreground">
-        Ad placeholder 320×250
-      </div>
+    <div
+      ref={ref}
+      data-native-ad-slot
+      className="w-full max-w-md h-[88px] rounded-xl border border-border bg-muted/40 flex items-center justify-center text-[11px] uppercase tracking-widest text-muted-foreground"
+    >
+      Anúncio
     </div>
   );
 }
