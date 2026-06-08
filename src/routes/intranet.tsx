@@ -4,6 +4,9 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
 import { NetworkErrorState } from "@/components/network-error-state";
+import { UnlockPinModal } from "@/components/unlock-pin-modal";
+import { vaultEnabled } from "@/lib/credential-vault";
+import { InAppWebView } from "@/lib/in-app-webview";
 import {
   ArrowLeft,
   Share2,
@@ -32,12 +35,16 @@ function IntranetWebviewScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [currentUrl, setCurrentUrl] = useState(url);
+  const [pinOpen, setPinOpen] = useState(false);
 
-  // No APK nativo, iframe não funciona com sites .gov.br (X-Frame-Options).
-  // Abrimos na WebView interna do Capacitor (NÃO no Chrome / Custom Tabs,
-  // que está bloqueando o acesso à intranet PMESP).
+  // No APK nativo: se houver cofre habilitado, pede o PIN antes de abrir
+  // a WebView; injeta credenciais via plugin nativo e abre.
   useEffect(() => {
     if (!isNativeApp()) return;
+    if (vaultEnabled()) {
+      setPinOpen(true);
+      return;
+    }
     void openInAppBrowser(url, { titulo, modo: "webview", forceMobileUA: true });
     navigate({ to: "/" });
   }, [url, titulo, navigate]);
@@ -207,6 +214,26 @@ function IntranetWebviewScreen() {
           Salvar escala
         </button>
       </nav>
+
+      <UnlockPinModal
+        open={pinOpen}
+        onOpenChange={(o) => {
+          setPinOpen(o);
+          if (!o) navigate({ to: "/" });
+        }}
+        onUnlock={async (creds) => {
+          try {
+            if (InAppWebView.setAutofillCredentials) {
+              await InAppWebView.setAutofillCredentials(creds);
+            }
+          } catch (e) {
+            console.warn("setAutofillCredentials falhou", e);
+            toast.error("Autofill indisponível neste build. Atualize o app.");
+          }
+          await openInAppBrowser(url, { titulo, modo: "webview", forceMobileUA: true });
+          navigate({ to: "/" });
+        }}
+      />
     </div>
   );
 }

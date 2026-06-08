@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, RotateCcw } from "lucide-react";
 
 import { PushSettingsCard } from "@/components/push-settings-card";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CredentialVaultCard } from "@/components/credential-vault-card";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/configuracoes")({
 });
 
 function ConfiguracoesPage() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       <header
@@ -42,7 +44,23 @@ function ConfiguracoesPage() {
 
       <main className="space-y-4 px-4 pb-8">
         <ThemeToggle />
+        <CredentialVaultCard />
         <PushSettingsCard />
+
+        <button
+          onClick={() => {
+            try {
+              window.localStorage.removeItem("onboarding-seen-v1");
+            } catch {
+              /* ignore */
+            }
+            void navigate({ to: "/onboarding" });
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-[14px] border-2 bg-white py-3 text-[14px] font-bold"
+          style={{ borderColor: "var(--primary)", color: "var(--primary)" }}
+        >
+          <RotateCcw size={16} /> Refazer onboarding
+        </button>
 
         <div
           className="rounded-[16px] border-2 p-4 text-[12px]"

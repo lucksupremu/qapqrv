@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -88,6 +89,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Onboarding: redireciona na primeira abertura.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (pathname === "/onboarding") return;
+    try {
+      if (window.localStorage.getItem("onboarding-seen-v1") !== "1") {
+        router.navigate({ to: "/onboarding" });
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [pathname, router]);
+
+
 
   useEffect(() => {
     if (typeof window === "undefined") return;

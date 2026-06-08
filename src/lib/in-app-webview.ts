@@ -15,6 +15,11 @@ export interface InAppWebViewPlugin {
   openPdf(options: { path: string; title?: string }): Promise<{ opened: boolean }>;
   openPdfExternal(options: { path: string }): Promise<{ opened: boolean }>;
   warmupIntranet(options: { url: string; timeoutMs?: number }): Promise<{ ok: boolean; reason?: string }>;
+  /**
+   * Define credenciais para autofill na próxima abertura da intranet.
+   * Implementado no plugin Android; no web é no-op (resolve silenciosamente).
+   */
+  setAutofillCredentials?(options: { cpf: string; senha: string }): Promise<{ ok: boolean }>;
 }
 
 export const InAppWebView =
