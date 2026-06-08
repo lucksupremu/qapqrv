@@ -315,6 +315,10 @@ function HomeScreen() {
         </div>
       </header>
 
+      <BrowserHintBanner />
+
+
+
       
 
       {/* CONSULTA — card tático com glow dourado */}
