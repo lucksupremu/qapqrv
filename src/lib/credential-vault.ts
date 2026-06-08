@@ -41,7 +41,7 @@ async function deriveKey(pin: string, salt: Uint8Array): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const base = await crypto.subtle.importKey(
     "raw",
-    enc.encode(pin),
+    enc.encode(pin) as BufferSource,
     { name: "PBKDF2" },
     false,
     ["deriveKey"],
@@ -49,7 +49,7 @@ async function deriveKey(pin: string, salt: Uint8Array): Promise<CryptoKey> {
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt,
+      salt: salt as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
@@ -86,7 +86,11 @@ export async function vaultSet(
   const enc = new TextEncoder();
   const plaintext = enc.encode(`${creds.cpf}\n${creds.senha}`);
   const cipher = new Uint8Array(
-    await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext),
+    await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv as BufferSource },
+      key,
+      plaintext as BufferSource,
+    ),
   );
   const payload: StoredPayload = {
     v: 1,
