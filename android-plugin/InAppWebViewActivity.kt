@@ -109,6 +109,8 @@ class InAppWebViewActivity : Activity() {
         val cm = CookieManager.getInstance()
         cm.setAcceptCookie(true)
         cm.setAcceptThirdPartyCookies(webView, true)
+        // Garante que cookies já gravados sejam carregados nesta sessão.
+        try { cm.flush() } catch (_: Throwable) {}
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
