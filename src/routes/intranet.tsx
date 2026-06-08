@@ -214,6 +214,26 @@ function IntranetWebviewScreen() {
           Salvar escala
         </button>
       </nav>
+
+      <UnlockPinModal
+        open={pinOpen}
+        onOpenChange={(o) => {
+          setPinOpen(o);
+          if (!o) navigate({ to: "/" });
+        }}
+        onUnlock={async (creds) => {
+          try {
+            if (InAppWebView.setAutofillCredentials) {
+              await InAppWebView.setAutofillCredentials(creds);
+            }
+          } catch (e) {
+            console.warn("setAutofillCredentials falhou", e);
+            toast.error("Autofill indisponível neste build. Atualize o app.");
+          }
+          await openInAppBrowser(url, { titulo, modo: "webview", forceMobileUA: true });
+          navigate({ to: "/" });
+        }}
+      />
     </div>
   );
 }
