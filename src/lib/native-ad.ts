@@ -35,7 +35,7 @@ async function ensureInit() {
  * Hook que cobre `ref` com um Native Ad nativo enquanto o elemento está montado.
  * No web ou se o plugin não existir, é no-op (o placeholder web continua aparecendo).
  */
-export function useNativeAd(ref: React.RefObject<HTMLElement>) {
+export function useNativeAd(ref: React.RefObject<HTMLElement | null>) {
   const slotIdRef = useRef<string>(`slot-${++counter}`);
 
   useEffect(() => {
