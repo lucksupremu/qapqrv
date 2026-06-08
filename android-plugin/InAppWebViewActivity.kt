@@ -536,4 +536,48 @@ class InAppWebViewActivity : Activity() {
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
+
+    /**
+     * Injeta CPF/senha no formulário de login da intranet PMESP quando o
+     * cofre local do app (PIN) decifrou as credenciais antes desta Activity.
+     */
+    private fun tryIntranetAutofill(url: String?) {
+        if (url.isNullOrBlank()) return
+        if (!url.contains("login.aspx", ignoreCase = true) &&
+            !url.contains("policiamilitar.sp.gov.br/login", ignoreCase = true)) return
+        val cpf = InAppWebViewPlugin.autofillCpf ?: return
+        val senha = InAppWebViewPlugin.autofillSenha ?: return
+        if (cpf.isBlank() || senha.isBlank()) return
+
+        val cpfJs = jsString(cpf)
+        val senhaJs = jsString(senha)
+        val js = """
+            (function(){
+              try {
+                var cpf = $cpfJs, senha = $senhaJs;
+                var userSel = ['#txtCpf','#txtUsuario','#txtLogin','input[name*="Cpf"]','input[name*="User"]','input[type="text"]'];
+                var passSel = ['#txtSenha','input[name*="Senha"]','input[type="password"]'];
+                var btnSel  = ['#btnEntrar','#btnLogin','input[type="submit"]','button[type="submit"]'];
+                function find(sels){ for (var i=0;i<sels.length;i++){ var el=document.querySelector(sels[i]); if(el) return el; } return null; }
+                var u=find(userSel), p=find(passSel), b=find(btnSel);
+                if (u){ u.value=cpf; u.dispatchEvent(new Event('input',{bubbles:true})); }
+                if (p){ p.value=senha; p.dispatchEvent(new Event('input',{bubbles:true})); }
+                if (u && p && b) { setTimeout(function(){ try { b.click(); } catch(e){} }, 300); }
+              } catch(e) { console.log('autofill err', e); }
+            })();
+        """.trimIndent()
+        try { webView.evaluateJavascript(js, null) } catch (_: Throwable) {}
+        InAppWebViewPlugin.autofillCpf = null
+        InAppWebViewPlugin.autofillSenha = null
+    }
+
+    private fun jsString(s: String): String {
+        val escaped = s
+            .replace("\\", "\\\\")
+            .replace("'", "\\'")
+            .replace("\n", "\\n")
+            .replace("\r", "")
+        return "'$escaped'"
+    }
 }
+
