@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { PushSettingsCard } from "@/components/push-settings-card";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/configuracoes")({
       {
         name: "description",
         content:
-          "Configure notificações push e lembretes para suas escalas dejem e delegada.",
+          "Configure tema, notificações push e lembretes para suas escalas dejem e delegada.",
       },
     ],
   }),
@@ -22,12 +23,16 @@ function ConfiguracoesPage() {
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       <header
         className="flex items-center gap-3 px-4 pt-5 pb-4"
-        style={{ color: "#0c2340" }}
+        style={{ color: "var(--text-dark)" }}
       >
         <Link
           to="/"
-          className="flex h-9 w-9 items-center justify-center rounded-full border-2 bg-white"
-          style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
+          className="flex h-9 w-9 items-center justify-center rounded-full border-2"
+          style={{
+            background: "var(--surface)",
+            borderColor: "var(--primary)",
+            color: "var(--primary)",
+          }}
           aria-label="Voltar"
         >
           <ArrowLeft size={18} />
@@ -36,13 +41,18 @@ function ConfiguracoesPage() {
       </header>
 
       <main className="space-y-4 px-4 pb-8">
+        <ThemeToggle />
         <PushSettingsCard />
 
         <div
-          className="rounded-[16px] border-2 bg-white p-4 text-[12px]"
-          style={{ borderColor: "#e8f0f8", color: "#5b7a8f" }}
+          className="rounded-[16px] border-2 p-4 text-[12px]"
+          style={{
+            background: "var(--surface)",
+            borderColor: "var(--border-soft)",
+            color: "var(--muted-fg)",
+          }}
         >
-          <p className="font-bold" style={{ color: "#0c2340" }}>
+          <p className="font-bold" style={{ color: "var(--text-dark)" }}>
             Como funcionam os avisos
           </p>
           <ul className="mt-2 space-y-1 list-disc pl-4">
