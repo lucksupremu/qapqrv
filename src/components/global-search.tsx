@@ -75,7 +75,7 @@ function GlobalSearchDialog({
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [baixadas, setBaixadas] = useState<EscalaSalva[]>([]);
   const [historico, setHistorico] = useState<
-    Array<{ id: string; nome?: string; favorito?: boolean; consultadoEm?: string }>
+    Array<{ id: string; nome: string; favorito?: boolean; consultadoEm: number }>
   >([]);
 
   useEffect(() => {
@@ -86,8 +86,8 @@ function GlobalSearchDialog({
     void lerHistorico().then((items) =>
       setHistorico(
         items.map((it) => ({
-          id: it.id,
-          nome: it.escala?.nome,
+          id: it.escala.id,
+          nome: `Escala ${it.escala.id} · ${it.escala.tipo}`,
           favorito: it.favorito,
           consultadoEm: it.consultadoEm,
         })),
