@@ -114,7 +114,11 @@ export async function vaultGet(pin: string): Promise<VaultCredentials | null> {
   try {
     const key = await deriveKey(pin, salt);
     const plain = new Uint8Array(
-      await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher),
+      await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: iv as BufferSource },
+        key,
+        cipher as BufferSource,
+      ),
     );
     const txt = new TextDecoder().decode(plain);
     const [cpf, ...rest] = txt.split("\n");
