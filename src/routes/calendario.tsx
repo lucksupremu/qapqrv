@@ -183,9 +183,31 @@ function CalendarScreen() {
     return { count: noMes.length, total, porTipo, lista: noMes };
   }, [marcasFiltradas, cursor]);
 
+  // Agenda infinita: TODAS as marcas (passadas + futuras), ordenadas cronologicamente
+  // e agrupadas por mês. Pula filtro do mês atual — é uma agenda contínua.
+  const agendaInfinita = useMemo(() => {
+    const ordenadas = [...marcasFiltradas].sort(
+      (a, b) => +new Date(a.data) - +new Date(b.data),
+    );
+    const grupos: { mesLabel: string; mesKey: string; itens: Marca[] }[] = [];
+    for (const m of ordenadas) {
+      const d = new Date(m.data);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      const label = `${MESES[d.getMonth()]} ${d.getFullYear()}`;
+      let g = grupos.find((x) => x.mesKey === key);
+      if (!g) {
+        g = { mesKey: key, mesLabel: label, itens: [] };
+        grupos.push(g);
+      }
+      g.itens.push(m);
+    }
+    return grupos;
+  }, [marcasFiltradas]);
+
   const agendaItems = useMemo(() => {
     return [...resumoMes.lista].sort((a, b) => +new Date(a.data) - +new Date(b.data));
   }, [resumoMes.lista]);
+
 
   const goPrev = () => {
     setSlideDir("right");
