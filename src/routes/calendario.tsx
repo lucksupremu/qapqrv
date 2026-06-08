@@ -183,9 +183,31 @@ function CalendarScreen() {
     return { count: noMes.length, total, porTipo, lista: noMes };
   }, [marcasFiltradas, cursor]);
 
+  // Agenda infinita: TODAS as marcas (passadas + futuras), ordenadas cronologicamente
+  // e agrupadas por mês. Pula filtro do mês atual — é uma agenda contínua.
+  const agendaInfinita = useMemo(() => {
+    const ordenadas = [...marcasFiltradas].sort(
+      (a, b) => +new Date(a.data) - +new Date(b.data),
+    );
+    const grupos: { mesLabel: string; mesKey: string; itens: Marca[] }[] = [];
+    for (const m of ordenadas) {
+      const d = new Date(m.data);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      const label = `${MESES[d.getMonth()]} ${d.getFullYear()}`;
+      let g = grupos.find((x) => x.mesKey === key);
+      if (!g) {
+        g = { mesKey: key, mesLabel: label, itens: [] };
+        grupos.push(g);
+      }
+      g.itens.push(m);
+    }
+    return grupos;
+  }, [marcasFiltradas]);
+
   const agendaItems = useMemo(() => {
     return [...resumoMes.lista].sort((a, b) => +new Date(a.data) - +new Date(b.data));
   }, [resumoMes.lista]);
+
 
   const goPrev = () => {
     setSlideDir("right");
@@ -584,6 +606,15 @@ function CalendarScreen() {
                           {formatBRL(m.valor)}
                         </div>
                       )}
+                      {m.observacao && (
+                        <p
+                          className="mt-1 text-[12px] italic leading-snug"
+                          style={{ color: "#5b7a8f" }}
+                        >
+                          {m.observacao}
+                        </p>
+                      )}
+
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={() => openEdit(m)}
@@ -622,59 +653,107 @@ function CalendarScreen() {
           </section>
         </>
       ) : (
-        // Agenda view
+        // Agenda infinita — todas as marcas, agrupadas por mês com header pegajoso.
         <section className="mx-3 mt-3">
-          {agendaItems.length === 0 ? (
+          {agendaInfinita.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <CalendarX size={40} style={{ color: "#5b7a8f" }} />
               <p className="mt-2 text-[14px] font-semibold" style={{ color: "#5b7a8f" }}>
-                Nenhuma marca neste mês
+                Nenhuma marca registrada
               </p>
+              <button
+                onClick={openNew}
+                className="mt-3 rounded-full px-4 py-1.5 text-[12px] font-bold text-white"
+                style={{ background: COR_PRIMARY }}
+              >
+                + Adicionar primeira marca
+              </button>
             </div>
           ) : (
-            <ul className="space-y-2">
-              {agendaItems.map((m) => {
-                const d = new Date(m.data);
-                return (
-                  <li
-                    key={m.id}
-                    onClick={() => openEdit(m)}
-                    className="flex overflow-hidden rounded-[14px] bg-[var(--surface)] shadow-[0_2px_12px_rgba(0,0,0,0.12)] active:scale-[0.99] transition cursor-pointer"
+            <div className="space-y-5">
+              {agendaInfinita.map((grupo) => (
+                <div key={grupo.mesKey}>
+                  <div
+                    className="sticky top-0 z-10 -mx-3 mb-2 px-3 py-1 text-[12px] font-bold uppercase tracking-wider backdrop-blur"
+                    style={{
+                      color: COR_PRIMARY,
+                      background: "color-mix(in oklab, var(--bg) 88%, transparent)",
+                    }}
                   >
-                    <div className="w-1.5 shrink-0" style={{ background: TIPO_COR[m.tipo] }} />
-                    <div
-                      className="flex w-14 flex-col items-center justify-center py-2"
-                      style={{ background: COR_BG_SOFT, color: COR_PRIMARY }}
-                    >
-                      <div className="text-[10px] font-bold uppercase">
-                        {DIAS[d.getDay()]}
-                      </div>
-                      <div className="text-[20px] font-extrabold leading-none">
-                        {String(d.getDate()).padStart(2, "0")}
-                      </div>
-                    </div>
-                    <div className="flex-1 p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-[14px] font-bold" style={{ color: COR_PRIMARY }}>
-                          {TIPO_LABEL[m.tipo]}
-                        </div>
-                        <div className="text-[12px] font-bold" style={{ color: "var(--text-dark)" }}>
-                          {formatHora(m.data)}
-                        </div>
-                      </div>
-                      {m.valor > 0 && (
-                        <div className="text-[12px] font-bold" style={{ color: "var(--text-dark)" }}>
-                          {formatBRL(m.valor)}
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                    {grupo.mesLabel}{" "}
+                    <span className="font-normal" style={{ color: "#5b7a8f" }}>
+                      · {grupo.itens.length}
+                    </span>
+                  </div>
+                  <ul className="space-y-2">
+                    {grupo.itens.map((m) => {
+                      const d = new Date(m.data);
+                      const isPast = d.getTime() < Date.now();
+                      return (
+                        <li
+                          key={m.id}
+                          onClick={() => openEdit(m)}
+                          className="flex overflow-hidden rounded-[14px] bg-[var(--surface)] shadow-[0_2px_12px_rgba(0,0,0,0.12)] active:scale-[0.99] transition cursor-pointer"
+                          style={{ opacity: isPast ? 0.7 : 1 }}
+                        >
+                          <div
+                            className="w-1.5 shrink-0"
+                            style={{ background: TIPO_COR[m.tipo] }}
+                          />
+                          <div
+                            className="flex w-14 flex-col items-center justify-center py-2"
+                            style={{ background: COR_BG_SOFT, color: COR_PRIMARY }}
+                          >
+                            <div className="text-[10px] font-bold uppercase">
+                              {DIAS[d.getDay()]}
+                            </div>
+                            <div className="text-[20px] font-extrabold leading-none">
+                              {String(d.getDate()).padStart(2, "0")}
+                            </div>
+                          </div>
+                          <div className="flex-1 p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <div
+                                className="text-[14px] font-bold"
+                                style={{ color: COR_PRIMARY }}
+                              >
+                                {TIPO_LABEL[m.tipo]}
+                              </div>
+                              <div
+                                className="text-[12px] font-bold"
+                                style={{ color: "var(--text-dark)" }}
+                              >
+                                {formatHora(m.data)}
+                              </div>
+                            </div>
+                            {m.valor > 0 && (
+                              <div
+                                className="text-[12px] font-bold"
+                                style={{ color: "var(--text-dark)" }}
+                              >
+                                {formatBRL(m.valor)}
+                              </div>
+                            )}
+                            {m.observacao && (
+                              <p
+                                className="mt-1 text-[12px] italic leading-snug"
+                                style={{ color: "#5b7a8f" }}
+                              >
+                                {m.observacao}
+                              </p>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
           )}
         </section>
       )}
+
 
       {/* FAB */}
       <button

@@ -85,9 +85,11 @@ export function MarcarModal({
   const [tipo, setTipo] = useState<TipoMarca | "">("");
   const [data, setData] = useState("");
   const [valor, setValor] = useState("");
+  const [observacao, setObservacao] = useState("");
   const [reminders, setReminders] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ tipo?: string; data?: string }>({});
   const [perm, setPerm] = useState<NotificationPermission>("default");
+
   
 
   useEffect(() => {
@@ -102,6 +104,7 @@ export function MarcarModal({
       setTipo(t);
       setData(isoToLocalInput(initialMarca.data));
       setValor(initialMarca.valor ? String(initialMarca.valor) : "");
+      setObservacao(initialMarca.observacao ?? "");
       const r =
         initialMarca.reminders && initialMarca.reminders.length > 0
           ? initialMarca.reminders.map(isoToLocalInput)
@@ -114,8 +117,10 @@ export function MarcarModal({
       const startLocal = initialDate ? isoToLocalInput(initialDate) : "";
       setData(startLocal);
       setValor("");
+      setObservacao("");
       setReminders(startLocal ? defaultRemindersForDate(startLocal) : []);
     }
+
     setErrors({});
   }, [open, initialMarca, initialDate]);
 
@@ -169,10 +174,12 @@ export function MarcarModal({
       tipo: parsed.data.tipo,
       data: isoData,
       valor: valorNum,
+      observacao: observacao.trim() || undefined,
       reminders: isoReminders,
       reminderAt: isoReminders[0] ?? null,
       criado: initialMarca?.criado ?? new Date().toISOString(),
     };
+
 
     onSave(marca);
 
@@ -283,6 +290,28 @@ export function MarcarModal({
           style={fieldStyle}
         />
       </div>
+
+      {/* Observação */}
+      <div>
+        <label
+          className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
+          style={{ color: "#2e6b8a" }}
+        >
+          Observação (opcional)
+        </label>
+        <textarea
+          value={observacao}
+          onChange={(e) => setObservacao(e.target.value.slice(0, 280))}
+          placeholder="Ex.: OP Rotam, trocada com Cb Silva…"
+          rows={2}
+          className={`${fieldClass} resize-none`}
+          style={fieldStyle}
+        />
+        <p className="mt-1 text-right text-[10px]" style={{ color: "#5b7a8f" }}>
+          {observacao.length}/280
+        </p>
+      </div>
+
 
       {/* Lembretes */}
       <div className="rounded-[12px] border-2 p-3" style={{ borderColor: "#2e6b8a" }}>

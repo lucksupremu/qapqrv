@@ -5,6 +5,8 @@ export type Marca = {
   tipo: TipoMarca;
   data: string; // ISO
   valor: number;
+  /** Observação livre do usuário (ex.: "OP Rotam", "trocada com Cb Silva"). */
+  observacao?: string;
   reminders?: string[]; // ISO list
   // legacy/optional
   delegadaArea?: string;
@@ -13,6 +15,7 @@ export type Marca = {
   reminderAt?: string | null;
   criado: string; // ISO
 };
+
 
 export const MARCAS_STORAGE_KEY = "marcas_atividade_d";
 
