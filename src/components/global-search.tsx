@@ -20,10 +20,10 @@ type Hit = {
   onPick: () => void;
 };
 
-function fmtDate(iso?: string) {
-  if (!iso) return "";
+function fmtDate(value?: string | number) {
+  if (value === undefined || value === null || value === "") return "";
   try {
-    return new Date(iso).toLocaleString("pt-BR", {
+    return new Date(value).toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -31,7 +31,7 @@ function fmtDate(iso?: string) {
       minute: "2-digit",
     });
   } catch {
-    return iso;
+    return String(value);
   }
 }
 
