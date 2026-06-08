@@ -202,174 +202,200 @@ export function MarcarModal({
     toast.success(isEdit ? "Marca atualizada!" : "Marca salva!");
   };
 
+  const isMobile = useIsMobile();
+
+  const body = (
+    <div className="space-y-4 px-5 py-4">
+      {/* Tipo */}
+      <div>
+        <label
+          className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
+          style={{ color: "#2e6b8a" }}
+        >
+          Tipo de escala
+        </label>
+        <Select
+          value={tipo}
+          onValueChange={(v) => {
+            setTipo(v as TipoMarca);
+            setErrors((e) => ({ ...e, tipo: undefined }));
+          }}
+        >
+          <SelectTrigger
+            className="h-[52px] w-full rounded-[12px] border-2 bg-[#ffffff] px-3 text-[15px] font-semibold"
+            style={fieldStyle}
+          >
+            <SelectValue placeholder="Selecione…" />
+          </SelectTrigger>
+          <SelectContent>
+            {tipoOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.tipo && (
+          <p className="mt-1 text-[12px] font-semibold text-red-600">{errors.tipo}</p>
+        )}
+      </div>
+
+      {/* Data */}
+      <div>
+        <label
+          className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
+          style={{ color: "#2e6b8a" }}
+        >
+          Dia e hora
+        </label>
+        <input
+          type="datetime-local"
+          value={data}
+          onChange={(e) => {
+            setData(e.target.value);
+            setErrors((er) => ({ ...er, data: undefined }));
+          }}
+          className={fieldClass}
+          style={fieldStyle}
+        />
+        {errors.data && (
+          <p className="mt-1 text-[12px] font-semibold text-red-600">{errors.data}</p>
+        )}
+      </div>
+
+      {/* Valor */}
+      <div>
+        <label
+          className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
+          style={{ color: "#2e6b8a" }}
+        >
+          Valor (R$)
+        </label>
+        <input
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0"
+          value={valor}
+          onChange={(e) => setValor(e.target.value)}
+          placeholder="0,00"
+          className={fieldClass}
+          style={fieldStyle}
+        />
+      </div>
+
+      {/* Lembretes */}
+      <div className="rounded-[12px] border-2 p-3" style={{ borderColor: "#2e6b8a" }}>
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bell size={16} style={{ color: "#2e6b8a" }} />
+            <span className="text-[13px] font-bold" style={{ color: "#2e6b8a" }}>
+              Lembretes
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddReminder}
+            className="flex items-center gap-1 rounded-[8px] px-2 py-1 text-[12px] font-bold"
+            style={{ background: "#e8f0f8", color: "#2e6b8a" }}
+          >
+            <Plus size={14} /> Adicionar
+          </button>
+        </div>
+
+        {reminders.length === 0 && (
+          <p className="text-[12px]" style={{ color: "#5b7a8f" }}>
+            Nenhum lembrete. O padrão é 1 dia antes às 09:00.
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {reminders.map((r, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <input
+                type="datetime-local"
+                value={r}
+                onChange={(e) => handleUpdateReminder(idx, e.target.value)}
+                className="flex-1 rounded-[10px] border-2 bg-white px-2 py-2 text-[13px] font-semibold"
+                style={fieldStyle}
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveReminder(idx)}
+                className="flex h-9 w-9 items-center justify-center rounded-[10px]"
+                style={{ background: "#fee2e2", color: "#c81d1d" }}
+                aria-label="Remover lembrete"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {perm !== "granted" && reminders.length > 0 && (
+          <button
+            type="button"
+            onClick={handleEnableNotifications}
+            className="mt-3 w-full rounded-[10px] px-3 py-2 text-[12px] font-bold text-white"
+            style={{ background: "#2e6b8a" }}
+          >
+            {perm === "denied"
+              ? "Notificações bloqueadas — ativar no navegador"
+              : "Ativar notificações push"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  const footer = (
+    <div className="flex gap-2 border-t border-[#e8f0f8] px-5 py-4">
+      <button
+        onClick={() => onOpenChange(false)}
+        className="h-[48px] flex-1 rounded-[14px] border-2 bg-[#ffffff] font-bold active:scale-[0.99]"
+        style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
+      >
+        Cancelar
+      </button>
+      <button
+        onClick={handleSave}
+        className="h-[48px] flex-1 rounded-[14px] font-bold text-white active:scale-[0.99]"
+        style={{ background: "#2e6b8a" }}
+      >
+        Salvar
+      </button>
+    </div>
+  );
+
+  const title = isEdit ? "Editar marca" : "Nova marca";
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92vh]">
+          <DrawerHeader className="px-5 pt-2 pb-2 text-left">
+            <DrawerTitle className="text-[20px] font-bold" style={{ color: "#2e6b8a" }}>
+              {title}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="max-h-[65vh] overflow-y-auto">{body}</div>
+          {footer}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[420px] gap-0 rounded-[20px] p-0">
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
           <DialogTitle className="text-[20px] font-bold" style={{ color: "#2e6b8a" }}>
-            {isEdit ? "Editar marca" : "Nova marca"}
+            {title}
           </DialogTitle>
           <span className="h-9 w-9" aria-hidden />
         </div>
-
-        <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
-          {/* Tipo */}
-          <div>
-            <label
-              className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: "#2e6b8a" }}
-            >
-              Tipo de escala
-            </label>
-            <Select
-              value={tipo}
-              onValueChange={(v) => {
-                setTipo(v as TipoMarca);
-                setErrors((e) => ({ ...e, tipo: undefined }));
-              }}
-            >
-              <SelectTrigger
-                className="h-[52px] w-full rounded-[12px] border-2 bg-[#ffffff] px-3 text-[15px] font-semibold"
-                style={fieldStyle}
-              >
-                <SelectValue placeholder="Selecione…" />
-              </SelectTrigger>
-              <SelectContent>
-                {tipoOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.tipo && (
-              <p className="mt-1 text-[12px] font-semibold text-red-600">{errors.tipo}</p>
-            )}
-          </div>
-
-          {/* Data */}
-          <div>
-            <label
-              className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: "#2e6b8a" }}
-            >
-              Dia e hora
-            </label>
-            <input
-              type="datetime-local"
-              value={data}
-              onChange={(e) => {
-                setData(e.target.value);
-                setErrors((er) => ({ ...er, data: undefined }));
-              }}
-              className={fieldClass}
-              style={fieldStyle}
-            />
-            {errors.data && (
-              <p className="mt-1 text-[12px] font-semibold text-red-600">{errors.data}</p>
-            )}
-          </div>
-
-          {/* Valor */}
-          <div>
-            <label
-              className="mb-1 block text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: "#2e6b8a" }}
-            >
-              Valor (R$)
-            </label>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min="0"
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-              placeholder="0,00"
-              className={fieldClass}
-              style={fieldStyle}
-            />
-          </div>
-
-          {/* Lembretes */}
-          <div className="rounded-[12px] border-2 p-3" style={{ borderColor: "#2e6b8a" }}>
-            <div className="mb-2 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bell size={16} style={{ color: "#2e6b8a" }} />
-                <span className="text-[13px] font-bold" style={{ color: "#2e6b8a" }}>
-                  Lembretes
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleAddReminder}
-                className="flex items-center gap-1 rounded-[8px] px-2 py-1 text-[12px] font-bold"
-                style={{ background: "#e8f0f8", color: "#2e6b8a" }}
-              >
-                <Plus size={14} /> Adicionar
-              </button>
-            </div>
-
-            {reminders.length === 0 && (
-              <p className="text-[12px]" style={{ color: "#5b7a8f" }}>
-                Nenhum lembrete. O padrão é 1 dia antes às 09:00.
-              </p>
-            )}
-
-            <div className="space-y-2">
-              {reminders.map((r, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <input
-                    type="datetime-local"
-                    value={r}
-                    onChange={(e) => handleUpdateReminder(idx, e.target.value)}
-                    className="flex-1 rounded-[10px] border-2 bg-white px-2 py-2 text-[13px] font-semibold"
-                    style={fieldStyle}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveReminder(idx)}
-                    className="flex h-9 w-9 items-center justify-center rounded-[10px]"
-                    style={{ background: "#fee2e2", color: "#c81d1d" }}
-                    aria-label="Remover lembrete"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {perm !== "granted" && reminders.length > 0 && (
-              <button
-                type="button"
-                onClick={handleEnableNotifications}
-                className="mt-3 w-full rounded-[10px] px-3 py-2 text-[12px] font-bold text-white"
-                style={{ background: "#2e6b8a" }}
-              >
-                {perm === "denied"
-                  ? "Notificações bloqueadas — ativar no navegador"
-                  : "Ativar notificações push"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="flex gap-2 border-t border-[#e8f0f8] px-5 py-4">
-          <button
-            onClick={() => onOpenChange(false)}
-            className="h-[48px] flex-1 rounded-[14px] border-2 bg-[#ffffff] font-bold active:scale-[0.99]"
-            style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSave}
-            className="h-[48px] flex-1 rounded-[14px] font-bold text-white active:scale-[0.99]"
-            style={{ background: "#2e6b8a" }}
-          >
-            Salvar
-          </button>
-        </div>
+        <div className="max-h-[70vh] overflow-y-auto">{body}</div>
+        {footer}
       </DialogContent>
     </Dialog>
   );
