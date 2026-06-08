@@ -18,6 +18,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Info,
+  X,
   type LucideIcon,
 } from "lucide-react";
 
