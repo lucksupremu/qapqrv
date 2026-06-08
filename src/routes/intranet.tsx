@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { openAnyConnect as launchAnyConnect } from "@/lib/open-anyconnect";
 import { openInAppBrowser, isNativeApp } from "@/lib/in-app-browser";
+import { NetworkErrorState } from "@/components/network-error-state";
 import {
   ArrowLeft,
   Share2,
@@ -11,7 +11,6 @@ import {
   ChevronRight,
   RotateCw,
   Save,
-  Lock,
   Loader2,
 } from "lucide-react";
 
