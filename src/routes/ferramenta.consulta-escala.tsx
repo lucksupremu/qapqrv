@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { BottomNav } from "@/components/bottom-nav";
+import { AdSlot } from "@/components/ad-slot";
 import { consultarEscala, formatBRL, formatDateBR, type Escala } from "@/lib/escala";
 import { useEscalaHistorico } from "@/hooks/use-escala-historico";
 import { isVpnActive } from "@/lib/vpn-status";
@@ -181,15 +182,23 @@ function ConsultaEscalaPage() {
         </form>
 
         {resultado ? (
-          <ResultadoCard
-            escala={resultado}
-            favorito={favoritoAtual}
-            onFavoritar={() => favoritar(resultado.id)}
-            onNova={() => {
-              setResultado(null);
-              setId("");
-            }}
-          />
+          <>
+            <ResultadoCard
+              escala={resultado}
+              favorito={favoritoAtual}
+              onFavoritar={() => favoritar(resultado.id)}
+              onNova={() => {
+                setResultado(null);
+                setId("");
+              }}
+            />
+            <div className="mt-4 flex flex-col items-center" aria-label="Publicidade">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+                Publicidade
+              </p>
+              <AdSlot type="banner" />
+            </div>
+          </>
         ) : null}
 
         <section>
