@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
-import { KeyRound, Trash2, ShieldCheck, ShieldOff } from "lucide-react";
+import { KeyRound, Trash2, ShieldCheck, ShieldOff, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import {
   vaultHas,
   vaultEnabled,
+  vaultGet,
   setVaultEnabled,
   vaultSet,
   vaultClear,
 } from "@/lib/credential-vault";
+import {
+  biometricSupported,
+  biometricEnabled,
+  enableBiometric,
+  disableBiometric,
+} from "@/lib/biometric-vault";
+import { useIsNative } from "@/hooks/use-is-native";
 
 export function CredentialVaultCard() {
+  const isNative = useIsNative();
   const [has, setHas] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -20,14 +29,28 @@ export function CredentialVaultCard() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  // Biometria
+  const [bioSupported, setBioSupported] = useState(false);
+  const [bioOn, setBioOn] = useState(false);
+  const [bioPinPrompt, setBioPinPrompt] = useState(false);
+  const [bioPin, setBioPin] = useState("");
+  const [bioErr, setBioErr] = useState<string | null>(null);
+
   useEffect(() => {
     setHas(vaultHas());
     setEnabled(vaultEnabled());
+    setBioOn(biometricEnabled());
   }, []);
+
+  useEffect(() => {
+    if (!isNative) return;
+    void biometricSupported().then(setBioSupported);
+  }, [isNative]);
 
   const refresh = () => {
     setHas(vaultHas());
     setEnabled(vaultEnabled());
+    setBioOn(biometricEnabled());
   };
 
   const handleSave = async () => {
