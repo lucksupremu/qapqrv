@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
-import { KeyRound, Trash2, ShieldCheck, ShieldOff } from "lucide-react";
+import { KeyRound, Trash2, ShieldCheck, ShieldOff, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import {
   vaultHas,
   vaultEnabled,
+  vaultGet,
   setVaultEnabled,
   vaultSet,
   vaultClear,
 } from "@/lib/credential-vault";
+import {
+  biometricSupported,
+  biometricEnabled,
+  enableBiometric,
+  disableBiometric,
+} from "@/lib/biometric-vault";
+import { useIsNative } from "@/hooks/use-is-native";
 
 export function CredentialVaultCard() {
+  const isNative = useIsNative();
   const [has, setHas] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -20,14 +29,28 @@ export function CredentialVaultCard() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  // Biometria
+  const [bioSupported, setBioSupported] = useState(false);
+  const [bioOn, setBioOn] = useState(false);
+  const [bioPinPrompt, setBioPinPrompt] = useState(false);
+  const [bioPin, setBioPin] = useState("");
+  const [bioErr, setBioErr] = useState<string | null>(null);
+
   useEffect(() => {
     setHas(vaultHas());
     setEnabled(vaultEnabled());
+    setBioOn(biometricEnabled());
   }, []);
+
+  useEffect(() => {
+    if (!isNative) return;
+    void biometricSupported().then(setBioSupported);
+  }, [isNative]);
 
   const refresh = () => {
     setHas(vaultHas());
     setEnabled(vaultEnabled());
+    setBioOn(biometricEnabled());
   };
 
   const handleSave = async () => {
@@ -68,6 +91,7 @@ export function CredentialVaultCard() {
   const handleClear = () => {
     if (!confirm("Apagar credenciais salvas?")) return;
     vaultClear();
+    disableBiometric();
     refresh();
     toast.success("Credenciais apagadas.");
   };
@@ -75,6 +99,40 @@ export function CredentialVaultCard() {
   const toggleEnabled = (v: boolean) => {
     setVaultEnabled(v);
     setEnabled(v);
+  };
+
+  const toggleBio = (v: boolean) => {
+    if (!v) {
+      disableBiometric();
+      setBioOn(false);
+      toast.success("Biometria desativada.");
+      return;
+    }
+    setBioErr(null);
+    setBioPin("");
+    setBioPinPrompt(true);
+  };
+
+  const confirmBio = async () => {
+    setBioErr(null);
+    if (!/^\d{4}$/.test(bioPin)) {
+      setBioErr("Digite os 4 dígitos do PIN.");
+      return;
+    }
+    const creds = await vaultGet(bioPin);
+    if (!creds) {
+      setBioErr("PIN incorreto.");
+      return;
+    }
+    const ok = await enableBiometric(bioPin);
+    if (!ok) {
+      setBioErr("Biometria não confirmada.");
+      return;
+    }
+    setBioPinPrompt(false);
+    setBioPin("");
+    setBioOn(true);
+    toast.success("Biometria ativada! Use a digital para desbloquear.");
   };
 
   return (
@@ -132,6 +190,57 @@ export function CredentialVaultCard() {
               <Trash2 size={14} /> Apagar
             </button>
           </div>
+          {isNative && bioSupported && (
+            <label className="flex items-center justify-between rounded-[10px] bg-white px-3 py-2">
+              <span className="flex items-center gap-2 text-[13px] font-bold" style={{ color: "#0f2535" }}>
+                <Fingerprint size={16} style={{ color: bioOn ? "#166534" : "#5b7a8f" }} />
+                Desbloquear com biometria
+              </span>
+              <input
+                type="checkbox"
+                checked={bioOn}
+                onChange={(e) => toggleBio(e.target.checked)}
+                className="h-5 w-5 accent-[#2e6b8a]"
+              />
+            </label>
+          )}
+          {bioPinPrompt && (
+            <div className="rounded-[10px] border-2 bg-white p-3" style={{ borderColor: "#2e6b8a" }}>
+              <p className="mb-2 text-[12px] font-semibold" style={{ color: "#0f2535" }}>
+                Digite seu PIN atual para vincular a biometria:
+              </p>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={bioPin}
+                onChange={(e) => setBioPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="••••"
+                className="w-full rounded-[8px] border-2 bg-white px-3 py-2 text-center text-[18px] font-bold tracking-[0.4em]"
+                style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
+              />
+              {bioErr && <p className="mt-1 text-[11px] font-semibold text-red-600">{bioErr}</p>}
+              <div className="mt-2 flex gap-2">
+                <button
+                  onClick={() => {
+                    setBioPinPrompt(false);
+                    setBioPin("");
+                  }}
+                  className="flex-1 rounded-[8px] border-2 bg-white py-2 text-[12px] font-bold"
+                  style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmBio}
+                  className="flex-1 rounded-[8px] py-2 text-[12px] font-bold text-white"
+                  style={{ background: "#2e6b8a" }}
+                >
+                  Confirmar com digital
+                </button>
+              </div>
+            </div>
+          )}
           <p className="text-[11px]" style={{ color: "var(--muted-fg, #5b7a8f)" }}>
             ⚠️ Autofill efetivo na intranet requer o app instalado (APK). No
             navegador as credenciais ficam salvas mas não são injetadas no iframe.
