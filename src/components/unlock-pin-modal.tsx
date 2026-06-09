@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Lock, X } from "lucide-react";
+import { Lock, X, Fingerprint } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   vaultGet,
@@ -7,6 +7,10 @@ import {
   vaultRegisterAttempt,
   type VaultCredentials,
 } from "@/lib/credential-vault";
+import {
+  biometricEnabled,
+  unlockPinWithBiometric,
+} from "@/lib/biometric-vault";
 
 export type UnlockPinModalProps = {
   open: boolean;
@@ -21,13 +25,37 @@ export function UnlockPinModal({ open, onOpenChange, onUnlock }: UnlockPinModalP
   const [lockSeconds, setLockSeconds] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const tryBiometric = async () => {
+    if (!biometricEnabled()) return;
+    setBusy(true);
+    try {
+      const bioPin = await unlockPinWithBiometric();
+      if (!bioPin) return;
+      const creds = await vaultGet(bioPin);
+      if (!creds) {
+        setErr("PIN salvo inválido. Reative a biometria.");
+        return;
+      }
+      vaultRegisterAttempt(true);
+      onUnlock(creds);
+      onOpenChange(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   useEffect(() => {
     if (!open) return;
     setPin("");
     setErr(null);
     const s = vaultLockState();
     setLockSeconds(s.secondsLeft);
-    setTimeout(() => inputRef.current?.focus(), 100);
+    if (biometricEnabled() && s.secondsLeft <= 0) {
+      void tryBiometric();
+    } else {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
@@ -104,22 +132,34 @@ export function UnlockPinModal({ open, onOpenChange, onUnlock }: UnlockPinModalP
           {err && <p className="text-[12px] font-semibold text-red-600">{err}</p>}
         </div>
 
-        <div className="flex gap-2 border-t px-5 py-4" style={{ borderColor: "#e8f0f8" }}>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="h-[44px] flex-1 rounded-[12px] border-2 bg-white font-bold"
-            style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={busy || lockSeconds > 0 || pin.length !== 4}
-            className="h-[44px] flex-1 rounded-[12px] font-bold text-white disabled:opacity-50"
-            style={{ background: "#2e6b8a" }}
-          >
-            {lockSeconds > 0 ? `Aguarde ${lockSeconds}s` : busy ? "Verificando…" : "Desbloquear"}
-          </button>
+        <div className="flex flex-col gap-2 border-t px-5 py-4" style={{ borderColor: "#e8f0f8" }}>
+          {biometricEnabled() && (
+            <button
+              onClick={tryBiometric}
+              disabled={busy || lockSeconds > 0}
+              className="flex h-[44px] items-center justify-center gap-2 rounded-[12px] border-2 bg-white font-bold disabled:opacity-50"
+              style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
+            >
+              <Fingerprint size={18} /> Usar biometria
+            </button>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="h-[44px] flex-1 rounded-[12px] border-2 bg-white font-bold"
+              style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={busy || lockSeconds > 0 || pin.length !== 4}
+              className="h-[44px] flex-1 rounded-[12px] font-bold text-white disabled:opacity-50"
+              style={{ background: "#2e6b8a" }}
+            >
+              {lockSeconds > 0 ? `Aguarde ${lockSeconds}s` : busy ? "Verificando…" : "Desbloquear"}
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
