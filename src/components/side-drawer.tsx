@@ -80,10 +80,11 @@ function SideDrawer() {
   const { open, setOpen } = useDrawer();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const native = useIsNative();
-  const { isNative: isNativePwa, isInstalled } = usePwaInstall();
+  const { isNative: isNativePwa, isInstalled, canPrompt, isIOS } = usePwaInstall();
   const grupo1 = native ? [...grupo1Base, ...grupo1NativeOnly] : grupo1Base;
   const installItem: Item = { type: "route", to: "/configuracoes", label: "Instalar app", icon: Download };
-  const grupo3Visible = !native && !isNativePwa && !isInstalled ? [installItem, ...grupo3] : grupo3;
+  const canShowInstall = !native && !isNativePwa && !isInstalled && (canPrompt || isIOS);
+  const grupo3Visible = canShowInstall ? [installItem, ...grupo3] : grupo3;
   const [theme, setTheme] = useState<Theme>("light");
   useEffect(() => {
     setTheme(getStoredTheme());
