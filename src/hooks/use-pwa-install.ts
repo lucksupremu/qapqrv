@@ -143,5 +143,6 @@ export function usePwaInstall() {
     isNative,
     isInstallable,
     shouldShowBanner,
+    isChromeFamily,
   };
 }
