@@ -72,10 +72,35 @@ function HomeScreen() {
   const [consultando, setConsultando] = useState(false);
   const native = useIsNative();
   const [theme, setThemeState] = useState<Theme>("light");
+  const { canPrompt, promptInstall } = usePwaInstall();
 
   useEffect(() => {
     setThemeState(getStoredTheme());
   }, []);
+
+  // Trata abertura via push de instalação: /?install=1
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("install") !== "1") return;
+    // Limpa o param da URL para não repetir
+    params.delete("install");
+    const q = params.toString();
+    const url = window.location.pathname + (q ? `?${q}` : "") + window.location.hash;
+    window.history.replaceState({}, "", url);
+
+    const t = window.setTimeout(() => {
+      if (canPrompt) {
+        void promptInstall();
+      } else {
+        toast.info(
+          "Abra o menu do navegador (⋮) e toque em Instalar app / Adicionar à tela inicial.",
+          { duration: 7000 },
+        );
+      }
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [canPrompt, promptInstall]);
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
