@@ -14,7 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      push_campaign_sends: {
+        Row: {
+          campaign_id: string | null
+          device_id: string
+          error: string | null
+          id: string
+          run_bucket: string
+          sent_at: string
+          success: boolean
+        }
+        Insert: {
+          campaign_id?: string | null
+          device_id: string
+          error?: string | null
+          id?: string
+          run_bucket: string
+          sent_at?: string
+          success: boolean
+        }
+        Update: {
+          campaign_id?: string | null
+          device_id?: string
+          error?: string | null
+          id?: string
+          run_bucket?: string
+          sent_at?: string
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_campaign_sends_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "push_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_campaigns: {
+        Row: {
+          active: boolean
+          body: string
+          created_at: string
+          id: string
+          last_run_at: string | null
+          schedule_cron: string
+          slug: string
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          body: string
+          created_at?: string
+          id?: string
+          last_run_at?: string | null
+          schedule_cron: string
+          slug: string
+          title: string
+          updated_at?: string
+          url?: string
+        }
+        Update: {
+          active?: boolean
+          body?: string
+          created_at?: string
+          id?: string
+          last_run_at?: string | null
+          schedule_cron?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          device_id: string
+          endpoint: string
+          id: string
+          inactivity_stage: number
+          last_notified_at: string | null
+          last_seen_at: string
+          locale: string | null
+          p256dh: string
+          tz: string | null
+          unsubscribed_at: string | null
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          device_id: string
+          endpoint: string
+          id?: string
+          inactivity_stage?: number
+          last_notified_at?: string | null
+          last_seen_at?: string
+          locale?: string | null
+          p256dh: string
+          tz?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          device_id?: string
+          endpoint?: string
+          id?: string
+          inactivity_stage?: number
+          last_notified_at?: string | null
+          last_seen_at?: string
+          locale?: string | null
+          p256dh?: string
+          tz?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

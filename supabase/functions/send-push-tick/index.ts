@@ -1,0 +1,212 @@
+// Tick a cada hora — chamado pelo cron.
+// 1) Dispara reengajamento para usuários inativos (3d, 14d, 30d).
+// 2) Envia campanhas regulares conforme o schedule_cron de cada uma.
+
+import { createClient } from "npm:@supabase/supabase-js@2";
+import webpush from "npm:web-push@3.6.7";
+import cronParser from "npm:cron-parser@4.9.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
+
+const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY")!;
+const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY")!;
+const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "mailto:noreply@qapqrv.app";
+
+webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
+
+type Sub = {
+  id: string;
+  device_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  last_seen_at: string;
+  last_notified_at: string | null;
+  inactivity_stage: number;
+};
+
+async function sendOne(
+  sub: Sub,
+  payload: { title: string; body: string; url?: string; tag?: string },
+): Promise<{ ok: boolean; gone: boolean; error?: string }> {
+  try {
+    await webpush.sendNotification(
+      {
+        endpoint: sub.endpoint,
+        keys: { p256dh: sub.p256dh, auth: sub.auth },
+      },
+      JSON.stringify(payload),
+      { TTL: 60 * 60 * 24 },
+    );
+    return { ok: true, gone: false };
+  } catch (e: unknown) {
+    const err = e as { statusCode?: number; body?: string; message?: string };
+    const gone = err.statusCode === 404 || err.statusCode === 410;
+    return { ok: false, gone, error: err.message ?? String(e) };
+  }
+}
+
+async function runInactivity() {
+  const now = Date.now();
+  const stages = [
+    { stage: 3, days: 30, title: "Faz tempo!", body: "Quer voltar a acompanhar suas escalas no QAP, QRV!?" },
+    { stage: 2, days: 14, title: "Sentimos sua falta", body: "Tem novidade no QAP, QRV! Bora dar uma olhada." },
+    { stage: 1, days: 3,  title: "Já conferiu sua escala hoje?", body: "Abra o app e veja seus próximos turnos." },
+  ];
+
+  let sent = 0;
+  for (const s of stages) {
+    const cutoff = new Date(now - s.days * 86400000).toISOString();
+    const { data: subs, error } = await supabase
+      .from("push_subscriptions")
+      .select("id, device_id, endpoint, p256dh, auth, last_seen_at, last_notified_at, inactivity_stage")
+      .is("unsubscribed_at", null)
+      .lt("inactivity_stage", s.stage)
+      .lt("last_seen_at", cutoff)
+      .or(`last_notified_at.is.null,last_notified_at.lt.${new Date(now - 3 * 86400000).toISOString()}`)
+      .limit(500);
+    if (error) {
+      console.error("[tick] inactivity query", s.stage, error);
+      continue;
+    }
+    for (const sub of subs ?? []) {
+      const res = await sendOne(sub as Sub, {
+        title: s.title,
+        body: s.body,
+        url: "/",
+        tag: `inactivity-${s.stage}`,
+      });
+      if (res.gone) {
+        await supabase
+          .from("push_subscriptions")
+          .update({ unsubscribed_at: new Date().toISOString() })
+          .eq("id", (sub as Sub).id);
+      } else if (res.ok) {
+        sent++;
+        await supabase
+          .from("push_subscriptions")
+          .update({
+            last_notified_at: new Date().toISOString(),
+            inactivity_stage: s.stage,
+          })
+          .eq("id", (sub as Sub).id);
+      }
+    }
+  }
+  return sent;
+}
+
+async function runCampaigns() {
+  const { data: campaigns, error } = await supabase
+    .from("push_campaigns")
+    .select("*")
+    .eq("active", true);
+  if (error) {
+    console.error("[tick] campaigns query", error);
+    return 0;
+  }
+
+  let sent = 0;
+  const now = new Date();
+
+  for (const c of campaigns ?? []) {
+    let dueAt: Date | null = null;
+    try {
+      const it = cronParser.parseExpression(c.schedule_cron, {
+        currentDate: now,
+        tz: "UTC",
+      });
+      const prev = it.prev().toDate();
+      // Janela: só dispara se a execução anterior do cron foi nas últimas 65 min
+      if (now.getTime() - prev.getTime() <= 65 * 60 * 1000) {
+        dueAt = prev;
+      }
+    } catch (e) {
+      console.error("[tick] cron parse", c.slug, e);
+      continue;
+    }
+    if (!dueAt) continue;
+
+    if (c.last_run_at && new Date(c.last_run_at).getTime() >= dueAt.getTime()) continue;
+
+    const { data: subs, error: e2 } = await supabase
+      .from("push_subscriptions")
+      .select("id, device_id, endpoint, p256dh, auth, last_seen_at, last_notified_at, inactivity_stage")
+      .is("unsubscribed_at", null)
+      .limit(2000);
+    if (e2) {
+      console.error("[tick] subs query", e2);
+      continue;
+    }
+
+    const bucket = dueAt.toISOString();
+    for (const sub of subs ?? []) {
+      // dedupe: já enviou nessa janela?
+      const { data: existing } = await supabase
+        .from("push_campaign_sends")
+        .select("id")
+        .eq("campaign_id", c.id)
+        .eq("device_id", (sub as Sub).device_id)
+        .eq("run_bucket", bucket)
+        .maybeSingle();
+      if (existing) continue;
+
+      const res = await sendOne(sub as Sub, {
+        title: c.title,
+        body: c.body,
+        url: c.url ?? "/",
+        tag: `campaign-${c.slug}`,
+      });
+
+      await supabase.from("push_campaign_sends").insert({
+        campaign_id: c.id,
+        device_id: (sub as Sub).device_id,
+        run_bucket: bucket,
+        success: res.ok,
+        error: res.error ?? null,
+      });
+
+      if (res.gone) {
+        await supabase
+          .from("push_subscriptions")
+          .update({ unsubscribed_at: new Date().toISOString() })
+          .eq("id", (sub as Sub).id);
+      } else if (res.ok) {
+        sent++;
+      }
+    }
+
+    await supabase
+      .from("push_campaigns")
+      .update({ last_run_at: new Date().toISOString() })
+      .eq("id", c.id);
+  }
+  return sent;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  try {
+    const inactivity = await runInactivity();
+    const campaigns = await runCampaigns();
+    return new Response(
+      JSON.stringify({ ok: true, inactivity_sent: inactivity, campaign_sent: campaigns }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (e) {
+    console.error("[send-push-tick] fatal", e);
+    return new Response(JSON.stringify({ error: String(e) }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

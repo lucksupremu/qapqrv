@@ -146,6 +146,27 @@ self.addEventListener("message", (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+// === Push remoto (Web Push do backend) ===
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { title: "QAP, QRV!", body: event.data ? event.data.text() : "" };
+  }
+  const title = payload.title || "QAP, QRV!";
+  const options = {
+    body: payload.body || "",
+    icon: payload.icon || "/notif-icon-192.png",
+    badge: payload.badge || "/notif-badge-72.png",
+    tag: payload.tag || `push-${Date.now()}`,
+    data: { url: payload.url || "/" },
+    requireInteraction: false,
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = (event.notification.data && event.notification.data.url) || "/calendario";
