@@ -5,8 +5,10 @@ import { RouterProvider } from "@tanstack/react-router";
 import "./styles.css";
 import { getRouter } from "./router";
 import { initTheme } from "./lib/theme";
+import { registerAppServiceWorker } from "./lib/sw-register";
 
 initTheme();
+registerAppServiceWorker();
 
 const router = getRouter();
 

@@ -19,20 +19,20 @@ const MIN_DAYS = 2;
 const DELAY_MS = 4000;
 
 export function InstallPushOptIn() {
-  const { isInstalled, isChromeFamily } = usePwaInstall();
+  const { isInstalled, canPrompt } = usePwaInstall();
   const native = useIsNative();
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (native || isInstalled || isChromeFamily) return;
+    if (native || isInstalled || !canPrompt) return;
     if (wasInstallOptInShown()) return;
     if (getAccessDays() < MIN_DAYS) return;
     if (typeof Notification === "undefined") return;
     if (Notification.permission !== "default") return;
     const t = window.setTimeout(() => setShow(true), DELAY_MS);
     return () => window.clearTimeout(t);
-  }, [native, isInstalled, isChromeFamily]);
+  }, [native, isInstalled, canPrompt]);
 
   if (!show) return null;
 
