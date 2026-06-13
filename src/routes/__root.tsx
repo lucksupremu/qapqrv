@@ -18,6 +18,7 @@ import { PushPermissionPrompt } from "@/components/push-permission-prompt";
 import { BrowserWarningModal } from "@/components/browser-warning-modal";
 import { WhatsNewModal } from "@/components/whats-new-modal";
 import { isNativeApp } from "@/lib/in-app-browser";
+import { installAppBadgeUpdater } from "@/lib/app-badge";
 
 
 /** Google AdSense client ID */
@@ -187,6 +188,9 @@ function RootComponent() {
     import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
       rehydrateReminders();
     });
+
+    // Atualiza o badge numérico do ícone do app (PWA instalada) com a contagem de hoje.
+    installAppBadgeUpdater();
     const id = setInterval(
       () => {
         import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
