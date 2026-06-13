@@ -107,6 +107,15 @@ function RootComponent() {
     }
   }, [pathname, router]);
 
+  // Heartbeat de push: avisa o backend que o usuário está ativo (no máx. 1x/h).
+  useEffect(() => {
+    import("@/lib/push-client").then(({ sendHeartbeat }) => {
+      sendHeartbeat();
+    });
+  }, [pathname]);
+
+
+
 
 
   useEffect(() => {
