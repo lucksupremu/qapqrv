@@ -10,6 +10,58 @@ import { isNativeApp } from "@/lib/in-app-browser";
 const DEVICE_ID_KEY = "qapqrv_device_id";
 const HEARTBEAT_KEY = "qapqrv_push_heartbeat_at";
 const HEARTBEAT_INTERVAL = 60 * 60 * 1000; // 1h
+const ACCESS_DAYS_KEY = "qapqrv_access_days";
+const ACCESS_LAST_KEY = "qapqrv_access_last_day";
+const INSTALL_OPTIN_SHOWN_KEY = "qapqrv_install_optin_shown";
+
+function detectPlatform(): "ios" | "android" | "web" {
+  if (typeof navigator === "undefined") return "web";
+  const ua = navigator.userAgent || "";
+  if (/iPad|iPhone|iPod/.test(ua)) return "ios";
+  if (/Android/i.test(ua)) return "android";
+  return "web";
+}
+
+/** Conta dias distintos de acesso. Chame uma vez no boot do app. */
+export function trackAccessDay(): number {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const last = localStorage.getItem(ACCESS_LAST_KEY);
+    let count = Number(localStorage.getItem(ACCESS_DAYS_KEY) ?? "0");
+    if (last !== today) {
+      count = (Number.isFinite(count) ? count : 0) + 1;
+      localStorage.setItem(ACCESS_DAYS_KEY, String(count));
+      localStorage.setItem(ACCESS_LAST_KEY, today);
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
+export function getAccessDays(): number {
+  try {
+    return Number(localStorage.getItem(ACCESS_DAYS_KEY) ?? "0") || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function wasInstallOptInShown(): boolean {
+  try {
+    return localStorage.getItem(INSTALL_OPTIN_SHOWN_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+export function markInstallOptInShown(): void {
+  try {
+    localStorage.setItem(INSTALL_OPTIN_SHOWN_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
 
 function getDeviceId(): string {
   try {
