@@ -26,6 +26,15 @@ type Body = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  // GET: devolve a chave VAPID pública pra o cliente assinar o pushManager.
+  if (req.method === "GET") {
+    return new Response(
+      JSON.stringify({ vapidPublicKey: Deno.env.get("VAPID_PUBLIC_KEY") ?? "" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+
   try {
     const body = (await req.json()) as Body;
     if (!body?.device_id || typeof body.device_id !== "string") {
