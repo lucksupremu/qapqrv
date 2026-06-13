@@ -1,7 +1,7 @@
-// Card de configurações de notificação (apenas locais).
+// Card de configurações de notificação (locais + push remoto).
 
 import { useEffect, useState } from "react";
-import { Bell, BellOff, CheckCircle2, Send } from "lucide-react";
+import { Bell, BellOff, CheckCircle2, Send, Mail, MailX } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -10,13 +10,21 @@ import {
   fireTestNotification,
 } from "@/lib/notifications-adapter";
 import { isNativeApp } from "@/lib/in-app-browser";
+import {
+  subscribeToPush,
+  unsubscribeFromPush,
+  isPushSubscribed,
+} from "@/lib/push-client";
 
 export function PushSettingsCard() {
   const [perm, setPerm] = useState<NotificationPermission>("default");
+  const [pushOn, setPushOn] = useState(false);
+  const [busy, setBusy] = useState(false);
   const native = isNativeApp();
 
   useEffect(() => {
     setPerm(getPermission());
+    isPushSubscribed().then(setPushOn);
   }, []);
 
   const handleEnableLocal = async () => {
@@ -32,6 +40,33 @@ export function PushSettingsCard() {
     else toast.error("Falha — verifique a permissão de notificações");
   };
 
+  const handleSubscribePush = async () => {
+    setBusy(true);
+    try {
+      const ok = await subscribeToPush();
+      if (ok) {
+        setPushOn(true);
+        setPerm("granted");
+        toast.success("Pronto! Você receberá novidades e lembretes.");
+      } else {
+        toast.error("Não foi possível ativar. Verifique a permissão de notificações.");
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleUnsubscribePush = async () => {
+    setBusy(true);
+    try {
+      await unsubscribeFromPush();
+      setPushOn(false);
+      toast.success("Você não receberá mais notificações de novidades.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div
       className="rounded-[16px] border-2 bg-white p-4"
@@ -40,7 +75,7 @@ export function PushSettingsCard() {
       <div className="mb-3 flex items-center gap-2">
         <Bell size={18} style={{ color: "#0c2340" }} />
         <h3 className="text-[15px] font-bold" style={{ color: "#0c2340" }}>
-          Notificações de escalas
+          Notificações
         </h3>
       </div>
 
@@ -73,6 +108,34 @@ export function PushSettingsCard() {
             )}
           </div>
         </div>
+
+        {!native && (
+          <div className="flex items-start gap-3 rounded-[12px] p-3" style={{ background: "#f4f8fb" }}>
+            {pushOn ? (
+              <Mail size={20} className="mt-0.5 shrink-0" style={{ color: "#2e6b8a" }} />
+            ) : (
+              <MailX size={20} className="mt-0.5 shrink-0 text-amber-600" />
+            )}
+            <div className="flex-1">
+              <p className="text-[13px] font-bold" style={{ color: "#0c2340" }}>
+                Receber novidades e lembretes
+              </p>
+              <p className="mt-0.5 text-[11px]" style={{ color: "#5b7a8f" }}>
+                {pushOn
+                  ? "Ativo — você receberá avisos do app mesmo com a aba fechada."
+                  : "Push remoto: lembretes semanais e mensagens quando ficar sem usar o app."}
+              </p>
+              <button
+                onClick={pushOn ? handleUnsubscribePush : handleSubscribePush}
+                disabled={busy}
+                className="mt-2 rounded-[8px] px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-60"
+                style={{ background: pushOn ? "#b45309" : "#2e6b8a" }}
+              >
+                {busy ? "Aguarde…" : pushOn ? "Não receber mais" : "Ativar push"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {native && (
           <div className="rounded-[12px] p-3 text-[12px]" style={{ background: "#e8f4ea", color: "#1b4332" }}>
