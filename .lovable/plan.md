@@ -1,59 +1,85 @@
-## O que muda
+## Diagnóstico
 
-### 1. Banner de instalação — só quando for prompt real
-Hoje o banner aparece em qualquer navegador "permitido" e, quando não há prompt nativo, abre um modal com passo a passo (o "pop-up falso"). Vamos remover esse caminho.
+O Chrome/Edge/Brave/Samsung só disparam o evento `beforeinstallprompt` (o que permite o botão "Instalar agora" funcionar com 1 toque) quando, ao carregar a página, encontram:
 
-- `usePwaInstall`: voltar `isInstallable` a exigir `canPrompt === true` (ou seja, só quando o navegador disparou `beforeinstallprompt`). Firefox e Safari ficam sem banner.
-- `PwaInstallBanner`: remover totalmente o uso de `PwaInstallModal`. O botão "Instalar" só chama `promptInstall()` (prompt nativo real do Chrome/Edge/Brave/Samsung/Opera).
-- `PwaInstallModal`: deletar o arquivo (não será mais usado em nenhum lugar).
-- Banner do Chrome (`ChromeInstallHintBanner`) continua igual, redirecionando para Firefox/Edge.
+1. Um `manifest.webmanifest` válido com ícone ≥192 e `display: standalone`. ✅ Já existe.
+2. Servido em HTTPS. ✅ OK em produção.
+3. Um **service worker com handler de `fetch` já ativo** no escopo `/`. ❌ Falta.
 
-### 2. Opção "Instalar app" em Configurações
-Novo bloco dentro do `PushSettingsCard` (ou um card novo `PwaInstallCard` ao lado dele em `src/routes/configuracoes.tsx` — prefiro card próprio para não misturar com notificações).
+Hoje o `public/sw.js` existe e tem `fetch`, mas ele só é **registrado** dentro de `src/lib/notifications-adapter.ts`, e apenas quando o usuário aceita notificações. Resultado: na maioria dos acessos, o SW nunca registra, o Chrome não considera o app instalável, `beforeinstallprompt` nunca dispara, `canPrompt` fica `false` e o botão cai no toast "Seu navegador não permite instalação automática".
 
-Comportamento:
-- Esconde se: rodando no APK nativo, já instalado (`display-mode: standalone`), ou Chrome (que bloqueamos por política).
-- Mostra botão "Instalar app":
-  - Se `canPrompt` → dispara `promptInstall()`.
-  - Caso contrário (Firefox/Safari) → texto curto: "Abra o menu do navegador e toque em *Instalar app* / *Adicionar à tela inicial*." Sem modal.
+Além disso, o `chrome-install-hint-banner.tsx` ainda diz "Chrome bloqueia a instalação" — informação falsa, herdada da tentativa anterior. Precisa sair.
 
-### 3. Push único pedindo instalação após o 2º acesso
+## Objetivo
 
-Heurística no cliente (sem nova tabela):
-- `src/lib/push-client.ts`: contar acessos em `localStorage` (`app_access_count`, incrementado 1x por dia).
-- Quando contagem ≥ 2 **e** `!isInstalled` **e** `!isNative` **e** `!isChromeFamily` **e** ainda não pediu push → mostrar um prompt suave (toast/modal pequeno) sugerindo ativar notificações para "lembrar de instalar". Se aceitar, `subscribeToPush()` registra a inscrição já marcando uma flag `wants_install_push=true` enviada ao backend.
+Após este plano, abrir o app publicado (`qapqrv.lovable.app` ou domínio) no Chrome/Edge Android/desktop deve resultar em:
+- `beforeinstallprompt` capturado automaticamente.
+- Card "Instalar app" em Configurações com botão habilitado.
+- Toque no botão abre o diálogo nativo "Instalar QAP, QRV!" do próprio sistema.
+- Após instalar, card e item de menu somem; ícone vai para a tela inicial.
 
-Backend:
-- Migração: adicionar coluna `wants_install_push BOOLEAN DEFAULT false` e `install_push_sent_at TIMESTAMPTZ` em `push_subscriptions`. Coluna `platform TEXT` (web/ios/android) para filtrar.
-- `register-push` aceita esses campos no payload.
-- `send-push-tick` (cron já roda de hora em hora): para cada subscription onde `wants_install_push = true`, `install_push_sent_at IS NULL`, `unsubscribed_at IS NULL` e idade ≥ 1h → envia 1 push:
-  - Título: "Instale o QAP, QRV! na tela inicial"
-  - Corpo: "Acesso rápido, sem abrir o navegador. Toque para instalar."
-  - URL: `/?install=1` (a home detecta o param e dispara `promptInstall()` se disponível, senão mostra instruções curtas).
-- Marca `install_push_sent_at = now()` para não repetir nunca mais.
+Firefox Android continua usando o menu nativo "Instalar" (o navegador não expõe API). Safari iOS continua com Compartilhar → Adicionar à Tela de Início. Esses são limites do navegador, não do app — mas não vão aparecer tutoriais inúteis: o card simplesmente não exibirá nada que confunda.
 
-APK e iOS não recebem (filtrado por `platform`).
+## Mudanças
 
-## Resumo dos arquivos
+### 1. Registrar o service worker em produção (essencial)
 
-Editar:
-- `src/hooks/use-pwa-install.ts` — voltar regra `canPrompt || isIOS` removendo o `isIOS`.
-- `src/components/pwa-install-banner.tsx` — remover modal.
-- `src/routes/configuracoes.tsx` — incluir novo card.
-- `src/lib/push-client.ts` — contagem de acessos + flag `wants_install_push` + `platform`.
-- `src/routes/index.tsx` (ou `__root.tsx`) — prompt suave após 2º acesso; tratar `?install=1`.
-- `supabase/functions/register-push/index.ts` — aceitar novos campos.
-- `supabase/functions/send-push-tick/index.ts` — enviar push de instalação 1x.
+Criar `src/lib/sw-register.ts`:
 
-Criar:
-- `src/components/pwa-install-card.tsx`
-- `src/components/install-push-opt-in.tsx` (prompt suave após 2º acesso)
-- Migração: colunas `wants_install_push`, `install_push_sent_at`, `platform` em `push_subscriptions`.
+- Função `registerAppServiceWorker()` que faz `navigator.serviceWorker.register("/sw.js", { scope: "/" })`.
+- Guarda contra ambientes onde o SW quebra ou não deve registrar:
+  - `import.meta.env.PROD === false` → sair (dev/Vite).
+  - Dentro de iframe (`window.top !== window.self`) → sair.
+  - Hostname começa com `id-preview--` / `preview--`, ou termina em `.lovableproject.com`, `.lovableproject-dev.com`, `.beta.lovable.dev` → sair (o próprio `sw.js` já tem kill-switch para esses domínios; não registrar de novo).
+  - `?sw=off` na URL → desregistrar SW existente e sair.
+  - APK nativo Capacitor (`isNativeApp()`) → sair.
+- Em qualquer ambiente "bloqueado", além de não registrar, faz `getRegistration("/")` + `unregister()` para limpar SWs antigos.
 
-Deletar:
-- `src/components/pwa-install-modal.tsx`
+Chamar `registerAppServiceWorker()` uma única vez em `src/main.tsx`, logo após `initTheme()`, dentro de um `requestIdleCallback`/`setTimeout(..., 0)` para não atrasar o primeiro paint.
 
-## Pontos abertos (assumidos, avise se quiser diferente)
-- O "2º acesso" conta dias distintos de abertura, não sessões.
-- O prompt suave aparece no máximo 1 vez; se o usuário fechar, não volta.
-- Push de instalação só vai para web PWA não instalado, conforme escolhido.
+Remover o registro on-demand de `src/lib/notifications-adapter.ts` (linhas 93-95): o SW já vai estar registrado; o adapter só precisa de `navigator.serviceWorker.ready`.
+
+### 2. Limpar o discurso falso sobre Chrome
+
+- `src/components/chrome-install-hint-banner.tsx`: deletar o arquivo e remover qualquer import (verificar `src/routes/index.tsx` e similares). O banner inteiro era baseado na premissa errada.
+- `src/hooks/use-pwa-install.ts`:
+  - Remover `detectChromeFamily`, `isChromeFamily`, `browserAllowsInstall`.
+  - `isInstallable = !isNative && !isInstalled && canPrompt`.
+  - `shouldShowBanner` idem.
+  - Exportar continua sem `isChromeFamily`.
+
+### 3. Card "Instalar app" — versão final, sem tutorial
+
+`src/components/pwa-install-card.tsx`:
+- Mantém o estado atual (chama `promptInstall()` direto no toque).
+- Quando `canPrompt === false` e não é iOS, **não renderiza nada** (esconde o card por completo) — assim Firefox/Safari não veem botão inútil e nenhum tutorial passo a passo aparece.
+- Exceção iOS: mostra apenas uma linha curta "No iPhone, use Compartilhar → Adicionar à Tela de Início" porque é literalmente o único caminho que existe nesse SO (sem isso o usuário iOS nunca instala). Sem ilustrações nem passo a passo longo.
+
+### 4. Item "Instalar app" no menu lateral
+
+`src/components/side-drawer.tsx`:
+- Hoje `grupo3Visible` mostra "Instalar app" sempre que `!isNative && !isInstalled`. Trocar a condição para também exigir `canPrompt || isIOS`, usando o mesmo hook. Em Firefox o item simplesmente não aparece (e o usuário usa o menu do próprio Firefox).
+
+### 5. Banner de instalação no topo da home
+
+`src/components/pwa-install-banner.tsx` já depende de `shouldShowBanner` (que passa a depender só de `canPrompt`). Sem mudança de código, mas o comportamento agora fica correto: aparece exatamente quando o navegador permite 1-toque.
+
+### 6. Sanidade do manifest
+
+Conferir que `public/icon-192.png` e `public/icon-512.png` existem e abrem (HEAD 200). Se algum estiver faltando, o Chrome silenciosamente rejeita instalabilidade. Se faltar, gerar substituto a partir do `apple-touch-icon.png` ou de um asset existente.
+
+## Como o usuário valida
+
+1. Após deploy, abrir `https://qapqrv.lovable.app` no Chrome Android.
+2. Aguardar ~2 segundos (tempo do SW ativar).
+3. Abrir o menu lateral → "Instalar app" → toca no botão → diálogo nativo do Android aparece imediatamente, sem tutorial.
+4. Em Configurações, o card "Instalar app" mostra o mesmo comportamento.
+5. Em Firefox Android: card e item de menu não aparecem (usar menu ⋮ do Firefox → "Instalar").
+6. Em Safari iOS: card mostra a única linha de instrução do iOS.
+
+## Não-objetivos
+
+- Não alterar comportamento do APK Capacitor.
+- Não mexer em push notifications nem em `register-push` / `send-push-tick`.
+- Não tentar burlar Firefox/Safari com hacks — esses navegadores não expõem API e nenhuma reescrita resolve isso.
+- Não reintroduzir o banner amarelo "Chrome bloqueia".
