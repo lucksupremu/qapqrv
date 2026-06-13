@@ -115,8 +115,10 @@ async function getVapidPublicKey(): Promise<string | null> {
   return null;
 }
 
-/** Inscreve no Web Push e envia ao backend. Retorna true se conseguiu. */
-export async function subscribeToPush(): Promise<boolean> {
+/** Inscreve no Web Push. `wantsInstallPush` marca para receber lembrete de instalação. */
+export async function subscribeToPush(
+  opts: { wantsInstallPush?: boolean } = {},
+): Promise<boolean> {
   if (typeof window === "undefined") return false;
   if (isNativeApp() || isPreviewOrIframe()) return false;
   if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
@@ -168,6 +170,8 @@ export async function subscribeToPush(): Promise<boolean> {
         user_agent: navigator.userAgent,
         locale: navigator.language,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        platform: detectPlatform(),
+        wants_install_push: !!opts.wantsInstallPush,
       },
     });
     return true;
