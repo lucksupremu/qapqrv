@@ -1,53 +1,26 @@
 // Card em Configurações para instalar o app como PWA.
 // - Some no APK nativo ou se já estiver instalado.
-// - Chrome: aparece com aviso de que o Chrome bloqueia (use Firefox/Edge).
-// - Edge/Brave/Samsung/Opera: dispara o prompt nativo.
-// - Firefox/Safari: instrução curta para usar o menu do navegador.
+// - Quando o navegador permite, dispara o prompt nativo de instalação direto.
+// - Quando o navegador não expõe API de instalação, apenas avisa de forma curta
+//   (sem tutorial passo a passo).
 
-import { Download, Copy } from "lucide-react";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { usePwaInstall } from "@/hooks/use-pwa-install";
 
 export function PwaInstallCard() {
-  const { isNative, isInstalled, isChromeFamily, canPrompt, promptInstall, isIOS } =
-    usePwaInstall();
+  const { isNative, isInstalled, canPrompt, promptInstall } = usePwaInstall();
 
   if (isNative || isInstalled) return null;
 
-  const url = typeof window !== "undefined" ? window.location.origin : "";
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Link copiado! Cole no Firefox ou Edge para instalar.");
-    } catch {
-      toast.error("Não foi possível copiar. Copie manualmente: " + url);
-    }
-  };
-
   const handleInstall = async () => {
-    if (isChromeFamily) {
-      handleCopy();
+    if (!canPrompt) {
+      toast.error("Seu navegador não permite instalação automática. Tente o Edge ou Firefox.");
       return;
     }
-    if (canPrompt) {
-      const result = await promptInstall();
-      if (result === "accepted") toast.success("App instalado!");
-      return;
-    }
-    toast.info(
-      isIOS
-        ? "No Safari, toque em Compartilhar → Adicionar à Tela de Início."
-        : "Abra o menu do navegador (⋮) e toque em Instalar app / Adicionar à tela inicial.",
-      { duration: 6000 },
-    );
+    const result = await promptInstall();
+    if (result === "accepted") toast.success("App instalado!");
   };
-
-  const buttonLabel = isChromeFamily
-    ? "Copiar link para Firefox/Edge"
-    : canPrompt
-    ? "Instalar agora"
-    : "Como instalar";
 
   return (
     <div
@@ -66,29 +39,15 @@ export function PwaInstallCard() {
         acesso rápido e em tela cheia.
       </p>
 
-      {isChromeFamily && (
-        <p className="mb-3 rounded-[10px] p-2 text-[11px]" style={{ background: "#fff7e6", color: "#92400e" }}>
-          O Chrome bloqueia a instalação do QAP, QRV!. Copie o link e abra no
-          <strong> Firefox</strong> ou <strong>Edge</strong> para instalar.
-        </p>
-      )}
-
       <button
         onClick={handleInstall}
-        className="inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-[12px] font-bold text-white"
+        disabled={!canPrompt}
+        className="inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-[12px] font-bold text-white disabled:opacity-60"
         style={{ background: "#2e6b8a" }}
       >
-        {isChromeFamily ? <Copy size={14} /> : <Download size={14} />}
-        {buttonLabel}
+        <Download size={14} />
+        Instalar agora
       </button>
-
-      {!isChromeFamily && !canPrompt && (
-        <p className="mt-3 text-[11px]" style={{ color: "#5b7a8f" }}>
-          {isIOS
-            ? "Safari: toque em Compartilhar → Adicionar à Tela de Início."
-            : "Firefox/Edge: abra o menu (⋮) e toque em Instalar app / Adicionar à tela inicial."}
-        </p>
-      )}
     </div>
   );
 }
