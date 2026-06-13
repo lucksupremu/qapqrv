@@ -188,6 +188,9 @@ function RootComponent() {
     import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
       rehydrateReminders();
     });
+
+    // Atualiza o badge numérico do ícone do app (PWA instalada) com a contagem de hoje.
+    installAppBadgeUpdater();
     const id = setInterval(
       () => {
         import("@/lib/notifications-adapter").then(({ rehydrateReminders }) => {
