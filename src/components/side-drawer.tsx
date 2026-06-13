@@ -11,7 +11,6 @@ import {
   X,
   Sun,
   Moon,
-  Bell,
   Download,
   Settings,
 } from "lucide-react";
