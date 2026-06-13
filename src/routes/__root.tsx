@@ -18,6 +18,7 @@ import { PushPermissionPrompt } from "@/components/push-permission-prompt";
 import { BrowserWarningModal } from "@/components/browser-warning-modal";
 import { WhatsNewModal } from "@/components/whats-new-modal";
 import { isNativeApp } from "@/lib/in-app-browser";
+import { installAppBadgeUpdater } from "@/lib/app-badge";
 
 
 /** Google AdSense client ID */

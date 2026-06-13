@@ -14,5 +14,35 @@
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
     { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Abrir calendário",
+      "short_name": "Calendário",
+      "description": "Ver marcas e eventos do mês",
+      "url": "/calendario",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Nova marca",
+      "short_name": "Nova marca",
+      "description": "Registrar nova marca de atividade",
+      "url": "/calendario?action=nova-marca",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Consultar escala",
+      "short_name": "Escala",
+      "description": "Consultar escala na intranet",
+      "url": "/ferramenta/consulta-escala",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Escalas baixadas",
+      "short_name": "Baixadas",
+      "description": "Abrir escalas offline",
+      "url": "/escalas-baixadas",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }
