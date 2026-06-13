@@ -109,7 +109,8 @@ function RootComponent() {
 
   // Heartbeat de push: avisa o backend que o usuário está ativo (no máx. 1x/h).
   useEffect(() => {
-    import("@/lib/push-client").then(({ sendHeartbeat }) => {
+    import("@/lib/push-client").then(({ sendHeartbeat, trackAccessDay }) => {
+      trackAccessDay();
       sendHeartbeat();
     });
   }, [pathname]);

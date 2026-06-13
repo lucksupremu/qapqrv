@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 
 import { PushSettingsCard } from "@/components/push-settings-card";
+import { PwaInstallCard } from "@/components/pwa-install-card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CredentialVaultCard } from "@/components/credential-vault-card";
 
@@ -44,6 +45,7 @@ function ConfiguracoesPage() {
 
       <main className="space-y-4 px-4 pb-8">
         <ThemeToggle />
+        <PwaInstallCard />
         <CredentialVaultCard />
         <PushSettingsCard />
 

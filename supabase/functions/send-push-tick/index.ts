@@ -193,13 +193,58 @@ async function runCampaigns() {
   return sent;
 }
 
+async function runInstallNudge() {
+  const cutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { data: subs, error } = await supabase
+    .from("push_subscriptions")
+    .select("id, device_id, endpoint, p256dh, auth, last_seen_at, last_notified_at, inactivity_stage")
+    .eq("wants_install_push", true)
+    .is("install_push_sent_at", null)
+    .is("unsubscribed_at", null)
+    .eq("platform", "web")
+    .lt("created_at", cutoff)
+    .limit(500);
+  if (error) {
+    console.error("[tick] install nudge query", error);
+    return 0;
+  }
+  let sent = 0;
+  for (const sub of subs ?? []) {
+    const res = await sendOne(sub as Sub, {
+      title: "Instale o QAP, QRV! na tela inicial",
+      body: "Acesso rápido, sem abrir o navegador. Toque para instalar.",
+      url: "/?install=1",
+      tag: "install-nudge",
+    });
+    if (res.gone) {
+      await supabase
+        .from("push_subscriptions")
+        .update({ unsubscribed_at: new Date().toISOString() })
+        .eq("id", (sub as Sub).id);
+    } else if (res.ok) {
+      sent++;
+      await supabase
+        .from("push_subscriptions")
+        .update({ install_push_sent_at: new Date().toISOString() })
+        .eq("id", (sub as Sub).id);
+    }
+  }
+  return sent;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const inactivity = await runInactivity();
     const campaigns = await runCampaigns();
+    const installNudge = await runInstallNudge();
     return new Response(
-      JSON.stringify({ ok: true, inactivity_sent: inactivity, campaign_sent: campaigns }),
+      JSON.stringify({
+        ok: true,
+        inactivity_sent: inactivity,
+        campaign_sent: campaigns,
+        install_nudge_sent: installNudge,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
