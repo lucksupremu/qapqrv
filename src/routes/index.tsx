@@ -317,6 +317,8 @@ function HomeScreen() {
       </header>
 
       <BrowserHintBanner />
+      <PwaInstallBanner />
+      <ChromeInstallHintBanner />
 
 
 
