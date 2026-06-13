@@ -99,14 +99,17 @@ export type Database = {
           endpoint: string
           id: string
           inactivity_stage: number
+          install_push_sent_at: string | null
           last_notified_at: string | null
           last_seen_at: string
           locale: string | null
           p256dh: string
+          platform: string | null
           tz: string | null
           unsubscribed_at: string | null
           updated_at: string
           user_agent: string | null
+          wants_install_push: boolean
         }
         Insert: {
           auth: string
@@ -115,14 +118,17 @@ export type Database = {
           endpoint: string
           id?: string
           inactivity_stage?: number
+          install_push_sent_at?: string | null
           last_notified_at?: string | null
           last_seen_at?: string
           locale?: string | null
           p256dh: string
+          platform?: string | null
           tz?: string | null
           unsubscribed_at?: string | null
           updated_at?: string
           user_agent?: string | null
+          wants_install_push?: boolean
         }
         Update: {
           auth?: string
@@ -131,14 +137,17 @@ export type Database = {
           endpoint?: string
           id?: string
           inactivity_stage?: number
+          install_push_sent_at?: string | null
           last_notified_at?: string | null
           last_seen_at?: string
           locale?: string | null
           p256dh?: string
+          platform?: string | null
           tz?: string | null
           unsubscribed_at?: string | null
           updated_at?: string
           user_agent?: string | null
+          wants_install_push?: boolean
         }
         Relationships: []
       }
