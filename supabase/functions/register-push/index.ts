@@ -21,6 +21,8 @@ type Body = {
   user_agent?: string;
   locale?: string;
   tz?: string;
+  platform?: string;
+  wants_install_push?: boolean;
 };
 
 Deno.serve(async (req) => {
@@ -70,7 +72,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const row = {
+    const platform = ["web", "ios", "android"].includes(String(body.platform))
+      ? (body.platform as string)
+      : null;
+
+    const row: Record<string, unknown> = {
       device_id: body.device_id,
       endpoint: sub.endpoint,
       p256dh: sub.keys.p256dh,
@@ -78,10 +84,17 @@ Deno.serve(async (req) => {
       user_agent: body.user_agent ?? null,
       locale: body.locale ?? null,
       tz: body.tz ?? null,
+      platform,
       last_seen_at: now,
       inactivity_stage: 0,
       unsubscribed_at: null,
     };
+    if (typeof body.wants_install_push === "boolean") {
+      row.wants_install_push = body.wants_install_push;
+      // Se desligou o opt-in de install push, zera o sent_at para regra futura;
+      // se ligou, deixa NULL para o tick enviar (1x).
+      row.install_push_sent_at = null;
+    }
 
     const { error } = await supabase
       .from("push_subscriptions")
