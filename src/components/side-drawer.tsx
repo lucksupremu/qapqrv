@@ -11,11 +11,13 @@ import {
   X,
   Sun,
   Moon,
-  Bell,
+  Download,
+  Settings,
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { useIsNative } from "@/hooks/use-is-native";
+import { usePwaInstall } from "@/hooks/use-pwa-install";
 
 type Ctx = { open: boolean; setOpen: (v: boolean) => void };
 const DrawerCtx = createContext<Ctx | null>(null);
@@ -68,7 +70,7 @@ const grupo2: Item[] = [
   },
 ];
 const grupo3: Item[] = [
-  { type: "route", to: "/configuracoes", label: "Notificações", icon: Bell },
+  { type: "route", to: "/configuracoes", label: "Configurações", icon: Settings },
   { type: "route", to: "/manual", label: "Manual", icon: BookOpenCheck },
   { type: "route", to: "/anyconnect", label: "Vídeo tutorial ANYCONECT", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
@@ -78,7 +80,10 @@ function SideDrawer() {
   const { open, setOpen } = useDrawer();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const native = useIsNative();
+  const { isNative: isNativePwa, isInstalled } = usePwaInstall();
   const grupo1 = native ? [...grupo1Base, ...grupo1NativeOnly] : grupo1Base;
+  const installItem: Item = { type: "route", to: "/configuracoes", label: "Instalar app", icon: Download };
+  const grupo3Visible = !native && !isNativePwa && !isInstalled ? [installItem, ...grupo3] : grupo3;
   const [theme, setTheme] = useState<Theme>("light");
   useEffect(() => {
     setTheme(getStoredTheme());
@@ -179,7 +184,7 @@ function SideDrawer() {
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo2.map(renderItem)}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
-          {grupo3.map(renderItem)}
+          {grupo3Visible.map(renderItem)}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           <button
             onClick={handleToggleTheme}
