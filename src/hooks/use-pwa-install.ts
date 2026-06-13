@@ -129,8 +129,9 @@ export function usePwaInstall() {
   // Política: bloquear instalação PWA apenas no Chrome/Chromium (inclui Edge,
   // Brave, Opera, Samsung Internet, CriOS). Firefox, Safari e demais ficam liberados.
   const browserAllowsInstall = !isChromeFamily;
-  const isInstallable =
-    !isNative && !isInstalled && browserAllowsInstall && (canPrompt || isIOS);
+  // Firefox Android/desktop e Safari não disparam beforeinstallprompt,
+  // mas ainda podemos mostrar o banner com instruções manuais via modal.
+  const isInstallable = !isNative && !isInstalled && browserAllowsInstall;
   const shouldShowBanner = isInstallable && !dismissed;
 
   return {
