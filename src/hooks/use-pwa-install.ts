@@ -23,22 +23,6 @@ function detectAndroid(): boolean {
   return /Android/i.test(navigator.userAgent || "");
 }
 
-function detectFirefox(): boolean {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent || "";
-  // Firefox desktop e Firefox Android (Fennec/Fenix)
-  return /Firefox\//i.test(ua) || /FxiOS\//i.test(ua);
-}
-
-function detectChromeFamily(): boolean {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent || "";
-  // Chrome, Chromium, Edge, Brave, Opera, Samsung Internet, etc. — qualquer Chromium.
-  // Excluímos explicitamente Firefox.
-  if (/Firefox\//i.test(ua) || /FxiOS\//i.test(ua)) return false;
-  return /Chrome\//i.test(ua) || /Chromium\//i.test(ua) || /CriOS\//i.test(ua);
-}
-
 function detectStandalone(): boolean {
   if (typeof window === "undefined") return false;
   const mql = window.matchMedia?.("(display-mode: standalone)").matches;
@@ -53,8 +37,7 @@ function isDismissExpired(): boolean {
     if (!raw) return true;
     const ts = Number(raw);
     if (Number.isNaN(ts)) return true;
-    const elapsed = Date.now() - ts;
-    return elapsed > DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    return Date.now() - ts > DISMISS_DAYS * 24 * 60 * 60 * 1000;
   } catch {
     return true;
   }
@@ -82,11 +65,10 @@ export function usePwaInstall() {
     const onInstalled = () => {
       setIsInstalled(true);
       setDeferred(null);
-      // limpa dismiss ao instalar com sucesso
       try {
         localStorage.removeItem(DISMISS_KEY);
       } catch {
-        // ignore
+        /* ignore */
       }
       setDismissed(false);
     };
@@ -108,7 +90,7 @@ export function usePwaInstall() {
       try {
         localStorage.removeItem(DISMISS_KEY);
       } catch {
-        // ignore
+        /* ignore */
       }
       setDismissed(false);
     }
@@ -119,20 +101,13 @@ export function usePwaInstall() {
     try {
       localStorage.setItem(DISMISS_KEY, String(Date.now()));
     } catch {
-      // ignore
+      /* ignore */
     }
     setDismissed(true);
   }, []);
 
   const canPrompt = !!deferred;
-  const isChromeFamily = detectChromeFamily();
-  // Política: bloquear instalação PWA apenas no Chrome/Chromium (inclui Edge,
-  // Brave, Opera, Samsung Internet, CriOS). Firefox, Safari e demais ficam liberados.
-  const browserAllowsInstall = !isChromeFamily;
-  // Banner só aparece quando o navegador realmente dispara o prompt nativo
-  // de instalação (Chrome/Edge/Brave/Samsung/Opera). Firefox e Safari ficam
-  // sem banner — o usuário instala pelo card em Configurações.
-  const isInstallable = !isNative && !isInstalled && browserAllowsInstall && canPrompt;
+  const isInstallable = !isNative && !isInstalled && canPrompt;
   const shouldShowBanner = isInstallable && !dismissed;
 
   return {
@@ -145,6 +120,5 @@ export function usePwaInstall() {
     isNative,
     isInstallable,
     shouldShowBanner,
-    isChromeFamily,
   };
 }
