@@ -45,6 +45,7 @@ function ConfiguracoesPage() {
 
       <main className="space-y-4 px-4 pb-8">
         <ThemeToggle />
+        <PwaInstallCard />
         <CredentialVaultCard />
         <PushSettingsCard />
 
