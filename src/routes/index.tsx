@@ -348,6 +348,7 @@ function HomeScreen() {
       <BrowserHintBanner />
       <PwaInstallBanner />
       <ChromeInstallHintBanner />
+      <InstallPushOptIn />
 
 
 
