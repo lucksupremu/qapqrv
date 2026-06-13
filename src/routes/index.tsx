@@ -33,6 +33,8 @@ import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
+import { ChromeInstallHintBanner } from "@/components/chrome-install-hint-banner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
