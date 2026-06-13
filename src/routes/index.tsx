@@ -35,6 +35,8 @@ import { openAnyConnect } from "@/lib/open-anyconnect";
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { ChromeInstallHintBanner } from "@/components/chrome-install-hint-banner";
+import { InstallPushOptIn } from "@/components/install-push-opt-in";
+import { usePwaInstall } from "@/hooks/use-pwa-install";
 
 export const Route = createFileRoute("/")({
   head: () => ({
