@@ -6,8 +6,10 @@ import "./styles.css";
 import { getRouter } from "./router";
 import { initTheme } from "./lib/theme";
 import { registerAppServiceWorker } from "./lib/sw-register";
+import { initPwaInstallManager } from "./lib/pwa-install-manager";
 
 initTheme();
+initPwaInstallManager();
 registerAppServiceWorker();
 
 const router = getRouter();
