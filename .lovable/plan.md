@@ -1,41 +1,46 @@
-## Plano para reativar a instalação PWA de forma completa
 
-O problema principal aqui é que o app depende do evento nativo `beforeinstallprompt`, mas esse evento é único e hoje fica preso em estados locais de vários `usePwaInstall()`. Se ele dispara na Home, a tela de Configurações pode não receber o mesmo evento depois. Além disso, o item “Instalar app” está escondido quando `canPrompt` ainda não está pronto, então para o usuário parece que não existe opção.
+## O que vai aparecer
 
-Também há um limite do navegador: Firefox/Safari não permitem abrir o pop-up nativo de instalação com 1 toque como Chrome/Edge/Brave/Samsung. Neles dá para mostrar a opção de instalação, mas o navegador não entrega uma API para forçar o diálogo nativo.
+Banner discreto no topo da Home (`/`), exibido **1x por mês** por usuário, convidando-o a compartilhar o app com colegas da tropa. Dois botões:
 
-## O que vou implementar
+- **WhatsApp** (verde #25D366) — abre o WhatsApp já com mensagem pronta + link
+- **Outras opções** — usa Web Share API nativa quando disponível; fallback copia o texto
 
-1. **Centralizar a instalação PWA em um único serviço global**
-   - Criar um gerenciador único para capturar `beforeinstallprompt` uma vez e manter o evento disponível para qualquer tela.
-   - Evitar que Home, menu lateral, banner e Configurações tenham estados separados e inconsistentes.
+E um "X" para dispensar (também conta como "visto" no mês).
 
-2. **Liberar o botão “Instalar app” para todos os usuários web não instalados**
-   - O item “Instalar app” volta a aparecer no menu mesmo antes do `canPrompt` estar pronto.
-   - A tela de Configurações sempre mostra a área de instalação quando o app não está instalado e não está rodando como APK.
+## Texto
 
-3. **Instalação com 1 toque quando o navegador permitir**
-   - Se `beforeinstallprompt` estiver disponível, o botão “Instalar agora” chama diretamente o diálogo nativo.
-   - Depois de instalar, o card/banner somem automaticamente via evento `appinstalled`.
+Título:
+> "Tem colega de farda que ainda não conhece?"
 
-4. **Fallback sem tutorial longo para navegadores sem API nativa**
-   - Para Chrome/Edge/Brave/Samsung: botão nativo.
-   - Para iPhone/iPad: mensagem curta inevitável, porque a Apple não libera prompt automático.
-   - Para Firefox/Safari/Outros: mostrar uma mensagem objetiva de incompatibilidade com instalação por 1 toque, sem passo-a-passo/tutorial.
+Subtítulo:
+> "Compartilhe o QAP, QRV! e ajude a tropa a controlar escalas, lembretes e intranet num só app."
 
-5. **Melhorar o registro do Service Worker sem quebrar preview**
-   - Manter registro apenas no app publicado/domínio real, nunca no preview/editor.
-   - Registrar cedo o suficiente para Chrome considerar o app instalável.
-   - Manter `/sw.js`, manifesto e ícones válidos.
-   - Não mexer no APK nativo.
+Mensagem enviada no WhatsApp / Share:
+> 🚔 *QAP, QRV!* — o app do PM
+>
+> Calendário de escalas (dejem/delegada), lembretes automáticos, acesso fácil à intranet PMESP e escalas offline. Tudo num só lugar, de graça.
+>
+> Baixa aí: https://www.miketools.top
 
-6. **Remover textos que mandam procurar menu do navegador**
-   - Tirar mensagens como “abra o menu ⋮ e toque em instalar”, já que você não quer tutorial.
-   - Substituir por botão nativo quando possível e fallback curto quando não for possível.
+## Regra de exibição (1x por mês)
 
-## Resultado esperado
+- Chave `localStorage`: `share_banner_last_shown_yyyymm`
+- Valor: `"YYYY-MM"` do mês em que foi exibido/dispensado
+- Mostra apenas se o valor salvo não for o mês atual
+- Reforço: só aparece para quem já usou 3+ dias distintos (`getAccessDays()` já existente em `push-client.ts`) — evita pedir compartilhar para quem acabou de chegar
+- Clicar em qualquer ação (WhatsApp, Compartilhar, X) grava o mês atual
 
-- No Chrome/Edge/Brave/Samsung Android: tocar em **Instalar app** abre o pop-up nativo de instalação.
-- No app já instalado/APK: a opção some.
-- No Firefox/Safari: a opção aparece, mas informa de forma curta que esse navegador não permite instalação por 1 toque.
-- O comportamento fica mais parecido com o app Sentinela porque o evento nativo passa a ser guardado globalmente e reaproveitado em qualquer tela.
+## Arquivos
+
+**Novo:** `src/components/share-app-banner.tsx`
+- Card verde-claro (#dcfce7) com ícone WhatsApp (SVG inline)
+- Botão WhatsApp: `https://wa.me/?text=<msg encoded>`
+- Botão Share: `navigator.share({...})` com fallback `navigator.clipboard.writeText` + toast
+- Link usado: `https://www.miketools.top`
+
+**Editar:** `src/routes/index.tsx`
+- Importar `ShareAppBanner`
+- Montar logo após `<InstallPushOptIn />` (linha ~347)
+
+Sem novas dependências (já existe `sonner` + `lucide-react`).
