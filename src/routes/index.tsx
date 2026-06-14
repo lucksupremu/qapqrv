@@ -93,10 +93,7 @@ function HomeScreen() {
       if (canPrompt) {
         void promptInstall();
       } else {
-        toast.info(
-          "Abra o menu do navegador (⋮) e toque em Instalar app / Adicionar à tela inicial.",
-          { duration: 7000 },
-        );
+        toast.info("Este navegador não permite instalar com 1 toque.");
       }
     }, 600);
     return () => window.clearTimeout(t);
