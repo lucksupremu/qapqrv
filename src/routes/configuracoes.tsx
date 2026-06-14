@@ -3,7 +3,6 @@ import { ArrowLeft, RotateCcw } from "lucide-react";
 
 import { PushSettingsCard } from "@/components/push-settings-card";
 import { PwaInstallCard } from "@/components/pwa-install-card";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { CredentialVaultCard } from "@/components/credential-vault-card";
 
 export const Route = createFileRoute("/configuracoes")({
@@ -44,10 +43,21 @@ function ConfiguracoesPage() {
       </header>
 
       <main className="space-y-4 px-4 pb-8">
-        <ThemeToggle />
         <PwaInstallCard />
         <CredentialVaultCard />
         <PushSettingsCard />
+
+        <div
+          className="rounded-[16px] border-2 p-3 text-[12px]"
+          style={{
+            background: "var(--surface)",
+            borderColor: "var(--border-soft)",
+            color: "var(--muted-fg)",
+          }}
+        >
+          O tema segue automaticamente o seu sistema (claro/escuro). Mude no
+          ajuste do seu celular.
+        </div>
 
         <button
           onClick={() => {

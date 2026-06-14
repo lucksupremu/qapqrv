@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Calendar, Wifi, Bell, ChevronRight, Check } from "lucide-react";
+import { Calendar, Bell, ChevronRight, Check } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Bem-vindo — QAP, QRV!" }] }),
@@ -26,24 +26,23 @@ export function hasSeenOnboarding(): boolean {
   }
 }
 
+// Onboarding enxuto: 2 telas — funcionalidade principal + permissões.
 const slides = [
   {
     icon: Calendar,
-    title: "Seu controle de escalas",
-    desc: "Marque dejem e delegada, veja no calendário, receba lembretes automáticos e some o valor do mês.",
-    bullets: ["Calendário visual", "Lembretes 1 dia antes + 2h antes", "Histórico e soma mensal"],
-  },
-  {
-    icon: Wifi,
-    title: "Acesso fácil à intranet",
-    desc: "Configure o AnyConnect uma vez e abra a intranet PMESP direto pelo app, sem sair.",
-    bullets: ["Tutorial em vídeo do AnyConnect", "Salvar escalas para ver offline", "Login automático opcional"],
+    title: "Controle suas escalas",
+    desc: "Marque dejem e delegada, veja no calendário, receba lembretes e some o valor do mês.",
+    bullets: [
+      "Calendário visual com soma mensal",
+      "Lembretes 1 dia antes + 2h antes",
+      "Salve escalas para abrir offline",
+    ],
   },
   {
     icon: Bell,
-    title: "Permissões",
-    desc: "Para receber lembretes das suas escalas mesmo com o app fechado, autorize notificações no próximo passo.",
-    bullets: ["Notificações (essencial)", "Localização (opcional — só na ferramenta)", "Nada é compartilhado"],
+    title: "Ative os lembretes",
+    desc: "No próximo passo, autorize notificações para receber avisos das suas escalas mesmo com o app fechado.",
+    bullets: ["Notificações (essencial)", "Localização só quando você abrir a ferramenta", "Seus dados ficam no aparelho"],
   },
 ];
 
