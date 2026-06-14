@@ -1,9 +1,9 @@
 // Card em Configurações para instalar o app como PWA.
 // - Some no APK nativo ou se já estiver instalado.
-// - Quando o navegador permite (Chrome/Edge/Brave/Samsung), o botão dispara
-//   o diálogo nativo de instalação direto, com 1 toque, sem tutorial.
-// - iOS Safari não expõe API, então mostra apenas a única instrução possível.
-// - Demais navegadores sem API (Firefox) não renderizam nada — sem tutorial.
+// - Chrome/Edge/Brave/Samsung: botão dispara o diálogo nativo (1 toque).
+// - iOS Safari: mostra apenas a única instrução possível (Apple não expõe API).
+// - Outros navegadores (Firefox/Safari desktop): mostra mensagem curta de
+//   incompatibilidade, sem tutorial passo-a-passo.
 
 import { Download } from "lucide-react";
 import { toast } from "sonner";
@@ -13,12 +13,12 @@ export function PwaInstallCard() {
   const { isNative, isInstalled, canPrompt, promptInstall, isIOS } = usePwaInstall();
 
   if (isNative || isInstalled) return null;
-  if (!canPrompt && !isIOS) return null;
 
   const handleInstall = async () => {
-    if (!canPrompt) return;
     const result = await promptInstall();
     if (result === "accepted") toast.success("App instalado!");
+    else if (result === "unavailable")
+      toast.info("Este navegador não permite instalar com 1 toque.");
   };
 
   return (
@@ -47,10 +47,15 @@ export function PwaInstallCard() {
           <Download size={14} />
           Instalar agora
         </button>
-      ) : (
+      ) : isIOS ? (
         <p className="text-[12px]" style={{ color: "#5b7a8f" }}>
           No iPhone, toque em <strong>Compartilhar</strong> →{" "}
           <strong>Adicionar à Tela de Início</strong>.
+        </p>
+      ) : (
+        <p className="text-[12px]" style={{ color: "#5b7a8f" }}>
+          Este navegador não permite instalar com 1 toque. Abra o app no
+          Chrome, Edge, Brave ou Samsung Internet para instalar.
         </p>
       )}
     </div>

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/in-app-browser";
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
+import {
+  getPwaInstallState,
+  promptPwaInstall,
+  subscribePwaInstall,
+} from "@/lib/pwa-install-manager";
 
 const DISMISS_KEY = "pwa_install_dismissed_at";
 const DISMISS_DAYS = 7;
@@ -23,14 +23,6 @@ function detectAndroid(): boolean {
   return /Android/i.test(navigator.userAgent || "");
 }
 
-function detectStandalone(): boolean {
-  if (typeof window === "undefined") return false;
-  const mql = window.matchMedia?.("(display-mode: standalone)").matches;
-  const iosStandalone = (window.navigator as unknown as { standalone?: boolean })
-    .standalone === true;
-  return !!mql || iosStandalone;
-}
-
 function isDismissExpired(): boolean {
   try {
     const raw = localStorage.getItem(DISMISS_KEY);
@@ -44,8 +36,9 @@ function isDismissExpired(): boolean {
 }
 
 export function usePwaInstall() {
-  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [{ canPrompt, installed: isInstalled }, setState] = useState(() =>
+    getPwaInstallState(),
+  );
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [isNative, setIsNative] = useState(false);
@@ -54,39 +47,17 @@ export function usePwaInstall() {
   useEffect(() => {
     setIsIOS(detectIOS());
     setIsAndroid(detectAndroid());
-    setIsInstalled(detectStandalone());
     setIsNative(isNativeApp());
     setDismissed(!isDismissExpired());
 
-    const onPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferred(e as BeforeInstallPromptEvent);
-    };
-    const onInstalled = () => {
-      setIsInstalled(true);
-      setDeferred(null);
-      try {
-        localStorage.removeItem(DISMISS_KEY);
-      } catch {
-        /* ignore */
-      }
-      setDismissed(false);
-    };
-    window.addEventListener("beforeinstallprompt", onPrompt);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onPrompt);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
+    const unsub = subscribePwaInstall(() => setState(getPwaInstallState()));
+    setState(getPwaInstallState());
+    return unsub;
   }, []);
 
   const promptInstall = useCallback(async () => {
-    if (!deferred) return "unavailable" as const;
-    await deferred.prompt();
-    const choice = await deferred.userChoice;
-    setDeferred(null);
-    if (choice.outcome === "accepted") {
-      setIsInstalled(true);
+    const result = await promptPwaInstall();
+    if (result === "accepted") {
       try {
         localStorage.removeItem(DISMISS_KEY);
       } catch {
@@ -94,8 +65,8 @@ export function usePwaInstall() {
       }
       setDismissed(false);
     }
-    return choice.outcome;
-  }, [deferred]);
+    return result;
+  }, []);
 
   const dismiss = useCallback(() => {
     try {
@@ -106,7 +77,6 @@ export function usePwaInstall() {
     setDismissed(true);
   }, []);
 
-  const canPrompt = !!deferred;
   const isInstallable = !isNative && !isInstalled && canPrompt;
   const shouldShowBanner = isInstallable && !dismissed;
 
