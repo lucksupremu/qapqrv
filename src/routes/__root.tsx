@@ -19,6 +19,8 @@ import { BrowserWarningModal } from "@/components/browser-warning-modal";
 import { WhatsNewModal } from "@/components/whats-new-modal";
 import { isNativeApp } from "@/lib/in-app-browser";
 import { installAppBadgeUpdater } from "@/lib/app-badge";
+import { InstallConfirmModal } from "@/components/install-confirm-modal";
+import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
 
 
 /** Google AdSense client ID */
@@ -114,6 +116,8 @@ function RootComponent() {
       trackAccessDay();
       sendHeartbeat();
     });
+    // Atualiza atalhos dinâmicos do PWA conforme a rota.
+    void updateDynamicShortcuts(pathname);
   }, [pathname]);
 
 
@@ -252,6 +256,7 @@ function RootComponent() {
           <PushPermissionPrompt />
           <BrowserWarningModal />
           <WhatsNewModal />
+          <InstallConfirmModal />
           <Toaster />
 
         </DrawerProvider>
