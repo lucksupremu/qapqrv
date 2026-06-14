@@ -2,17 +2,30 @@
 // - Some no APK nativo ou se já estiver instalado.
 // - Chrome/Edge/Brave/Samsung: botão dispara o diálogo nativo (1 toque).
 // - iOS Safari: mostra apenas a única instrução possível (Apple não expõe API).
-// - Outros navegadores (Firefox/Safari desktop): mostra mensagem curta de
-//   incompatibilidade, sem tutorial passo-a-passo.
+// - Aguarda o Service Worker estar pronto antes de aparecer (sinal de PWA OK).
 
+import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { usePwaInstall } from "@/hooks/use-pwa-install";
 
 export function PwaInstallCard() {
   const { isNative, isInstalled, canPrompt, promptInstall, isIOS } = usePwaInstall();
+  const [swReady, setSwReady] = useState(false);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+      setSwReady(true); // sem SW, não bloqueia o card
+      return;
+    }
+    navigator.serviceWorker.ready.then(() => setSwReady(true)).catch(() => setSwReady(true));
+    // fallback: após 4s mostra de qualquer forma para não esconder no iOS
+    const t = window.setTimeout(() => setSwReady(true), 4000);
+    return () => window.clearTimeout(t);
+  }, []);
 
   if (isNative || isInstalled) return null;
+  if (!swReady) return null;
 
   const handleInstall = async () => {
     const result = await promptInstall();

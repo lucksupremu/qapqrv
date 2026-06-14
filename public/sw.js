@@ -1,11 +1,15 @@
 // Service Worker do QAP, QRV!
 // 1) Mantém notificações locais via showNotification (Chrome Android exige SW).
 // 2) Cache app-shell para abrir offline (NetworkFirst HTML, CacheFirst assets hashados).
+// 3) Stale-while-revalidate para PDFs de escala (rede primeiro em background,
+//    cache servido imediato se já houver).
 // Não interfere com a intranet PMESP (URLs externas passam direto pela rede).
 
-const CACHE_VERSION = "qapqrv-v4";
+const CACHE_VERSION = "qapqrv-v5";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
+const PDF_CACHE = `${CACHE_VERSION}-pdf`;
+const PDF_MAX_ENTRIES = 20;
 const SHELL_URLS = [
   "/",
   "/escalas-baixadas",
@@ -17,8 +21,7 @@ const SHELL_URLS = [
 ];
 
 // Detecta ambientes de preview Lovable — nestes domínios o SW deve se
-// auto-desregistrar e limpar caches, pois o preview serve HTML novo a cada
-// build e o SW antigo causa "Not Found" em rotas e chunks removidos.
+// auto-desregistrar e limpar caches.
 const host = self.location.hostname;
 const IS_PREVIEW =
   host.startsWith("id-preview--") ||
@@ -30,9 +33,17 @@ const IS_PREVIEW =
   host === "beta.lovable.dev" ||
   host.endsWith(".beta.lovable.dev");
 
+async function trimCache(cacheName, maxEntries) {
+  try {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length <= maxEntries) return;
+    const toDelete = keys.slice(0, keys.length - maxEntries);
+    await Promise.all(toDelete.map((k) => cache.delete(k)));
+  } catch {}
+}
+
 if (IS_PREVIEW) {
-  // Kill-switch: no preview, instala, limpa todos os caches da app e
-  // desregistra a si mesmo. Não intercepta nenhum fetch.
   self.addEventListener("install", () => self.skipWaiting());
   self.addEventListener("activate", (event) => {
     event.waitUntil(
@@ -46,9 +57,7 @@ if (IS_PREVIEW) {
           );
           await self.clients.claim();
           const clientsList = await self.clients.matchAll({ type: "window" });
-          await Promise.allSettled(
-            clientsList.map((c) => c.navigate(c.url)),
-          );
+          await Promise.allSettled(clientsList.map((c) => c.navigate(c.url)));
         } finally {
           await self.registration.unregister();
         }
@@ -86,6 +95,28 @@ if (IS_PREVIEW) {
     const req = event.request;
     if (req.method !== "GET") return;
     const url = new URL(req.url);
+
+    // === Stale-while-revalidate para PDFs (mesma origem ou intranet) ===
+    const isPdf = /\.pdf(\?|$)/i.test(url.pathname) || req.destination === "document" && /pdf/i.test(req.headers.get("accept") || "");
+    if (isPdf) {
+      event.respondWith(
+        (async () => {
+          const cache = await caches.open(PDF_CACHE);
+          const cached = await cache.match(req);
+          const network = fetch(req)
+            .then((resp) => {
+              if (resp && resp.ok) {
+                cache.put(req, resp.clone()).then(() => trimCache(PDF_CACHE, PDF_MAX_ENTRIES));
+              }
+              return resp;
+            })
+            .catch(() => null);
+          return cached || (await network) || Response.error();
+        })(),
+      );
+      return;
+    }
+
     if (url.origin !== self.location.origin) return;
     if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_serverFn")) return;
 
@@ -165,7 +196,6 @@ self.addEventListener("push", (event) => {
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
-
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
