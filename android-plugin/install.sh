@@ -140,14 +140,12 @@ import com.getcapacitor.BridgeActivity
 import br.com.qapqrv.app.plugins.VpnStatusPlugin
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin
 import br.com.qapqrv.app.plugins.AppOpenAdPlugin
-import br.com.qapqrv.app.plugins.CustomTabsPlugin
 
 class MainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         registerPlugin(VpnStatusPlugin::class.java)
         registerPlugin(InAppWebViewPlugin::class.java)
         registerPlugin(AppOpenAdPlugin::class.java)
-        registerPlugin(CustomTabsPlugin::class.java)
         super.onCreate(savedInstanceState)
     }
 }
@@ -162,7 +160,6 @@ import com.getcapacitor.BridgeActivity;
 import br.com.qapqrv.app.plugins.VpnStatusPlugin;
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin;
 import br.com.qapqrv.app.plugins.AppOpenAdPlugin;
-import br.com.qapqrv.app.plugins.CustomTabsPlugin;
 
 public class MainActivity extends BridgeActivity {
   @Override
@@ -170,7 +167,6 @@ public class MainActivity extends BridgeActivity {
     registerPlugin(VpnStatusPlugin.class);
     registerPlugin(InAppWebViewPlugin.class);
     registerPlugin(AppOpenAdPlugin.class);
-    registerPlugin(CustomTabsPlugin.class);
     super.onCreate(savedInstanceState);
   }
 }
