@@ -462,7 +462,7 @@ class InAppWebViewActivity : Activity() {
         // Barra superior fina com Voltar / Recarregar / Fechar
         topBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(0x66000000)
+            setBackgroundColor(TOOLBAR_BG)
             gravity = Gravity.CENTER_VERTICAL
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
