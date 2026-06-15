@@ -414,6 +414,8 @@ class InAppWebViewActivity : Activity() {
         }
 
         swipeRefresh = SwipeRefreshLayout(this).apply {
+            // Pull-to-refresh desativado: atrapalha o gesto de zoom/pinch na página
+            isEnabled = false
             setColorSchemeColors(TOOLBAR_BG)
             setOnRefreshListener {
                 hideErrorOverlay()
