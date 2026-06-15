@@ -125,7 +125,7 @@ jobs:
           ls -lh android/app/build/outputs/bundle/release/ || true
 
       - name: Upload AAB to GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.4.0
         with:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'release-aab-latest' }}
           name: AAB Release Latest
