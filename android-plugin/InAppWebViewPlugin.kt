@@ -327,7 +327,14 @@ class InAppWebViewPlugin : Plugin() {
                     finish(false, "timeout")
                 }, timeoutMs.toLong())
 
-                wv.loadUrl(url)
+                // Adia o loadUrl em ~800ms — dá tempo do processo WebView
+                // estabilizar e evita crash em cold start no APK.
+                Handler(Looper.getMainLooper()).postDelayed({
+                    try { wv.loadUrl(url) } catch (e: Throwable) {
+                        android.util.Log.w("InAppWebView", "warmup loadUrl falhou", e)
+                        finish(false, "load_failed")
+                    }
+                }, 800)
             } catch (e: Throwable) {
                 android.util.Log.w("InAppWebView", "warmupIntranet falhou", e)
                 call.resolve(JSObject().put("ok", false).put("reason", e.message ?: "erro"))

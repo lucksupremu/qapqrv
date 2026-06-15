@@ -60,21 +60,31 @@ class AppOpenAdPlugin : Plugin() {
         try {
             MobileAds.initialize(activity.applicationContext) {
                 initialized = true
-                loadAd()
+                try { loadAd() } catch (e: Throwable) { Log.w(TAG, "loadAd inicial falhou", e) }
                 val ret = JSObject()
                 ret.put("initialized", true)
                 call.resolve(ret)
             }
         } catch (e: Throwable) {
+            // Nunca rejeita — JS espera resposta determinística para não quebrar
+            // o fluxo de inicialização do app.
             Log.w(TAG, "MobileAds.initialize falhou", e)
-            call.reject(e.message ?: "Falha ao inicializar MobileAds")
+            val ret = JSObject()
+            ret.put("initialized", false)
+            ret.put("reason", e.message ?: "init_failed")
+            call.resolve(ret)
         }
     }
 
     @PluginMethod
     fun show(call: PluginCall) {
         val activity: Activity = activity ?: run {
-            call.reject("Activity indisponível")
+            call.resolve(JSObject().put("shown", false).put("reason", "no_activity"))
+            return
+        }
+        // Não tenta mostrar fullscreen sobre Activity que está finalizando — crash garantido.
+        if (activity.isFinishing || activity.isDestroyed) {
+            call.resolve(JSObject().put("shown", false).put("reason", "activity_gone"))
             return
         }
         if (isShowing) {
@@ -83,7 +93,7 @@ class AppOpenAdPlugin : Plugin() {
         }
         if (!isAdAvailable()) {
             // Não há ad disponível agora — pede um novo e responde sem bloquear.
-            loadAd()
+            try { loadAd() } catch (_: Throwable) {}
             call.resolve(JSObject().put("shown", false).put("reason", "not_ready"))
             return
         }
