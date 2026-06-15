@@ -272,8 +272,13 @@ cat > "$RES_XML_DIR/qapqrv_file_paths.xml" <<'EOF'
 <paths>
     <files-path name="escalas" path="escalas/" />
     <files-path name="files_root" path="." />
+    <cache-path name="shared" path="shared/" />
+    <cache-path name="cache_root" path="." />
+    <external-files-path name="ext_files" path="." />
+    <external-cache-path name="ext_cache" path="." />
 </paths>
 EOF
+
 
 if ! grep -q "androidx.core.content.FileProvider" "$MANIFEST"; then
   echo "==> Registrando FileProvider no AndroidManifest"
