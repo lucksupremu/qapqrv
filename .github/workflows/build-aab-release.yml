@@ -106,4 +106,4 @@ jobs:
           name: qapqrv-release-aab
           path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
-          retention-days: 90
+          retention-days: 7
