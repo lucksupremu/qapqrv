@@ -58,12 +58,6 @@ const grupo2: Item[] = [
   },
   {
     type: "external",
-    href: "https://correio.policiamilitar.sp.gov.br",
-    label: "Correio PMESP",
-    icon: Mail,
-  },
-  {
-    type: "external",
     href: "https://www.ciaf.policiamilitar.sp.gov.br/folhadepagamento/autenticacaosegura.aspx",
     label: "Folha de Pagamento",
     icon: Wallet,
