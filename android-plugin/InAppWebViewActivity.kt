@@ -459,25 +459,44 @@ class InAppWebViewActivity : Activity() {
         errorOverlay.addView(errTitle); errorOverlay.addView(errorMessage); errorOverlay.addView(btnRetry)
         root.addView(errorOverlay)
 
-        // Barra de progresso fina no topo (sobre o conteúdo).
+        // Barra superior fina com Voltar / Recarregar / Fechar
+        topBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(0x66000000)
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(44),
+                Gravity.TOP,
+            ).apply { topMargin = statusBarHeight() }
+        }
+        btnTopBack = topBarButton(android.R.drawable.ic_media_rew, "Voltar") {
+            if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else finish()
+        }
+        btnTopReload = topBarButton(android.R.drawable.ic_menu_rotate, "Recarregar") {
+            try { webView.reload() } catch (_: Throwable) {}
+        }
+        btnTopClose = topBarButton(android.R.drawable.ic_menu_close_clear_cancel, "Fechar") { finish() }
+        topBar.addView(btnTopBack, LinearLayout.LayoutParams(dp(44), dp(44)))
+        topBar.addView(btnTopReload, LinearLayout.LayoutParams(dp(44), dp(44)))
+        // Spacer para empurrar o "fechar" pra direita
+        val spacer = View(this)
+        topBar.addView(spacer, LinearLayout.LayoutParams(0, 1, 1f))
+        topBar.addView(btnTopClose, LinearLayout.LayoutParams(dp(44), dp(44)))
+        root.addView(topBar)
+
+        // Barra de progresso fina logo abaixo da topBar.
         progressBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100; progress = 0
             progressTintList = android.content.res.ColorStateList.valueOf(TOOLBAR_BG)
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, dp(3),
-            ).apply { topMargin = statusBarHeight() }
+            ).apply { topMargin = statusBarHeight() + dp(44) }
         }
         root.addView(progressBar)
 
-        // Botões flutuantes (× e ⋮) — no rodapé, pequenos, semi-transparentes, somem ao rolar.
+        // Botão flutuante ⋮ no rodapé (× foi pra barra superior).
         val fabBottom = navigationBarHeight() + dp(12)
-        btnClose = floatingButton(android.R.drawable.ic_menu_close_clear_cancel, "Fechar") { finish() }
-        btnClose.setPadding(dp(7), dp(7), dp(7), dp(7))
-        btnClose.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.BOTTOM or Gravity.START).apply {
-            bottomMargin = fabBottom; marginStart = dp(12)
-        }
-        root.addView(btnClose)
-
         btnOverflow = floatingButton(android.R.drawable.ic_menu_more, "Mais opções") { showOverflowMenu(it) }
         btnOverflow.setPadding(dp(7), dp(7), dp(7), dp(7))
         btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.BOTTOM or Gravity.END).apply {
