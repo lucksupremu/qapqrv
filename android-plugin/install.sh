@@ -24,6 +24,7 @@ cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
 cp "$ROOT/android-plugin/PdfViewerActivity.kt"    "$PKG_DIR/"
 cp "$ROOT/android-plugin/AppOpenAdPlugin.kt"      "$PKG_DIR/"
+cp "$ROOT/android-plugin/CustomTabsPlugin.kt"     "$PKG_DIR/"
 
 ADMOB_APP_ID="ca-app-pub-4966192764194561~2515666476"
 
@@ -139,12 +140,14 @@ import com.getcapacitor.BridgeActivity
 import br.com.qapqrv.app.plugins.VpnStatusPlugin
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin
 import br.com.qapqrv.app.plugins.AppOpenAdPlugin
+import br.com.qapqrv.app.plugins.CustomTabsPlugin
 
 class MainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         registerPlugin(VpnStatusPlugin::class.java)
         registerPlugin(InAppWebViewPlugin::class.java)
         registerPlugin(AppOpenAdPlugin::class.java)
+        registerPlugin(CustomTabsPlugin::class.java)
         super.onCreate(savedInstanceState)
     }
 }
@@ -159,6 +162,7 @@ import com.getcapacitor.BridgeActivity;
 import br.com.qapqrv.app.plugins.VpnStatusPlugin;
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin;
 import br.com.qapqrv.app.plugins.AppOpenAdPlugin;
+import br.com.qapqrv.app.plugins.CustomTabsPlugin;
 
 public class MainActivity extends BridgeActivity {
   @Override
@@ -166,6 +170,7 @@ public class MainActivity extends BridgeActivity {
     registerPlugin(VpnStatusPlugin.class);
     registerPlugin(InAppWebViewPlugin.class);
     registerPlugin(AppOpenAdPlugin.class);
+    registerPlugin(CustomTabsPlugin.class);
     super.onCreate(savedInstanceState);
   }
 }
@@ -247,6 +252,18 @@ fi
 if [ -f "$APP_GRADLE" ] && ! grep -q "androidx.core:core-ktx" "$APP_GRADLE"; then
   echo "==> Adicionando dependência androidx.core:core-ktx em $APP_GRADLE"
   sed -i "s#dependencies {#dependencies {\n    implementation \"androidx.core:core-ktx:1.13.1\"#" "$APP_GRADLE"
+fi
+
+# ----- androidx.browser (Chrome Custom Tabs) -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "androidx.browser:browser" "$APP_GRADLE"; then
+  echo "==> Adicionando dependência androidx.browser:browser em $APP_GRADLE"
+  sed -i "s#dependencies {#dependencies {\n    implementation \"androidx.browser:browser:1.8.0\"#" "$APP_GRADLE"
+fi
+
+# ----- androidx.swiperefreshlayout (pull-to-refresh na WebView interna) -----
+if [ -f "$APP_GRADLE" ] && ! grep -q "androidx.swiperefreshlayout" "$APP_GRADLE"; then
+  echo "==> Adicionando dependência androidx.swiperefreshlayout em $APP_GRADLE"
+  sed -i "s#dependencies {#dependencies {\n    implementation \"androidx.swiperefreshlayout:swiperefreshlayout:1.1.0\"#" "$APP_GRADLE"
 fi
 
 # ----- FileProvider para abrir PDF baixado em apps externos -----

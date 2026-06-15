@@ -144,47 +144,83 @@ function RootComponent() {
       ? ric(loadAds, { timeout: 3000 })
       : window.setTimeout(loadAds, 1500);
 
-    // Inicializa AdMob e mostra App Open Ad (apenas no APK nativo).
-    // Só dispara após retorno de background longo (>30s) — evita derrubar
-    // a Activity recém-resumida quando o usuário volta rapidamente do
-    // AnyConnect ou de outro app.
+    // Inicializa AdMob e agenda warm-up da intranet (apenas no APK nativo).
+    //
+    // Importante (fix de "abre e fecha sozinho" no cold start):
+    //  - Não criamos a WebView de warm-up nem mostramos App Open Ad em paralelo
+    //    com a montagem da Activity. Esses dois juntos causavam ANR/crash
+    //    silencioso em vários devices.
+    //  - Cold start = apenas pré-carrega o ad (não exibe). App Open Ad só
+    //    aparece em warm resume (>30s em background) — recomendação do Google.
+    //  - Warm-up é encadeado APÓS o AdMob init e atrasado ~3s, dando tempo da
+    //    Activity inflar e do processo WebView estabilizar.
     let removeAppListener: (() => void) | null = null;
+    let warmupTimer = 0;
     if (isNativeApp()) {
-      // Warm-up de sessão da intranet em background, para garantir os cookies
-      // antes da primeira consulta de PDF de escala.
-      import("@/lib/intranet-warmup").then(({ warmupIntranetSession }) => {
-        warmupIntranetSession().catch(() => {});
-      });
+      const coldStartTimer = window.setTimeout(() => {
+        import("@/lib/admob")
+          .then(({ initAdMob, showAppOpenAd }) => {
+            initAdMob()
+              .then(() => {
+                // trigger:"cold" só pré-carrega — não exibe na primeira tela.
+                showAppOpenAd({ trigger: "cold" }).catch((e) =>
+                  console.warn("[admob] cold preload falhou", e),
+                );
+              })
+              .catch((e) => console.warn("[admob] init falhou", e));
 
-      import("@/lib/admob").then(({ initAdMob, showAppOpenAd }) => {
-        initAdMob().then(() => {
-          try { showAppOpenAd(); } catch (e) { console.warn("[admob] cold start show falhou", e); }
-        });
+            // Warm-up da intranet, encadeado depois do init do AdMob.
+            warmupTimer = window.setTimeout(() => {
+              import("@/lib/intranet-warmup")
+                .then(({ warmupIntranetSession }) =>
+                  warmupIntranetSession().catch((e) =>
+                    console.warn("[warmup] cold falhou", e),
+                  ),
+                )
+                .catch((e) => console.warn("[warmup] import falhou", e));
+            }, 3000);
 
-        let lastBackgroundedAt = 0;
-        const MIN_BG_MS = 30_000;
-        import("@capacitor/app").then(({ App }) => {
-          App.addListener("appStateChange", (state: { isActive: boolean }) => {
-            try {
-              if (!state.isActive) {
-                lastBackgroundedAt = Date.now();
-                return;
-              }
-              if (lastBackgroundedAt === 0) return;
-              if (Date.now() - lastBackgroundedAt < MIN_BG_MS) return;
-              showAppOpenAd();
-              // Re-warm da intranet ao voltar de background longo.
-              import("@/lib/intranet-warmup").then(({ warmupIntranetSession }) => {
-                warmupIntranetSession().catch(() => {});
-              });
-            } catch (e) {
-              console.warn("[admob] resume show falhou", e);
-            }
-          }).then((handle: { remove: () => void }) => {
-            removeAppListener = () => handle.remove();
-          });
-        }).catch(() => {});
-      });
+            let lastBackgroundedAt = 0;
+            const MIN_BG_MS = 30_000;
+            import("@capacitor/app")
+              .then(({ App }) => {
+                App.addListener(
+                  "appStateChange",
+                  (state: { isActive: boolean }) => {
+                    try {
+                      if (!state.isActive) {
+                        lastBackgroundedAt = Date.now();
+                        return;
+                      }
+                      if (lastBackgroundedAt === 0) return;
+                      if (Date.now() - lastBackgroundedAt < MIN_BG_MS) return;
+                      showAppOpenAd({ trigger: "resume" }).catch((e) =>
+                        console.warn("[admob] resume show falhou", e),
+                      );
+                      // Re-warm da intranet ao voltar de background longo.
+                      import("@/lib/intranet-warmup")
+                        .then(({ warmupIntranetSession }) =>
+                          warmupIntranetSession().catch(() => {}),
+                        )
+                        .catch(() => {});
+                    } catch (e) {
+                      console.warn("[appStateChange] erro", e);
+                    }
+                  },
+                )
+                  .then((handle: { remove: () => void }) => {
+                    removeAppListener = () => handle.remove();
+                  })
+                  .catch((e) =>
+                    console.warn("[app] addListener falhou", e),
+                  );
+              })
+              .catch((e) => console.warn("[app] import falhou", e));
+          })
+          .catch((e) => console.warn("[admob] import falhou", e));
+      }, 1500);
+      // garante limpeza
+      void coldStartTimer;
     }
 
 
@@ -232,6 +268,7 @@ function RootComponent() {
     return () => {
       clearInterval(id);
       window.clearTimeout(reviewTimer);
+      if (warmupTimer) window.clearTimeout(warmupTimer);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (ric && (window as any).cancelIdleCallback)
         (window as any).cancelIdleCallback(adTimer);
