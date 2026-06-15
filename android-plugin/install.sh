@@ -19,12 +19,12 @@ KOTLIN_VERSION="2.3.10"
 
 echo "==> Copiando plugins Kotlin para $PKG_DIR"
 mkdir -p "$PKG_DIR"
+# Limpa cópias antigas de plugins/Activities removidos.
+rm -f "$PKG_DIR/PdfViewerActivity.kt" "$PKG_DIR/CustomTabsPlugin.kt"
 cp "$ROOT/android-plugin/VpnStatusPlugin.kt"      "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
-cp "$ROOT/android-plugin/PdfViewerActivity.kt"    "$PKG_DIR/"
 cp "$ROOT/android-plugin/AppOpenAdPlugin.kt"      "$PKG_DIR/"
-cp "$ROOT/android-plugin/CustomTabsPlugin.kt"     "$PKG_DIR/"
 
 ADMOB_APP_ID="ca-app-pub-4966192764194561~2515666476"
 
