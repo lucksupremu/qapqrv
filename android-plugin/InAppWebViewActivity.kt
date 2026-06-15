@@ -173,8 +173,10 @@ class InAppWebViewActivity : Activity() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try { getSystemService(AutofillManager::class.java)?.commit() } catch (_: Throwable) {}
                 }
+                injectMobileViewport(url)
                 tryIntranetAutofill(url)
             }
+
 
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val uri = request?.url ?: return false
