@@ -459,17 +459,21 @@ class InAppWebViewActivity : Activity() {
         errorOverlay.addView(errTitle); errorOverlay.addView(errorMessage); errorOverlay.addView(btnRetry)
         root.addView(errorOverlay)
 
-        // Barra superior fina com Voltar / Recarregar / Fechar
+        // Barra superior fina com Voltar / Recarregar / Fechar.
+        // Altura = inset top (status bar + cutout) + 44dp; o inset vira padding-top
+        // para que os botões fiquem abaixo do status bar/notch em qualquer tela.
         topBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(TOOLBAR_BG)
             gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, statusBarHeight(), 0, 0)
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(44),
+                statusBarHeight() + dp(44),
                 Gravity.TOP,
-            ).apply { topMargin = statusBarHeight() }
+            )
         }
+
         btnTopBack = topBarButton(android.R.drawable.ic_media_rew, "Voltar") {
             if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else finish()
         }
