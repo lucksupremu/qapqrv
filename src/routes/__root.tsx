@@ -265,6 +265,39 @@ function RootComponent() {
         .catch(() => {});
     }, 8000);
 
+    // Listener para o item "Salvar escala" do menu ⋮ do navegador interno
+    // (substitui o botão da antiga tela /intranet).
+    let removeSalvarEscala: (() => void) | null = null;
+    if (isNativeApp()) {
+      void import("@/lib/in-app-webview").then(({ InAppWebView }) => {
+        InAppWebView.addListener(
+          "intranetSalvarEscala",
+          async (ev) => {
+            try {
+              const { toast } = await import("sonner");
+              const { upsertEscala, baixarPdfEmBackground } = await import(
+                "@/lib/escalas-baixadas"
+              );
+              upsertEscala({
+                id: ev.id,
+                url: ev.url,
+                titulo: ev.titulo || `Escala ${ev.id}`,
+                dataSalva: new Date().toISOString(),
+              });
+              toast.success("Escala salva em Escalas baixadas!");
+              const ok = await baixarPdfEmBackground(ev.id, ev.url);
+              if (ok) toast.success("PDF salvo offline.");
+            } catch (e) {
+              console.warn("[intranetSalvarEscala] erro", e);
+            }
+          },
+        )
+          .then((handle) => { removeSalvarEscala = () => handle.remove(); })
+          .catch((e) => console.warn("[intranetSalvarEscala] listener falhou", e));
+      });
+    }
+
+
     return () => {
       clearInterval(id);
       window.clearTimeout(reviewTimer);
