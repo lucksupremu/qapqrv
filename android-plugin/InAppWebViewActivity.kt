@@ -596,7 +596,6 @@ class InAppWebViewActivity : Activity() {
     private fun attachFloatingAutoFade() {
         val fadeRunnable = Runnable {
             try {
-                topBar.animate().alpha(0.30f).setDuration(220).start()
                 btnOverflow.animate().alpha(0.30f).setDuration(220).start()
             } catch (_: Throwable) {}
         }
@@ -604,7 +603,6 @@ class InAppWebViewActivity : Activity() {
         fun bump() {
             handler.removeCallbacks(fadeRunnable)
             try {
-                topBar.animate().alpha(1f).setDuration(120).start()
                 btnOverflow.animate().alpha(1f).setDuration(120).start()
             } catch (_: Throwable) {}
             handler.postDelayed(fadeRunnable, 1500)
