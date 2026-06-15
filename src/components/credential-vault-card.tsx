@@ -343,7 +343,7 @@ export function CredentialVaultCard() {
             Se esquecer o PIN, será necessário cadastrar tudo de novo — não há
             recuperação.
           </p>
-        </div>
+        </form>
       )}
     </div>
   );
