@@ -1,15 +1,25 @@
 // Changelog do app — exibido na "Novidades" após cada update.
 // Bump APP_VERSION sempre que tiver algo novo pra mostrar.
 
-export const APP_VERSION = "2026.06.08";
+export const APP_VERSION = "2026.06.15";
 
 export type ChangelogEntry = {
   version: string;
-  date: string; // "08/06/2026"
+  date: string; // "15/06/2026"
   highlights: string[];
 };
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2026.06.15",
+    date: "15/06/2026",
+    highlights: [
+      "🌐 Novo navegador interno estilo Instagram: tela cheia, sem barra de endereço.",
+      "👆 Gestos: arraste pra baixo pra fechar, deslize da borda pra voltar, puxe pra atualizar.",
+      "📄 PDFs agora abrem no seu leitor preferido (Drive, Adobe) — zoom e navegação muito melhores.",
+      "🔐 Intranet PMESP unificada no novo navegador, com \"Salvar escala\" no menu ⋮.",
+    ],
+  },
   {
     version: "2026.06.08",
     date: "08/06/2026",
