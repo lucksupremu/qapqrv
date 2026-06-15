@@ -459,17 +459,21 @@ class InAppWebViewActivity : Activity() {
         errorOverlay.addView(errTitle); errorOverlay.addView(errorMessage); errorOverlay.addView(btnRetry)
         root.addView(errorOverlay)
 
-        // Barra superior fina com Voltar / Recarregar / Fechar
+        // Barra superior fina com Voltar / Recarregar / Fechar.
+        // Altura = inset top (status bar + cutout) + 44dp; o inset vira padding-top
+        // para que os botões fiquem abaixo do status bar/notch em qualquer tela.
         topBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(TOOLBAR_BG)
             gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, statusBarHeight(), 0, 0)
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(44),
+                statusBarHeight() + dp(44),
                 Gravity.TOP,
-            ).apply { topMargin = statusBarHeight() }
+            )
         }
+
         btnTopBack = topBarButton(android.R.drawable.ic_media_rew, "Voltar") {
             if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else finish()
         }
@@ -559,8 +563,56 @@ class InAppWebViewActivity : Activity() {
         findBar.addView(btnFindPrev); findBar.addView(btnFindNext); findBar.addView(btnFindClose)
         root.addView(findBar)
 
+        // Aplica a safe area (status bar + display cutout no topo, nav bar no rodapé)
+        // dinamicamente, para evitar sobreposição em qualquer dispositivo/orientação.
+        root.setOnApplyWindowInsetsListener { _, insets ->
+            val sysTop: Int
+            val sysBottom: Int
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                val t = insets.getInsets(
+                    android.view.WindowInsets.Type.systemBars() or
+                        android.view.WindowInsets.Type.displayCutout()
+                )
+                sysTop = t.top; sysBottom = t.bottom
+            } else {
+                @Suppress("DEPRECATION")
+                val cutoutTop = insets.displayCutout?.safeInsetTop ?: 0
+                @Suppress("DEPRECATION")
+                sysTop = maxOf(insets.systemWindowInsetTop, cutoutTop)
+                @Suppress("DEPRECATION")
+                sysBottom = insets.systemWindowInsetBottom
+            }
+            val barH = sysTop + dp(44)
+            // topBar: altura total = inset + 44dp; inset vira padding-top.
+            (topBar.layoutParams as? FrameLayout.LayoutParams)?.let {
+                it.height = barH; it.topMargin = 0; topBar.layoutParams = it
+            }
+            topBar.setPadding(0, sysTop, 0, 0)
+            // Conteúdo começa abaixo da barra.
+            (swipeRefresh.layoutParams as? FrameLayout.LayoutParams)?.let {
+                it.topMargin = barH; swipeRefresh.layoutParams = it
+            }
+            (errorOverlay.layoutParams as? FrameLayout.LayoutParams)?.let {
+                it.topMargin = barH; errorOverlay.layoutParams = it
+            }
+            (progressBar.layoutParams as? FrameLayout.LayoutParams)?.let {
+                it.topMargin = barH; progressBar.layoutParams = it
+            }
+            (findBar.layoutParams as? FrameLayout.LayoutParams)?.let {
+                it.topMargin = sysTop; findBar.layoutParams = it
+            }
+            // Empurra o FAB ⋮ acima da barra de navegação.
+            (btnOverflow.layoutParams as? FrameLayout.LayoutParams)?.let {
+                it.bottomMargin = sysBottom + dp(12); btnOverflow.layoutParams = it
+            }
+            insets
+        }
+        // Garante que o listener rode mesmo se a view já estiver anexada.
+        try { root.requestApplyInsets() } catch (_: Throwable) {}
+
         return root
     }
+
 
     private fun floatingButton(iconRes: Int, desc: String, onClick: (View) -> Unit): ImageButton {
         val bg = GradientDrawable().apply {
