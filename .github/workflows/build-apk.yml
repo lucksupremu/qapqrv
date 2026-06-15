@@ -20,24 +20,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Delete old APK/AAB artifacts
+      - name: Delete ALL old artifacts (free storage quota)
         uses: actions/github-script@v8
         with:
           script: |
-            const names = ['qapqrv-debug-apk', 'qapqrv-release-aab'];
             const { data } = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 100,
             });
-            for (const artifact of data.artifacts.filter((item) => names.includes(item.name))) {
-              await github.rest.actions.deleteArtifact({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                artifact_id: artifact.id,
-              });
-              core.info(`Deleted old artifact: ${artifact.name} (${artifact.id})`);
+            for (const artifact of data.artifacts) {
+              try {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+                core.info(`Deleted: ${artifact.name} (${artifact.size_in_bytes} bytes)`);
+              } catch (e) {
+                core.warning(`Failed to delete ${artifact.name}: ${e.message}`);
+              }
             }
+
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
