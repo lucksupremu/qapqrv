@@ -242,13 +242,34 @@ class InAppWebViewPlugin : Plugin() {
                 return
             }
             val authority = "${context.packageName}.fileprovider"
-            val uri = FileProvider.getUriForFile(context, authority, file)
+
+            // Tenta FileProvider direto; se o root não estiver mapeado
+            // (APK antigo com file_paths.xml sem a pasta escalas), copia
+            // para cacheDir/shared/ e tenta de novo.
+            val uri = try {
+                FileProvider.getUriForFile(context, authority, file)
+            } catch (e: IllegalArgumentException) {
+                android.util.Log.w("InAppWebView", "FileProvider root ausente, usando cache/shared", e)
+                val sharedDir = File(context.cacheDir, "shared").apply { mkdirs() }
+                val copy = File(sharedDir, file.name)
+                file.inputStream().use { i -> copy.outputStream().use { o -> i.copyTo(o) } }
+                try {
+                    FileProvider.getUriForFile(context, authority, copy)
+                } catch (e2: IllegalArgumentException) {
+                    val extDir = context.getExternalFilesDir(null)
+                    if (extDir != null) {
+                        val extCopy = File(extDir, file.name)
+                        file.inputStream().use { i -> extCopy.outputStream().use { o -> i.copyTo(o) } }
+                        FileProvider.getUriForFile(context, authority, extCopy)
+                    } else throw e2
+                }
+            }
+
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "application/pdf")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            // Verifica se existe pelo menos um leitor de PDF instalado.
             val resolvers = context.packageManager.queryIntentActivities(intent, 0)
             if (resolvers.isEmpty()) {
                 call.reject("NO_VIEWER: nenhum leitor de PDF instalado")
@@ -262,9 +283,11 @@ class InAppWebViewPlugin : Plugin() {
             ret.put("opened", true)
             call.resolve(ret)
         } catch (e: Throwable) {
+            android.util.Log.e("InAppWebView", "openPdfExternal falhou", e)
             call.reject(e.message ?: "Falha ao abrir PDF externo")
         }
     }
+
 
     /**
      * Warm-up de sessão na intranet PMESP: cria uma WebView invisível,
