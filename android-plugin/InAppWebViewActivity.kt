@@ -466,18 +466,19 @@ class InAppWebViewActivity : Activity() {
         }
         root.addView(progressBar)
 
-        // Botões flutuantes (× e ⋮) — pequenos, semi-transparentes, somem ao rolar.
+        // Botões flutuantes (× e ⋮) — no rodapé, pequenos, semi-transparentes, somem ao rolar.
+        val fabBottom = navigationBarHeight() + dp(12)
         btnClose = floatingButton(android.R.drawable.ic_menu_close_clear_cancel, "Fechar") { finish() }
         btnClose.setPadding(dp(7), dp(7), dp(7), dp(7))
-        btnClose.layoutParams = FrameLayout.LayoutParams(dp(32), dp(32), Gravity.TOP or Gravity.START).apply {
-            topMargin = statusBarHeight() + dp(6); marginStart = dp(6)
+        btnClose.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.BOTTOM or Gravity.START).apply {
+            bottomMargin = fabBottom; marginStart = dp(12)
         }
         root.addView(btnClose)
 
         btnOverflow = floatingButton(android.R.drawable.ic_menu_more, "Mais opções") { showOverflowMenu(it) }
         btnOverflow.setPadding(dp(7), dp(7), dp(7), dp(7))
-        btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(32), dp(32), Gravity.TOP or Gravity.END).apply {
-            topMargin = statusBarHeight() + dp(6); marginEnd = dp(6)
+        btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.BOTTOM or Gravity.END).apply {
+            bottomMargin = fabBottom; marginEnd = dp(12)
         }
         root.addView(btnOverflow)
 

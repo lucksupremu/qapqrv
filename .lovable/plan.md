@@ -1,35 +1,28 @@
-## Problema
+# Ajustes no navegador interno (Atividade Delegada/DEJEM)
 
-A injeção de viewport mobile + CSS de saneamento em `injectMobileViewport()` (em `android-plugin/InAppWebViewActivity.kt`) está sendo aplicada em **toda** página cujo host termine em `policiamilitar.sp.gov.br`. Isso resolveu o login da intranet (`ms.policiamilitar.sp.gov.br/login.aspx`), mas quebrou o layout de páginas que já funcionavam bem: webmail (`correio.policiamilitar.sp.gov.br` — iNotes), folha (`ciaf.policiamilitar.sp.gov.br/.../mobileview.aspx`) e outras páginas internas.
+Dois problemas na tela pós-login da DEJEM (ver screenshot anexo: conteúdo minúsculo no canto superior + botões × e ⋮ cobrindo links importantes no topo):
 
-## Correção
+## 1. Aplicar viewport mobile também na tela da DEJEM
 
-Restringir a injeção apenas às páginas de **login** da intranet, deixando o resto exatamente como estava antes.
+Hoje a injeção de viewport/CSS em `injectMobileViewport()` só roda em `login.aspx` e `autenticacaosegura.aspx`. A tela "Atividade Delegada/DEJEM" e demais páginas da intranet PMESP ficam sem viewport e renderizam em largura desktop (≈980px), aparecendo minúsculas no celular.
 
-Em `android-plugin/InAppWebViewActivity.kt`, função `injectMobileViewport(url)`:
+**Mudança:** ampliar o filtro de URL para cobrir todo o host `policiamilitar.sp.gov.br` (intranet), aplicando apenas o **meta-viewport** (`width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes`) em todas as páginas desse host. O CSS pesado de saneamento de formulário (inputs grandes, botão azul, overlay "Entrando…") **continua restrito** a `login.aspx` / `autenticacaosegura.aspx` — pois nas outras telas (iNotes, folha, DEJEM) o usuário já confirmou que estava OK e não pode quebrar o layout.
 
-- Em vez de aplicar quando `host.endsWith("policiamilitar.sp.gov.br")`, aplicar somente quando o **path** da URL casar com a allowlist abaixo (case-insensitive):
-  - `/login.aspx` (intranet PMESP — `ms.policiamilitar.sp.gov.br/login.aspx`)
-  - `/autenticacaosegura.aspx` (login da folha/CIAF, mesmo template legado)
+Resultado: a DEJEM e demais telas vão abrir já no zoom certo respeitando a largura do celular, mas o usuário ainda pode dar pinch-to-zoom se quiser.
 
-- Nada mais muda: o CSS injetado, os botões flutuantes, o auto-fade e o resto da Activity continuam iguais.
+## 2. Mover botões flutuantes × (fechar) e ⋮ (menu) para a parte inferior
 
-### Pseudocódigo da mudança
+Hoje ambos ficam no topo (`Gravity.TOP`), cobrindo o link "Inscrever-se na escala" da DEJEM (visível parcialmente atrás do botão × no screenshot).
 
-```text
-private fun injectMobileViewport(url):
-    if url vazio: return
-    parsed = Uri.parse(url)
-    host = parsed.host  (lowercase)
-    path = parsed.path  (lowercase)
-    if host NÃO termina em "policiamilitar.sp.gov.br": return
-    if path NÃO termina em "/login.aspx"
-       E path NÃO termina em "/autenticacaosegura.aspx": return
-    // injeta meta viewport + CSS (igual ao atual)
-```
+**Mudança em `InAppWebViewActivity.kt` (linhas 470-482):**
+- `btnClose`: trocar `Gravity.TOP or Gravity.START` → `Gravity.BOTTOM or Gravity.START`, e usar `bottomMargin = navigationBarHeight() + dp(12)` no lugar de `topMargin`.
+- `btnOverflow`: trocar `Gravity.TOP or Gravity.END` → `Gravity.BOTTOM or Gravity.END`, mesmo `bottomMargin`.
+- Adicionar um pequeno helper `navigationBarHeight()` análogo a `statusBarHeight()`, para não colidir com a barra de gestos.
+- Manter o auto-fade (alpha 0.30 após 1.5s) como já funciona.
+- Remover/ajustar o `padding-top: 48px` do CSS de `login.aspx` (linha 616) já que os botões não estarão mais no topo — para os campos de CPF/senha não ficarem desnecessariamente afastados.
 
-## Resultado esperado
+## Arquivo afetado
 
-- Login da intranet (e Delegada via login.aspx) continua com o fix de zoom/teclado.
-- Webmail iNotes, folha de pagamento mobile, escalas internas e demais páginas voltam a renderizar exatamente como antes do fix (sem CSS extra, sem padding superior forçado, sem `max-width:340px` em inputs).
-- Sem mudanças em build, versionCode, plugins, ou em qualquer outra parte do app.
+- `android-plugin/InAppWebViewActivity.kt` (apenas)
+
+Sem mudanças em código TS/React — é tudo nativo Android do navegador interno.
