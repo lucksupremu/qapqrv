@@ -81,4 +81,4 @@ jobs:
           name: qapqrv-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
