@@ -21,7 +21,7 @@ const AppOpenAd = registerPlugin<AppOpenAdPlugin>("AppOpenAd");
 
 let initialized = false;
 let lastShownAt = 0;
-const MIN_INTERVAL_MS = 4 * 60 * 1000; // 4 min — não mostra de novo logo após exibir
+const MIN_INTERVAL_MS = 5 * 60 * 1000; // 5 min — não mostra de novo logo após exibir
 
 /** Inicializa o SDK do AdMob (uma única vez, apenas no APK). */
 export async function initAdMob(): Promise<void> {
@@ -34,14 +34,30 @@ export async function initAdMob(): Promise<void> {
   }
 }
 
+export type ShowOpts = { trigger?: "cold" | "resume" };
+
 /**
  * Mostra o App Open Ad. Só dispara se:
  *  - estiver no APK
  *  - o SDK já estiver inicializado
  *  - tiver passado o intervalo mínimo desde o último ad
+ *  - trigger === "resume" (cold start apenas pré-carrega — recomendação do Google
+ *    para evitar crash de Activity recém-criada)
  */
-export async function showAppOpenAd(): Promise<void> {
+export async function showAppOpenAd(opts: ShowOpts = {}): Promise<void> {
   if (!isNativeApp()) return;
+  const trigger = opts.trigger ?? "resume";
+  if (trigger === "cold") {
+    // Apenas pré-carrega o próximo ad — não exibe na primeira abertura.
+    if (!initialized) {
+      try {
+        await initAdMob();
+      } catch {
+        /* ignore */
+      }
+    }
+    return;
+  }
   const now = Date.now();
   if (now - lastShownAt < MIN_INTERVAL_MS) return;
   try {
@@ -59,5 +75,5 @@ export async function prepareInterstitial(): Promise<void> {
 }
 
 export async function showInterstitial(): Promise<void> {
-  await showAppOpenAd();
+  await showAppOpenAd({ trigger: "resume" });
 }
