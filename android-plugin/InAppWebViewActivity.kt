@@ -589,10 +589,14 @@ class InAppWebViewActivity : Activity() {
      */
     private fun injectMobileViewport(url: String?) {
         if (url.isNullOrBlank()) return
-        val isPmesp = try {
-            Uri.parse(url).host?.endsWith("policiamilitar.sp.gov.br", ignoreCase = true) == true
+        val ok = try {
+            val u = Uri.parse(url)
+            val host = u.host?.lowercase().orEmpty()
+            val path = u.path?.lowercase().orEmpty()
+            host.endsWith("policiamilitar.sp.gov.br") &&
+                (path.endsWith("/login.aspx") || path.endsWith("/autenticacaosegura.aspx"))
         } catch (_: Throwable) { false }
-        if (!isPmesp) return
+        if (!ok) return
         val js = """
             (function(){
               try {

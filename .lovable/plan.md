@@ -1,29 +1,35 @@
 ## Problema
 
-O workflow `build-aab-release.yml` (e provavelmente `build-apk.yml`) usa a variável `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"` para forçar as actions antigas a rodarem em Node 24. Isso gera o warning porque as versões fixadas ainda declaram Node 20 internamente.
+A injeção de viewport mobile + CSS de saneamento em `injectMobileViewport()` (em `android-plugin/InAppWebViewActivity.kt`) está sendo aplicada em **toda** página cujo host termine em `policiamilitar.sp.gov.br`. Isso resolveu o login da intranet (`ms.policiamilitar.sp.gov.br/login.aspx`), mas quebrou o layout de páginas que já funcionavam bem: webmail (`correio.policiamilitar.sp.gov.br` — iNotes), folha (`ciaf.policiamilitar.sp.gov.br/.../mobileview.aspx`) e outras páginas internas.
 
-A correção limpa é **atualizar as actions para as versões que já rodam nativamente em Node 24** e remover o `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`.
+## Correção
 
-## Mudanças
+Restringir a injeção apenas às páginas de **login** da intranet, deixando o resto exatamente como estava antes.
 
-Em `.github/workflows/build-aab-release.yml` e `.github/workflows/build-apk.yml`:
+Em `android-plugin/InAppWebViewActivity.kt`, função `injectMobileViewport(url)`:
 
-1. Remover o bloco:
-   ```yaml
-   env:
-     FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-   ```
+- Em vez de aplicar quando `host.endsWith("policiamilitar.sp.gov.br")`, aplicar somente quando o **path** da URL casar com a allowlist abaixo (case-insensitive):
+  - `/login.aspx` (intranet PMESP — `ms.policiamilitar.sp.gov.br/login.aspx`)
+  - `/autenticacaosegura.aspx` (login da folha/CIAF, mesmo template legado)
 
-2. Atualizar versões das actions:
-   - `actions/checkout@v4` → `@v5`
-   - `actions/github-script@v7` → `@v8`
-   - `actions/setup-java@v4` → `@v5`
-   - `android-actions/setup-android@v3` → `@v4`
-   - `softprops/action-gh-release@v2` → manter (v2 já roda em Node 24 nas releases recentes; se ainda warn, fixar tag mais nova)
-   - `oven-sh/setup-bun@v2` → manter (já em Node 24)
+- Nada mais muda: o CSS injetado, os botões flutuantes, o auto-fade e o resto da Activity continuam iguais.
 
-3. Não mexer em nada de build, signing, versionCode/Name ou plugins — só atualização de runner.
+### Pseudocódigo da mudança
+
+```text
+private fun injectMobileViewport(url):
+    if url vazio: return
+    parsed = Uri.parse(url)
+    host = parsed.host  (lowercase)
+    path = parsed.path  (lowercase)
+    if host NÃO termina em "policiamilitar.sp.gov.br": return
+    if path NÃO termina em "/login.aspx"
+       E path NÃO termina em "/autenticacaosegura.aspx": return
+    // injeta meta viewport + CSS (igual ao atual)
+```
 
 ## Resultado esperado
 
-Próximo run do workflow não emite mais o warning de deprecação do Node 20, e o build continua igual (mesmo AAB/APK assinados).
+- Login da intranet (e Delegada via login.aspx) continua com o fix de zoom/teclado.
+- Webmail iNotes, folha de pagamento mobile, escalas internas e demais páginas voltam a renderizar exatamente como antes do fix (sem CSS extra, sem padding superior forçado, sem `max-width:340px` em inputs).
+- Sem mudanças em build, versionCode, plugins, ou em qualquer outra parte do app.
