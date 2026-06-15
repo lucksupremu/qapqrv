@@ -1,44 +1,25 @@
-# Ajustes no navegador interno (InAppWebViewActivity)
+## Problema
 
-Duas correções pontuais em `android-plugin/InAppWebViewActivity.kt`. Nenhuma mudança em código web/React.
+A top bar nova ficou flutuando por cima do WebView, cobrindo a área clicável do topo da página (no print, o `×` cobre o conteúdo). O WebView ocupa `MATCH_PARENT` sem nenhum `topMargin`, então a barra fica sobreposta em vez de empurrar o conteúdo para baixo.
 
-## 1. Parar o reload ao arrastar pra baixo no DEJEM/Delegada
+## Correção
 
-Hoje o `SwipeRefreshLayout` envolve a WebView inteira e dispara `webView.reload()` em qualquer pull-down — inclusive nas telas pós-login da intranet (DEJEM, Delegada, SIRH...), onde o gesto natural de rolagem acaba recarregando a página e perdendo o estado.
+Em `android-plugin/InAppWebViewActivity.kt`, no `buildLayout()`:
 
-**Como corrigir:** dentro de `injectMobileViewport(url)`, no ramo `isSistemasAdminPos` (linha ~656), além do viewport já injetado, desativar o swipe-to-refresh:
+1. **Empurrar o `swipeRefresh` (que contém o WebView) para baixo da barra** — alterar o `FrameLayout.LayoutParams` nas linhas 426-429 para incluir:
+   ```kotlin
+   topMargin = statusBarHeight() + dp(44)
+   ```
+   Assim a página inicia abaixo da barra superior e nada do conteúdo fica coberto.
 
-```kotlin
-swipeRefresh.isEnabled = false
-```
+2. **Fundo opaco na `topBar`** — trocar o `0x66000000` (semitransparente) por um fundo sólido (`TOOLBAR_BG` ou `0xFF000000`) para a barra ter aparência de toolbar real e não de overlay flutuante. Remover também o `attachFloatingAutoFade` da `topBar` (mantendo-o apenas no `btnOverflow`), já que ela agora é parte do layout, não um overlay.
 
-E reabilitar nos demais ramos (login PMESP e ramo 3 "outros hosts") com `swipeRefresh.isEnabled = true`, para não vazar o estado entre páginas dentro da mesma sessão de navegação.
+3. **Manter `progressBar` como está** — já fica em `topMargin = statusBarHeight() + dp(44)`, agora alinhado ao topo do WebView.
 
-## 2. Barra superior com Voltar / Fechar / Recarregar
+4. **`errorOverlay`** — também precisa do mesmo `topMargin = statusBarHeight() + dp(44)` para não ficar atrás da barra quando aparece.
 
-Hoje só existem dois botões flutuantes no rodapé (× e ⋮) e nada no topo. Adicionar uma barra fina ancorada no topo (logo abaixo da status bar) com três `ImageButton`:
+Nenhuma outra mudança. Sem alterações em código web/React.
 
-```text
-┌──────────────────────────────────────────┐
-│  ←        ⟳                          ×  │  ← barra translúcida no topo
-├──────────────────────────────────────────┤
-│                                          │
-│            conteúdo da WebView           │
-```
+## Arquivo afetado
 
-- **←** Voltar: `if (webView.canGoBack()) webView.goBack()`
-- **⟳** Recarregar: `webView.reload()`
-- **×** Fechar: `finish()` (mesma ação do FAB atual)
-
-Detalhes de implementação:
-- Adicionar em `buildLayout()` um `LinearLayout` horizontal com fundo `0x66000000` (semi-transparente, igual ao estilo dos FABs), altura ~44dp, ancorado em `Gravity.TOP` com `topMargin = statusBarHeight()`.
-- Reaproveitar o helper `floatingButton(...)` ou criar `ImageButton`s simples com `setColorFilter(Color.WHITE)`.
-- Como agora existe a barra superior com × e ⟳, o FAB × inferior fica redundante — **remover o `btnClose` flutuante de baixo** e manter só o `btnOverflow` (⋮) no canto inferior direito.
-- Aplicar o mesmo `attachFloatingAutoFade` à nova barra para ela ficar translúcida (alpha 0.30) após 1.5s sem interação, igual aos FABs, evitando cobrir conteúdo de login.
-- A `progressBar` (linha 460) já fica no topo com `topMargin = statusBarHeight()` — deslocar para `topMargin = statusBarHeight() + dp(44)` para ficar logo abaixo da nova barra.
-
-## Arquivos alterados
-
-- `android-plugin/InAppWebViewActivity.kt` (único arquivo)
-
-Como o build do APK roda no GitHub Actions, as mudanças só aparecem no app depois do próximo build.
+- `android-plugin/InAppWebViewActivity.kt`

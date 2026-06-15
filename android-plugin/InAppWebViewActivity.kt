@@ -426,7 +426,7 @@ class InAppWebViewActivity : Activity() {
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-            )
+            ).apply { topMargin = statusBarHeight() + dp(44) }
         }
         root.addView(swipeRefresh)
 
@@ -440,7 +440,7 @@ class InAppWebViewActivity : Activity() {
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-            )
+            ).apply { topMargin = statusBarHeight() + dp(44) }
         }
         val errTitle = TextView(this).apply {
             text = "Não foi possível abrir a página"
@@ -462,7 +462,7 @@ class InAppWebViewActivity : Activity() {
         // Barra superior fina com Voltar / Recarregar / Fechar
         topBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(0x66000000)
+            setBackgroundColor(TOOLBAR_BG)
             gravity = Gravity.CENTER_VERTICAL
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -596,7 +596,6 @@ class InAppWebViewActivity : Activity() {
     private fun attachFloatingAutoFade() {
         val fadeRunnable = Runnable {
             try {
-                topBar.animate().alpha(0.30f).setDuration(220).start()
                 btnOverflow.animate().alpha(0.30f).setDuration(220).start()
             } catch (_: Throwable) {}
         }
@@ -604,7 +603,6 @@ class InAppWebViewActivity : Activity() {
         fun bump() {
             handler.removeCallbacks(fadeRunnable)
             try {
-                topBar.animate().alpha(1f).setDuration(120).start()
                 btnOverflow.animate().alpha(1f).setDuration(120).start()
             } catch (_: Throwable) {}
             handler.postDelayed(fadeRunnable, 1500)
