@@ -3,7 +3,7 @@ import { ArrowLeft, RotateCcw } from "lucide-react";
 
 import { PushSettingsCard } from "@/components/push-settings-card";
 import { PwaInstallCard } from "@/components/pwa-install-card";
-import { CredentialVaultCard } from "@/components/credential-vault-card";
+
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
@@ -44,7 +44,7 @@ function ConfiguracoesPage() {
 
       <main className="space-y-4 px-4 pb-8">
         <PwaInstallCard />
-        <CredentialVaultCard />
+        
         <PushSettingsCard />
 
         <div
