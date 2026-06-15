@@ -76,8 +76,11 @@ class InAppWebViewActivity : Activity() {
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private lateinit var errorOverlay: LinearLayout
     private lateinit var errorMessage: TextView
-    private lateinit var btnClose: ImageButton
     private lateinit var btnOverflow: ImageButton
+    private lateinit var topBar: LinearLayout
+    private lateinit var btnTopBack: ImageButton
+    private lateinit var btnTopReload: ImageButton
+    private lateinit var btnTopClose: ImageButton
     private lateinit var findBar: LinearLayout
     private lateinit var findInput: EditText
     private lateinit var findCount: TextView
@@ -456,25 +459,44 @@ class InAppWebViewActivity : Activity() {
         errorOverlay.addView(errTitle); errorOverlay.addView(errorMessage); errorOverlay.addView(btnRetry)
         root.addView(errorOverlay)
 
-        // Barra de progresso fina no topo (sobre o conteúdo).
+        // Barra superior fina com Voltar / Recarregar / Fechar
+        topBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(0x66000000)
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(44),
+                Gravity.TOP,
+            ).apply { topMargin = statusBarHeight() }
+        }
+        btnTopBack = topBarButton(android.R.drawable.ic_media_rew, "Voltar") {
+            if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else finish()
+        }
+        btnTopReload = topBarButton(android.R.drawable.ic_menu_rotate, "Recarregar") {
+            try { webView.reload() } catch (_: Throwable) {}
+        }
+        btnTopClose = topBarButton(android.R.drawable.ic_menu_close_clear_cancel, "Fechar") { finish() }
+        topBar.addView(btnTopBack, LinearLayout.LayoutParams(dp(44), dp(44)))
+        topBar.addView(btnTopReload, LinearLayout.LayoutParams(dp(44), dp(44)))
+        // Spacer para empurrar o "fechar" pra direita
+        val spacer = View(this)
+        topBar.addView(spacer, LinearLayout.LayoutParams(0, 1, 1f))
+        topBar.addView(btnTopClose, LinearLayout.LayoutParams(dp(44), dp(44)))
+        root.addView(topBar)
+
+        // Barra de progresso fina logo abaixo da topBar.
         progressBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100; progress = 0
             progressTintList = android.content.res.ColorStateList.valueOf(TOOLBAR_BG)
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, dp(3),
-            ).apply { topMargin = statusBarHeight() }
+            ).apply { topMargin = statusBarHeight() + dp(44) }
         }
         root.addView(progressBar)
 
-        // Botões flutuantes (× e ⋮) — no rodapé, pequenos, semi-transparentes, somem ao rolar.
+        // Botão flutuante ⋮ no rodapé (× foi pra barra superior).
         val fabBottom = navigationBarHeight() + dp(12)
-        btnClose = floatingButton(android.R.drawable.ic_menu_close_clear_cancel, "Fechar") { finish() }
-        btnClose.setPadding(dp(7), dp(7), dp(7), dp(7))
-        btnClose.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.BOTTOM or Gravity.START).apply {
-            bottomMargin = fabBottom; marginStart = dp(12)
-        }
-        root.addView(btnClose)
-
         btnOverflow = floatingButton(android.R.drawable.ic_menu_more, "Mais opções") { showOverflowMenu(it) }
         btnOverflow.setPadding(dp(7), dp(7), dp(7), dp(7))
         btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.BOTTOM or Gravity.END).apply {
@@ -555,15 +577,26 @@ class InAppWebViewActivity : Activity() {
         }
     }
 
+    private fun topBarButton(iconRes: Int, desc: String, onClick: (View) -> Unit): ImageButton {
+        return ImageButton(this).apply {
+            setImageResource(iconRes)
+            setColorFilter(Color.WHITE)
+            background = null
+            contentDescription = desc
+            scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+            setPadding(dp(10), dp(10), dp(10), dp(10))
+            setOnClickListener { onClick(it) }
+        }
+    }
+
     /**
-     * Faz os botões × e ⋮ ficarem translúcidos após 1.5s sem interação,
-     * e voltarem opacos ao tocar a tela ou ao rolar. Evita que cubram
-     * conteúdo (especialmente campos de login da intranet PMESP).
+     * Faz a barra superior e o botão ⋮ ficarem translúcidos após 1.5s sem
+     * interação, e voltarem opacos ao tocar a tela ou ao rolar.
      */
     private fun attachFloatingAutoFade() {
         val fadeRunnable = Runnable {
             try {
-                btnClose.animate().alpha(0.30f).setDuration(220).start()
+                topBar.animate().alpha(0.30f).setDuration(220).start()
                 btnOverflow.animate().alpha(0.30f).setDuration(220).start()
             } catch (_: Throwable) {}
         }
@@ -571,7 +604,7 @@ class InAppWebViewActivity : Activity() {
         fun bump() {
             handler.removeCallbacks(fadeRunnable)
             try {
-                btnClose.animate().alpha(1f).setDuration(120).start()
+                topBar.animate().alpha(1f).setDuration(120).start()
                 btnOverflow.animate().alpha(1f).setDuration(120).start()
             } catch (_: Throwable) {}
             handler.postDelayed(fadeRunnable, 1500)
@@ -603,6 +636,7 @@ class InAppWebViewActivity : Activity() {
 
         // Ramo 1: login PMESP → viewport mobile + CSS de saneamento + overlay "Entrando...".
         if (isLoginPmesp) {
+            try { swipeRefresh.isEnabled = true } catch (_: Throwable) {}
             val js = """
                 (function(){
                   try {
@@ -654,6 +688,9 @@ class InAppWebViewActivity : Activity() {
         // Ramo 2: intranet de sistemas pós-login (DEJEM, Delegada, SIRH, etc.)
         // → zoom-out do layout desktop legado para caber na tela do celular.
         if (isSistemasAdminPos) {
+            // Desativa pull-to-refresh: o gesto natural de rolagem estava
+            // recarregando a página e perdendo o estado do formulário.
+            try { swipeRefresh.isEnabled = false } catch (_: Throwable) {}
             val js = """
                 (function(){
                   try {
@@ -673,6 +710,7 @@ class InAppWebViewActivity : Activity() {
         }
 
         // Ramo 3: outros hosts (iNotes, CIAF, externos) → não injeta nada.
+        try { swipeRefresh.isEnabled = true } catch (_: Throwable) {}
     }
 
 
