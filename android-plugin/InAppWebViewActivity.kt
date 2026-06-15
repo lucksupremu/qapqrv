@@ -173,8 +173,10 @@ class InAppWebViewActivity : Activity() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try { getSystemService(AutofillManager::class.java)?.commit() } catch (_: Throwable) {}
                 }
+                injectMobileViewport(url)
                 tryIntranetAutofill(url)
             }
+
 
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val uri = request?.url ?: return false
@@ -464,18 +466,25 @@ class InAppWebViewActivity : Activity() {
         }
         root.addView(progressBar)
 
-        // Botões flutuantes (× e ⋮) em pílulas semi-transparentes.
+        // Botões flutuantes (× e ⋮) — pequenos, semi-transparentes, somem ao rolar.
         btnClose = floatingButton(android.R.drawable.ic_menu_close_clear_cancel, "Fechar") { finish() }
-        btnClose.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.TOP or Gravity.START).apply {
-            topMargin = statusBarHeight() + dp(8); marginStart = dp(8)
+        btnClose.setPadding(dp(7), dp(7), dp(7), dp(7))
+        btnClose.layoutParams = FrameLayout.LayoutParams(dp(32), dp(32), Gravity.TOP or Gravity.START).apply {
+            topMargin = statusBarHeight() + dp(6); marginStart = dp(6)
         }
         root.addView(btnClose)
 
         btnOverflow = floatingButton(android.R.drawable.ic_menu_more, "Mais opções") { showOverflowMenu(it) }
-        btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.TOP or Gravity.END).apply {
-            topMargin = statusBarHeight() + dp(8); marginEnd = dp(8)
+        btnOverflow.setPadding(dp(7), dp(7), dp(7), dp(7))
+        btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(32), dp(32), Gravity.TOP or Gravity.END).apply {
+            topMargin = statusBarHeight() + dp(6); marginEnd = dp(6)
         }
         root.addView(btnOverflow)
+
+        // Auto-fade: fica translúcido (alpha 0.35) após 1.5s sem interação,
+        // volta opaco ao tocar a tela ou rolar.
+        attachFloatingAutoFade()
+
 
         // Find bar (oculta por padrão)
         findBar = LinearLayout(this).apply {
@@ -533,21 +542,94 @@ class InAppWebViewActivity : Activity() {
     private fun floatingButton(iconRes: Int, desc: String, onClick: (View) -> Unit): ImageButton {
         val bg = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
-            setColor(0xCC1F1F1F.toInt())
+            setColor(0x99000000.toInt())
         }
         return ImageButton(this).apply {
             setImageResource(iconRes)
             setColorFilter(Color.WHITE)
             background = bg
             contentDescription = desc
+            scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
             setOnClickListener { onClick(it) }
         }
+    }
+
+    /**
+     * Faz os botões × e ⋮ ficarem translúcidos após 1.5s sem interação,
+     * e voltarem opacos ao tocar a tela ou ao rolar. Evita que cubram
+     * conteúdo (especialmente campos de login da intranet PMESP).
+     */
+    private fun attachFloatingAutoFade() {
+        val fadeRunnable = Runnable {
+            try {
+                btnClose.animate().alpha(0.30f).setDuration(220).start()
+                btnOverflow.animate().alpha(0.30f).setDuration(220).start()
+            } catch (_: Throwable) {}
+        }
+        val handler = Handler(Looper.getMainLooper())
+        fun bump() {
+            handler.removeCallbacks(fadeRunnable)
+            try {
+                btnClose.animate().alpha(1f).setDuration(120).start()
+                btnOverflow.animate().alpha(1f).setDuration(120).start()
+            } catch (_: Throwable) {}
+            handler.postDelayed(fadeRunnable, 1500)
+        }
+        webView.setOnTouchListener { _, _ -> bump(); false }
+        webView.viewTreeObserver.addOnScrollChangedListener { bump() }
+        // Inicia já com fade pendente.
+        handler.postDelayed(fadeRunnable, 2000)
+    }
+
+    /**
+     * Injeta meta-viewport e CSS de saneamento em páginas legadas da intranet
+     * PMESP (login.aspx, arrelconesc, etc.) — força layout mobile, aumenta
+     * inputs/botões pra dedo, evita zoom involuntário no foco, e adiciona
+     * padding superior pra não colidir com os botões flutuantes × / ⋮.
+     */
+    private fun injectMobileViewport(url: String?) {
+        if (url.isNullOrBlank()) return
+        val isPmesp = try {
+            Uri.parse(url).host?.endsWith("policiamilitar.sp.gov.br", ignoreCase = true) == true
+        } catch (_: Throwable) { false }
+        if (!isPmesp) return
+        val js = """
+            (function(){
+              try {
+                var head = document.head || document.getElementsByTagName('head')[0];
+                if (head) {
+                  var existing = document.querySelector('meta[name="viewport"]');
+                  if (existing) existing.parentNode.removeChild(existing);
+                  var m = document.createElement('meta');
+                  m.name = 'viewport';
+                  m.content = 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes';
+                  head.appendChild(m);
+                  if (!document.getElementById('qapqrv-mobile-fix')) {
+                    var st = document.createElement('style');
+                    st.id = 'qapqrv-mobile-fix';
+                    st.textContent = ''
+                      + 'html,body{max-width:100% !important;overflow-x:hidden !important;}'
+                      + 'body{padding:48px 12px 24px 12px !important;font-size:16px !important;line-height:1.45 !important;-webkit-text-size-adjust:100% !important;}'
+                      + 'table{max-width:100% !important;width:auto !important;}'
+                      + 'img{max-width:100% !important;height:auto !important;}'
+                      + 'input,select,textarea,button{font-size:16px !important;min-height:44px !important;padding:8px 10px !important;box-sizing:border-box !important;}'
+                      + 'input[type="text"],input[type="password"],input:not([type]){width:100% !important;max-width:340px !important;display:block !important;margin:6px 0 !important;border:1px solid #888 !important;border-radius:6px !important;}'
+                      + 'input[type="submit"],input[type="button"],button{display:inline-block !important;margin:10px 4px !important;padding:10px 18px !important;border-radius:6px !important;background:#2E6B8A !important;color:#fff !important;border:0 !important;font-weight:600 !important;}'
+                      + 'a{word-break:break-word;}';
+                    head.appendChild(st);
+                  }
+                }
+              } catch(e) {}
+            })();
+        """.trimIndent()
+        try { webView.evaluateJavascript(js, null) } catch (_: Throwable) {}
     }
 
     private fun statusBarHeight(): Int {
         val id = resources.getIdentifier("status_bar_height", "dimen", "android")
         return if (id > 0) resources.getDimensionPixelSize(id) else dp(24)
     }
+
 
     // ---------------- Menu ⋮ ----------------
 
