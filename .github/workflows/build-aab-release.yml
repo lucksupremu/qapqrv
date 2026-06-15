@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 jobs:
@@ -123,10 +123,12 @@ jobs:
           echo "--- AAB gerado ---"
           ls -lh android/app/build/outputs/bundle/release/ || true
 
-      - name: Upload AAB artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload AAB to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: qapqrv-release-aab
-          path: android/app/build/outputs/bundle/release/*.aab
-          if-no-files-found: error
-          retention-days: 7
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'release-aab-latest' }}
+          name: AAB Release Latest
+          body: AAB release gerado automaticamente pelo workflow Build Android AAB.
+          prerelease: ${{ github.ref_type != 'tag' }}
+          make_latest: false
+          files: android/app/build/outputs/bundle/release/*.aab

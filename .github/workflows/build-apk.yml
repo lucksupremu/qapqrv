@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 jobs:
@@ -98,10 +98,12 @@ jobs:
           echo "--- APKs gerados ---"
           ls -lh android/app/build/outputs/apk/debug/ || true
 
-      - name: Upload APK artifacts (por arquitetura)
-        uses: actions/upload-artifact@v4
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: qapqrv-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 7
+          tag_name: debug-apk-latest
+          name: APK Debug Latest
+          body: APK debug gerado automaticamente pelo workflow Build Android APK.
+          prerelease: true
+          make_latest: false
+          files: android/app/build/outputs/apk/debug/*.apk
