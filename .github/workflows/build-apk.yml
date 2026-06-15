@@ -166,10 +166,14 @@ jobs:
       - name: Upload AAB artifact
         if: steps.aab_secrets.outputs.ok == 'true'
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: qapqrv-release-aab
           path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+
 
       - name: Upload AAB to GitHub Release
         if: steps.aab_secrets.outputs.ok == 'true'
