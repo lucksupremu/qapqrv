@@ -1,123 +1,127 @@
-## Objetivo
+## O que muda na prática
 
-1. Parar o **crash "abre e fecha sozinho"** no cold start do APK.
-2. Entregar um **navegador interno mais robusto**: Chrome Custom Tabs para links genéricos + WebView turbinada para a intranet PMESP.
+**Antes:** navegador interno com toolbar grande, URL bar, barra inferior de 4 botões, look de "browser dos anos 2010". PDF abre num viewer próprio meia-boca. Intranet tem tela e fluxo separados.
 
----
-
-## Parte 1 — Fix do cold-start crash
-
-A causa mais provável: no `src/routes/__root.tsx`, no primeiro `useEffect`, três coisas pesadas disparam **ao mesmo tempo**, logo no primeiro frame do APK:
-
-- `warmupIntranetSession()` → cria uma `WebView` invisível na UI thread.
-- `initAdMob()` → `MobileAds.initialize` + `loadAd()`.
-- `showAppOpenAd()` chamado **na hora** que o init resolve, antes da Activity estar 100 % visível.
-
-Duas WebViews (Capacitor + warm-up) sendo criadas em paralelo com inicialização de AdMob é um padrão conhecido de ANR/crash silencioso em vários devices Android.
-
-**Mudanças:**
-
-1. **`src/routes/__root.tsx`** — bloco de cold start nativo:
-   - Envolver tudo num `requestIdleCallback` / `setTimeout(..., 1500)` para dar tempo da Activity inflar.
-   - **Não mostrar App Open Ad no cold start.** Seguindo a recomendação do próprio Google AdMob, o App Open Ad deve aparecer **só no warm resume** (volta de background longo). Manter apenas o pré-load no cold start. Isso elimina a janela em que o ad fullscreen aparece em cima de uma Activity recém-criada.
-   - Encadear o warm-up da intranet **depois** do AdMob init resolver (não em paralelo), com `setTimeout(..., 3000)` extra.
-   - Envolver cada `import(...).then(...)` num `.catch(console.warn)` para evitar unhandled rejection.
-
-2. **`src/lib/admob.ts`** — `showAppOpenAd`:
-   - Adicionar parâmetro `opts?: { trigger: "cold" | "resume" }`. Se `trigger === "cold"`, **só pré-carrega** e retorna sem mostrar.
-   - Aumentar `MIN_INTERVAL_MS` para 5 min (já era 4).
-
-3. **`android-plugin/AppOpenAdPlugin.kt`** — `show()`:
-   - Antes de `ad.show(activity)`, checar `activity.isFinishing || activity.isDestroyed` e abortar com `not_ready`. Evita crash quando o resume foi cancelado.
-   - Envolver `MobileAds.initialize` num `try/catch` que resolve `initialized=false` em vez de rejeitar — assim o JS nunca quebra.
-
-4. **`android-plugin/InAppWebViewPlugin.kt`** — `warmupIntranet`:
-   - Adiar `wv.loadUrl(url)` para `Handler.postDelayed(..., 800)` depois da criação da WebView, dando tempo do processo WebView estabilizar.
-   - Já tem `try/catch` global; ok.
-
-5. **Telemetria** (opcional, mas barato): em `__root.tsx`, registrar `window.addEventListener("error", …)` e `unhandledrejection` que loga via `reportLovableError` para capturar o que sobrar.
+**Depois:** um navegador único, imersivo, estilo Instagram/Twitter — só conteúdo + × flutuante + barra de progresso fina. Gestos para tudo. PDF nunca abre no app — vai direto pro Drive/Adobe do usuário (Android escolhe). Intranet vira "só mais um link" usando o mesmo navegador, com cofre e Salvar escala virando itens do menu ⋮.
 
 ---
 
-## Parte 2 — Navegador interno mais robusto
+## Parte 1 — Navegador interno imersivo (estilo Instagram)
 
-### 2a. Chrome Custom Tabs para links externos genéricos
+Refatora `android-plugin/InAppWebViewActivity.kt` do zero.
 
-Hoje **todo** link externo cai no `InAppWebViewActivity`. Para sites quaisquer (notícias, Google, YouTube etc.), Custom Tabs é melhor: usa o Chrome do usuário, herda autofill/senhas, tem dark mode automático, é mais rápido e ocupa zero MB.
-
-- **Novo arquivo `android-plugin/CustomTabsPlugin.kt`** (plugin Capacitor `CustomTabs`):
-  - Método `open({ url, toolbarColor })` usa `androidx.browser.customtabs.CustomTabsIntent.Builder()`.
-  - Cor da toolbar `#2e6b8a` (igual ao tema do app).
-  - Fallback: se não houver Chrome/handler, faz `Intent(ACTION_VIEW)` normal.
-  - Dependência já vem com o Capacitor (`androidx.browser`).
-
-- **Novo arquivo `src/lib/custom-tabs.ts`** — wrapper com `registerPlugin<CustomTabsPlugin>`.
-
-- **`src/lib/in-app-browser.ts`** — `openInAppBrowser`:
-  - Se `isNativeApp()` **e** o host **não** for `*.policiamilitar.sp.gov.br` **e** não houver `opts.forceWebview`, abrir via Custom Tabs.
-  - Senão, manter `InAppWebView.open(...)` (intranet PMESP continua na WebView interna por causa de autofill, cookies, TLS relaxado, PDFs).
-  - Adicionar `opts.forceWebview?: boolean` ao tipo `AbrirOpts`.
-
-### 2b. WebView interna turbinada (`InAppWebViewActivity.kt`)
-
-Layout novo, mantendo o esquema visual atual:
+### Layout final
 
 ```text
 ┌──────────────────────────────────────────┐
-│ [×]  [host editável ▼ ]  [⋮]             │ toolbar
-├──────────────────────────────────────────┤
-│ ▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░     │ progress
+│ ▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ progress 2dp (some quando carrega)
+│ [×]                            [⋮]      │ overlay flutuante autohide (3s)
 │                                          │
 │            CONTEÚDO WEB                  │
+│         (ocupa quase tudo)               │
 │                                          │
-├──────────────────────────────────────────┤
-│  ←     →     ↻     🔍     ⤓              │ bottom bar
+│                                          │
 └──────────────────────────────────────────┘
 ```
 
-Adições:
-- **Campo de URL editável** na toolbar (TextView vira `EditText` com `imeOptions=actionGo`); ao confirmar, carrega `loadUrl`. Mostra `host` quando não está focado.
-- **Menu de overflow `⋮`** (`PopupMenu`) com:
-  - "Compartilhar link" → `Intent.ACTION_SEND`.
-  - "Copiar link" → `ClipboardManager`.
-  - "Abrir no Chrome" → `Intent(ACTION_VIEW)` forçando `setPackage` do Chrome se presente.
-  - "Modo desktop" (toggle) → alterna `userAgentString` entre o mobile atual e UA desktop + `useWideViewPort/loadWithOverviewMode`.
-  - "Buscar na página" → abre overlay com `EditText` que chama `webView.findAllAsync(q)` + `findNext(true/false)`.
-  - "Limpar cache desta sessão" → `webView.clearCache(false)` + `clearHistory()`.
-- **Bottom bar** com Back / Forward / Reload / Find / Downloads (atalho para abrir `Environment.DIRECTORY_DOWNLOADS`).
-- **Estabilidade**: já tem; manter trust-relaxado restrito a `*.policiamilitar.sp.gov.br`.
-- **Long-press em link** (`setOnCreateContextMenuListener` + `WebView.HitTestResult`): "Abrir em nova aba" → empilha `Intent` para outra `InAppWebViewActivity`; "Copiar link"; "Compartilhar".
-- **Pull-to-refresh**: envolver o `WebView` num `SwipeRefreshLayout` (já está no `androidx.swiperefreshlayout`, que vem com Capacitor).
-- **Toast de progresso de download** → trocar pelo já existente `DownloadManager` + um `BroadcastReceiver` em `DownloadManager.ACTION_DOWNLOAD_COMPLETE` que mostra "Download concluído — abrir?" como `Toast` clicável (na verdade Snackbar não dá em Activity sem CoordinatorLayout, então usar `AlertDialog` simples).
+- Sem toolbar fixa, sem URL bar, sem barra inferior.
+- Status bar do Android translúcida com ícones brancos (modo edge-to-edge).
+- × e ⋮ flutuantes em pílulas semi-transparentes — somem 3s depois do load; reaparecem ao tocar/scrollar para cima.
 
-### 2c. JS — nada quebra
+### Gestos
 
-`openInAppBrowser` continua com a mesma assinatura. Quem chama `openInAppBrowser(url, { modo: "webview" })` (ex.: `intranet.tsx`) força WebView via novo `opts.forceWebview = true` (mapear `modo === "webview"` para isso, sem mudar callsites).
+- **Swipe da borda esquerda → direita**: `webView.goBack()`. Se sem histórico, fecha.
+- **Swipe vertical pra baixo no topo da página** (quando `scrollY == 0`): fecha a Activity com animação slide-down.
+- **Pull-to-refresh** (`SwipeRefreshLayout` envolvendo a WebView): recarrega.
+- **Botão voltar do Android**: igual swipe-esquerda.
+- **Long-press em link**: mini bottom-sheet com Copiar / Compartilhar / Abrir em nova aba.
+
+### Menu ⋮
+
+`PopupMenu` ancorado no botão:
+- Compartilhar link
+- Copiar link
+- Abrir no Chrome
+- Modo desktop (toggle UA + viewport)
+- Buscar na página (`findAllAsync`)
+- **Salvar escala** (só aparece quando a URL bate em `arrelconesc.aspx`/`nuesc=` — antigo botão da rota intranet vira item de menu)
+- Limpar cache/cookies desta sessão
+
+### Confiabilidade
+
+- Mantém o trust relaxado restrito a `*.policiamilitar.sp.gov.br`.
+- Mantém autofill nativo do Android (input attributes já estão prontos no app, e na WebView com Android Autofill ativo o usuário usa o serviço dele).
+- Download de PDF/arquivo: continua via `DownloadManager`, mas em vez de Toast simples, mostra `AlertDialog` "Download concluído — abrir?" via `BroadcastReceiver`.
+
+---
+
+## Parte 2 — PDF delegado pro Drive/Adobe
+
+### Remover o viewer interno
+
+- `android-plugin/PdfViewerActivity.kt`: **deletado**.
+- Plugin `InAppWebView`: método `openPdf` passa a fazer a mesma coisa que `openPdfExternal` (mantém a assinatura, evita quebrar callsites).
+- `openPdfExternal` (já existente) usa `Intent(ACTION_VIEW)` com `application/pdf` + `FileProvider`, com flag `CATEGORY_DEFAULT`. Android mostra o seletor "Abrir com…" se houver mais de um app de PDF; do contrário abre o padrão (Drive/Adobe/Samsung Reader/etc.).
+- Se **nenhum app de PDF** estiver instalado: fallback abre o PDF dentro do novo navegador imersivo via `file://` + `application/pdf` (a WebView mostra ou oferece download). Mostra Toast: "Instale o Google Drive ou Adobe Reader para uma experiência melhor".
+
+### Callsites — nada muda no JS
+
+`escala-viewer.$id.tsx`, `escalas-baixadas.tsx`, `index.tsx` continuam chamando `InAppWebView.openPdf(...)` e `openPdfExternal(...)`. Por baixo dos panos, ambos agora delegam pro app de PDF do usuário.
+
+---
+
+## Parte 3 — Unificar intranet PMESP
+
+### Tela `/intranet` deixa de existir como WebView customizada
+
+`src/routes/intranet.tsx` vira um **redirecionador**:
+1. Se cofre habilitado, abre `UnlockPinModal` direto.
+2. Ao desbloquear (ou se sem cofre), chama `InAppWebView.setAutofillCredentials(creds)` (se houver) e abre o navegador imersivo (`openInAppBrowser` SEM `modo: webview` — agora todos usam o mesmo navegador) e `navigate({ to: "/" })`.
+3. Sem `<iframe>`, sem header próprio, sem barra inferior, sem botão "Salvar escala" duplicado.
+
+### Botão "Salvar escala" migra pro menu ⋮ do navegador
+
+Lado Kotlin (`InAppWebViewActivity`):
+- Quando a URL atual contém `arrelconesc.aspx` ou `?nuesc=`, o item "Salvar escala" aparece no `PopupMenu`.
+- Ao clicar, dispara um evento JS (`window.dispatchEvent(new CustomEvent('lovable:salvar-escala', { detail: { url } }))`) **ou** chama de volta o JS via `evaluateJavascript`. Mais simples: o plugin Kotlin emite um evento Capacitor `intranetSalvarEscala` com `{ url, id }`, e um listener registrado em `__root.tsx` faz o mesmo que `salvarEscala()` fazia em `intranet.tsx` (`upsertEscala` + `baixarPdfEmBackground`).
+
+### `credential-vault-card.tsx` e cofre
+
+Sem mudança — continua funcionando. Só a tela `/intranet` muda.
 
 ---
 
 ## Detalhes técnicos
 
-- Plugins novos a registrar no `MainActivity.java` do APK (instruções no `android-plugin/install.sh`): `CustomTabs`. Atualizar o `install.sh` para copiar o novo `.kt` e adicionar a linha `registerPlugin(CustomTabsPlugin.class);`.
-- Dependência `androidx.browser:browser` — já vem transitivamente do Capacitor 6. Se faltar, adicionar `implementation "androidx.browser:browser:1.8.0"` ao `app/build.gradle` via patch no `.github/scripts/patch-gradle-signing.py` (ou doc no `APK-BUILD.md`).
-- O usuário precisa rodar `git pull` + `npx cap sync android` + rebuild do APK (workflow `build-apk.yml`) para o crash-fix e Custom Tabs subirem. Mudanças JS-only (admob.ts, __root.tsx, in-app-browser.ts) já valem na PWA imediatamente.
+### Arquivos editados
+
+- `android-plugin/InAppWebViewActivity.kt` — refatorado para layout imersivo (SwipeRefreshLayout + WebView + overlays flutuantes), gestos (`GestureDetector` para swipe-down e edge-swipe), menu ⋮ via `PopupMenu`, item dinâmico "Salvar escala", emissão de evento Capacitor.
+- `android-plugin/InAppWebViewPlugin.kt` — `openPdf` agora delega para `openPdfExternal`. Adiciona `notifyListeners("intranetSalvarEscala", …)`.
+- `src/lib/in-app-webview.ts` — adiciona tipo do evento `addListener('intranetSalvarEscala', cb)`.
+- `src/lib/in-app-browser.ts` — remove a ramificação `useWebview` que separava PMESP; agora **todos os links nativos** vão pra WebView interna nova (Custom Tabs deixa de ser usada — usuário pediu "nada fora do app"). Pode manter `CustomTabs` no menu ⋮ "Abrir no Chrome" se quiser, mas não como padrão.
+- `src/routes/intranet.tsx` — reduzida a ~50 linhas: só PIN modal + abrir navegador + voltar.
+- `src/routes/__root.tsx` — registra listener `intranetSalvarEscala` que chama `upsertEscala` + `baixarPdfEmBackground`.
+
+### Arquivos removidos
+
+- `android-plugin/PdfViewerActivity.kt`
+- `src/lib/custom-tabs.ts` (opcional — manter se quiser usar para "Abrir no Chrome" no menu)
+- `android-plugin/CustomTabsPlugin.kt` (idem)
+
+### Sem nova dependência
+
+- Não usa AndroidPdfViewer (você escolheu delegar pro Drive/Adobe).
+- `androidx.swiperefreshlayout` e `androidx.core` já vêm com Capacitor.
+- APK final fica **menor** (sem PdfViewerActivity + sem libs de render PDF).
+
+### Build
+
+Mudanças Kotlin exigem rebuild do APK pelo workflow `build-apk.yml`. Mudanças JS valem na hora.
 
 ---
 
-## Arquivos tocados
+## Limitações honestas
 
-**Editados**
-- `src/routes/__root.tsx` (delay + ordering + error handlers)
-- `src/lib/admob.ts` (`trigger: "cold" | "resume"`)
-- `src/lib/in-app-browser.ts` (roteia para Custom Tabs)
-- `android-plugin/AppOpenAdPlugin.kt` (guard `isFinishing`/`isDestroyed`)
-- `android-plugin/InAppWebViewPlugin.kt` (delay no warmup)
-- `android-plugin/InAppWebViewActivity.kt` (URL bar, menu, find, desktop mode, pull-to-refresh, long-press)
-- `android-plugin/install.sh` (registrar CustomTabs)
-- `APK-BUILD.md` (nota sobre `androidx.browser`)
-
-**Criados**
-- `android-plugin/CustomTabsPlugin.kt`
-- `src/lib/custom-tabs.ts`
-
-Nenhuma mudança de dependência npm. Nenhuma alteração de backend.
+- **Sem app de PDF instalado**: usuário precisa instalar Drive/Adobe (Toast informa). 99% dos Android já vêm com Drive.
+- **Autofill na WebView**: depende do "Serviço de preenchimento automático" do Android estar configurado (Google, 1Password, Bitwarden). O cofre interno com PIN continua sendo o fallback robusto.
+- **Cookies/sessão por site**: cada abertura do navegador interno compartilha cookies (mesma WebView do app). Item "Limpar sessão" do menu ⋮ reseta.

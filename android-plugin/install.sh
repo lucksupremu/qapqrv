@@ -19,12 +19,12 @@ KOTLIN_VERSION="2.3.10"
 
 echo "==> Copiando plugins Kotlin para $PKG_DIR"
 mkdir -p "$PKG_DIR"
+# Limpa cópias antigas de plugins/Activities removidos.
+rm -f "$PKG_DIR/PdfViewerActivity.kt" "$PKG_DIR/CustomTabsPlugin.kt"
 cp "$ROOT/android-plugin/VpnStatusPlugin.kt"      "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewPlugin.kt"   "$PKG_DIR/"
 cp "$ROOT/android-plugin/InAppWebViewActivity.kt" "$PKG_DIR/"
-cp "$ROOT/android-plugin/PdfViewerActivity.kt"    "$PKG_DIR/"
 cp "$ROOT/android-plugin/AppOpenAdPlugin.kt"      "$PKG_DIR/"
-cp "$ROOT/android-plugin/CustomTabsPlugin.kt"     "$PKG_DIR/"
 
 ADMOB_APP_ID="ca-app-pub-4966192764194561~2515666476"
 
@@ -140,14 +140,12 @@ import com.getcapacitor.BridgeActivity
 import br.com.qapqrv.app.plugins.VpnStatusPlugin
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin
 import br.com.qapqrv.app.plugins.AppOpenAdPlugin
-import br.com.qapqrv.app.plugins.CustomTabsPlugin
 
 class MainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         registerPlugin(VpnStatusPlugin::class.java)
         registerPlugin(InAppWebViewPlugin::class.java)
         registerPlugin(AppOpenAdPlugin::class.java)
-        registerPlugin(CustomTabsPlugin::class.java)
         super.onCreate(savedInstanceState)
     }
 }
@@ -162,7 +160,6 @@ import com.getcapacitor.BridgeActivity;
 import br.com.qapqrv.app.plugins.VpnStatusPlugin;
 import br.com.qapqrv.app.plugins.InAppWebViewPlugin;
 import br.com.qapqrv.app.plugins.AppOpenAdPlugin;
-import br.com.qapqrv.app.plugins.CustomTabsPlugin;
 
 public class MainActivity extends BridgeActivity {
   @Override
@@ -170,7 +167,6 @@ public class MainActivity extends BridgeActivity {
     registerPlugin(VpnStatusPlugin.class);
     registerPlugin(InAppWebViewPlugin.class);
     registerPlugin(AppOpenAdPlugin.class);
-    registerPlugin(CustomTabsPlugin.class);
     super.onCreate(savedInstanceState);
   }
 }
@@ -186,9 +182,11 @@ if ! grep -q "InAppWebViewActivity" "$MANIFEST"; then
   sed -i 's#</application>#    <activity android:name=".plugins.InAppWebViewActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
 fi
 
-if ! grep -q "PdfViewerActivity" "$MANIFEST"; then
-  echo "==> Registrando PdfViewerActivity no AndroidManifest"
-  sed -i 's#</application>#    <activity android:name=".plugins.PdfViewerActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
+# PdfViewerActivity foi removida — agora PDFs abrem em app externo (Drive/Adobe).
+# Remove o registro antigo do manifest se existir.
+if grep -q "PdfViewerActivity" "$MANIFEST"; then
+  echo "==> Removendo registro de PdfViewerActivity do AndroidManifest"
+  sed -i '/PdfViewerActivity/d' "$MANIFEST"
 fi
 
 # ----- Endurece MainActivity: singleTask + configChanges + alwaysRetainTaskState -----

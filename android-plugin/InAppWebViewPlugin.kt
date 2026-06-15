@@ -59,6 +59,30 @@ class InAppWebViewPlugin : Plugin() {
         /** Credenciais de autofill (apenas em memória do processo). */
         @Volatile var autofillCpf: String? = null
         @Volatile var autofillSenha: String? = null
+
+        /** Instância viva do plugin pra emitir eventos a partir da Activity interna. */
+        @Volatile private var liveInstance: InAppWebViewPlugin? = null
+
+        /** Pedido de "Salvar escala" disparado pelo menu ⋮ do navegador interno. */
+        fun emitSalvarEscala(url: String, id: String, titulo: String): Boolean {
+            val plugin = liveInstance ?: return false
+            return try {
+                val data = JSObject()
+                data.put("url", url); data.put("id", id); data.put("titulo", titulo)
+                plugin.notifyListeners("intranetSalvarEscala", data)
+                true
+            } catch (_: Throwable) { false }
+        }
+    }
+
+    override fun load() {
+        super.load()
+        liveInstance = this
+    }
+
+    override fun handleOnDestroy() {
+        if (liveInstance === this) liveInstance = null
+        super.handleOnDestroy()
     }
 
     @PluginMethod
@@ -193,36 +217,15 @@ class InAppWebViewPlugin : Plugin() {
     }
 
     /**
-     * Abre um PDF salvo (path relativo dentro de filesDir) no visualizador
-     * interno do app (PdfViewerActivity). Não depende de leitor externo.
+     * Abre um PDF salvo (path relativo dentro de filesDir) delegando ao app de
+     * PDF do usuário (Drive/Adobe/Samsung Reader/etc.) via Intent.ACTION_VIEW.
+     * Mantém a assinatura antiga; agora é alias de openPdfExternal.
      */
     @PluginMethod
     fun openPdf(call: PluginCall) {
-        val path = call.getString("path")
-        if (path.isNullOrBlank()) {
-            call.reject("path ausente")
-            return
-        }
-        try {
-            val file = File(context.filesDir, path)
-            if (!file.exists()) {
-                call.reject("Arquivo não encontrado: $path")
-                return
-            }
-            val title = call.getString("title") ?: "Escala"
-            val intent = Intent(context, PdfViewerActivity::class.java).apply {
-                putExtra(PdfViewerActivity.EXTRA_PATH, path)
-                putExtra(PdfViewerActivity.EXTRA_TITLE, title)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
-            val ret = JSObject()
-            ret.put("opened", true)
-            call.resolve(ret)
-        } catch (e: Throwable) {
-            call.reject(e.message ?: "Falha ao abrir PDF")
-        }
+        openPdfExternal(call)
     }
+
 
     /** Fallback: abre o PDF via app externo (Google PDF, etc.) usando FileProvider. */
     @PluginMethod
