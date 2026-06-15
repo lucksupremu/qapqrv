@@ -102,7 +102,7 @@ jobs:
           ls -lh android/app/build/outputs/apk/debug/ || true
 
       - name: Upload APK to GitHub Release
-        uses: softprops/action-gh-release@v2.4.0
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: debug-apk-latest
           name: APK Debug Latest
