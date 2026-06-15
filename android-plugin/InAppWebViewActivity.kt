@@ -414,6 +414,8 @@ class InAppWebViewActivity : Activity() {
         }
 
         swipeRefresh = SwipeRefreshLayout(this).apply {
+            // Pull-to-refresh desativado: atrapalha o gesto de zoom/pinch na página
+            isEnabled = false
             setColorSchemeColors(TOOLBAR_BG)
             setOnRefreshListener {
                 hideErrorOverlay()
@@ -686,7 +688,7 @@ class InAppWebViewActivity : Activity() {
 
         // Ramo 1: login PMESP → viewport mobile + CSS de saneamento + overlay "Entrando...".
         if (isLoginPmesp) {
-            try { swipeRefresh.isEnabled = true } catch (_: Throwable) {}
+            // pull-to-refresh permanece desativado globalmente (atrapalha zoom)
             val js = """
                 (function(){
                   try {
@@ -760,7 +762,7 @@ class InAppWebViewActivity : Activity() {
         }
 
         // Ramo 3: outros hosts (iNotes, CIAF, externos) → não injeta nada.
-        try { swipeRefresh.isEnabled = true } catch (_: Throwable) {}
+        // pull-to-refresh permanece desativado globalmente (atrapalha zoom)
     }
 
 
