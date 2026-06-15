@@ -710,6 +710,7 @@ class InAppWebViewActivity : Activity() {
         }
 
         // Ramo 3: outros hosts (iNotes, CIAF, externos) → não injeta nada.
+        try { swipeRefresh.isEnabled = true } catch (_: Throwable) {}
     }
 
 
