@@ -466,18 +466,25 @@ class InAppWebViewActivity : Activity() {
         }
         root.addView(progressBar)
 
-        // Botões flutuantes (× e ⋮) em pílulas semi-transparentes.
+        // Botões flutuantes (× e ⋮) — pequenos, semi-transparentes, somem ao rolar.
         btnClose = floatingButton(android.R.drawable.ic_menu_close_clear_cancel, "Fechar") { finish() }
-        btnClose.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.TOP or Gravity.START).apply {
-            topMargin = statusBarHeight() + dp(8); marginStart = dp(8)
+        btnClose.setPadding(dp(7), dp(7), dp(7), dp(7))
+        btnClose.layoutParams = FrameLayout.LayoutParams(dp(32), dp(32), Gravity.TOP or Gravity.START).apply {
+            topMargin = statusBarHeight() + dp(6); marginStart = dp(6)
         }
         root.addView(btnClose)
 
         btnOverflow = floatingButton(android.R.drawable.ic_menu_more, "Mais opções") { showOverflowMenu(it) }
-        btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(40), dp(40), Gravity.TOP or Gravity.END).apply {
-            topMargin = statusBarHeight() + dp(8); marginEnd = dp(8)
+        btnOverflow.setPadding(dp(7), dp(7), dp(7), dp(7))
+        btnOverflow.layoutParams = FrameLayout.LayoutParams(dp(32), dp(32), Gravity.TOP or Gravity.END).apply {
+            topMargin = statusBarHeight() + dp(6); marginEnd = dp(6)
         }
         root.addView(btnOverflow)
+
+        // Auto-fade: fica translúcido (alpha 0.35) após 1.5s sem interação,
+        // volta opaco ao tocar a tela ou rolar.
+        attachFloatingAutoFade()
+
 
         // Find bar (oculta por padrão)
         findBar = LinearLayout(this).apply {
