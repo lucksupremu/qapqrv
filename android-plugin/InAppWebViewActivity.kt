@@ -76,8 +76,11 @@ class InAppWebViewActivity : Activity() {
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private lateinit var errorOverlay: LinearLayout
     private lateinit var errorMessage: TextView
-    private lateinit var btnClose: ImageButton
     private lateinit var btnOverflow: ImageButton
+    private lateinit var topBar: LinearLayout
+    private lateinit var btnTopBack: ImageButton
+    private lateinit var btnTopReload: ImageButton
+    private lateinit var btnTopClose: ImageButton
     private lateinit var findBar: LinearLayout
     private lateinit var findInput: EditText
     private lateinit var findCount: TextView
