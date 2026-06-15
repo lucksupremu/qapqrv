@@ -651,6 +651,11 @@ class InAppWebViewActivity : Activity() {
         return if (id > 0) resources.getDimensionPixelSize(id) else dp(24)
     }
 
+    private fun navigationBarHeight(): Int {
+        val id = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        return if (id > 0) resources.getDimensionPixelSize(id) else dp(0)
+    }
+
 
     // ---------------- Menu ⋮ ----------------
 
