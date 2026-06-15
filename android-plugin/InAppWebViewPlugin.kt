@@ -59,6 +59,30 @@ class InAppWebViewPlugin : Plugin() {
         /** Credenciais de autofill (apenas em memória do processo). */
         @Volatile var autofillCpf: String? = null
         @Volatile var autofillSenha: String? = null
+
+        /** Instância viva do plugin pra emitir eventos a partir da Activity interna. */
+        @Volatile private var liveInstance: InAppWebViewPlugin? = null
+
+        /** Pedido de "Salvar escala" disparado pelo menu ⋮ do navegador interno. */
+        fun emitSalvarEscala(url: String, id: String, titulo: String): Boolean {
+            val plugin = liveInstance ?: return false
+            return try {
+                val data = JSObject()
+                data.put("url", url); data.put("id", id); data.put("titulo", titulo)
+                plugin.notifyListeners("intranetSalvarEscala", data)
+                true
+            } catch (_: Throwable) { false }
+        }
+    }
+
+    override fun load() {
+        super.load()
+        liveInstance = this
+    }
+
+    override fun handleOnDestroy() {
+        if (liveInstance === this) liveInstance = null
+        super.handleOnDestroy()
     }
 
     @PluginMethod
