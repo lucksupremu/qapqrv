@@ -182,9 +182,11 @@ if ! grep -q "InAppWebViewActivity" "$MANIFEST"; then
   sed -i 's#</application>#    <activity android:name=".plugins.InAppWebViewActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
 fi
 
-if ! grep -q "PdfViewerActivity" "$MANIFEST"; then
-  echo "==> Registrando PdfViewerActivity no AndroidManifest"
-  sed -i 's#</application>#    <activity android:name=".plugins.PdfViewerActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:hardwareAccelerated="true" android:exported="false" />\n    </application>#' "$MANIFEST"
+# PdfViewerActivity foi removida — agora PDFs abrem em app externo (Drive/Adobe).
+# Remove o registro antigo do manifest se existir.
+if grep -q "PdfViewerActivity" "$MANIFEST"; then
+  echo "==> Removendo registro de PdfViewerActivity do AndroidManifest"
+  sed -i '/PdfViewerActivity/d' "$MANIFEST"
 fi
 
 # ----- Endurece MainActivity: singleTask + configChanges + alwaysRetainTaskState -----
