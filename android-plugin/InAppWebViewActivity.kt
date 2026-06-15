@@ -636,6 +636,7 @@ class InAppWebViewActivity : Activity() {
 
         // Ramo 1: login PMESP → viewport mobile + CSS de saneamento + overlay "Entrando...".
         if (isLoginPmesp) {
+            try { swipeRefresh.isEnabled = true } catch (_: Throwable) {}
             val js = """
                 (function(){
                   try {
