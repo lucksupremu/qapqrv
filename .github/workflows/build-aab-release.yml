@@ -97,8 +97,9 @@ jobs:
       - name: Patch build.gradle with signing config + version
         run: |
           GRADLE=android/app/build.gradle
-          sed -i 's/versionCode [0-9][0-9]*/versionCode 2/'   "$GRADLE"
-          sed -i 's/versionName "[^"]*"/versionName "1.1.0"/' "$GRADLE"
+          sed -i 's/versionCode [0-9][0-9]*/versionCode 3/'   "$GRADLE"
+          sed -i 's/versionName "[^"]*"/versionName "1.1.1"/' "$GRADLE"
+
           if ! grep -q "signingConfigs {" "$GRADLE"; then
             python3 .github/scripts/patch-gradle-signing.py
           fi
