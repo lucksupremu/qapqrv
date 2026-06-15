@@ -320,6 +320,7 @@ export function CredentialVaultCard() {
           <div className="flex gap-2">
             {editing && (
               <button
+                type="button"
                 onClick={() => {
                   setEditing(false);
                   setErr(null);
@@ -331,7 +332,7 @@ export function CredentialVaultCard() {
               </button>
             )}
             <button
-              onClick={handleSave}
+              type="submit"
               disabled={busy}
               className="flex-1 rounded-[10px] py-2 text-[13px] font-bold text-white disabled:opacity-50"
               style={{ background: "#2e6b8a" }}
