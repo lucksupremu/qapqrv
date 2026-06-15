@@ -688,6 +688,9 @@ class InAppWebViewActivity : Activity() {
         // Ramo 2: intranet de sistemas pós-login (DEJEM, Delegada, SIRH, etc.)
         // → zoom-out do layout desktop legado para caber na tela do celular.
         if (isSistemasAdminPos) {
+            // Desativa pull-to-refresh: o gesto natural de rolagem estava
+            // recarregando a página e perdendo o estado do formulário.
+            try { swipeRefresh.isEnabled = false } catch (_: Throwable) {}
             val js = """
                 (function(){
                   try {
