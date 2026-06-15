@@ -590,14 +590,44 @@ class InAppWebViewActivity : Activity() {
      */
     private fun injectMobileViewport(url: String?) {
         if (url.isNullOrBlank()) return
-        val ok = try {
+        val (isIntranet, isLogin) = try {
             val u = Uri.parse(url)
             val host = u.host?.lowercase().orEmpty()
             val path = u.path?.lowercase().orEmpty()
-            host.endsWith("policiamilitar.sp.gov.br") &&
+            val intranet = host.endsWith("policiamilitar.sp.gov.br")
+            val login = intranet &&
                 (path.endsWith("/login.aspx") || path.endsWith("/autenticacaosegura.aspx"))
-        } catch (_: Throwable) { false }
-        if (!ok) return
+            Pair(intranet, login)
+        } catch (_: Throwable) { Pair(false, false) }
+        if (!isIntranet) return
+        val loginCss = if (isLogin) """
+                      + 'html,body{max-width:100% !important;overflow-x:hidden !important;}'
+                      + 'body{padding:12px !important;font-size:16px !important;line-height:1.45 !important;-webkit-text-size-adjust:100% !important;}'
+                      + 'table{max-width:100% !important;width:auto !important;}'
+                      + 'img{max-width:100% !important;height:auto !important;}'
+                      + 'input,select,textarea,button{font-size:16px !important;min-height:44px !important;padding:8px 10px !important;box-sizing:border-box !important;}'
+                      + 'input[type="text"],input[type="password"],input:not([type]){width:100% !important;max-width:340px !important;display:block !important;margin:6px 0 !important;border:1px solid #888 !important;border-radius:6px !important;}'
+                      + 'input[type="submit"],input[type="button"],button{display:inline-block !important;margin:10px 4px !important;padding:10px 18px !important;border-radius:6px !important;background:#2E6B8A !important;color:#fff !important;border:0 !important;font-weight:600 !important;}'
+                      + 'a{word-break:break-word;}'
+                      + '#qapqrv-loading{position:fixed;inset:0;background:rgba(15,30,45,0.88);color:#fff;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:2147483647;font-family:system-ui,-apple-system,sans-serif;}'
+                      + '#qapqrv-loading.on{display:flex;}'
+                      + '#qapqrv-loading .sp{width:48px;height:48px;border:4px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:qapqrvSpin 0.9s linear infinite;margin-bottom:14px;}'
+                      + '#qapqrv-loading .tx{font-size:16px;font-weight:600;letter-spacing:0.3px;}'
+                      + '@keyframes qapqrvSpin{to{transform:rotate(360deg);}}'
+        """.trimIndent() else ""
+        val loginOverlay = if (isLogin) """
+                  if (!document.getElementById('qapqrv-loading')) {
+                    var ov = document.createElement('div');
+                    ov.id = 'qapqrv-loading';
+                    ov.innerHTML = '<div class="sp"></div><div class="tx">Entrando...</div>';
+                    (document.body || document.documentElement).appendChild(ov);
+                  }
+                  var showLoad = function(){ var o=document.getElementById('qapqrv-loading'); if(o) o.classList.add('on'); };
+                  document.addEventListener('submit', showLoad, true);
+                  Array.prototype.forEach.call(document.querySelectorAll('input[type="submit"],button[type="submit"],button:not([type])'), function(b){
+                    b.addEventListener('click', function(){ setTimeout(showLoad, 0); }, true);
+                  });
+        """.trimIndent() else ""
         val js = """
             (function(){
               try {
@@ -613,32 +643,12 @@ class InAppWebViewActivity : Activity() {
                     var st = document.createElement('style');
                     st.id = 'qapqrv-mobile-fix';
                     st.textContent = ''
-                      + 'html,body{max-width:100% !important;overflow-x:hidden !important;}'
-                      + 'body{padding:48px 12px 24px 12px !important;font-size:16px !important;line-height:1.45 !important;-webkit-text-size-adjust:100% !important;}'
-                      + 'table{max-width:100% !important;width:auto !important;}'
-                      + 'img{max-width:100% !important;height:auto !important;}'
-                      + 'input,select,textarea,button{font-size:16px !important;min-height:44px !important;padding:8px 10px !important;box-sizing:border-box !important;}'
-                      + 'input[type="text"],input[type="password"],input:not([type]){width:100% !important;max-width:340px !important;display:block !important;margin:6px 0 !important;border:1px solid #888 !important;border-radius:6px !important;}'
-                      + 'input[type="submit"],input[type="button"],button{display:inline-block !important;margin:10px 4px !important;padding:10px 18px !important;border-radius:6px !important;background:#2E6B8A !important;color:#fff !important;border:0 !important;font-weight:600 !important;}'
-                      + 'a{word-break:break-word;}'
-                      + '#qapqrv-loading{position:fixed;inset:0;background:rgba(15,30,45,0.88);color:#fff;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:2147483647;font-family:system-ui,-apple-system,sans-serif;}'
-                      + '#qapqrv-loading.on{display:flex;}'
-                      + '#qapqrv-loading .sp{width:48px;height:48px;border:4px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:qapqrvSpin 0.9s linear infinite;margin-bottom:14px;}'
-                      + '#qapqrv-loading .tx{font-size:16px;font-weight:600;letter-spacing:0.3px;}'
-                      + '@keyframes qapqrvSpin{to{transform:rotate(360deg);}}';
+                      + 'html{-webkit-text-size-adjust:100% !important;}'
+                      $loginCss
+                      + '';
                     head.appendChild(st);
                   }
-                  if (!document.getElementById('qapqrv-loading')) {
-                    var ov = document.createElement('div');
-                    ov.id = 'qapqrv-loading';
-                    ov.innerHTML = '<div class="sp"></div><div class="tx">Entrando...</div>';
-                    (document.body || document.documentElement).appendChild(ov);
-                  }
-                  var showLoad = function(){ var o=document.getElementById('qapqrv-loading'); if(o) o.classList.add('on'); };
-                  document.addEventListener('submit', showLoad, true);
-                  Array.prototype.forEach.call(document.querySelectorAll('input[type="submit"],button[type="submit"],button:not([type])'), function(b){
-                    b.addEventListener('click', function(){ setTimeout(showLoad, 0); }, true);
-                  });
+                  $loginOverlay
                 }
               } catch(e) {}
             })();
