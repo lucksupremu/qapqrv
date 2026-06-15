@@ -249,10 +249,25 @@ export function CredentialVaultCard() {
       )}
 
       {(!has || editing) && (
-        <div className="mt-3 space-y-2">
+        <form
+          className="mt-3 space-y-2"
+          autoComplete="on"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSave();
+          }}
+        >
+          {/* Hidden hint para o autofill do Android associar credenciais ao domínio da intranet PMESP */}
+          <input type="hidden" name="form-type" value="login" autoComplete="off" />
           <input
+            id="intranet-cpf"
+            name="username"
             type="text"
             inputMode="numeric"
+            autoComplete="username"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
             value={cpf}
             onChange={(e) => setCpf(e.target.value)}
             placeholder="CPF (só números)"
@@ -260,7 +275,13 @@ export function CredentialVaultCard() {
             style={{ borderColor: "#2e6b8a", color: "#0f2535" }}
           />
           <input
+            id="intranet-senha"
+            name="password"
             type="password"
+            autoComplete={editing ? "current-password" : "new-password"}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
             placeholder="Senha da intranet"
@@ -272,6 +293,9 @@ export function CredentialVaultCard() {
               type="password"
               inputMode="numeric"
               maxLength={4}
+              autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="PIN (4 dígitos)"
@@ -282,6 +306,9 @@ export function CredentialVaultCard() {
               type="password"
               inputMode="numeric"
               maxLength={4}
+              autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
               value={pin2}
               onChange={(e) => setPin2(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="Confirme o PIN"
