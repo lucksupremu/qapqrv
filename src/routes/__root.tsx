@@ -307,6 +307,7 @@ function RootComponent() {
         (window as any).cancelIdleCallback(adTimer);
       else clearTimeout(adTimer);
       if (removeAppListener) removeAppListener();
+      if (removeSalvarEscala) removeSalvarEscala();
     };
   }, []);
 
