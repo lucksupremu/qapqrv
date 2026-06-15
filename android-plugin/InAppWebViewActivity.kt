@@ -577,15 +577,26 @@ class InAppWebViewActivity : Activity() {
         }
     }
 
+    private fun topBarButton(iconRes: Int, desc: String, onClick: (View) -> Unit): ImageButton {
+        return ImageButton(this).apply {
+            setImageResource(iconRes)
+            setColorFilter(Color.WHITE)
+            background = null
+            contentDescription = desc
+            scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+            setPadding(dp(10), dp(10), dp(10), dp(10))
+            setOnClickListener { onClick(it) }
+        }
+    }
+
     /**
-     * Faz os botões × e ⋮ ficarem translúcidos após 1.5s sem interação,
-     * e voltarem opacos ao tocar a tela ou ao rolar. Evita que cubram
-     * conteúdo (especialmente campos de login da intranet PMESP).
+     * Faz a barra superior e o botão ⋮ ficarem translúcidos após 1.5s sem
+     * interação, e voltarem opacos ao tocar a tela ou ao rolar.
      */
     private fun attachFloatingAutoFade() {
         val fadeRunnable = Runnable {
             try {
-                btnClose.animate().alpha(0.30f).setDuration(220).start()
+                topBar.animate().alpha(0.30f).setDuration(220).start()
                 btnOverflow.animate().alpha(0.30f).setDuration(220).start()
             } catch (_: Throwable) {}
         }
@@ -593,7 +604,7 @@ class InAppWebViewActivity : Activity() {
         fun bump() {
             handler.removeCallbacks(fadeRunnable)
             try {
-                btnClose.animate().alpha(1f).setDuration(120).start()
+                topBar.animate().alpha(1f).setDuration(120).start()
                 btnOverflow.animate().alpha(1f).setDuration(120).start()
             } catch (_: Throwable) {}
             handler.postDelayed(fadeRunnable, 1500)
