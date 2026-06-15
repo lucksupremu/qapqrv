@@ -426,7 +426,7 @@ class InAppWebViewActivity : Activity() {
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-            )
+            ).apply { topMargin = statusBarHeight() + dp(44) }
         }
         root.addView(swipeRefresh)
 
