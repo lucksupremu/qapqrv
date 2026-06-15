@@ -20,17 +20,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Delete old APK artifacts
+      - name: Delete old APK/AAB artifacts
         uses: actions/github-script@v8
         with:
           script: |
-            const artifactName = 'qapqrv-debug-apk';
+            const names = ['qapqrv-debug-apk', 'qapqrv-release-aab'];
             const { data } = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 100,
             });
-            for (const artifact of data.artifacts.filter((item) => item.name === artifactName)) {
+            for (const artifact of data.artifacts.filter((item) => names.includes(item.name))) {
               await github.rest.actions.deleteArtifact({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
