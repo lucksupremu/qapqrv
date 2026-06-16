@@ -1,3 +1,4 @@
+# Trigger build: gerar AAB
 name: Build Android APK
 
 on:
