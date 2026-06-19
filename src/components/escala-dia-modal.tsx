@@ -1,0 +1,181 @@
+// Modal simplificado para adicionar um plantão único num dia específico.
+// Inspirado no antigo modal de evento — só os campos essenciais.
+
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  ESCALA_CORES,
+  type EscalaRegra,
+  newEscalaId,
+} from "@/lib/escala-trabalho";
+
+type Props = {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  baseDate: Date | null;
+  onSave: (regra: EscalaRegra) => void;
+};
+
+function toISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function toHHMM(h: number, m: number): string {
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function parseHHMM(s: string): { h: number; m: number } {
+  const [hh, mm] = s.split(":").map((x) => Number(x));
+  return {
+    h: Number.isFinite(hh) ? Math.min(23, Math.max(0, hh)) : 0,
+    m: Number.isFinite(mm) ? Math.min(59, Math.max(0, mm)) : 0,
+  };
+}
+
+export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) {
+  const [local, setLocal] = useState("");
+  const [cor, setCor] = useState(ESCALA_CORES[0]!.value);
+  const [horaInicio, setHoraInicio] = useState(7);
+  const [minutoInicio, setMinutoInicio] = useState(0);
+  const [duracao, setDuracao] = useState(12);
+
+  useEffect(() => {
+    if (!open) return;
+    setLocal("");
+    setCor(ESCALA_CORES[0]!.value);
+    setHoraInicio(7);
+    setMinutoInicio(0);
+    setDuracao(12);
+  }, [open]);
+
+  const handleSubmit = () => {
+    const localOk = local.trim();
+    if (!localOk) {
+      toast.error("Informe o local do plantão.");
+      return;
+    }
+    if (!baseDate) {
+      toast.error("Dia inválido.");
+      return;
+    }
+    if (!Number.isFinite(duracao) || duracao < 1 || duracao > 24) {
+      toast.error("Duração deve estar entre 1 e 24 horas.");
+      return;
+    }
+    const iso = toISO(baseDate);
+    const regra: EscalaRegra = {
+      id: newEscalaId(),
+      local: localOk.slice(0, 60),
+      cor,
+      trabalho: duracao,
+      folga: Math.max(1, 24 - duracao),
+      horaInicio,
+      minutoInicio,
+      dataInicial: iso,
+      dataFinal: iso,
+    };
+    onSave(regra);
+    onOpenChange(false);
+    toast.success("Plantão adicionado.");
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle>Adicionar plantão neste dia</DialogTitle>
+          <DialogDescription>
+            {baseDate
+              ? format(baseDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+              : ""}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-1">
+          <div className="space-y-1.5">
+            <Label htmlFor="local-dia">Local</Label>
+            <Input
+              id="local-dia"
+              value={local}
+              onChange={(e) => setLocal(e.target.value)}
+              placeholder="Ex: Polícia Militar, Dejem, Delegada"
+              maxLength={60}
+              autoFocus
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Cor no calendário</Label>
+            <div className="flex flex-wrap gap-2">
+              {ESCALA_CORES.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => setCor(c.value)}
+                  aria-label={c.label}
+                  className={cn(
+                    "h-8 w-8 rounded-full border-2 transition",
+                    cor === c.value
+                      ? "scale-110 border-foreground"
+                      : "border-transparent opacity-80",
+                  )}
+                  style={{ background: c.value }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="hora-dia">Horário de início</Label>
+              <Input
+                id="hora-dia"
+                type="time"
+                step={60}
+                value={toHHMM(horaInicio, minutoInicio)}
+                onChange={(e) => {
+                  const { h, m } = parseHHMM(e.target.value);
+                  setHoraInicio(h);
+                  setMinutoInicio(m);
+                }}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="dur-dia">Duração (horas)</Label>
+              <Input
+                id="dur-dia"
+                type="number"
+                min={1}
+                max={24}
+                value={duracao}
+                onChange={(e) => setDuracao(Number(e.target.value))}
+              />
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit}>Salvar plantão</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

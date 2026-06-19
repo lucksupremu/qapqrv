@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
+import { EscalaDiaModal } from "@/components/escala-dia-modal";
 import { EventoLivreModal } from "@/components/evento-livre-modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
@@ -62,6 +63,7 @@ export function EscalaCalendarCard() {
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRegra, setEditingRegra] = useState<EscalaRegra | null>(null);
+  const [escalaDiaOpen, setEscalaDiaOpen] = useState(false);
   const [escalaBaseDate, setEscalaBaseDate] = useState<Date | null>(null);
   const [eventoModalOpen, setEventoModalOpen] = useState(false);
   const [eventoEditing, setEventoEditing] = useState<EventoPersonalizado | null>(null);
@@ -603,9 +605,8 @@ export function EscalaCalendarCard() {
                 <button
                   onClick={() => {
                     setOpenKey(null);
-                    setEditingRegra(null);
                     setEscalaBaseDate(cell.date);
-                    setModalOpen(true);
+                    setEscalaDiaOpen(true);
                   }}
                   className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
                   style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
@@ -740,14 +741,20 @@ export function EscalaCalendarCard() {
         open={modalOpen}
         onOpenChange={(v) => {
           setModalOpen(v);
-          if (!v) {
-            setEditingRegra(null);
-            setEscalaBaseDate(null);
-          }
+          if (!v) setEditingRegra(null);
         }}
         onSave={handleSave}
         initial={editingRegra}
-        initialBaseDate={escalaBaseDate}
+      />
+
+      <EscalaDiaModal
+        open={escalaDiaOpen}
+        onOpenChange={(v) => {
+          setEscalaDiaOpen(v);
+          if (!v) setEscalaBaseDate(null);
+        }}
+        baseDate={escalaBaseDate}
+        onSave={handleSave}
       />
 
       <EventoLivreModal
