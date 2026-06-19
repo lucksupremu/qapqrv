@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, Clock } from "lucide-react";
-import { POSTS, getPost } from "@/lib/blog";
+import { POSTS, getPost, type BlogPost } from "@/lib/blog";
 
 export const Route = createFileRoute("/blog/$slug")({
   head: ({ params }) => {
@@ -83,7 +83,7 @@ function BlogPostScreen() {
         </div>
 
         <div className="mt-6 space-y-4 text-[15.5px] leading-[1.7] text-slate-700">
-          {post.body.map((block, i) => {
+          {post.body.map((block: BlogPost["body"][number], i: number) => {
             if (typeof block === "string") {
               return <p key={i}>{block}</p>;
             }
@@ -99,7 +99,7 @@ function BlogPostScreen() {
             }
             return (
               <ul key={i} className="list-disc space-y-1 pl-5">
-                {block.list.map((item, j) => (
+                {block.list.map((item: string, j: number) => (
                   <li key={j}>{item}</li>
                 ))}
               </ul>
