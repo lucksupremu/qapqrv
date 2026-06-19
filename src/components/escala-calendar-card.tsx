@@ -61,6 +61,7 @@ export function EscalaCalendarCard() {
   const [eventos, setEventos] = useState<EventoPersonalizado[]>([]);
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingRegra, setEditingRegra] = useState<EscalaRegra | null>(null);
   const [eventoModalOpen, setEventoModalOpen] = useState(false);
   const [eventoEditing, setEventoEditing] = useState<EventoPersonalizado | null>(null);
   const [eventoBaseDate, setEventoBaseDate] = useState<Date | null>(null);
