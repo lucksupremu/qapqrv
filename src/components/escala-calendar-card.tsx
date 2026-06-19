@@ -383,17 +383,6 @@ export function EscalaCalendarCard() {
                   const emoji = isNoite ? "🌙" : "🌞";
                   const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
 
-                  // Barra proporcional ao horário: posição = hora de entrada,
-                  // altura = horas trabalhadas dentro do mesmo dia.
-                  const AREA_TOP = 18;
-                  const AREA_BOTTOM = 2;
-                  const AREA_H = 40 - AREA_TOP - AREA_BOTTOM; // 20px
-                  const hi = s.horaInicio ?? 0;
-                  const dn = s.duracaoNoDia ?? 24;
-                  const barTop = AREA_TOP + (hi / 24) * AREA_H;
-                  const barHeight = Math.max(6, (dn / 24) * AREA_H);
-                  const borderRadiusBar = "4px";
-
                   return (
                     <span
                       key={`${ci}-${si}`}
@@ -402,11 +391,11 @@ export function EscalaCalendarCard() {
                       style={{
                         left,
                         width,
-                        top: barTop,
-                        height: barHeight,
+                        top: 20,
+                        bottom: 2,
                         background: bg,
                         borderTop: `3px solid ${s.cor}`,
-                        borderRadius: borderRadiusBar,
+                        borderRadius: "6px",
                         zIndex: 0,
                       }}
                     >
