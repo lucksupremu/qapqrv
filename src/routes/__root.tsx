@@ -20,6 +20,7 @@ import { WhatsNewModal } from "@/components/whats-new-modal";
 import { isNativeApp } from "@/lib/in-app-browser";
 import { installAppBadgeUpdater } from "@/lib/app-badge";
 import { InstallConfirmModal } from "@/components/install-confirm-modal";
+import { ShareAppNudge } from "@/components/share-app-nudge";
 import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
 
 
@@ -344,6 +345,7 @@ function RootComponent() {
           <BrowserWarningModal />
           <WhatsNewModal />
           <InstallConfirmModal />
+          <ShareAppNudge />
           <Toaster />
 
         </DrawerProvider>
