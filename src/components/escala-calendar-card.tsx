@@ -376,24 +376,22 @@ export function EscalaCalendarCard() {
                       />
                     );
                   }
-                  const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
-                  const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
-                  const badgeSize = totalCol === 1 ? 14 : totalCol === 2 ? 12 : 0;
-                  const iconSize = totalCol === 1 ? 9 : totalCol === 2 ? 7 : 0;
                   const isNoite = s.periodo === "noite";
-                  const PeriodoIcon = isNoite ? Moon : Sun;
-                  const badgeBg = isNoite ? "#1E1B4B" : "#FBBF24";
-                  // Contraste automático: ícone escuro em fundo claro (sol) e claro em fundo escuro (lua).
-                  const iconColor = isNoite ? "#FFFFFF" : "#1F2937";
-                  // Anel duplo: ring interno na cor do card + ring externo no foreground translúcido
-                  // garante separação visível contra qualquer cor de plantão e em ambos os temas.
-                  const ringShadow =
-                    "0 0 0 1.5px hsl(var(--card)), 0 0 0 2.5px hsl(var(--foreground) / 0.45), 0 1px 2px rgba(0,0,0,0.35)";
+                  // (1) Fundo diferenciado por turno: noite mais escuro/azulado, dia mais claro.
+                  const bg = isNoite
+                    ? `color-mix(in srgb, ${s.cor} 55%, #0B1437)`
+                    : `color-mix(in srgb, ${s.cor} 28%, transparent)`;
+                  const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
+                  // (3) Faixa lateral: amarela = diurno, índigo = noturno.
+                  const stripeColor = isNoite ? "#1E1B4B" : "#FBBF24";
+                  // (5) Emoji nativo do turno.
+                  const emoji = isNoite ? "🌙" : "🌞";
+                  const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
                   return (
                     <span
                       key={`${ci}-${si}`}
                       aria-hidden
-                      className="pointer-events-none absolute"
+                      className="pointer-events-none absolute overflow-hidden"
                       style={{
                         left,
                         width,
@@ -405,30 +403,35 @@ export function EscalaCalendarCard() {
                         zIndex: 0,
                       }}
                     >
-                      {badgeSize > 0 && s.lado === "cheia" && (
+                      {/* Faixa lateral indicando turno */}
+                      <span
+                        style={{
+                          position: "absolute",
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: 3,
+                          background: stripeColor,
+                          boxShadow: isNoite
+                            ? "0 0 4px rgba(30,27,75,0.5)"
+                            : "0 0 4px rgba(251,191,36,0.5)",
+                        }}
+                      />
+                      {emojiSize > 0 && s.lado === "cheia" && (
                         <span
                           role="img"
                           aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
                           style={{
                             position: "absolute",
                             right: 2,
-                            bottom: 2,
-                            width: badgeSize,
-                            height: badgeSize,
-                            borderRadius: "50%",
-                            background: badgeBg,
-                            boxShadow: ringShadow,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            bottom: 0,
+                            fontSize: emojiSize,
+                            lineHeight: 1,
+                            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
                             zIndex: 4,
                           }}
                         >
-                          <PeriodoIcon
-                            size={iconSize}
-                            strokeWidth={2.75}
-                            color={iconColor}
-                          />
+                          {emoji}
                         </span>
                       )}
                     </span>
@@ -634,18 +637,16 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 14, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }}>
-            <span style={{ position: "absolute", right: -2, bottom: -2, width: 10, height: 10, borderRadius: "50%", background: "#FBBF24", boxShadow: "0 0 0 1.5px hsl(var(--card)), 0 0 0 2.5px hsl(var(--foreground) / 0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Sun size={6} strokeWidth={3} color="#1F2937" />
-            </span>
+          <span style={{ position: "relative", width: 16, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)`, overflow: "hidden" }}>
+            <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "#FBBF24" }} />
+            <span style={{ position: "absolute", right: 1, bottom: -1, fontSize: 10, lineHeight: 1 }}>🌞</span>
           </span>
           Plantão diurno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 14, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }}>
-            <span style={{ position: "absolute", right: -2, bottom: -2, width: 10, height: 10, borderRadius: "50%", background: "#1E1B4B", boxShadow: "0 0 0 1.5px hsl(var(--card)), 0 0 0 2.5px hsl(var(--foreground) / 0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Moon size={6} strokeWidth={3} color="#FFFFFF" />
-            </span>
+          <span style={{ position: "relative", width: 16, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 55%, #0B1437)`, overflow: "hidden" }}>
+            <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "#1E1B4B" }} />
+            <span style={{ position: "absolute", right: 1, bottom: -1, fontSize: 10, lineHeight: 1 }}>🌙</span>
           </span>
           Plantão noturno
         </span>
@@ -656,8 +657,9 @@ export function EscalaCalendarCard() {
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        O ícone indica o turno e marca apenas o dia em que o plantão começa. Toque em um dia para ver detalhes.
+        Fundo escuro e faixa lateral índigo indicam plantão noturno; fundo claro e faixa amarela indicam diurno. Toque em um dia para detalhes.
       </p>
+
 
 
 
