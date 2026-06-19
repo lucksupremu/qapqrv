@@ -634,20 +634,20 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          <span style={{ width: 8, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-          Plantão no dia
+          <span style={{ position: "relative", width: 14, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }}>
+            <span style={{ position: "absolute", right: -2, bottom: -2, width: 10, height: 10, borderRadius: "50%", background: "#FBBF24", boxShadow: "0 0 0 1.5px hsl(var(--card)), 0 0 0 2.5px hsl(var(--foreground) / 0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Sun size={6} strokeWidth={3} color="#1F2937" />
+            </span>
+          </span>
+          Plantão diurno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 8, height: 16 }}>
-            <span style={{ position: "absolute", top: 8, bottom: 0, left: 0, right: 0, borderRadius: "0 0 3px 3px", background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+          <span style={{ position: "relative", width: 14, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }}>
+            <span style={{ position: "absolute", right: -2, bottom: -2, width: 10, height: 10, borderRadius: "50%", background: "#1E1B4B", boxShadow: "0 0 0 1.5px hsl(var(--card)), 0 0 0 2.5px hsl(var(--foreground) / 0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Moon size={6} strokeWidth={3} color="#FFFFFF" />
+            </span>
           </span>
-          Início noturno
-        </span>
-        <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 8, height: 16 }}>
-            <span style={{ position: "absolute", top: 0, bottom: 8, left: 0, right: 0, borderRadius: "3px 3px 0 0", borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-          </span>
-          Continuação
+          Plantão noturno
         </span>
         <span className="flex items-center gap-1">
           <span style={{ width: 8, height: 16, borderRadius: 3, background: "#FFE066", borderTop: "3px solid #3498DB", boxShadow: "0 1px 2px rgba(0,0,0,0.2)", transform: "rotate(-3deg)" }} />
@@ -656,8 +656,9 @@ export function EscalaCalendarCard() {
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        Toque em um dia para ver detalhes.
+        O ícone indica o turno e marca apenas o dia em que o plantão começa. Toque em um dia para ver detalhes.
       </p>
+
 
 
 
