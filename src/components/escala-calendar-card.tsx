@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, BookmarkPlus, Sun, Moon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, BookmarkPlus } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
 import { EventoLivreModal } from "@/components/evento-livre-modal";
