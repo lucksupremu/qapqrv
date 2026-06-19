@@ -719,6 +719,7 @@ export function EscalaCalendarCard() {
           <button
             onClick={() => {
               setEditingRegra(null);
+              setEscalaBaseDate(null);
               setModalOpen(true);
             }}
             className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-[12px] font-bold transition active:scale-[0.98]"
