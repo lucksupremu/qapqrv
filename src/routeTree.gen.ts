@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char91indexChar93RouteImport } from './routes/[index]'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SplashRouteImport } from './routes/splash'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -22,18 +23,26 @@ import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as Googlef2edc9e3a6b2e4a9DothtmlRouteImport } from './routes/googlef2edc9e3a6b2e4a9[.]html'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
+import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as CalendarioRouteImport } from './routes/calendario'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AnyconnectRouteImport } from './routes/anyconnect'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 import { Route as EscalaViewerIdRouteImport } from './routes/escala-viewer.$id'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 
 const Char91indexChar93Route = Char91indexChar93RouteImport.update({
   id: '/index',
   path: '/index',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplashRoute = SplashRouteImport.update({
@@ -97,6 +106,11 @@ const EscalasBaixadasRoute = EscalasBaixadasRouteImport.update({
   path: '/escalas-baixadas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -105,6 +119,11 @@ const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
 const CalendarioRoute = CalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnyconnectRoute = AnyconnectRouteImport.update({
@@ -139,12 +158,19 @@ const EscalaViewerIdRoute = EscalaViewerIdRouteImport.update({
   path: '/escala-viewer/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
+  '/blog': typeof BlogRouteWithChildren
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/contato': typeof ContatoRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -158,6 +184,8 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
+  '/termos': typeof TermosRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -166,8 +194,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
+  '/blog': typeof BlogRouteWithChildren
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/contato': typeof ContatoRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -181,6 +211,8 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
+  '/termos': typeof TermosRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -190,8 +222,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/anyconnect': typeof AnyconnectRoute
+  '/blog': typeof BlogRouteWithChildren
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/contato': typeof ContatoRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -205,6 +239,8 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/splash': typeof SplashRoute
+  '/termos': typeof TermosRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -215,8 +251,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/anyconnect'
+    | '/blog'
     | '/calendario'
     | '/configuracoes'
+    | '/contato'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -230,6 +268,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
+    | '/termos'
+    | '/blog/$slug'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -238,8 +278,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/anyconnect'
+    | '/blog'
     | '/calendario'
     | '/configuracoes'
+    | '/contato'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -253,6 +295,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
+    | '/termos'
+    | '/blog/$slug'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -261,8 +305,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/anyconnect'
+    | '/blog'
     | '/calendario'
     | '/configuracoes'
+    | '/contato'
     | '/escalas-baixadas'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
@@ -276,6 +322,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/splash'
+    | '/termos'
+    | '/blog/$slug'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -285,8 +333,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnyconnectRoute: typeof AnyconnectRoute
+  BlogRoute: typeof BlogRouteWithChildren
   CalendarioRoute: typeof CalendarioRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ContatoRoute: typeof ContatoRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FavoritosRoute: typeof FavoritosRoute
   Googlef2edc9e3a6b2e4a9DothtmlRoute: typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
@@ -300,6 +350,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   SplashRoute: typeof SplashRoute
+  TermosRoute: typeof TermosRoute
   EscalaViewerIdRoute: typeof EscalaViewerIdRoute
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
@@ -313,6 +364,13 @@ declare module '@tanstack/react-router' {
       path: '/index'
       fullPath: '/index'
       preLoaderRoute: typeof Char91indexChar93RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/splash': {
@@ -399,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalasBaixadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/configuracoes': {
       id: '/configuracoes'
       path: '/configuracoes'
@@ -411,6 +476,13 @@ declare module '@tanstack/react-router' {
       path: '/calendario'
       fullPath: '/calendario'
       preLoaderRoute: typeof CalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/anyconnect': {
@@ -455,14 +527,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalaViewerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
   }
 }
+
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnyconnectRoute: AnyconnectRoute,
+  BlogRoute: BlogRouteWithChildren,
   CalendarioRoute: CalendarioRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
+  ContatoRoute: ContatoRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FavoritosRoute: FavoritosRoute,
   Googlef2edc9e3a6b2e4a9DothtmlRoute: Googlef2edc9e3a6b2e4a9DothtmlRoute,
@@ -476,6 +567,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   SplashRoute: SplashRoute,
+  TermosRoute: TermosRoute,
   EscalaViewerIdRoute: EscalaViewerIdRoute,
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
