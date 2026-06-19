@@ -740,14 +740,20 @@ export function EscalaCalendarCard() {
         open={modalOpen}
         onOpenChange={(v) => {
           setModalOpen(v);
-          if (!v) {
-            setEditingRegra(null);
-            setEscalaBaseDate(null);
-          }
+          if (!v) setEditingRegra(null);
         }}
         onSave={handleSave}
         initial={editingRegra}
-        initialBaseDate={escalaBaseDate}
+      />
+
+      <EscalaDiaModal
+        open={escalaDiaOpen}
+        onOpenChange={(v) => {
+          setEscalaDiaOpen(v);
+          if (!v) setEscalaBaseDate(null);
+        }}
+        baseDate={escalaBaseDate}
+        onSave={handleSave}
       />
 
       <EventoLivreModal
