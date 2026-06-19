@@ -384,54 +384,45 @@ export function EscalaCalendarCard() {
                     );
                   }
                   const isNoite = s.periodo === "noite";
-                  // (1) Fundo diferenciado por turno: noite mais escuro/azulado, dia mais claro.
-                  const bg = isNoite
-                    ? `color-mix(in srgb, ${s.cor} 55%, #0B1437)`
-                    : `color-mix(in srgb, ${s.cor} 28%, transparent)`;
-                  const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
-                  // (3) Faixa lateral: amarela = diurno, índigo = noturno.
-                  const stripeColor = isNoite ? "#1E1B4B" : "#FBBF24";
-                  // (5) Emoji nativo do turno.
+                  const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
                   const emoji = isNoite ? "🌙" : "🌞";
                   const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
+
+                  // Barra proporcional ao horário: posição = hora de entrada,
+                  // altura = horas trabalhadas dentro do mesmo dia.
+                  const AREA_TOP = 18;
+                  const AREA_BOTTOM = 2;
+                  const AREA_H = 40 - AREA_TOP - AREA_BOTTOM; // 20px
+                  const hi = s.horaInicio ?? 0;
+                  const dn = s.duracaoNoDia ?? 24;
+                  const barTop = AREA_TOP + (hi / 24) * AREA_H;
+                  const barHeight = Math.max(6, (dn / 24) * AREA_H);
+                  const borderRadiusBar = "4px";
+
                   return (
                     <span
                       key={`${ci}-${si}`}
                       aria-hidden
-                      className="pointer-events-none absolute overflow-hidden"
+                      className="pointer-events-none absolute"
                       style={{
                         left,
                         width,
-                        top,
-                        bottom,
+                        top: barTop,
+                        height: barHeight,
                         background: bg,
-                        borderTop,
-                        borderRadius,
+                        borderTop: `3px solid ${s.cor}`,
+                        borderRadius: borderRadiusBar,
                         zIndex: 0,
                       }}
                     >
-                      {/* Faixa lateral indicando turno */}
-                      <span
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: 3,
-                          background: stripeColor,
-                          boxShadow: isNoite
-                            ? "0 0 4px rgba(30,27,75,0.5)"
-                            : "0 0 4px rgba(251,191,36,0.5)",
-                        }}
-                      />
                       {emojiSize > 0 && s.lado === "cheia" && (
                         <span
                           role="img"
                           aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
                           style={{
                             position: "absolute",
-                            right: 2,
-                            bottom: 0,
+                            right: -1,
+                            bottom: -2,
                             fontSize: emojiSize,
                             lineHeight: 1,
                             filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
