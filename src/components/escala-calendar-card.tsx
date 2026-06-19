@@ -700,6 +700,7 @@ export function EscalaCalendarCard() {
                   aria-label={`Editar escala ${r.local}`}
                   onClick={() => {
                     setEditingRegra(r);
+                    setEscalaBaseDate(null);
                     setModalOpen(true);
                   }}
                   className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
