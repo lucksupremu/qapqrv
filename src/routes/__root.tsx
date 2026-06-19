@@ -345,6 +345,7 @@ function RootComponent() {
           <BrowserWarningModal />
           <WhatsNewModal />
           <InstallConfirmModal />
+          <ShareAppNudge />
           <Toaster />
 
         </DrawerProvider>
