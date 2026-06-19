@@ -45,8 +45,6 @@ type Props = {
   onOpenChange: (v: boolean) => void;
   onSave: (regra: EscalaRegra) => void;
   initial?: EscalaRegra | null;
-  /** Quando não há `initial`, pré-preenche datas para um plantão único nesse dia. */
-  initialBaseDate?: Date | null;
 };
 
 function toISO(d: Date): string {
