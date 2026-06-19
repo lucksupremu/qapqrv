@@ -1,47 +1,39 @@
 ## Objetivo
 
-Criar uma "mini-notificação" interna sutil que aparece de vez em quando dentro do app pedindo para o usuário compartilhar o QAP, QRV! com outros policiais.
-
-Hoje já existe o `ShareAppBanner` (card verde grande, 1x por mês, só no `/inicio`). A ideia agora é algo mais discreto, em formato de **toast/snackbar flutuante**, que possa aparecer em qualquer tela do app, simulando uma notificação interna.
+Quando o usuário toca num dia do calendário e clica em "Adicionar plantão neste dia", abrir um modal **simples**, no estilo do antigo "Adicionar evento" — só os campos essenciais — em vez do modal completo de escala recorrente.
 
 ## Como vai funcionar
 
-**Formato visual (sutil):**
-- Pequeno card flutuante ancorado acima da `BottomNav` (canto inferior, com margem), largura quase total mas baixinho (~64px de altura).
-- Ícone 🚔/Share + título curto + 1 linha de descrição + botão "Compartilhar" + X para dispensar.
-- Entra deslizando de baixo com leve fade, fica visível ~12s e se esconde sozinho se ignorado (sem marcar como "visto definitivo" — só registra a exibição).
-- Usa o verde do app (mesma paleta do banner atual) mas em escala menor, sem ocupar conteúdo.
+**Novo modal simplificado** — "Adicionar plantão neste dia":
 
-**Quando aparece (regras de frequência):**
-- Só para usuários com pelo menos 5 dias de acesso (`getAccessDays() >= 5`) — evita incomodar novatos.
-- No máximo 1 vez a cada 7 dias (controlado por `localStorage`).
-- Só dispara depois de 20s navegando no app na sessão atual (não no primeiro segundo).
-- Não aparece em rotas de modal/onboarding: `/onboarding`, `/splash`, `/anyconnect`, `/escala-viewer/*`.
-- Não aparece se o `ShareAppBanner` (banner mensal grande) estiver visível na mesma sessão — evita duplicidade.
-- Dispensar (X) ou compartilhar → respeita o cooldown de 7 dias.
+Campos:
+- **Local** (texto, obrigatório) — ex: "Polícia Militar", "Dejem", "Delegada".
+- **Cor** (paleta de cores reutilizando `ESCALA_CORES`).
+- **Horário de início** (input `time`, default 07:00).
+- **Duração em horas** (number, default 12, range 1–24). Mantido porque o calendário precisa saber se é diurno/noturno (emoji 🌞/🌙) e quando começa/termina — mas com default sensato para o usuário só confirmar.
 
-**Ação de compartilhar:**
-- Mesma lógica do banner existente: tenta `navigator.share` com texto pronto; fallback copia o link e mostra toast "Link copiado!".
-- Texto reaproveitado (mais curto): "🚔 QAP, QRV! — app do PM com escalas, lembretes e intranet. Baixa aí: https://www.miketools.top".
+Sem: data inicial/final, preset, turno alternado, folga, modelo de escala. Como é só um dia, a data já vem fixada pelo dia clicado.
 
-## Onde montar
-
-Adicionar o componente **uma única vez** no layout raiz `src/routes/__root.tsx` para que apareça em qualquer página (com as exclusões de rota acima feitas internamente via `useLocation`).
+Ao salvar:
+- Cria uma `EscalaRegra` com `dataInicial = dataFinal = dia clicado`, `trabalho = duração`, `folga = 24 - duração` (irrelevante porque não vai repetir), sem `alternada`. Reaproveita o storage e o motor de cálculo existentes — o calendário e a lista de escalas cadastradas continuam mostrando normalmente.
+- Mostra toast "Plantão adicionado." e fecha.
 
 ## Arquivos
 
 **Novo:**
-- `src/components/share-app-nudge.tsx` — componente da mini-notificação flutuante com toda a lógica de frequência, timer de exibição e ação de compartilhar.
+- `src/components/escala-dia-modal.tsx` — modal enxuto com os 4 campos acima, usando `Dialog` shadcn, paleta `ESCALA_CORES`, e gerando `EscalaRegra` via `newEscalaId()`.
 
 **Editado:**
-- `src/routes/__root.tsx` — importar e renderizar `<ShareAppNudge />` junto dos outros widgets globais.
+- `src/components/escala-calendar-card.tsx`:
+  - Substitui o uso do `EscalaConfigModal` no fluxo "clicou num dia" pelo novo `EscalaDiaModal`.
+  - Mantém o `EscalaConfigModal` para os fluxos "Configurar" (topo) e "Editar" (lápis na lista de regras) — escalas recorrentes continuam usando o modal completo.
+
+**Editado (reversão parcial):**
+- `src/components/escala-config-modal.tsx`: remover a prop `initialBaseDate` adicionada antes (não é mais necessária) e voltar título/descrição ao original.
 
 ## Detalhes técnicos
 
-- Chaves de `localStorage`:
-  - `share_nudge_last_shown_at` — timestamp ISO da última exibição (cooldown 7 dias).
-- Posicionamento: `fixed bottom-[calc(env(safe-area-inset-bottom)+76px)] left-3 right-3 z-40` para ficar acima da `BottomNav` (que tem ~64px).
-- Animação: classes Tailwind `animate-in slide-in-from-bottom-4 fade-in duration-300`.
-- Acessibilidade: `role="status"`, `aria-live="polite"`, botão X com `aria-label="Dispensar"`.
-- Sem dependências novas.
-- Não altera o `ShareAppBanner` existente (continua funcionando como está, mensal, na home).
+- `EscalaDiaModal` props: `open`, `onOpenChange`, `baseDate: Date`, `onSave: (regra: EscalaRegra) => void`.
+- Reutiliza `loadEscalas` / `saveEscalas` / `handleSave` já existentes no card — basta passar a regra montada.
+- Default de duração = 12h, hora = 07:00. Valida: local não-vazio, duração 1–24.
+- Nenhuma migração de dados: a estrutura `EscalaRegra` é a mesma, só com `dataInicial == dataFinal` e sem `alternada`.
