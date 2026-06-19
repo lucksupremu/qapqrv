@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, BookmarkPlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, BookmarkPlus, Sun, Moon } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
 import { EventoLivreModal } from "@/components/evento-livre-modal";
@@ -184,41 +184,38 @@ export function EscalaCalendarCard() {
     kind: "plantao" | "marca";
     cor: string;
     lado: "cheia" | "top" | "bottom";
+    /** Apenas para `kind === "plantao"`. Define o ícone Sol/Lua. */
+    periodo?: "dia" | "noite";
     marcaTipo?: string;
   };
   type Coluna = { slots: Slot[] };
 
+  /** Noturno se começa às 18h+ ou antes das 6h. */
+  const isNoturno = (horaInicio: number) => horaInicio >= 18 || horaInicio < 6;
+
   const colunasDoDia = (entries: PlantaoEntry[], marcasDay: Marca[], date: Date): Coluna[] => {
-    // Plantões → uma coluna por plantão (com dedupe cor+lado)
+    // Plantões → uma coluna por plantão, sempre "cheia" (o dia inicial é o
+    // único onde a entry existe). Dedupe por cor+periodo para evitar duas
+    // colunas idênticas quando há regras sobrepostas.
+    void date;
     const colunas: Coluna[] = [];
     const seen = new Set<string>();
     for (const e of entries) {
-      const inicioSameDay = sameDay(e.inicio, date);
-      const fimSameDay = sameDay(e.fim, date);
-      let lado: Slot["lado"];
-      if (inicioSameDay && fimSameDay) lado = "cheia";
-      else if (inicioSameDay && !fimSameDay) lado = "bottom"; // noturno começa aqui
-      else if (!inicioSameDay && fimSameDay) lado = "top"; // continuação
-      else lado = "cheia";
-      const k = `${e.regra.cor}-${lado}`;
+      const periodo: "dia" | "noite" = isNoturno(e.inicio.getHours()) ? "noite" : "dia";
+      const k = `${e.regra.cor}-${periodo}`;
       if (seen.has(k)) continue;
       seen.add(k);
-      colunas.push({ slots: [{ kind: "plantao", cor: e.regra.cor, lado }] });
+      colunas.push({
+        slots: [{ kind: "plantao", cor: e.regra.cor, lado: "cheia", periodo }],
+      });
     }
 
-    // Marcas → tentam encaixar na metade livre de uma coluna de plantão
+    // Marcas → uma coluna própria (não há mais "metade livre" para encaixar).
     for (const mk of marcasDay) {
-      const d = new Date(mk.data);
-      const hora = Number.isNaN(d.getTime()) ? 12 : d.getHours();
-      const preferida: "top" | "bottom" = hora < 12 ? "top" : "bottom";
-      const oposta = preferida === "top" ? "bottom" : "top";
       const cor = MARCA_COR[mk.tipo] ?? "#3498DB";
-      const slot: Slot = { kind: "marca", cor, lado: preferida, marcaTipo: mk.tipo };
-      const alvo = colunas.find(
-        (c) => c.slots.length === 1 && c.slots[0].kind === "plantao" && c.slots[0].lado === oposta,
-      );
-      if (alvo) alvo.slots.push(slot);
-      else colunas.push({ slots: [slot] });
+      colunas.push({
+        slots: [{ kind: "marca", cor, lado: "cheia", marcaTipo: mk.tipo }],
+      });
     }
 
     return colunas;
@@ -381,6 +378,8 @@ export function EscalaCalendarCard() {
                   }
                   const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
                   const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
+                  const iconSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
+                  const PeriodoIcon = s.periodo === "noite" ? Moon : Sun;
                   return (
                     <span
                       key={`${ci}-${si}`}
@@ -396,7 +395,22 @@ export function EscalaCalendarCard() {
                         borderRadius,
                         zIndex: 0,
                       }}
-                    />
+                    >
+                      {iconSize > 0 && s.lado === "cheia" && (
+                        <PeriodoIcon
+                          size={iconSize}
+                          strokeWidth={2.5}
+                          style={{
+                            position: "absolute",
+                            right: 2,
+                            bottom: 1,
+                            color: s.cor,
+                            filter:
+                              "drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff)",
+                          }}
+                        />
+                      )}
+                    </span>
                   );
                 });
               })}

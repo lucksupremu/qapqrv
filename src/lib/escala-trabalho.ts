@@ -141,33 +141,10 @@ export function gerarPlantoesDoMes(
         });
       }
 
-      // Marca continuações nos dias subsequentes até endOfShift
-      const startDay = new Date(
-        startOfShift.getFullYear(),
-        startOfShift.getMonth(),
-        startOfShift.getDate(),
-      );
-      const endDay = new Date(
-        endOfShift.getFullYear(),
-        endOfShift.getMonth(),
-        endOfShift.getDate(),
-      );
-      if (endDay.getTime() > startDay.getTime()) {
-        const cur = new Date(startDay);
-        cur.setDate(cur.getDate() + 1);
-        while (cur.getTime() <= endDay.getTime()) {
-          const curTs = cur.getTime();
-          if (curTs >= inicioMes && curTs < fimMes) {
-            addEntry(dayKey(cur), cur, {
-              regra,
-              tipo: "continuacao",
-              inicio: new Date(startOfShift),
-              fim: new Date(endOfShift),
-            });
-          }
-          cur.setDate(cur.getDate() + 1);
-        }
-      }
+      // Não geramos mais entries de "continuacao" para os dias seguintes.
+      // O plantão aparece apenas no dia em que começa — um ícone de Sol/Lua
+      // na célula deixa claro se é diurno ou noturno, sem dividir a célula
+      // em metades (que confundia escalas como 12x24/12x48).
 
       // avança trabalho + folga horas
       cursor = new Date(startOfShift.getTime() + (t.trabalho + t.folga) * 3600 * 1000);
