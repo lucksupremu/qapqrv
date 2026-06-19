@@ -186,6 +186,10 @@ export function EscalaCalendarCard() {
     lado: "cheia" | "top" | "bottom";
     /** Apenas para `kind === "plantao"`. Define o ícone Sol/Lua. */
     periodo?: "dia" | "noite";
+    /** Hora de entrada do plantão em formato decimal (0..24). */
+    horaInicio?: number;
+    /** Horas trabalhadas que cabem no mesmo dia (entre horaInicio e 24h). */
+    duracaoNoDia?: number;
     marcaTipo?: string;
   };
   type Coluna = { slots: Slot[] };
@@ -201,14 +205,17 @@ export function EscalaCalendarCard() {
     const colunas: Coluna[] = [];
     const seen = new Set<string>();
     for (const e of entries) {
+      const horaInicio = e.inicio.getHours() + e.inicio.getMinutes() / 60;
       const periodo: "dia" | "noite" = isNoturno(e.inicio.getHours()) ? "noite" : "dia";
       const k = `${e.regra.cor}-${periodo}`;
       if (seen.has(k)) continue;
       seen.add(k);
+      const duracaoNoDia = Math.min(e.regra.trabalho, 24 - horaInicio);
       colunas.push({
-        slots: [{ kind: "plantao", cor: e.regra.cor, lado: "cheia", periodo }],
+        slots: [{ kind: "plantao", cor: e.regra.cor, lado: "cheia", periodo, horaInicio, duracaoNoDia }],
       });
     }
+
 
     // Marcas → uma coluna própria (não há mais "metade livre" para encaixar).
     for (const mk of marcasDay) {
