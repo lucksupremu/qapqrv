@@ -379,7 +379,7 @@ export function EscalaCalendarCard() {
                     );
                   }
                   const isNoite = s.periodo === "noite";
-                  const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
+                  const bg = `color-mix(in srgb, ${s.cor} 32%, transparent)`;
                   const emoji = isNoite ? "🌙" : "🌞";
                   const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
 
@@ -391,11 +391,11 @@ export function EscalaCalendarCard() {
                       style={{
                         left,
                         width,
-                        top: 20,
+                        top: 2,
                         bottom: 2,
                         background: bg,
                         borderTop: `3px solid ${s.cor}`,
-                        borderRadius: "6px",
+                        borderRadius: "8px",
                         zIndex: 0,
                       }}
                     >
@@ -405,11 +405,11 @@ export function EscalaCalendarCard() {
                           aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
                           style={{
                             position: "absolute",
-                            right: -1,
-                            bottom: -2,
+                            right: 0,
+                            bottom: -1,
                             fontSize: emojiSize,
                             lineHeight: 1,
-                            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
+                            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))",
                             zIndex: 4,
                           }}
                         >
