@@ -603,9 +603,8 @@ export function EscalaCalendarCard() {
                 <button
                   onClick={() => {
                     setOpenKey(null);
-                    setEditingRegra(null);
                     setEscalaBaseDate(cell.date);
-                    setModalOpen(true);
+                    setEscalaDiaOpen(true);
                   }}
                   className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
                   style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
