@@ -7,18 +7,21 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
     />
     <meta name="theme-color" content="#f4f8fc" />
-    <title>QAP, QRV! — Ferramentas operacionais</title>
+    <title>QAP, QRV! — Ferramentas operacionais para o policial militar</title>
     <meta
       name="description"
-      content="Central de ferramentas operacionais para o policial militar."
+      content="Central gratuita de ferramentas operacionais para o policial militar do Estado de São Paulo: escalas Dejem e Delegada, calendário, lembretes, atalhos para intranet."
     />
+    <link rel="canonical" href="https://miketools.top/" />
     <meta property="og:title" content="QAP, QRV! — Ferramentas operacionais" />
-    <meta property="og:description" content="Ferramentas operacionais em um só lugar." />
+    <meta property="og:description" content="Escalas Dejem, Delegada, calendário e atalhos para a intranet PMESP em um só lugar." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/icon-512.png" />
+    <meta property="og:url" content="https://miketools.top/" />
+    <meta property="og:image" content="https://miketools.top/icon-512.png" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="QAP, QRV! — Ferramentas operacionais" />
-    <meta name="twitter:image" content="/icon-512.png" />
+    <meta name="twitter:description" content="Escalas Dejem, Delegada, calendário e atalhos para a intranet PMESP em um só lugar." />
+    <meta name="twitter:image" content="https://miketools.top/icon-512.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
@@ -30,6 +33,17 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "QAP, QRV!",
+        "alternateName": "Mike Tools",
+        "url": "https://miketools.top",
+        "description": "Ferramentas operacionais gratuitas para o policial militar do Estado de São Paulo.",
+        "inLanguage": "pt-BR"
+      }
+    </script>
     <script>
       (function () {
         try {
@@ -42,7 +56,40 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <p>O QAP, QRV! precisa de JavaScript ativado para funcionar.</p>
+      </noscript>
+      <!--
+        Fallback estático para crawlers (Googlebot, AdSense AdsBot, redes sociais).
+        Some assim que o React hidrata (#root é re-renderizado).
+      -->
+      <div id="seo-fallback" style="max-width:760px;margin:0 auto;padding:2rem 1.25rem;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.6;color:#1a2a3a;">
+        <h1 style="font-size:1.8rem;margin:0 0 .5rem">QAP, QRV! — Ferramentas operacionais</h1>
+        <p>Central gratuita de ferramentas para o policial militar do Estado de São Paulo. Consulte escalas Dejem e Delegada, organize seu calendário de plantões, receba lembretes e acesse atalhos para a intranet PMESP.</p>
+        <h2 style="font-size:1.15rem;margin-top:1.5rem">Principais funcionalidades</h2>
+        <ul>
+          <li>Consulta e armazenamento offline de escalas Dejem e Delegada</li>
+          <li>Calendário de plantões com lembretes locais</li>
+          <li>Atalhos para a intranet PMESP via AnyConnect</li>
+          <li>Histórico, favoritos e busca global</li>
+        </ul>
+        <h2 style="font-size:1.15rem;margin-top:1.5rem">Conteúdo</h2>
+        <ul>
+          <li><a href="/sobre">Sobre o aplicativo</a></li>
+          <li><a href="/manual">Manual do usuário</a></li>
+          <li><a href="/blog">Blog — dicas e guias operacionais</a></li>
+          <li><a href="/blog/escala-dejem-pmesp">Como funciona a escala Dejem na PMESP</a></li>
+          <li><a href="/blog/diferenca-dejem-delegada">Dejem x Delegada: qual a diferença</a></li>
+          <li><a href="/blog/organizacao-plantao">5 dicas para se organizar nos plantões</a></li>
+          <li><a href="/blog/vpn-anyconnect-seguranca">Como usar a VPN AnyConnect com segurança</a></li>
+          <li><a href="/contato">Contato</a></li>
+          <li><a href="/privacidade">Política de Privacidade</a></li>
+          <li><a href="/termos">Termos de Uso</a></li>
+        </ul>
+        <p style="margin-top:1.5rem;color:#5a6a7a;font-size:.9rem">Projeto independente, sem vínculo oficial com a PMESP.</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
