@@ -694,17 +694,32 @@ export function EscalaCalendarCard() {
                 </div>
 
               </div>
-              <button
-                aria-label={`Remover escala ${r.local}`}
-                onClick={() => handleRemove(r.id)}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 size={14} />
-              </button>
+              <div className="flex shrink-0 items-center">
+                <button
+                  aria-label={`Editar escala ${r.local}`}
+                  onClick={() => {
+                    setEditingRegra(r);
+                    setModalOpen(true);
+                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  aria-label={`Remover escala ${r.local}`}
+                  onClick={() => handleRemove(r.id)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))}
           <button
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              setEditingRegra(null);
+              setModalOpen(true);
+            }}
             className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-[12px] font-bold transition active:scale-[0.98]"
             style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
           >
