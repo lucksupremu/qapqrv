@@ -635,16 +635,18 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 16, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)`, overflow: "hidden" }}>
-            <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "#FBBF24" }} />
-            <span style={{ position: "absolute", right: 1, bottom: -1, fontSize: 10, lineHeight: 1 }}>🌞</span>
+          {/* Miniatura: barra encostada no topo (manhã) */}
+          <span style={{ position: "relative", width: 14, height: 18 }}>
+            <span style={{ position: "absolute", left: 0, right: 0, top: 1, height: 8, borderRadius: 3, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+            <span style={{ position: "absolute", right: -2, bottom: -2, fontSize: 10, lineHeight: 1 }}>🌞</span>
           </span>
           Plantão diurno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ position: "relative", width: 16, height: 16, borderRadius: 3, borderTop: `3px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 55%, #0B1437)`, overflow: "hidden" }}>
-            <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "#1E1B4B" }} />
-            <span style={{ position: "absolute", right: 1, bottom: -1, fontSize: 10, lineHeight: 1 }}>🌙</span>
+          {/* Miniatura: barra encostada na base (noite) */}
+          <span style={{ position: "relative", width: 14, height: 18 }}>
+            <span style={{ position: "absolute", left: 0, right: 0, bottom: 1, height: 8, borderRadius: 3, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+            <span style={{ position: "absolute", right: -2, bottom: -2, fontSize: 10, lineHeight: 1 }}>🌙</span>
           </span>
           Plantão noturno
         </span>
@@ -655,8 +657,9 @@ export function EscalaCalendarCard() {
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        Fundo escuro e faixa lateral índigo indicam plantão noturno; fundo claro e faixa amarela indicam diurno. Toque em um dia para detalhes.
+        A altura da barra mostra a duração do plantão; a posição indica a hora de entrada (topo = manhã, base = noite). Toque em um dia para detalhes.
       </p>
+
 
 
 
