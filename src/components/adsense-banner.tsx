@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 
 /** Google AdSense client ID */
 const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT ?? "ca-pub-4966192764194561";
+/** AdSense fica desligado até o site ser aprovado. Quando false, o componente
+ *  inteiro vira no-op (sem `<ins>`, sem placeholder) — exigido pelas políticas
+ *  do AdSense para não exibir inventário em páginas sem aprovação. */
+const ADSENSE_ENABLED = import.meta.env.VITE_ADSENSE_ENABLED === "true";
 
 type Props = {
   adSlot: string;           // data-ad-slot
@@ -40,6 +44,7 @@ export function AdSenseBanner({
   const [status, setStatus] = useState<"loading" | "filled" | "empty">("loading");
 
   useEffect(() => {
+    if (!ADSENSE_ENABLED) return;
     if (!ADSENSE_CLIENT || pushed.current) return;
     const el = ref.current;
     if (!el) return;
@@ -64,6 +69,9 @@ export function AdSenseBanner({
 
     return () => window.clearTimeout(check);
   }, []);
+
+  // Não renderiza nada enquanto a aprovação do AdSense estiver pendente.
+  if (!ADSENSE_ENABLED) return null;
 
   const showPlaceholder = status !== "filled";
 

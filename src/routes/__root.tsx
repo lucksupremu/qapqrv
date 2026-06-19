@@ -25,6 +25,15 @@ import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
 
 /** Google AdSense client ID */
 const ADSENSE_CLIENT = "ca-pub-4966192764194561";
+/** Carrega o script do AdSense apenas quando o site estiver aprovado.
+ *  Mantemos `ads.txt` e o `<ins>` desligado para evitar reprovação por
+ *  "inventário de anúncio sem conteúdo". Ative com VITE_ADSENSE_ENABLED=true. */
+const ADSENSE_ENABLED = import.meta.env.VITE_ADSENSE_ENABLED === "true";
+
+/** User-agents que são crawlers de busca/AdSense. Evitamos redirecionar o
+ *  robô para /onboarding (que aparece como conteúdo vazio para indexação). */
+const BOT_UA_RE =
+  /bot|crawler|spider|crawling|googlebot|mediapartners-google|adsbot-google|bingbot|duckduckbot|yandex|baiduspider|facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot/i;
 
 function NotFoundComponent() {
   return (
@@ -98,10 +107,14 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // Onboarding: redireciona na primeira abertura.
+  // Importante: NÃO redirecionar bots/crawlers — eles veriam só a tela de
+  // boas-vindas e o Google AdSense reprovaria por "conteúdo insuficiente".
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (pathname === "/onboarding") return;
     try {
+      const ua = navigator.userAgent || "";
+      if (BOT_UA_RE.test(ua)) return;
       if (window.localStorage.getItem("onboarding-seen-v1") !== "1") {
         router.navigate({ to: "/onboarding" });
       }
@@ -128,7 +141,10 @@ function RootComponent() {
     if (typeof window === "undefined") return;
 
     // Lazy-load AdSense after first paint (apenas no web, não no APK nativo).
+    // Mantém-se desligado por padrão até o site ser aprovado no AdSense —
+    // ative com VITE_ADSENSE_ENABLED=true.
     const loadAds = () => {
+      if (!ADSENSE_ENABLED) return;
       if (isNativeApp()) return;
       if (document.querySelector("script[data-adsense]")) return;
       const s = document.createElement("script");
