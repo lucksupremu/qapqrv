@@ -1,62 +1,69 @@
-## Problema
+# Barra proporcional ao horário do plantão
 
-Hoje o ícone de Sol/Lua usa a **mesma cor do plantão** (vermelho, azul, verde, etc.) com um leve halo branco. Resultado: o ícone vira "mais um detalhe colorido" em vez de comunicar imediatamente "dia" ou "noite".
+Voltar o visual da célula ao estilo original (fundo claro translúcido, sem faixa lateral, sem fundo azulado) e fazer a barrinha **representar visualmente o horário do plantão dentro do dia**: posição vertical = hora de entrada, altura = horas trabalhadas naquele dia. O emoji 🌞/🌙 continua no canto como reforço.
 
-## Solução
+Toda a mudança acontece em `src/components/escala-calendar-card.tsx`. Nenhuma alteração na lógica de geração de escalas (`src/lib/escala-trabalho.ts`).
 
-Dar identidade visual fixa ao Sol e à Lua, independente da cor do plantão e do tema (claro/escuro): cada um vira um **micro-badge circular** com cor própria, contrastando com a faixa do plantão por trás.
+## Como vai ficar
 
-### Cores fixas (sempre as mesmas)
-- **Sol** ☀️ — círculo **amarelo âmbar** (`#FBBF24`) com ícone branco em cima.
-- **Lua** 🌙 — círculo **índigo profundo** (`#1E1B4B`) com ícone branco-creme em cima.
+```text
+célula 40×40
+┌──────────┐
+│ 12       │  ← número do dia (topo)
+│ ░░       │  diurno 07h→19h: barra ocupa metade de cima
+│ ░░       │
+│ ░░    🌞 │
+│          │
+└──────────┘
 
-Essas duas cores não colidem com nenhuma cor da paleta de plantões (vermelho, azul, verde, magenta, laranja, ciano, roxo, amarelo "trabalho") porque ficam **dentro de um badge circular** com fundo sólido + anel branco fino. Mesmo se o plantão for amarelo, o sol ainda lê como sol (anel branco + ícone branco no centro) e a lua lê como lua.
+┌──────────┐
+│ 12       │
+│          │  noturno 19h→07h: barra começa embaixo
+│          │  e desce até o final da célula
+│ ▓▓       │
+│ ▓▓    🌙 │
+└──────────┘
 
-### Tema escuro
-- O anel externo do badge troca para `hsl(var(--card))` (não fica branco puro sobre fundo escuro do card). Isso já casa automaticamente com light/dark via token.
-- O fundo do badge (âmbar / índigo) é sólido e bem saturado — funciona nos dois temas.
-- O ícone interno fica branco em ambos.
+┌──────────┐
+│ 12       │
+│ ░░       │  plantão 24h (07h→07h): barra ocupa
+│ ░░       │  toda a área útil
+│ ░░    🌞 │
+│ ░░       │
+└──────────┘
+```
 
-### Posicionamento
-- Mesmo canto (inferior-direito da coluna), mesmo tamanho geral (badge ~14px / ícone ~9px com 1 coluna; ~12 / ~7 com 2 colunas; ocultar com 3+).
-- `border: 1.5px solid hsl(var(--card))` para o anel; `box-shadow: 0 1px 2px rgba(0,0,0,.25)` para dar peso e não sumir no fundo claro do plantão.
+## Comportamento
 
-### Acessibilidade
-- Adicionar `aria-label="Plantão diurno"` / `"Plantão noturno"` no span do badge (remover `aria-hidden` dele) para leitores de tela. O resto da célula continua decorativo.
-
-### Mudanças
-**Arquivo único: `src/components/escala-calendar-card.tsx`**
-- Substituir o trecho atual que renderiza `<PeriodoIcon … color={s.cor}>` (dentro do `colunasVisiveis.map`) por um `<span>` badge com fundo fixo (âmbar/índigo), anel via `hsl(var(--card))`, e o ícone branco dentro.
-- Ajustar tamanhos: badge 14/12, ícone 9/7, conforme `totalCol`.
-- Ocultar quando `totalCol >= 3` (mesma regra de hoje).
-
-### Fora do escopo
-- Não mexe na lógica de geração de plantões nem em cores das faixas dos plantões.
-- Não cria novos tokens globais (cores do sol/lua ficam locais nesse componente — são identidade do ícone, não do tema do app).
+- **Posição vertical** = hora de entrada do plantão (mapeada de 0h às 24h sobre a área útil da célula, logo abaixo do número do dia).
+- **Altura** = horas trabalhadas que cabem no mesmo dia (de `horaInicio` até no máximo 24h). Mínimo de ~6 px para continuar legível em turnos curtos.
+- A célula só marca o **dia em que o plantão começa** (regra atual, mantida). Se o turno cruza a meia-noite, a barra simplesmente vai até o fim da área útil — o próximo dia segue limpo.
+- Quando há mais de um plantão no mesmo dia, cada coluna ganha sua própria barra proporcional, na largura já calculada hoje (`slotW`).
+- Emoji 🌞 (diurno, início entre 6h e 18h) ou 🌙 (noturno, início ≥18h ou <6h) permanece no canto inferior direito da célula.
+- Marcas (Dejem/Delegada) e eventos livres seguem inalterados.
 
 ## Detalhes técnicos
 
-```tsx
-// pseudo
-const isNoite = s.periodo === "noite";
-const badgeBg = isNoite ? "#1E1B4B" : "#FBBF24";
-const badgeSize = totalCol === 1 ? 14 : 12;
-const iconSize  = totalCol === 1 ? 9  : 7;
+1. **Tipo `Slot`** ganha dois campos opcionais para plantões: `horaInicio: number` (0..23.99, considerando minutos) e `duracaoNoDia: number` (horas que cabem entre `horaInicio` e 24h, com mínimo prático para o desenho).
+2. **`colunasDoDia`** passa esses campos ao montar o slot a partir de `PlantaoEntry`:
+   - `horaInicio = e.inicio.getHours() + e.inicio.getMinutes()/60`
+   - `duracaoNoDia = Math.min(e.regra.trabalho, 24 - horaInicio)`
+3. **Render do slot plantão** (≈ linhas 379–438) substitui o cálculo fixo de `top`/`bottom` por:
+   - `AREA_TOP = 18`, `AREA_BOTTOM = 2`, `AREA_H = 40 - AREA_TOP - AREA_BOTTOM` (área útil abaixo do número do dia).
+   - `top = AREA_TOP + (horaInicio / 24) * AREA_H`
+   - `height = Math.max(6, (duracaoNoDia / 24) * AREA_H)`
+   - `bottom` deixa de ser usado; passamos a controlar `height` direto.
+   - `borderTop` continua usando `s.cor` (linha de referência no topo da barra, marcando o instante exato da entrada).
+4. **Reverter** o fundo escurecido e a faixa lateral introduzidos na última mudança. O `background` volta a ser `color-mix(in srgb, ${s.cor} 28%, transparent)` para qualquer turno, e o `<span>` da faixa lateral é removido. `overflow: hidden` deixa de ser necessário.
+5. **Emoji 🌞/🌙** continua exatamente como hoje (canto inferior direito, `drop-shadow`, oculto quando `totalCol >= 3`).
+6. **Legenda** (≈ linhas 638–663):
+   - "Plantão diurno": miniatura com barrinha encostada no topo + 🌞.
+   - "Plantão noturno": miniatura com barrinha encostada na base + 🌙.
+   - Texto explicativo abaixo: "A altura da barra mostra quantas horas o plantão dura; a posição mostra a hora de entrada (topo = manhã, base = noite)."
+7. **Não mexer** em `escala-trabalho.ts`, na geração de entries, nem em modais/listas — somente apresentação visual.
 
-<span
-  role="img"
-  aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
-  style={{
-    position: "absolute", right: 2, bottom: 1,
-    width: badgeSize, height: badgeSize, borderRadius: "50%",
-    background: badgeBg,
-    border: "1.5px solid hsl(var(--card))",
-    boxShadow: "0 1px 2px rgba(0,0,0,0.25)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-  }}
->
-  <PeriodoIcon size={iconSize} strokeWidth={2.5} color="#fff" />
-</span>
-```
+## Fora de escopo
 
-Posso aplicar?
+- Não alterar paleta de cores das escalas.
+- Não alterar tipografia, tokens globais ou tema.
+- Não introduzir dependências novas.
