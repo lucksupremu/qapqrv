@@ -603,14 +603,14 @@ export function EscalaCalendarCard() {
                 <button
                   onClick={() => {
                     setOpenKey(null);
-                    setEventoEditing(null);
-                    setEventoBaseDate(cell.date);
-                    setEventoModalOpen(true);
+                    setEditingRegra(null);
+                    setEscalaBaseDate(cell.date);
+                    setModalOpen(true);
                   }}
                   className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
-                  style={{ borderColor: "#7C3AED", color: "#7C3AED" }}
+                  style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
                 >
-                  <BookmarkPlus size={13} /> Adicionar evento
+                  <Plus size={13} /> Adicionar plantão neste dia
                 </button>
               </PopoverContent>
             </Popover>
