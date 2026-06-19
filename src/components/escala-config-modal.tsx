@@ -211,16 +211,10 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle>
-            {initial
-              ? "Editar escala"
-              : initialBaseDate
-                ? "Adicionar plantão único"
-                : "Adicionar plantão"}
+            {initial ? "Editar escala" : "Adicionar plantão"}
           </DialogTitle>
           <DialogDescription>
-            {initialBaseDate
-              ? "Cadastre um plantão único para este dia."
-              : "Cadastre sua escala recorrente para visualizar no calendário."}
+            Cadastre sua escala recorrente para visualizar no calendário.
           </DialogDescription>
         </DialogHeader>
 
