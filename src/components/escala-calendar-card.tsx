@@ -378,8 +378,11 @@ export function EscalaCalendarCard() {
                   }
                   const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
                   const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
-                  const iconSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
-                  const PeriodoIcon = s.periodo === "noite" ? Moon : Sun;
+                  const badgeSize = totalCol === 1 ? 14 : totalCol === 2 ? 12 : 0;
+                  const iconSize = totalCol === 1 ? 9 : totalCol === 2 ? 7 : 0;
+                  const isNoite = s.periodo === "noite";
+                  const PeriodoIcon = isNoite ? Moon : Sun;
+                  const badgeBg = isNoite ? "#1E1B4B" : "#FBBF24";
                   return (
                     <span
                       key={`${ci}-${si}`}
@@ -396,19 +399,32 @@ export function EscalaCalendarCard() {
                         zIndex: 0,
                       }}
                     >
-                      {iconSize > 0 && s.lado === "cheia" && (
-                        <PeriodoIcon
-                          size={iconSize}
-                          strokeWidth={2.5}
+                      {badgeSize > 0 && s.lado === "cheia" && (
+                        <span
+                          role="img"
+                          aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
                           style={{
                             position: "absolute",
-                            right: 2,
+                            right: 1,
                             bottom: 1,
-                            color: s.cor,
-                            filter:
-                              "drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff)",
+                            width: badgeSize,
+                            height: badgeSize,
+                            borderRadius: "50%",
+                            background: badgeBg,
+                            border: "1.5px solid hsl(var(--card))",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 4,
                           }}
-                        />
+                        >
+                          <PeriodoIcon
+                            size={iconSize}
+                            strokeWidth={2.75}
+                            color="#fff"
+                          />
+                        </span>
                       )}
                     </span>
                   );
