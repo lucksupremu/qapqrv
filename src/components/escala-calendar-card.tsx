@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
+import { EscalaDiaModal } from "@/components/escala-dia-modal";
 import { EventoLivreModal } from "@/components/evento-livre-modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
