@@ -376,24 +376,22 @@ export function EscalaCalendarCard() {
                       />
                     );
                   }
-                  const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
-                  const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
-                  const badgeSize = totalCol === 1 ? 14 : totalCol === 2 ? 12 : 0;
-                  const iconSize = totalCol === 1 ? 9 : totalCol === 2 ? 7 : 0;
                   const isNoite = s.periodo === "noite";
-                  const PeriodoIcon = isNoite ? Moon : Sun;
-                  const badgeBg = isNoite ? "#1E1B4B" : "#FBBF24";
-                  // Contraste automático: ícone escuro em fundo claro (sol) e claro em fundo escuro (lua).
-                  const iconColor = isNoite ? "#FFFFFF" : "#1F2937";
-                  // Anel duplo: ring interno na cor do card + ring externo no foreground translúcido
-                  // garante separação visível contra qualquer cor de plantão e em ambos os temas.
-                  const ringShadow =
-                    "0 0 0 1.5px hsl(var(--card)), 0 0 0 2.5px hsl(var(--foreground) / 0.45), 0 1px 2px rgba(0,0,0,0.35)";
+                  // (1) Fundo diferenciado por turno: noite mais escuro/azulado, dia mais claro.
+                  const bg = isNoite
+                    ? `color-mix(in srgb, ${s.cor} 55%, #0B1437)`
+                    : `color-mix(in srgb, ${s.cor} 28%, transparent)`;
+                  const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
+                  // (3) Faixa lateral: amarela = diurno, índigo = noturno.
+                  const stripeColor = isNoite ? "#1E1B4B" : "#FBBF24";
+                  // (5) Emoji nativo do turno.
+                  const emoji = isNoite ? "🌙" : "🌞";
+                  const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
                   return (
                     <span
                       key={`${ci}-${si}`}
                       aria-hidden
-                      className="pointer-events-none absolute"
+                      className="pointer-events-none absolute overflow-hidden"
                       style={{
                         left,
                         width,
@@ -405,30 +403,35 @@ export function EscalaCalendarCard() {
                         zIndex: 0,
                       }}
                     >
-                      {badgeSize > 0 && s.lado === "cheia" && (
+                      {/* Faixa lateral indicando turno */}
+                      <span
+                        style={{
+                          position: "absolute",
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: 3,
+                          background: stripeColor,
+                          boxShadow: isNoite
+                            ? "0 0 4px rgba(30,27,75,0.5)"
+                            : "0 0 4px rgba(251,191,36,0.5)",
+                        }}
+                      />
+                      {emojiSize > 0 && s.lado === "cheia" && (
                         <span
                           role="img"
                           aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
                           style={{
                             position: "absolute",
                             right: 2,
-                            bottom: 2,
-                            width: badgeSize,
-                            height: badgeSize,
-                            borderRadius: "50%",
-                            background: badgeBg,
-                            boxShadow: ringShadow,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            bottom: 0,
+                            fontSize: emojiSize,
+                            lineHeight: 1,
+                            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
                             zIndex: 4,
                           }}
                         >
-                          <PeriodoIcon
-                            size={iconSize}
-                            strokeWidth={2.75}
-                            color={iconColor}
-                          />
+                          {emoji}
                         </span>
                       )}
                     </span>
