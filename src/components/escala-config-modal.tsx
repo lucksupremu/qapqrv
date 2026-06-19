@@ -149,10 +149,16 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial, initial
     } else {
       setLocal("");
       setCor(ESCALA_CORES[0]!.value);
-      setDataInicial(new Date());
-      const f = new Date();
-      f.setMonth(f.getMonth() + 6);
-      setDataFinal(f);
+      if (initialBaseDate) {
+        // Plantão único: data inicial = data final = dia clicado.
+        setDataInicial(new Date(initialBaseDate));
+        setDataFinal(new Date(initialBaseDate));
+      } else {
+        setDataInicial(new Date());
+        const f = new Date();
+        f.setMonth(f.getMonth() + 6);
+        setDataFinal(f);
+      }
       // aplica o preset padrão (12x24/12x48)
       aplicarPreset("12x24-12x48");
     }
