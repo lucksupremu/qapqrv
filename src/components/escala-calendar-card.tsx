@@ -378,6 +378,8 @@ export function EscalaCalendarCard() {
                   }
                   const bg = `color-mix(in srgb, ${s.cor} 28%, transparent)`;
                   const borderTop = s.lado === "bottom" ? "none" : `3px solid ${s.cor}`;
+                  const iconSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
+                  const PeriodoIcon = s.periodo === "noite" ? Moon : Sun;
                   return (
                     <span
                       key={`${ci}-${si}`}
@@ -393,7 +395,22 @@ export function EscalaCalendarCard() {
                         borderRadius,
                         zIndex: 0,
                       }}
-                    />
+                    >
+                      {iconSize > 0 && s.lado === "cheia" && (
+                        <PeriodoIcon
+                          size={iconSize}
+                          strokeWidth={2.5}
+                          style={{
+                            position: "absolute",
+                            right: 2,
+                            bottom: 1,
+                            color: s.cor,
+                            filter:
+                              "drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff)",
+                          }}
+                        />
+                      )}
+                    </span>
                   );
                 });
               })}
