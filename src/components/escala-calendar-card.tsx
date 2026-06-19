@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, BookmarkPlus, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
 import { EventoLivreModal } from "@/components/evento-livre-modal";
@@ -62,6 +62,7 @@ export function EscalaCalendarCard() {
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRegra, setEditingRegra] = useState<EscalaRegra | null>(null);
+  const [escalaBaseDate, setEscalaBaseDate] = useState<Date | null>(null);
   const [eventoModalOpen, setEventoModalOpen] = useState(false);
   const [eventoEditing, setEventoEditing] = useState<EventoPersonalizado | null>(null);
   const [eventoBaseDate, setEventoBaseDate] = useState<Date | null>(null);
@@ -247,7 +248,7 @@ export function EscalaCalendarCard() {
           <h2 className="text-[15px] font-bold text-foreground">Minha escala</h2>
         </div>
         <button
-          onClick={() => { setEditingRegra(null); setModalOpen(true); }}
+          onClick={() => { setEditingRegra(null); setEscalaBaseDate(null); setModalOpen(true); }}
           className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white active:scale-95 transition"
           style={{ background: COR_PRIMARY }}
         >
@@ -602,14 +603,14 @@ export function EscalaCalendarCard() {
                 <button
                   onClick={() => {
                     setOpenKey(null);
-                    setEventoEditing(null);
-                    setEventoBaseDate(cell.date);
-                    setEventoModalOpen(true);
+                    setEditingRegra(null);
+                    setEscalaBaseDate(cell.date);
+                    setModalOpen(true);
                   }}
                   className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
-                  style={{ borderColor: "#7C3AED", color: "#7C3AED" }}
+                  style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
                 >
-                  <BookmarkPlus size={13} /> Adicionar evento
+                  <Plus size={13} /> Adicionar plantão neste dia
                 </button>
               </PopoverContent>
             </Popover>
@@ -699,6 +700,7 @@ export function EscalaCalendarCard() {
                   aria-label={`Editar escala ${r.local}`}
                   onClick={() => {
                     setEditingRegra(r);
+                    setEscalaBaseDate(null);
                     setModalOpen(true);
                   }}
                   className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
@@ -718,6 +720,7 @@ export function EscalaCalendarCard() {
           <button
             onClick={() => {
               setEditingRegra(null);
+              setEscalaBaseDate(null);
               setModalOpen(true);
             }}
             className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-[12px] font-bold transition active:scale-[0.98]"
@@ -737,10 +740,14 @@ export function EscalaCalendarCard() {
         open={modalOpen}
         onOpenChange={(v) => {
           setModalOpen(v);
-          if (!v) setEditingRegra(null);
+          if (!v) {
+            setEditingRegra(null);
+            setEscalaBaseDate(null);
+          }
         }}
         onSave={handleSave}
         initial={editingRegra}
+        initialBaseDate={escalaBaseDate}
       />
 
       <EventoLivreModal

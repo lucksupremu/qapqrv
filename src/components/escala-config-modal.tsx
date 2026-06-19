@@ -45,6 +45,8 @@ type Props = {
   onOpenChange: (v: boolean) => void;
   onSave: (regra: EscalaRegra) => void;
   initial?: EscalaRegra | null;
+  /** Quando não há `initial`, pré-preenche datas para um plantão único nesse dia. */
+  initialBaseDate?: Date | null;
 };
 
 function toISO(d: Date): string {
@@ -70,7 +72,7 @@ function parseHHMM(s: string): { h: number; m: number } {
   };
 }
 
-export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props) {
+export function EscalaConfigModal({ open, onOpenChange, onSave, initial, initialBaseDate }: Props) {
   const [preset, setPreset] = useState<string>("12x24-12x48");
   const [local, setLocal] = useState("");
   const [cor, setCor] = useState(ESCALA_CORES[0]!.value);
@@ -147,10 +149,16 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
     } else {
       setLocal("");
       setCor(ESCALA_CORES[0]!.value);
-      setDataInicial(new Date());
-      const f = new Date();
-      f.setMonth(f.getMonth() + 6);
-      setDataFinal(f);
+      if (initialBaseDate) {
+        // Plantão único: data inicial = data final = dia clicado.
+        setDataInicial(new Date(initialBaseDate));
+        setDataFinal(new Date(initialBaseDate));
+      } else {
+        setDataInicial(new Date());
+        const f = new Date();
+        f.setMonth(f.getMonth() + 6);
+        setDataFinal(f);
+      }
       // aplica o preset padrão (12x24/12x48)
       aplicarPreset("12x24-12x48");
     }
@@ -211,10 +219,16 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle>
-            {initial ? "Editar escala" : "Adicionar plantão"}
+            {initial
+              ? "Editar escala"
+              : initialBaseDate
+                ? "Adicionar plantão único"
+                : "Adicionar plantão"}
           </DialogTitle>
           <DialogDescription>
-            Cadastre sua escala recorrente para visualizar no calendário.
+            {initialBaseDate
+              ? "Cadastre um plantão único para este dia."
+              : "Cadastre sua escala recorrente para visualizar no calendário."}
           </DialogDescription>
         </DialogHeader>
 
