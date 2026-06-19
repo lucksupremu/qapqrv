@@ -383,6 +383,12 @@ export function EscalaCalendarCard() {
                   const isNoite = s.periodo === "noite";
                   const PeriodoIcon = isNoite ? Moon : Sun;
                   const badgeBg = isNoite ? "#1E1B4B" : "#FBBF24";
+                  // Contraste automático: ícone escuro em fundo claro (sol) e claro em fundo escuro (lua).
+                  const iconColor = isNoite ? "#FFFFFF" : "#1F2937";
+                  // Anel duplo: ring interno na cor do card + ring externo no foreground translúcido
+                  // garante separação visível contra qualquer cor de plantão e em ambos os temas.
+                  const ringShadow =
+                    "0 0 0 1.5px hsl(var(--card)), 0 0 0 2.5px hsl(var(--foreground) / 0.45), 0 1px 2px rgba(0,0,0,0.35)";
                   return (
                     <span
                       key={`${ci}-${si}`}
@@ -405,14 +411,13 @@ export function EscalaCalendarCard() {
                           aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
                           style={{
                             position: "absolute",
-                            right: 1,
-                            bottom: 1,
+                            right: 2,
+                            bottom: 2,
                             width: badgeSize,
                             height: badgeSize,
                             borderRadius: "50%",
                             background: badgeBg,
-                            border: "1.5px solid hsl(var(--card))",
-                            boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                            boxShadow: ringShadow,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -422,7 +427,7 @@ export function EscalaCalendarCard() {
                           <PeriodoIcon
                             size={iconSize}
                             strokeWidth={2.75}
-                            color="#fff"
+                            color={iconColor}
                           />
                         </span>
                       )}
