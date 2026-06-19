@@ -735,8 +735,12 @@ export function EscalaCalendarCard() {
 
       <EscalaConfigModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(v) => {
+          setModalOpen(v);
+          if (!v) setEditingRegra(null);
+        }}
         onSave={handleSave}
+        initial={editingRegra}
       />
 
       <EventoLivreModal
