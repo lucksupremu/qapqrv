@@ -186,10 +186,6 @@ export function EscalaCalendarCard() {
     lado: "cheia" | "top" | "bottom";
     /** Apenas para `kind === "plantao"`. Define o ícone Sol/Lua. */
     periodo?: "dia" | "noite";
-    /** Hora de entrada do plantão em formato decimal (0..24). */
-    horaInicio?: number;
-    /** Horas trabalhadas que cabem no mesmo dia (entre horaInicio e 24h). */
-    duracaoNoDia?: number;
     marcaTipo?: string;
   };
   type Coluna = { slots: Slot[] };
@@ -205,16 +201,15 @@ export function EscalaCalendarCard() {
     const colunas: Coluna[] = [];
     const seen = new Set<string>();
     for (const e of entries) {
-      const horaInicio = e.inicio.getHours() + e.inicio.getMinutes() / 60;
       const periodo: "dia" | "noite" = isNoturno(e.inicio.getHours()) ? "noite" : "dia";
       const k = `${e.regra.cor}-${periodo}`;
       if (seen.has(k)) continue;
       seen.add(k);
-      const duracaoNoDia = Math.min(e.regra.trabalho, 24 - horaInicio);
       colunas.push({
-        slots: [{ kind: "plantao", cor: e.regra.cor, lado: "cheia", periodo, horaInicio, duracaoNoDia }],
+        slots: [{ kind: "plantao", cor: e.regra.cor, lado: "cheia", periodo }],
       });
     }
+
 
 
     // Marcas → uma coluna própria (não há mais "metade livre" para encaixar).
@@ -388,17 +383,6 @@ export function EscalaCalendarCard() {
                   const emoji = isNoite ? "🌙" : "🌞";
                   const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
 
-                  // Barra proporcional ao horário: posição = hora de entrada,
-                  // altura = horas trabalhadas dentro do mesmo dia.
-                  const AREA_TOP = 18;
-                  const AREA_BOTTOM = 2;
-                  const AREA_H = 40 - AREA_TOP - AREA_BOTTOM; // 20px
-                  const hi = s.horaInicio ?? 0;
-                  const dn = s.duracaoNoDia ?? 24;
-                  const barTop = AREA_TOP + (hi / 24) * AREA_H;
-                  const barHeight = Math.max(6, (dn / 24) * AREA_H);
-                  const borderRadiusBar = "4px";
-
                   return (
                     <span
                       key={`${ci}-${si}`}
@@ -407,11 +391,11 @@ export function EscalaCalendarCard() {
                       style={{
                         left,
                         width,
-                        top: barTop,
-                        height: barHeight,
+                        top: 20,
+                        bottom: 2,
                         background: bg,
                         borderTop: `3px solid ${s.cor}`,
-                        borderRadius: borderRadiusBar,
+                        borderRadius: "6px",
                         zIndex: 0,
                       }}
                     >
@@ -635,18 +619,18 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          {/* Miniatura: barra encostada no topo (manhã) */}
+          {/* Miniatura: célula cheia + emoji diurno */}
           <span style={{ position: "relative", width: 14, height: 18 }}>
-            <span style={{ position: "absolute", left: 0, right: 0, top: 1, height: 8, borderRadius: 3, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-            <span style={{ position: "absolute", right: -2, bottom: -2, fontSize: 10, lineHeight: 1 }}>🌞</span>
+            <span style={{ position: "absolute", inset: 1, borderRadius: 4, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+            <span style={{ position: "absolute", right: -2, bottom: -3, fontSize: 10, lineHeight: 1 }}>🌞</span>
           </span>
           Plantão diurno
         </span>
         <span className="flex items-center gap-1">
-          {/* Miniatura: barra encostada na base (noite) */}
+          {/* Miniatura: célula cheia + emoji noturno */}
           <span style={{ position: "relative", width: 14, height: 18 }}>
-            <span style={{ position: "absolute", left: 0, right: 0, bottom: 1, height: 8, borderRadius: 3, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-            <span style={{ position: "absolute", right: -2, bottom: -2, fontSize: 10, lineHeight: 1 }}>🌙</span>
+            <span style={{ position: "absolute", inset: 1, borderRadius: 4, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
+            <span style={{ position: "absolute", right: -2, bottom: -3, fontSize: 10, lineHeight: 1 }}>🌙</span>
           </span>
           Plantão noturno
         </span>
@@ -657,8 +641,9 @@ export function EscalaCalendarCard() {
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        A altura da barra mostra a duração do plantão; a posição indica a hora de entrada (topo = manhã, base = noite). Toque em um dia para detalhes.
+        🌞 indica plantão diurno e 🌙 indica plantão noturno. Toque em um dia para detalhes.
       </p>
+
 
 
 
