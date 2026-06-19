@@ -247,7 +247,7 @@ export function EscalaCalendarCard() {
           <h2 className="text-[15px] font-bold text-foreground">Minha escala</h2>
         </div>
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={() => { setEditingRegra(null); setModalOpen(true); }}
           className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white active:scale-95 transition"
           style={{ background: COR_PRIMARY }}
         >
