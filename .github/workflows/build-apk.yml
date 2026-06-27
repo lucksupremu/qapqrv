@@ -147,8 +147,8 @@ jobs:
         if: steps.aab_secrets.outputs.ok == 'true'
         run: |
           GRADLE=android/app/build.gradle
-          sed -i 's/versionCode [0-9][0-9]*/versionCode 4/'   "$GRADLE"
-          sed -i 's/versionName "[^"]*"/versionName "1.1.2"/' "$GRADLE"
+          sed -i 's/versionCode [0-9][0-9]*/versionCode 5/'   "$GRADLE"
+          sed -i 's/versionName "[^"]*"/versionName "1.1.3"/' "$GRADLE"
           if ! grep -q "signingConfigs {" "$GRADLE"; then
             python3 .github/scripts/patch-gradle-signing.py
           fi
