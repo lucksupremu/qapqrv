@@ -150,13 +150,21 @@ jobs:
           RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           GRADLE=android/app/build.gradle
-          # Auto-increment versionCode alto e único.
-          # Usa run_attempt para evitar repetir o mesmo código ao reexecutar o workflow.
-          BASE=10000
-          VCODE=$((BASE + (RUN_NUMBER * 10) + RUN_ATTEMPT))
+          # versionCode estritamente monotônico para a Play Store.
+          # Estratégia: minutos decorridos desde 2024-01-01 UTC + run_attempt.
+          # - Sempre cresce a cada build (mesmo em re-runs, graças ao run_attempt).
+          # - Cabe largamente no limite da Play (max 2.100.000.000).
+          # - Independe de run_number/branch/fork.
+          EPOCH_BASE=1704067200   # 2024-01-01T00:00:00Z
+          NOW=$(date -u +%s)
+          VCODE=$(( (NOW - EPOCH_BASE) / 60 + RUN_ATTEMPT ))
+          # versionName derivado da data (YY.MM.DD-buildN) — legível e sempre crescente.
+          VNAME="$(date -u +%y.%-m.%-d).${RUN_NUMBER}"
           echo "versionCode=${VCODE}"
-          sed -i "s/versionCode [0-9][0-9]*/versionCode ${VCODE}/"   "$GRADLE"
-          sed -i 's/versionName "[^"]*"/versionName "1.2.1"/' "$GRADLE"
+          echo "versionName=${VNAME}"
+          sed -i "s/versionCode [0-9][0-9]*/versionCode ${VCODE}/" "$GRADLE"
+          sed -i "s/versionName \"[^\"]*\"/versionName \"${VNAME}\"/" "$GRADLE"
+
           if ! grep -q "signingConfigs {" "$GRADLE"; then
             python3 .github/scripts/patch-gradle-signing.py
           fi
