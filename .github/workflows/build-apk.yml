@@ -147,14 +147,16 @@ jobs:
         if: steps.aab_secrets.outputs.ok == 'true'
         env:
           RUN_NUMBER: ${{ github.run_number }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           GRADLE=android/app/build.gradle
-          # Auto-increment versionCode: BASE + run_number garante valor único e crescente
-          BASE=20
-          VCODE=$((BASE + RUN_NUMBER))
+          # Auto-increment versionCode alto e único.
+          # Usa run_attempt para evitar repetir o mesmo código ao reexecutar o workflow.
+          BASE=10000
+          VCODE=$((BASE + (RUN_NUMBER * 10) + RUN_ATTEMPT))
           echo "versionCode=${VCODE}"
           sed -i "s/versionCode [0-9][0-9]*/versionCode ${VCODE}/"   "$GRADLE"
-          sed -i 's/versionName "[^"]*"/versionName "1.2.0"/' "$GRADLE"
+          sed -i 's/versionName "[^"]*"/versionName "1.2.1"/' "$GRADLE"
           if ! grep -q "signingConfigs {" "$GRADLE"; then
             python3 .github/scripts/patch-gradle-signing.py
           fi
