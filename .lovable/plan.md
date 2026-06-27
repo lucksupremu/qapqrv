@@ -1,39 +1,24 @@
-## Objetivo
+## Problema
 
-Quando o usuário toca num dia do calendário e clica em "Adicionar plantão neste dia", abrir um modal **simples**, no estilo do antigo "Adicionar evento" — só os campos essenciais — em vez do modal completo de escala recorrente.
+O Play Store rejeitou o AAB porque o `versionCode` enviado era **4**, e a Play já tem uma versão igual ou superior publicada. Cada novo upload precisa de `versionCode` **estritamente maior** que qualquer versão já enviada (mesmo em trilhas de teste/interno).
 
-## Como vai funcionar
+Bumpei pra 5 no último turno, mas pra evitar esse problema voltar toda vez (e pra garantir que o próximo upload passe), vou fazer duas coisas:
 
-**Novo modal simplificado** — "Adicionar plantão neste dia":
+## Mudanças em `.github/workflows/build-apk.yml`
 
-Campos:
-- **Local** (texto, obrigatório) — ex: "Polícia Militar", "Dejem", "Delegada".
-- **Cor** (paleta de cores reutilizando `ESCALA_CORES`).
-- **Horário de início** (input `time`, default 07:00).
-- **Duração em horas** (number, default 12, range 1–24). Mantido porque o calendário precisa saber se é diurno/noturno (emoji 🌞/🌙) e quando começa/termina — mas com default sensato para o usuário só confirmar.
+1. **Bump seguro imediato**: pular `versionCode` de 5 → **20** e `versionName` para **1.2.0**. Margem grande pra ultrapassar qualquer versão já existente na Play (interna/fechada/produção).
 
-Sem: data inicial/final, preset, turno alternado, folga, modelo de escala. Como é só um dia, a data já vem fixada pelo dia clicado.
+2. **Auto-incremento baseado em `github.run_number`**: trocar o `sed` fixo por:
+   ```
+   BASE=20
+   VCODE=$((BASE + GITHUB_RUN_NUMBER))
+   sed -i "s/versionCode [0-9][0-9]*/versionCode ${VCODE}/" "$GRADLE"
+   ```
+   Assim cada build do CI gera um `versionCode` único e crescente automaticamente — você nunca mais precisa lembrar de bumpar manualmente antes de subir pra Play.
 
-Ao salvar:
-- Cria uma `EscalaRegra` com `dataInicial = dataFinal = dia clicado`, `trabalho = duração`, `folga = 24 - duração` (irrelevante porque não vai repetir), sem `alternada`. Reaproveita o storage e o motor de cálculo existentes — o calendário e a lista de escalas cadastradas continuam mostrando normalmente.
-- Mostra toast "Plantão adicionado." e fecha.
+3. **`versionName`** continua fixo em `1.2.0` (ou o que você quiser); só o `versionCode` precisa ser sempre único pra Play.
 
-## Arquivos
+## O que você precisa fazer depois
 
-**Novo:**
-- `src/components/escala-dia-modal.tsx` — modal enxuto com os 4 campos acima, usando `Dialog` shadcn, paleta `ESCALA_CORES`, e gerando `EscalaRegra` via `newEscalaId()`.
-
-**Editado:**
-- `src/components/escala-calendar-card.tsx`:
-  - Substitui o uso do `EscalaConfigModal` no fluxo "clicou num dia" pelo novo `EscalaDiaModal`.
-  - Mantém o `EscalaConfigModal` para os fluxos "Configurar" (topo) e "Editar" (lápis na lista de regras) — escalas recorrentes continuam usando o modal completo.
-
-**Editado (reversão parcial):**
-- `src/components/escala-config-modal.tsx`: remover a prop `initialBaseDate` adicionada antes (não é mais necessária) e voltar título/descrição ao original.
-
-## Detalhes técnicos
-
-- `EscalaDiaModal` props: `open`, `onOpenChange`, `baseDate: Date`, `onSave: (regra: EscalaRegra) => void`.
-- Reutiliza `loadEscalas` / `saveEscalas` / `handleSave` já existentes no card — basta passar a regra montada.
-- Default de duração = 12h, hora = 07:00. Valida: local não-vazio, duração 1–24.
-- Nenhuma migração de dados: a estrutura `EscalaRegra` é a mesma, só com `dataInicial == dataFinal` e sem `alternada`.
+- Push pro GitHub → Actions gera o novo AAB em `Releases → AAB Release Latest`.
+- Se a Play ainda reclamar (versão interna já passou de 20), me avisa o número exato que aparece na mensagem que eu ajusto o `BASE`.
