@@ -1,6 +1,8 @@
 import { useRef } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { AdSenseBanner } from "./adsense-banner";
 import { useNativeAd } from "@/lib/native-ad";
+import { isAdsAllowedRoute } from "@/lib/ads-allowlist";
 
 /**
  * AdSlot — seletor de anúncio conforme a plataforma. Mesma API em web e APK:
