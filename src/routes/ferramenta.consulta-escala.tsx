@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { BottomNav } from "@/components/bottom-nav";
-import { AdSlot } from "@/components/ad-slot";
+
 import { consultarEscala, formatBRL, formatDateBR, type Escala } from "@/lib/escala";
 import { useEscalaHistorico } from "@/hooks/use-escala-historico";
 import { isVpnActive } from "@/lib/vpn-status";
