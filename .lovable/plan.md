@@ -1,24 +1,48 @@
-## Problema
+# Conformidade Google AdSense
 
-O Play Store rejeitou o AAB porque o `versionCode` enviado era **4**, e a Play já tem uma versão igual ou superior publicada. Cada novo upload precisa de `versionCode` **estritamente maior** que qualquer versão já enviada (mesmo em trilhas de teste/interno).
+O Google reprovou por duas violações:
+1. **Anúncios em telas sem conteúdo** (splash, onboarding, "em construção", redirecionamentos, telas de navegação/alerta).
+2. **Conteúdo de baixo valor** em algumas rotas.
 
-Bumpei pra 5 no último turno, mas pra evitar esse problema voltar toda vez (e pra garantir que o próximo upload passe), vou fazer duas coisas:
+A causa raiz: hoje o script global do AdSense (`adsbygoogle.js`) é injetado em **todas** as rotas quando ligado, e o `<AdSlot>` pode aparecer em telas predominantemente interativas (ferramentas, anyconnect). Mesmo sem `auto-ads`, o robô do AdSense visita o site e vê o script carregando em páginas vazias — e isso é o suficiente para reprovar.
 
-## Mudanças em `.github/workflows/build-apk.yml`
+## O que vou fazer
 
-1. **Bump seguro imediato**: pular `versionCode` de 5 → **20** e `versionName` para **1.2.0**. Margem grande pra ultrapassar qualquer versão já existente na Play (interna/fechada/produção).
+### 1. Allowlist rígida de rotas com anúncio
+Criar `src/lib/ads-allowlist.ts` com APENAS rotas ricas em conteúdo editorial:
+- `/blog`, `/blog/$slug`
+- `/sobre`, `/manual`, `/termos`, `/privacidade`, `/contato`
 
-2. **Auto-incremento baseado em `github.run_number`**: trocar o `sed` fixo por:
-   ```
-   BASE=20
-   VCODE=$((BASE + GITHUB_RUN_NUMBER))
-   sed -i "s/versionCode [0-9][0-9]*/versionCode ${VCODE}/" "$GRADLE"
-   ```
-   Assim cada build do CI gera um `versionCode` único e crescente automaticamente — você nunca mais precisa lembrar de bumpar manualmente antes de subir pra Play.
+Tudo o resto (splash, onboarding, inicio, calendario, historico, favoritos, intranet, anyconnect, em-construcao, ferramenta.*, escala-viewer, escalas-baixadas, configuracoes) **nunca** carrega o script do AdSense nem renderiza `<AdSlot>`.
 
-3. **`versionName`** continua fixo em `1.2.0` (ou o que você quiser); só o `versionCode` precisa ser sempre único pra Play.
+### 2. Script AdSense condicional por rota
+No `__root.tsx`, o `loadAds()` passa a checar a rota atual contra a allowlist antes de injetar o `<script>`. Se a rota não estiver na lista, o script não é adicionado — e se já estava adicionado de uma rota anterior, ele permanece mas nenhum `<ins>` será criado nas novas telas.
 
-## O que você precisa fazer depois
+### 3. Guarda no `<AdSlot>`
+O componente vira no-op se:
+- A rota atual não está na allowlist; **ou**
+- `VITE_ADSENSE_ENABLED !== "true"`; **ou**
+- Estiver em APK (mantém comportamento atual de native ad — não muda).
 
-- Push pro GitHub → Actions gera o novo AAB em `Releases → AAB Release Latest`.
-- Se a Play ainda reclamar (versão interna já passou de 20), me avisa o número exato que aparece na mensagem que eu ajusto o `BASE`.
+### 4. Remover `<AdSlot>` das telas reprovadas
+- `src/routes/anyconnect.tsx` → remove `<AdSlot>` (tela de tutorial/ação, pouco texto).
+- `src/routes/ferramenta.consulta-escala.tsx` → remove `<AdSlot>` (tela de busca/ferramenta).
+- `src/routes/manual.tsx` → **mantém** (página densa de conteúdo).
+
+### 5. Reforçar conteúdo das páginas com ads
+- `/sobre`, `/contato`, `/termos`, `/privacidade`: revisar e garantir ≥ 600 palavras de conteúdo original, com headings semânticos.
+- `/blog` index: garantir descrição introdutória + lista visível com resumo de cada post.
+- Posts do blog: validar que cada um tem ≥ 800 palavras úteis (já existem 4 posts; ajusto os que estiverem curtos).
+
+### 6. Bloquear crawler em telas de baixo valor
+Adicionar `<meta name="robots" content="noindex">` dinamicamente (via `__root.tsx`) nas rotas fora da allowlist de conteúdo, exceto `/` que tem landing. Isso impede que o robô do AdSense classifique splash/onboarding/em-construcao como "página do editor".
+
+### 7. Atualizar `public/robots.txt`
+Desautorizar explicitamente: `/splash`, `/onboarding`, `/em-construcao`, `/intranet`, `/anyconnect`, `/ferramenta/*`, `/escala-viewer/*`, `/escalas-baixadas`, `/configuracoes`, `/favoritos`, `/historico`, `/calendario`, `/inicio`.
+
+### 8. Não atrapalhar o usuário
+- Onde o `<AdSlot>` for removido/no-op, ele simplesmente não renderiza (sem placeholder, sem reserva de espaço) — UX fica mais limpa.
+- Flag `VITE_ADSENSE_ENABLED` continua `false` no `.env` até a aprovação. Quando virar `true`, só as rotas da allowlist exibirão anúncios.
+
+## Resultado esperado
+Quando você pedir revisão ao AdSense, o crawler só vai encontrar `adsbygoogle.js` em páginas com conteúdo editorial denso (blog + páginas institucionais), eliminando ambas as violações.
