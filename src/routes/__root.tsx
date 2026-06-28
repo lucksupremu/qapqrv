@@ -22,6 +22,7 @@ import { installAppBadgeUpdater } from "@/lib/app-badge";
 import { InstallConfirmModal } from "@/components/install-confirm-modal";
 import { ShareAppNudge } from "@/components/share-app-nudge";
 import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
+import { isAdsAllowedRoute } from "@/lib/ads-allowlist";
 
 
 /** Google AdSense client ID */
