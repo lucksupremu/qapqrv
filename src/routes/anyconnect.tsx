@@ -4,7 +4,7 @@ import { ArrowLeft, Check, Copy, PlayCircle, Smartphone } from "lucide-react";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 import tutorialVideo from "@/assets/anyconnect/tutorial.mp4.asset.json";
 import { useIsNative } from "@/hooks/use-is-native";
-import { AdSlot } from "@/components/ad-slot";
+
 
 // No APK (Capacitor) o app roda em https://localhost e não tem acesso ao
 // caminho relativo `/__l5e/...`. Para o vídeo carregar, prefixamos com o
