@@ -22,6 +22,7 @@ import { installAppBadgeUpdater } from "@/lib/app-badge";
 import { InstallConfirmModal } from "@/components/install-confirm-modal";
 import { ShareAppNudge } from "@/components/share-app-nudge";
 import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
+import { isAdsAllowedRoute } from "@/lib/ads-allowlist";
 
 
 /** Google AdSense client ID */
@@ -138,15 +139,38 @@ function RootComponent() {
 
 
 
+  // Aplica <meta name="robots" content="noindex"> em rotas sem conteúdo
+  // editorial. Mantém o crawler do AdSense focado nas páginas ricas (blog,
+  // manual, institucionais) e impede que telas de "alerta/navegação/em
+  // construção" sejam classificadas como inventário de anúncio sem conteúdo.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const allowIndex = pathname === "/" || isAdsAllowedRoute(pathname);
+    const existing = document.querySelector('meta[name="robots"][data-dyn="1"]');
+    if (!allowIndex) {
+      if (!existing) {
+        const m = document.createElement("meta");
+        m.setAttribute("name", "robots");
+        m.setAttribute("content", "noindex,nofollow");
+        m.setAttribute("data-dyn", "1");
+        document.head.appendChild(m);
+      }
+    } else if (existing) {
+      existing.remove();
+    }
+  }, [pathname]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Lazy-load AdSense after first paint (apenas no web, não no APK nativo).
-    // Mantém-se desligado por padrão até o site ser aprovado no AdSense —
-    // ative com VITE_ADSENSE_ENABLED=true.
+    // Carrega o script do AdSense apenas se:
+    //  - a feature flag estiver ligada (site aprovado);
+    //  - não estiver no APK nativo (lá usamos AdMob);
+    //  - a rota atual estiver na allowlist de conteúdo editorial.
     const loadAds = () => {
       if (!ADSENSE_ENABLED) return;
       if (isNativeApp()) return;
+      if (!isAdsAllowedRoute(pathname)) return;
       if (document.querySelector("script[data-adsense]")) return;
       const s = document.createElement("script");
       s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
