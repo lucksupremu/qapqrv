@@ -38,10 +38,15 @@ const DEFAULT_SLOT = "7036302359";
 const DEFAULT_IN_FEED_LAYOUT_KEY = "-fb+5w+4e-db+86";
 
 export function AdSlot({ type = "banner", adSlot = DEFAULT_SLOT, layoutKey }: Props) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isNative =
     typeof window !== "undefined" &&
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).Capacitor?.isNativePlatform?.() === true;
+
+  // Política AdSense: anúncios só em rotas com conteúdo editorial.
+  // Em rotas fora da allowlist o componente não renderiza nada (web).
+  if (!isNative && !isAdsAllowedRoute(pathname)) return null;
 
   if (!isNative) {
     if (type === "in-feed") {
