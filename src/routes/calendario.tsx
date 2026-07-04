@@ -309,7 +309,7 @@ function CalendarScreen() {
   const COR_BG_SOFT = "#e8f0f8";
 
   return (
-    <div className="min-h-screen pb-32" style={{ background: "var(--bg)" }}>
+    <div className="escala-light-scope min-h-screen pb-32" style={{ background: "var(--bg)" }}>
       {/* Header */}
       <header className="flex items-center gap-2 px-3 py-3">
         <button
