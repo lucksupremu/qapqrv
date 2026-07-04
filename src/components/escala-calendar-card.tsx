@@ -497,10 +497,10 @@ export function EscalaCalendarCard() {
                     aria-hidden
                     className="absolute pointer-events-none"
                     style={{
-                      top: -4,
+                      bottom: -4,
                       right: -4,
-                      width: 18,
-                      height: 18,
+                      width: 20,
+                      height: 20,
                       zIndex: 7,
                     }}
                   >
@@ -512,38 +512,22 @@ export function EscalaCalendarCard() {
                         width: "100%",
                         height: "100%",
                         objectFit: "contain",
-                        transform: "rotate(6deg)",
+                        transform: "rotate(-6deg)",
                         filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.35))",
                       }}
                     />
-                    {/* Clipe metálico prendendo o post-it */}
                     <span
                       style={{
                         position: "absolute",
-                        top: -2,
+                        top: "45%",
                         left: "50%",
-                        transform: "translateX(-50%) rotate(6deg)",
-                        width: 8,
-                        height: 5,
-                        borderRadius: 1,
-                        background:
-                          "linear-gradient(180deg, #e8ecf1 0%, #b8c0cc 55%, #7d8896 100%)",
-                        border: "0.5px solid #6a7280",
-                        boxShadow: "0 0.5px 1px rgba(0,0,0,0.4)",
-                        zIndex: 8,
-                      }}
-                    />
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: 4,
-                        left: "50%",
-                        transform: "translateX(-50%) rotate(6deg)",
+                        transform: "translate(-50%, -50%) rotate(-6deg)",
                         fontSize: 5,
                         lineHeight: 1,
                         fontWeight: 700,
                         color: "#3a2a00",
                         whiteSpace: "nowrap",
+                        textAlign: "center",
                       }}
                     >
                       {label.slice(0, 5)}
