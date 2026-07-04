@@ -68,7 +68,15 @@ export function loadEscalas(): EscalaRegra[] {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as EscalaRegra[]) : [];
+    if (!Array.isArray(parsed)) return [];
+    const list = (parsed as EscalaRegra[]).map(migrarCor);
+    // persiste migração se algo mudou
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch {
+      /* ignore */
+    }
+    return list;
   } catch {
     return [];
   }
