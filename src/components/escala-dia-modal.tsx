@@ -51,7 +51,6 @@ function parseHHMM(s: string): { h: number; m: number } {
 
 export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) {
   const [local, setLocal] = useState("");
-  const [cor, setCor] = useState(ESCALA_CORES[0]!.value);
   const [horaInicio, setHoraInicio] = useState(7);
   const [minutoInicio, setMinutoInicio] = useState(0);
   const [duracao, setDuracao] = useState(12);
@@ -59,7 +58,6 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
   useEffect(() => {
     if (!open) return;
     setLocal("");
-    setCor(ESCALA_CORES[0]!.value);
     setHoraInicio(7);
     setMinutoInicio(0);
     setDuracao(12);
