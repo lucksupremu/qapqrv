@@ -639,18 +639,18 @@ export function EscalaCalendarCard() {
         <span className="flex items-center gap-1">
           <span
             className="flex items-center justify-center text-white"
-            style={{ width: 12, height: 12, borderRadius: "50%", background: COR_DIURNO, fontSize: 8 }}
+            style={{ width: 14, height: 14, borderRadius: "50%", background: COR_DIURNO }}
           >
-            🌞
+            <Sun size={8} strokeWidth={2.75} />
           </span>
           Avulso (dia)
         </span>
         <span className="flex items-center gap-1">
           <span
             className="flex items-center justify-center text-white"
-            style={{ width: 12, height: 12, borderRadius: "50%", background: COR_NOTURNO, fontSize: 8 }}
+            style={{ width: 14, height: 14, borderRadius: "50%", background: COR_NOTURNO }}
           >
-            🌙
+            <Moon size={8} strokeWidth={2.75} />
           </span>
           Avulso (noite)
         </span>
@@ -661,8 +661,9 @@ export function EscalaCalendarCard() {
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        Contorno = escala recorrente · Selo 🌞/🌙 = plantão avulso. Toque em um dia para detalhes.
+        Contorno = escala recorrente · Selo com sol/lua = plantão avulso. Toque em um dia para detalhes.
       </p>
+
 
 
 
