@@ -574,7 +574,7 @@ export function EscalaCalendarCard() {
           Diurno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid ${COR_NOTURNO}` }} />
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `3px solid ${COR_NOTURNO}` }} />
           Noturno
         </span>
         <span className="flex items-center gap-1">
