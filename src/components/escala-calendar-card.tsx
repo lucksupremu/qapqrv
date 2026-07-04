@@ -21,6 +21,9 @@ import { gerarIcs, baixarIcs } from "@/lib/escala-ics";
 import { loadMarcas, type Marca } from "@/lib/marcas";
 import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
 import { toast } from "sonner";
+import postitAsset from "@/assets/postit-alfinete.avif.asset.json";
+
+const POSTIT_URL = postitAsset.url;
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
