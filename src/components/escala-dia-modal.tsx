@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
-import { Sun, Moon } from "lucide-react";
 
 
 import { Button } from "@/components/ui/button";
@@ -126,21 +125,46 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
           {(() => {
             const p = classificarPeriodo(horaInicio, minutoInicio, duracao);
             const c = p === "noite" ? COR_NOTURNO : COR_DIURNO;
-            const Icon = p === "noite" ? Moon : Sun;
-            const label = p === "noite" ? "Noturno" : "Diurno";
             return (
               <div className="space-y-1.5">
                 <Label>Como aparece no calendário</Label>
                 <div className="flex items-center gap-2">
                   <span
                     aria-hidden
-                    className="flex h-6 w-6 items-center justify-center rounded-full text-white"
-                    style={{ background: c, boxShadow: "0 0 0 2px hsl(var(--card)), 0 1px 2px rgba(0,0,0,0.25)" }}
+                    className="relative inline-block h-[22px] w-[26px]"
+                    style={{
+                      borderRadius: 3,
+                      background: "#FFE66D",
+                      border: "1px solid rgba(125, 93, 0, 0.35)",
+                      boxShadow: "0 0 0 2px hsl(var(--card)), 0 1px 2px rgba(0,0,0,0.22)",
+                    }}
                   >
-                    <Icon size={12} strokeWidth={2.75} />
+                    <span
+                      aria-hidden
+                      className="absolute left-[4px] right-[4px] top-[6px] h-[2px] rounded-full"
+                      style={{ background: "rgba(92, 70, 0, 0.35)" }}
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute left-[4px] right-[8px] top-[12px] h-[2px] rounded-full"
+                      style={{ background: "rgba(92, 70, 0, 0.25)" }}
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute bottom-0 left-0 h-[4px] w-full rounded-b-[3px]"
+                      style={{ background: c }}
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute right-0 top-0 h-0 w-0"
+                      style={{
+                        borderTop: "7px solid rgba(255, 255, 255, 0.85)",
+                        borderLeft: "7px solid rgba(139, 103, 0, 0.28)",
+                      }}
+                    />
                   </span>
                   <span className="text-[11px] text-muted-foreground">
-                    Selo {label.toLowerCase()} no canto do dia — não pinta o contorno da escala.
+                    Post-it no canto do dia — não pinta o contorno da escala.
                   </span>
                 </div>
               </div>
