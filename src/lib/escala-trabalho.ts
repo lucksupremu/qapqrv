@@ -16,7 +16,10 @@ export type EscalaRegra = {
   dataInicial: string; // yyyy-mm-dd
   dataFinal: string; // yyyy-mm-dd
   alternada?: EscalaTurno;
+  /** true = plantão avulso adicionado clicando direto num dia. */
+  avulso?: boolean;
 };
+
 
 const STORAGE_KEY = "qap-escalas-trabalho";
 
@@ -56,11 +59,16 @@ export function corDoTurno(
     : COR_DIURNO;
 }
 
-function migrarCor(r: EscalaRegra): EscalaRegra {
+function migrarRegra(r: EscalaRegra): EscalaRegra {
   const corPrincipal = corDoTurno(r.horaInicio, r.minutoInicio, r.trabalho);
-  if (r.cor === corPrincipal) return r;
-  return { ...r, cor: corPrincipal };
+  // Heurística retrocompatível: registros de um único dia sem alternância
+  // eram criados pelo modal "adicionar neste dia" — marcamos como avulso.
+  const avulsoInferido =
+    r.avulso ?? (!r.alternada && r.dataInicial === r.dataFinal);
+  if (r.cor === corPrincipal && r.avulso === avulsoInferido) return r;
+  return { ...r, cor: corPrincipal, avulso: avulsoInferido };
 }
+
 
 export function loadEscalas(): EscalaRegra[] {
   if (typeof window === "undefined") return [];
@@ -69,7 +77,7 @@ export function loadEscalas(): EscalaRegra[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    const list = (parsed as EscalaRegra[]).map(migrarCor);
+    const list = (parsed as EscalaRegra[]).map(migrarRegra);
     // persiste migração se algo mudou
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));

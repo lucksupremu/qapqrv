@@ -88,11 +88,13 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
       minutoInicio,
       dataInicial: iso,
       dataFinal: iso,
+      avulso: true,
     };
     onSave(regra);
     onOpenChange(false);
-    toast.success("Plantão adicionado.");
+    toast.success("Plantão avulso adicionado.");
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -126,21 +128,23 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
             const label = p === "noite" ? "Noturno" : "Diurno";
             return (
               <div className="space-y-1.5">
-                <Label>Cor no calendário</Label>
+                <Label>Como aparece no calendário</Label>
                 <div className="flex items-center gap-2">
                   <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold text-white"
-                    style={{ background: c }}
+                    aria-hidden
+                    className="flex h-6 w-6 items-center justify-center rounded-full text-[12px] text-white"
+                    style={{ background: c, boxShadow: "0 0 0 2px hsl(var(--card))" }}
                   >
-                    <span aria-hidden>{emoji}</span> {label}
+                    {emoji}
                   </span>
                   <span className="text-[11px] text-muted-foreground">
-                    Definida automaticamente pelo horário.
+                    Selo {label.toLowerCase()} no canto do dia — não pinta o contorno da escala.
                   </span>
                 </div>
               </div>
             );
           })()}
+
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">

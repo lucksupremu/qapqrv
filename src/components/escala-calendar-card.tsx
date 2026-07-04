@@ -345,14 +345,23 @@ export function EscalaCalendarCard() {
           const interativo = cell.inMonth;
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
 
-          // Detecta períodos presentes no dia (para o contorno)
+          // Detecta períodos presentes no dia — separando escala recorrente
+          // (contorno quadrado) de plantão avulso (selo redondo).
           let temDia = false;
           let temNoite = false;
+          let avulsoDia = false;
+          let avulsoNoite = false;
           for (const e of entries) {
             const p = periodoDaEntry(e);
-            if (p === "dia") temDia = true;
-            else temNoite = true;
+            if (e.regra.avulso) {
+              if (p === "dia") avulsoDia = true;
+              else avulsoNoite = true;
+            } else {
+              if (p === "dia") temDia = true;
+              else temNoite = true;
+            }
           }
+          const temAvulso = avulsoDia || avulsoNoite;
 
           // Estilo do contorno: quadrado; se tem os dois períodos, split
           // horizontal (metade laranja em cima, azul embaixo).
@@ -367,6 +376,16 @@ export function EscalaCalendarCard() {
           } else if (isToday) {
             borderStyle.border = `3px solid ${COR_PRIMARY}`;
           }
+
+          // Selo do plantão avulso — canto inferior direito.
+          const seloBg =
+            avulsoDia && avulsoNoite
+              ? `linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%)`
+              : avulsoDia
+                ? COR_DIURNO
+                : COR_NOTURNO;
+          const seloEmoji =
+            avulsoDia && avulsoNoite ? "☀︎" : avulsoDia ? "🌞" : "🌙";
 
           const cellInner = (
             <>
@@ -422,8 +441,30 @@ export function EscalaCalendarCard() {
                   }}
                 />
               )}
+
+              {temAvulso && (
+                <span
+                  aria-hidden
+                  className="absolute flex items-center justify-center text-white"
+                  style={{
+                    right: -2,
+                    bottom: -2,
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: seloBg,
+                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
+                    fontSize: 9,
+                    lineHeight: 1,
+                    zIndex: 4,
+                  }}
+                >
+                  {seloEmoji}
+                </span>
+              )}
             </>
           );
+
 
 
 
@@ -475,6 +516,14 @@ export function EscalaCalendarCard() {
                           <div className="min-w-0">
                             <p className="truncate text-[12px] font-bold text-foreground">
                               {e.regra.local}
+                              {e.regra.avulso && (
+                                <span
+                                  className="ml-1.5 inline-flex items-center rounded-full px-1.5 py-[1px] align-middle text-[9px] font-bold uppercase tracking-wide text-white"
+                                  style={{ background: e.regra.cor }}
+                                >
+                                  Avulso
+                                </span>
+                              )}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
                               {fmtHora(e.inicio)} → {fmtHora(e.fim)}
@@ -488,6 +537,7 @@ export function EscalaCalendarCard() {
                                 : `Continuação (vem de ${fmtDiaCurto(e.inicio)})`}
                             </p>
                           </div>
+
                         </div>
                       );
                     })}
@@ -590,14 +640,33 @@ export function EscalaCalendarCard() {
           Dia + Noite
         </span>
         <span className="flex items-center gap-1">
+          <span
+            className="flex items-center justify-center text-white"
+            style={{ width: 12, height: 12, borderRadius: "50%", background: COR_DIURNO, fontSize: 8 }}
+          >
+            🌞
+          </span>
+          Avulso (dia)
+        </span>
+        <span className="flex items-center gap-1">
+          <span
+            className="flex items-center justify-center text-white"
+            style={{ width: 12, height: 12, borderRadius: "50%", background: COR_NOTURNO, fontSize: 8 }}
+          >
+            🌙
+          </span>
+          Avulso (noite)
+        </span>
+        <span className="flex items-center gap-1">
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3498DB" }} />
           Dejem/Delegada
         </span>
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        Contorno laranja = plantão de dia · azul-marinho = plantão de noite. Toque em um dia para detalhes.
+        Contorno = escala recorrente · Selo 🌞/🌙 = plantão avulso. Toque em um dia para detalhes.
       </p>
+
 
 
 
