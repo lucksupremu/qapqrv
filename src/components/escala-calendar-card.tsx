@@ -497,18 +497,47 @@ export function EscalaCalendarCard() {
               {temEvento && (
                 <span
                   aria-hidden
-                  className="absolute"
+                  className="absolute bottom-0 left-0 flex items-center justify-center overflow-hidden"
                   style={{
-                    left: 0,
-                    bottom: 0,
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#7C3AED",
-                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
+                    width: 34,
+                    height: 34,
+                    background: "#FFE066",
+                    backgroundImage:
+                      "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
+                    borderRadius: 3,
+                    boxShadow:
+                      "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset, 0 -3px 6px rgba(180,130,0,0.18) inset",
+                    transform: "rotate(-3deg)",
                     zIndex: 5,
                   }}
-                />
+                >
+                  {/* Cantinho dobrado */}
+                  <span
+                    aria-hidden
+                    className="absolute right-0 top-0"
+                    style={{
+                      width: 0,
+                      height: 0,
+                      borderTop: "7px solid hsl(var(--card))",
+                      borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
+                    }}
+                  />
+                  <span
+                    className="text-[7px] font-bold text-[#3a2a00]"
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width: "100%",
+                      height: "100%",
+                      textAlign: "center",
+                      padding: 1,
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {eventosDia[0]?.titulo.trim().slice(0, 8)}
+                  </span>
+                </span>
               )}
             </>
           );
