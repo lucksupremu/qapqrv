@@ -501,34 +501,22 @@ export function EscalaCalendarCard() {
               )}
 
               {temEvento && (
-                <span
+                <img
                   aria-hidden
-                  className="absolute bottom-0 left-0 overflow-hidden"
+                  src={POSTIT_URL}
+                  alt=""
+                  draggable={false}
+                  className="absolute pointer-events-none"
                   style={{
-                    width: 34,
-                    height: 34,
-                    background: "#FFE066",
-                    backgroundImage:
-                      "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
-                    borderRadius: 3,
-                    boxShadow:
-                      "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset, 0 -3px 6px rgba(180,130,0,0.18) inset",
-                    transform: "rotate(-3deg)",
+                    bottom: 0,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 38,
+                    height: 38,
+                    objectFit: "contain",
                     zIndex: 0,
                   }}
-                >
-                  {/* Cantinho dobrado */}
-                  <span
-                    aria-hidden
-                    className="absolute right-0 top-0"
-                    style={{
-                      width: 0,
-                      height: 0,
-                      borderTop: "7px solid hsl(var(--card))",
-                      borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
-                    }}
-                  />
-                </span>
+                />
               )}
               {temEvento && (
                 <span
