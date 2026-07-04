@@ -76,7 +76,6 @@ function parseHHMM(s: string): { h: number; m: number } {
 export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props) {
   const [preset, setPreset] = useState<string>("12x24-12x48");
   const [local, setLocal] = useState("");
-  const [cor, setCor] = useState(ESCALA_CORES[0]!.value);
   const [trabalho, setTrabalho] = useState(12);
   const [folga, setFolga] = useState(24);
   const [horaInicio, setHoraInicio] = useState(7);
