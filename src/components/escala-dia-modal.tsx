@@ -119,26 +119,28 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
             />
           </div>
 
-          <div className="space-y-1.5">
-            <Label>Cor no calendário</Label>
-            <div className="flex flex-wrap gap-2">
-              {ESCALA_CORES.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setCor(c.value)}
-                  aria-label={c.label}
-                  className={cn(
-                    "h-8 w-8 rounded-full border-2 transition",
-                    cor === c.value
-                      ? "scale-110 border-foreground"
-                      : "border-transparent opacity-80",
-                  )}
-                  style={{ background: c.value }}
-                />
-              ))}
-            </div>
-          </div>
+          {(() => {
+            const p = classificarPeriodo(horaInicio, minutoInicio, duracao);
+            const c = p === "noite" ? COR_NOTURNO : COR_DIURNO;
+            const emoji = p === "noite" ? "🌙" : "🌞";
+            const label = p === "noite" ? "Noturno" : "Diurno";
+            return (
+              <div className="space-y-1.5">
+                <Label>Cor no calendário</Label>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold text-white"
+                    style={{ background: c }}
+                  >
+                    <span aria-hidden>{emoji}</span> {label}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Definida automaticamente pelo horário.
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
