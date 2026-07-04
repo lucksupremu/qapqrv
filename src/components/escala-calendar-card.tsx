@@ -373,8 +373,6 @@ export function EscalaCalendarCard() {
             borderStyle.border = `5px solid ${COR_DIURNO}`;
           } else if (temNoite) {
             borderStyle.border = `5px solid ${COR_NOTURNO}`;
-          } else if (isToday) {
-            borderStyle.border = `5px solid ${COR_PRIMARY}`;
           }
 
           // Post-it do plantão avulso — formato diferente do contorno da escala.
