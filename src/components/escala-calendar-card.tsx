@@ -686,21 +686,29 @@ export function EscalaCalendarCard() {
           <span
             className="relative inline-block"
             style={{
-              width: 15,
-              height: 13,
+              width: 16,
+              height: 14,
               borderRadius: 2,
-              background: "#FFE66D",
-              border: "1px solid rgba(125, 93, 0, 0.35)",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.16)",
+              background: "#FFE066",
+              backgroundImage:
+                "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.22)",
+              transform: "rotate(-3deg)",
             }}
           >
-            <span className="absolute left-[2px] right-[2px] top-[3px] h-[1.5px] rounded-full bg-[rgba(92,70,0,0.35)]" />
             <span className="absolute bottom-0 left-0 h-[3px] w-full rounded-b-[2px]" style={{ background: COR_DIURNO }} />
             <span
-              className="absolute right-0 top-0 h-0 w-0"
+              aria-hidden
+              className="absolute"
               style={{
-                borderTop: "5px solid rgba(255, 255, 255, 0.85)",
-                borderLeft: "5px solid rgba(139, 103, 0, 0.28)",
+                top: -3,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                background: "radial-gradient(circle at 30% 30%, #ff6b6b 0%, #d63031 60%, #a51d1d 100%)",
+                boxShadow: "0 1px 1px rgba(0,0,0,0.35)",
               }}
             />
           </span>
