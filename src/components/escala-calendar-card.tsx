@@ -466,6 +466,13 @@ export function EscalaCalendarCard() {
                   }}
                 >
                   {cell.date.getDate()}
+                  {isToday && (
+                    <span
+                      aria-hidden
+                      className="absolute -bottom-1 left-1/2 h-[3px] w-5 -translate-x-1/2 rounded-full"
+                      style={{ background: COR_PRIMARY }}
+                    />
+                  )}
                 </span>
 
               </span>
