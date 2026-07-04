@@ -394,18 +394,16 @@ export function EscalaCalendarCard() {
                 style={{ ...borderStyle }}
               >
                 <span
-                  className="text-[13px]"
+                  className={`text-[13px] ${
+                    !cell.inMonth ? "text-muted-foreground/60" : "text-foreground"
+                  }`}
                   style={{
-                    color: !cell.inMonth
-                      ? "#a8b5c2"
-                      : temAlgo || isToday
-                        ? "#1a1a1a"
-                        : "var(--text-dark, #02080d)",
                     fontWeight: isToday || temPlantao ? 800 : 500,
                   }}
                 >
                   {cell.date.getDate()}
                 </span>
+
               </span>
 
               {temMarca && (
