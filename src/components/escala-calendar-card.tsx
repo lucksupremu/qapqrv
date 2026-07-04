@@ -583,7 +583,7 @@ export function EscalaCalendarCard() {
               width: 14,
               height: 14,
               borderRadius: 3,
-              border: "2px solid transparent",
+              border: "3px solid transparent",
               background: `linear-gradient(hsl(var(--card)),hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`,
             }}
           />
