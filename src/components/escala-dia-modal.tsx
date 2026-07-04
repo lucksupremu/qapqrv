@@ -144,10 +144,19 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
                     }}
                   >
                     <span
-                      className="text-[13px] font-extrabold"
-                      style={{ color: "#3a2a00" }}
+                      className="text-[10px] font-extrabold leading-none text-center px-0.5"
+                      style={{
+                        color: "#3a2a00",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                        height: "100%",
+                        wordBreak: "break-word",
+                        overflow: "hidden",
+                      }}
                     >
-                      {baseDate ? baseDate.getDate() : 15}
+                      {local.trim().slice(0, 8) || (baseDate ? baseDate.getDate() : 15)}
                     </span>
                     <span
                       aria-hidden
