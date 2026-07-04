@@ -345,14 +345,23 @@ export function EscalaCalendarCard() {
           const interativo = cell.inMonth;
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
 
-          // Detecta períodos presentes no dia (para o contorno)
+          // Detecta períodos presentes no dia — separando escala recorrente
+          // (contorno quadrado) de plantão avulso (selo redondo).
           let temDia = false;
           let temNoite = false;
+          let avulsoDia = false;
+          let avulsoNoite = false;
           for (const e of entries) {
             const p = periodoDaEntry(e);
-            if (p === "dia") temDia = true;
-            else temNoite = true;
+            if (e.regra.avulso) {
+              if (p === "dia") avulsoDia = true;
+              else avulsoNoite = true;
+            } else {
+              if (p === "dia") temDia = true;
+              else temNoite = true;
+            }
           }
+          const temAvulso = avulsoDia || avulsoNoite;
 
           // Estilo do contorno: quadrado; se tem os dois períodos, split
           // horizontal (metade laranja em cima, azul embaixo).
@@ -367,6 +376,16 @@ export function EscalaCalendarCard() {
           } else if (isToday) {
             borderStyle.border = `3px solid ${COR_PRIMARY}`;
           }
+
+          // Selo do plantão avulso — canto inferior direito.
+          const seloBg =
+            avulsoDia && avulsoNoite
+              ? `linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%)`
+              : avulsoDia
+                ? COR_DIURNO
+                : COR_NOTURNO;
+          const seloEmoji =
+            avulsoDia && avulsoNoite ? "☀︎" : avulsoDia ? "🌞" : "🌙";
 
           const cellInner = (
             <>
@@ -422,8 +441,30 @@ export function EscalaCalendarCard() {
                   }}
                 />
               )}
+
+              {temAvulso && (
+                <span
+                  aria-hidden
+                  className="absolute flex items-center justify-center text-white"
+                  style={{
+                    right: -2,
+                    bottom: -2,
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: seloBg,
+                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
+                    fontSize: 9,
+                    lineHeight: 1,
+                    zIndex: 4,
+                  }}
+                >
+                  {seloEmoji}
+                </span>
+              )}
             </>
           );
+
 
 
 
