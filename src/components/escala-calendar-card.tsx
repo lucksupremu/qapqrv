@@ -190,47 +190,41 @@ export function EscalaCalendarCard() {
   const fmtDiaCurto = (d: Date) =>
     `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 
-  type Slot = {
-    kind: "plantao" | "marca";
-    cor: string;
-    lado: "cheia" | "top" | "bottom";
-    /** Apenas para `kind === "plantao"`. Define o ícone Sol/Lua. */
-    periodo?: "dia" | "noite";
-    marcaTipo?: string;
-  };
-  type Coluna = { slots: Slot[] };
-
   /** Periodo calculado pelo meio do plantão (mais preciso que só o início). */
   const periodoDaEntry = (e: PlantaoEntry): "dia" | "noite" => {
     const durH = (e.fim.getTime() - e.inicio.getTime()) / 3600000;
     return classificarPeriodo(e.inicio.getHours(), e.inicio.getMinutes(), durH);
   };
 
-  const colunasDoDia = (entries: PlantaoEntry[], marcasDay: Marca[], date: Date): Coluna[] => {
-    void date;
-    const colunas: Coluna[] = [];
-    const seen = new Set<string>();
-    for (const e of entries) {
-      const periodo = periodoDaEntry(e);
-      const cor = periodo === "noite" ? COR_NOTURNO : COR_DIURNO;
-      const k = `${cor}-${periodo}`;
-      if (seen.has(k)) continue;
-      seen.add(k);
-      colunas.push({
-        slots: [{ kind: "plantao", cor, lado: "cheia", periodo }],
-      });
+  // Contador de horas / plantões do mês visível
+  const resumoMes = useMemo(() => {
+    let horas = 0;
+    let qtd = 0;
+    for (const dia of plantoes.values()) {
+      for (const e of dia.plantoes) {
+        horas += (e.fim.getTime() - e.inicio.getTime()) / 3600000;
+        qtd += 1;
+      }
     }
+    return { horas: Math.round(horas), qtd };
+  }, [plantoes]);
 
-    // Marcas → uma coluna própria (não há mais "metade livre" para encaixar).
-    for (const mk of marcasDay) {
-      const cor = MARCA_COR[mk.tipo] ?? "#3498DB";
-      colunas.push({
-        slots: [{ kind: "marca", cor, lado: "cheia", marcaTipo: mk.tipo }],
-      });
+  const exportarIcs = () => {
+    const todas: PlantaoEntry[] = [];
+    for (const dia of plantoes.values()) todas.push(...dia.plantoes);
+    if (todas.length === 0) {
+      toast.info("Nenhum plantão no mês para exportar.");
+      return;
     }
-
-    return colunas;
+    const nome = `Escala ${MESES[cursor.getMonth()]} ${cursor.getFullYear()}`;
+    const ics = gerarIcs(todas, nome);
+    baixarIcs(ics, `escala-${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}.ics`);
+    toast.success("Arquivo .ics baixado. Importe no Google/Apple Calendar.");
   };
+
+  const irParaHoje = () => setCursor(new Date(today.getFullYear(), today.getMonth(), 1));
+  const noMesAtual = cursor.getFullYear() === today.getFullYear() && cursor.getMonth() === today.getMonth();
+
 
 
 
