@@ -232,27 +232,43 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
             />
           </div>
 
-          {/* Cor */}
-          <div className="space-y-1.5">
-            <Label>Cor no calendário</Label>
-            <div className="flex flex-wrap gap-2">
-              {ESCALA_CORES.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setCor(c.value)}
-                  aria-label={c.label}
-                  className={cn(
-                    "h-8 w-8 rounded-full border-2 transition",
-                    cor === c.value
-                      ? "scale-110 border-foreground"
-                      : "border-transparent opacity-80",
+          {/* Cores automáticas (dia/noite) */}
+          {(() => {
+            const p1 = classificarPeriodo(horaInicio, minutoInicio, trabalho);
+            const c1 = p1 === "noite" ? COR_NOTURNO : COR_DIURNO;
+            const e1 = p1 === "noite" ? "🌙" : "🌞";
+            const l1 = p1 === "noite" ? "Noturno" : "Diurno";
+            const showB = alternada;
+            const p2 = showB ? classificarPeriodo(horaInicioB, minutoInicioB, trabalhoB) : null;
+            const c2 = p2 === "noite" ? COR_NOTURNO : COR_DIURNO;
+            const e2 = p2 === "noite" ? "🌙" : "🌞";
+            const l2 = p2 === "noite" ? "Noturno" : "Diurno";
+            return (
+              <div className="space-y-1.5">
+                <Label>Cor no calendário</Label>
+                <div className="flex flex-wrap gap-2">
+                  <span
+                    className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold text-white"
+                    style={{ background: c1 }}
+                  >
+                    <span aria-hidden>{e1}</span> {l1}
+                  </span>
+                  {showB && (
+                    <span
+                      className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold text-white"
+                      style={{ background: c2 }}
+                    >
+                      <span aria-hidden>{e2}</span> {l2}
+                    </span>
                   )}
-                  style={{ background: c.value }}
-                />
-              ))}
-            </div>
-          </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  A cor é definida automaticamente pelo horário: 🌞 laranja para diurno,
+                  🌙 azul-marinho para noturno.
+                </p>
+              </div>
+            );
+          })()}
 
           {/* Modelo de escala (preset) */}
           <div className="space-y-1.5">
