@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,7 +18,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  ESCALA_CORES,
+  COR_DIURNO,
+  COR_NOTURNO,
+  classificarPeriodo,
+  corDoTurno,
   type EscalaRegra,
   newEscalaId,
 } from "@/lib/escala-trabalho";
