@@ -200,27 +200,26 @@ export function EscalaCalendarCard() {
   };
   type Coluna = { slots: Slot[] };
 
-  /** Noturno se começa às 18h+ ou antes das 6h. */
-  const isNoturno = (horaInicio: number) => horaInicio >= 18 || horaInicio < 6;
+  /** Periodo calculado pelo meio do plantão (mais preciso que só o início). */
+  const periodoDaEntry = (e: PlantaoEntry): "dia" | "noite" => {
+    const durH = (e.fim.getTime() - e.inicio.getTime()) / 3600000;
+    return classificarPeriodo(e.inicio.getHours(), e.inicio.getMinutes(), durH);
+  };
 
   const colunasDoDia = (entries: PlantaoEntry[], marcasDay: Marca[], date: Date): Coluna[] => {
-    // Plantões → uma coluna por plantão, sempre "cheia" (o dia inicial é o
-    // único onde a entry existe). Dedupe por cor+periodo para evitar duas
-    // colunas idênticas quando há regras sobrepostas.
     void date;
     const colunas: Coluna[] = [];
     const seen = new Set<string>();
     for (const e of entries) {
-      const periodo: "dia" | "noite" = isNoturno(e.inicio.getHours()) ? "noite" : "dia";
-      const k = `${e.regra.cor}-${periodo}`;
+      const periodo = periodoDaEntry(e);
+      const cor = periodo === "noite" ? COR_NOTURNO : COR_DIURNO;
+      const k = `${cor}-${periodo}`;
       if (seen.has(k)) continue;
       seen.add(k);
       colunas.push({
-        slots: [{ kind: "plantao", cor: e.regra.cor, lado: "cheia", periodo }],
+        slots: [{ kind: "plantao", cor, lado: "cheia", periodo }],
       });
     }
-
-
 
     // Marcas → uma coluna própria (não há mais "metade livre" para encaixar).
     for (const mk of marcasDay) {
