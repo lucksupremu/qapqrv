@@ -367,14 +367,14 @@ export function EscalaCalendarCard() {
           // horizontal (metade laranja em cima, azul embaixo).
           const borderStyle: React.CSSProperties = {};
           if (temDia && temNoite) {
-            borderStyle.border = "3px solid transparent";
+            borderStyle.border = "5px solid transparent";
             borderStyle.background = `linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`;
           } else if (temDia) {
-            borderStyle.border = `3px solid ${COR_DIURNO}`;
+            borderStyle.border = `5px solid ${COR_DIURNO}`;
           } else if (temNoite) {
-            borderStyle.border = `3px solid ${COR_NOTURNO}`;
+            borderStyle.border = `5px solid ${COR_NOTURNO}`;
           } else if (isToday) {
-            borderStyle.border = `3px solid ${COR_PRIMARY}`;
+            borderStyle.border = `5px solid ${COR_PRIMARY}`;
           }
 
           // Post-it do plantão avulso — formato diferente do contorno da escala.
@@ -677,11 +677,11 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          <span style={{ width: 14, height: 14, borderRadius: 3, border: `3px solid ${COR_DIURNO}` }} />
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `5px solid ${COR_DIURNO}` }} />
           Diurno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ width: 14, height: 14, borderRadius: 3, border: `3px solid ${COR_NOTURNO}` }} />
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `5px solid ${COR_NOTURNO}` }} />
           Noturno
         </span>
         <span className="flex items-center gap-1">
@@ -690,7 +690,7 @@ export function EscalaCalendarCard() {
               width: 14,
               height: 14,
               borderRadius: 3,
-              border: "3px solid transparent",
+              border: "5px solid transparent",
               background: `linear-gradient(hsl(var(--card)),hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`,
             }}
           />
