@@ -148,7 +148,6 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
       );
     } else {
       setLocal("");
-      setCor(ESCALA_CORES[0]!.value);
       setDataInicial(new Date());
       const f = new Date();
       f.setMonth(f.getMonth() + 6);
