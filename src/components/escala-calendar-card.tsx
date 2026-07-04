@@ -248,17 +248,28 @@ export function EscalaCalendarCard() {
           </span>
           <h2 className="text-[15px] font-bold text-foreground">Minha escala</h2>
         </div>
-        <button
-          onClick={() => { setEditingRegra(null); setEscalaBaseDate(null); setModalOpen(true); }}
-          className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white active:scale-95 transition"
-          style={{ background: COR_PRIMARY }}
-        >
-          <Plus size={14} /> Configurar
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={exportarIcs}
+            aria-label="Exportar mês para calendário"
+            title="Exportar .ics (Google/Apple Calendar)"
+            className="flex h-8 w-8 items-center justify-center rounded-full active:scale-95 transition"
+            style={{ background: COR_BG_SOFT, color: COR_PRIMARY }}
+          >
+            <Download size={14} />
+          </button>
+          <button
+            onClick={() => { setEditingRegra(null); setEscalaBaseDate(null); setModalOpen(true); }}
+            className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white active:scale-95 transition"
+            style={{ background: COR_PRIMARY }}
+          >
+            <Plus size={14} /> Configurar
+          </button>
+        </div>
       </div>
 
       {/* Navegação mês */}
-      <div className="mt-2 flex items-center justify-between px-1">
+      <div className="mt-2 flex items-center justify-between gap-2 px-1">
         <button
           aria-label="Mês anterior"
           onClick={goPrev}
@@ -267,9 +278,21 @@ export function EscalaCalendarCard() {
         >
           <ChevronLeft size={18} />
         </button>
-        <span className="text-[14px] font-bold text-foreground">
-          {MESES[cursor.getMonth()]} {cursor.getFullYear()}
-        </span>
+        <div className="flex flex-1 items-center justify-center gap-2">
+          <span className="text-[14px] font-bold text-foreground">
+            {MESES[cursor.getMonth()]} {cursor.getFullYear()}
+          </span>
+          {!noMesAtual && (
+            <button
+              onClick={irParaHoje}
+              aria-label="Ir para hoje"
+              className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold active:scale-95 transition"
+              style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
+            >
+              <Home size={10} /> Hoje
+            </button>
+          )}
+        </div>
         <button
           aria-label="Próximo mês"
           onClick={goNext}
@@ -279,6 +302,15 @@ export function EscalaCalendarCard() {
           <ChevronRight size={18} />
         </button>
       </div>
+
+      {/* Resumo do mês */}
+      {resumoMes.qtd > 0 && (
+        <div className="mt-1.5 text-center text-[11px]" style={{ color: "#5b7a8f" }}>
+          <span className="font-bold" style={{ color: COR_PRIMARY }}>{resumoMes.horas}h</span>
+          {" · "}
+          <span>{resumoMes.qtd} plantão{resumoMes.qtd === 1 ? "" : "es"} no mês</span>
+        </div>
+      )}
 
       {/* Dias da semana */}
       <div className="mt-2 grid grid-cols-7 gap-1">
@@ -292,6 +324,7 @@ export function EscalaCalendarCard() {
           </div>
         ))}
       </div>
+
 
       {/* Grid */}
       <div className="mt-1 grid grid-cols-7 gap-1">
