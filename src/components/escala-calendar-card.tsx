@@ -358,14 +358,14 @@ export function EscalaCalendarCard() {
           // horizontal (metade laranja em cima, azul embaixo).
           const borderStyle: React.CSSProperties = {};
           if (temDia && temNoite) {
-            borderStyle.border = "2px solid transparent";
+            borderStyle.border = "3px solid transparent";
             borderStyle.background = `linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`;
           } else if (temDia) {
-            borderStyle.border = `2px solid ${COR_DIURNO}`;
+            borderStyle.border = `3px solid ${COR_DIURNO}`;
           } else if (temNoite) {
-            borderStyle.border = `2px solid ${COR_NOTURNO}`;
+            borderStyle.border = `3px solid ${COR_NOTURNO}`;
           } else if (isToday) {
-            borderStyle.border = `1.5px solid ${COR_PRIMARY}`;
+            borderStyle.border = `3px solid ${COR_PRIMARY}`;
           }
 
           const cellInner = (
