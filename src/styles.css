@@ -314,6 +314,87 @@
 }
 
 
+
+/* ============================================================
+   ESCALA CARD — sempre tema claro, mesmo com .dark no ancestral
+   ============================================================ */
+.dark .escala-light-scope {
+  color-scheme: light;
+  /* tokens legacy */
+  --bg: #edf2f7;
+  --surface: #ffffff;
+  --surface-2: #e0e9f2;
+  --primary: #1a5276;
+  --primary-dark: #0f3045;
+  --primary-light: #4a90c2;
+  --card-field: #a8c8e0;
+  --text-white: #ffffff;
+  --text-dark: #0a1922;
+  --muted-fg: #3d5a6e;
+  --border-soft: #c5d5e3;
+  --shadow-card: 0 4px 20px -10px rgba(15, 48, 69, 0.22);
+  /* tokens shadcn */
+  --background: oklch(0.96 0.015 230);
+  --foreground: oklch(0.18 0.05 240);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.05 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.05 240);
+  --muted: oklch(0.9 0.03 230);
+  --muted-foreground: oklch(0.42 0.05 235);
+  --border: oklch(0.85 0.035 230);
+  color: #0a1922;
+}
+
+/* Neutraliza overrides de .dark [style*=…] com maior especificidade */
+.dark .escala-light-scope [style*="background: #ffffff"],
+.dark .escala-light-scope [style*="background:#ffffff"],
+.dark .escala-light-scope [style*="background-color: #ffffff"],
+.dark .escala-light-scope [style*="background: rgb(255, 255, 255)"],
+.dark .escala-light-scope [style*="background-color: rgb(255, 255, 255)"] {
+  background-color: #ffffff !important;
+  background-image: initial !important;
+}
+.dark .escala-light-scope [style*="background: #e8f0f8"],
+.dark .escala-light-scope [style*="background:#e8f0f8"],
+.dark .escala-light-scope [style*="background-color: #e8f0f8"],
+.dark .escala-light-scope [style*="background: rgb(232, 240, 248)"],
+.dark .escala-light-scope [style*="background-color: rgb(232, 240, 248)"] {
+  background-color: #e8f0f8 !important;
+  background-image: initial !important;
+}
+.dark .escala-light-scope [style*="background: #f4f8fc"],
+.dark .escala-light-scope [style*="background:#f4f8fc"],
+.dark .escala-light-scope [style*="background-color: #f4f8fc"],
+.dark .escala-light-scope [style*="background: rgb(244, 248, 252)"],
+.dark .escala-light-scope [style*="background-color: rgb(244, 248, 252)"] {
+  background-color: #f4f8fc !important;
+  background-image: initial !important;
+}
+.dark .escala-light-scope [style*="color: #0f2535"],
+.dark .escala-light-scope [style*="color: rgb(15, 37, 53)"] { color: #0f2535 !important; }
+.dark .escala-light-scope [style*="color: #2e6b8a"],
+.dark .escala-light-scope [style*="color: rgb(46, 107, 138)"] { color: #2e6b8a !important; }
+.dark .escala-light-scope [style*="color: #5b7a8f"],
+.dark .escala-light-scope [style*="color: rgb(91, 122, 143)"] { color: #5b7a8f !important; }
+.dark .escala-light-scope [style*="color: #1a5276"],
+.dark .escala-light-scope [style*="color: rgb(26, 82, 118)"] { color: #1a5276 !important; }
+.dark .escala-light-scope [style*="border-color: #d5e3ee"],
+.dark .escala-light-scope [style*="border-color: rgb(213, 227, 238)"] { border-color: #d5e3ee !important; }
+.dark .escala-light-scope [style*="border-color: #e8f0f8"],
+.dark .escala-light-scope [style*="border-color: rgb(232, 240, 248)"] { border-color: #e8f0f8 !important; }
+
+.dark .escala-light-scope .bg-\[\#ffffff\] { background-color: #ffffff !important; }
+.dark .escala-light-scope .bg-\[\#e8f0f8\] { background-color: #e8f0f8 !important; }
+.dark .escala-light-scope .bg-\[\#f4f8fc\] { background-color: #f4f8fc !important; }
+.dark .escala-light-scope .border-\[\#e8f0f8\] { border-color: #e8f0f8 !important; }
+.dark .escala-light-scope .border-\[\#d5e3ee\] { border-color: #d5e3ee !important; }
+.dark .escala-light-scope .text-\[\#0f2535\] { color: #0f2535 !important; }
+.dark .escala-light-scope .text-\[\#2e6b8a\] { color: #2e6b8a !important; }
+.dark .escala-light-scope .text-\[\#5b7a8f\] { color: #5b7a8f !important; }
+
+.dark .escala-light-scope img { filter: none; }
+
 @layer base {
   * {
     border-color: var(--color-border);
