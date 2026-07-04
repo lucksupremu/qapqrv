@@ -81,7 +81,7 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
     const regra: EscalaRegra = {
       id: newEscalaId(),
       local: localOk.slice(0, 60),
-      cor,
+      cor: corDoTurno(horaInicio, minutoInicio, duracao),
       trabalho: duracao,
       folga: Math.max(1, 24 - duracao),
       horaInicio,
