@@ -391,12 +391,80 @@ export function EscalaCalendarCard() {
                 className="relative flex h-9 w-9 items-center justify-center rounded-md"
                 style={{ ...borderStyle }}
               >
+                {temAvulso && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{ zIndex: 1 }}
+                  >
+                    {/* Post-it grande cobrindo o dia */}
+                    <span
+                      className="relative block"
+                      style={{
+                        width: 34,
+                        height: 34,
+                        background: "#FFE066",
+                        backgroundImage:
+                          "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
+                        borderRadius: 3,
+                        boxShadow:
+                          "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset, 0 -3px 6px rgba(180,130,0,0.18) inset",
+                        transform: "rotate(-3deg)",
+                      }}
+                    >
+                      {/* Faixa inferior do período (dia/noite) */}
+                      <span
+                        aria-hidden
+                        className="absolute bottom-0 left-0 h-[4px] w-full"
+                        style={{
+                          background: postItAccent,
+                          borderBottomLeftRadius: 3,
+                          borderBottomRightRadius: 3,
+                        }}
+                      />
+                      {/* Cantinho dobrado */}
+                      <span
+                        aria-hidden
+                        className="absolute right-0 top-0"
+                        style={{
+                          width: 0,
+                          height: 0,
+                          borderTop: "7px solid hsl(var(--card))",
+                          borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
+                        }}
+                      />
+                    </span>
+                    {/* Alfinete vermelho */}
+                    <span
+                      aria-hidden
+                      className="absolute"
+                      style={{
+                        top: -3,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background:
+                          "radial-gradient(circle at 30% 30%, #ff6b6b 0%, #d63031 55%, #a51d1d 100%)",
+                        boxShadow:
+                          "0 1px 2px rgba(0,0,0,0.45), 0 0 0 0.5px rgba(0,0,0,0.25)",
+                        zIndex: 2,
+                      }}
+                    />
+                  </span>
+                )}
                 <span
-                  className={`text-[13px] ${
-                    !cell.inMonth ? "text-muted-foreground/60" : "text-foreground"
+                  className={`relative text-[13px] ${
+                    !cell.inMonth
+                      ? "text-muted-foreground/60"
+                      : temAvulso
+                        ? "text-[#3a2a00]"
+                        : "text-foreground"
                   }`}
                   style={{
-                    fontWeight: isToday || temPlantao ? 800 : 500,
+                    fontWeight: isToday || temPlantao || temAvulso ? 800 : 500,
+                    zIndex: 2,
                   }}
                 >
                   {cell.date.getDate()}
@@ -416,7 +484,7 @@ export function EscalaCalendarCard() {
                     borderRadius: "50%",
                     background: corMarca ?? "#3498DB",
                     boxShadow: "0 0 0 1.5px hsl(var(--card))",
-                    zIndex: 3,
+                    zIndex: 5,
                   }}
                 />
               )}
@@ -433,53 +501,10 @@ export function EscalaCalendarCard() {
                     borderRadius: "50%",
                     background: "#7C3AED",
                     boxShadow: "0 0 0 1.5px hsl(var(--card))",
-                    zIndex: 3,
+                    zIndex: 5,
                   }}
                 />
               )}
-
-              {temAvulso && (
-                <span
-                  aria-hidden
-                  className="absolute"
-                  style={{
-                    right: -4,
-                    bottom: -3,
-                    width: 16,
-                    height: 14,
-                    borderRadius: 2,
-                    background: "#FFE66D",
-                    border: "1px solid rgba(125, 93, 0, 0.35)",
-                    boxShadow: "0 0 0 1.5px hsl(var(--card)), 0 1px 2px rgba(0,0,0,0.22)",
-                    zIndex: 4,
-                  }}
-                >
-                  <span
-                    aria-hidden
-                    className="absolute left-[2px] right-[2px] top-[3px] h-[1.5px] rounded-full"
-                    style={{ background: "rgba(92, 70, 0, 0.35)" }}
-                  />
-                  <span
-                    aria-hidden
-                    className="absolute left-[2px] right-[5px] top-[7px] h-[1.5px] rounded-full"
-                    style={{ background: "rgba(92, 70, 0, 0.25)" }}
-                  />
-                  <span
-                    aria-hidden
-                    className="absolute bottom-0 left-0 h-[3px] w-full rounded-b-[2px]"
-                    style={{ background: postItAccent }}
-                  />
-                  <span
-                    aria-hidden
-                    className="absolute right-0 top-0 h-0 w-0"
-                    style={{
-                      borderTop: "5px solid rgba(255, 255, 255, 0.85)",
-                      borderLeft: "5px solid rgba(139, 103, 0, 0.28)",
-                    }}
-                  />
-                </span>
-              )}
-
             </>
           );
 
