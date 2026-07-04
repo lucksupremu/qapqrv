@@ -234,7 +234,7 @@ export function EscalaCalendarCard() {
 
   return (
     <div
-      className="mx-4 mt-6 rounded-2xl bg-card p-3"
+      className="escala-light-scope mx-4 mt-6 rounded-2xl bg-card p-3"
       style={{ boxShadow: "var(--shadow-card)" }}
     >
       {/* Header */}
