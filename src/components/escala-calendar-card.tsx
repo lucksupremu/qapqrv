@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil, Download, Home } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
 import { EscalaDiaModal } from "@/components/escala-dia-modal";
 import { EventoLivreModal } from "@/components/evento-livre-modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
+  COR_DIURNO,
+  COR_NOTURNO,
+  classificarPeriodo,
+  corDoTurno,
   type EscalaRegra,
   type PlantaoEntry,
   gerarPlantoesDoMes,
@@ -13,8 +17,10 @@ import {
   removeEscala,
   saveEscalas,
 } from "@/lib/escala-trabalho";
+import { gerarIcs, baixarIcs } from "@/lib/escala-ics";
 import { loadMarcas, type Marca } from "@/lib/marcas";
 import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
+import { toast } from "sonner";
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
@@ -184,48 +190,41 @@ export function EscalaCalendarCard() {
   const fmtDiaCurto = (d: Date) =>
     `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 
-  type Slot = {
-    kind: "plantao" | "marca";
-    cor: string;
-    lado: "cheia" | "top" | "bottom";
-    /** Apenas para `kind === "plantao"`. Define o ícone Sol/Lua. */
-    periodo?: "dia" | "noite";
-    marcaTipo?: string;
+  /** Periodo calculado pelo meio do plantão (mais preciso que só o início). */
+  const periodoDaEntry = (e: PlantaoEntry): "dia" | "noite" => {
+    const durH = (e.fim.getTime() - e.inicio.getTime()) / 3600000;
+    return classificarPeriodo(e.inicio.getHours(), e.inicio.getMinutes(), durH);
   };
-  type Coluna = { slots: Slot[] };
 
-  /** Noturno se começa às 18h+ ou antes das 6h. */
-  const isNoturno = (horaInicio: number) => horaInicio >= 18 || horaInicio < 6;
-
-  const colunasDoDia = (entries: PlantaoEntry[], marcasDay: Marca[], date: Date): Coluna[] => {
-    // Plantões → uma coluna por plantão, sempre "cheia" (o dia inicial é o
-    // único onde a entry existe). Dedupe por cor+periodo para evitar duas
-    // colunas idênticas quando há regras sobrepostas.
-    void date;
-    const colunas: Coluna[] = [];
-    const seen = new Set<string>();
-    for (const e of entries) {
-      const periodo: "dia" | "noite" = isNoturno(e.inicio.getHours()) ? "noite" : "dia";
-      const k = `${e.regra.cor}-${periodo}`;
-      if (seen.has(k)) continue;
-      seen.add(k);
-      colunas.push({
-        slots: [{ kind: "plantao", cor: e.regra.cor, lado: "cheia", periodo }],
-      });
+  // Contador de horas / plantões do mês visível
+  const resumoMes = useMemo(() => {
+    let horas = 0;
+    let qtd = 0;
+    for (const dia of plantoes.values()) {
+      for (const e of dia.plantoes) {
+        horas += (e.fim.getTime() - e.inicio.getTime()) / 3600000;
+        qtd += 1;
+      }
     }
+    return { horas: Math.round(horas), qtd };
+  }, [plantoes]);
 
-
-
-    // Marcas → uma coluna própria (não há mais "metade livre" para encaixar).
-    for (const mk of marcasDay) {
-      const cor = MARCA_COR[mk.tipo] ?? "#3498DB";
-      colunas.push({
-        slots: [{ kind: "marca", cor, lado: "cheia", marcaTipo: mk.tipo }],
-      });
+  const exportarIcs = () => {
+    const todas: PlantaoEntry[] = [];
+    for (const dia of plantoes.values()) todas.push(...dia.plantoes);
+    if (todas.length === 0) {
+      toast.info("Nenhum plantão no mês para exportar.");
+      return;
     }
-
-    return colunas;
+    const nome = `Escala ${MESES[cursor.getMonth()]} ${cursor.getFullYear()}`;
+    const ics = gerarIcs(todas, nome);
+    baixarIcs(ics, `escala-${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}.ics`);
+    toast.success("Arquivo .ics baixado. Importe no Google/Apple Calendar.");
   };
+
+  const irParaHoje = () => setCursor(new Date(today.getFullYear(), today.getMonth(), 1));
+  const noMesAtual = cursor.getFullYear() === today.getFullYear() && cursor.getMonth() === today.getMonth();
+
 
 
 
@@ -249,17 +248,28 @@ export function EscalaCalendarCard() {
           </span>
           <h2 className="text-[15px] font-bold text-foreground">Minha escala</h2>
         </div>
-        <button
-          onClick={() => { setEditingRegra(null); setEscalaBaseDate(null); setModalOpen(true); }}
-          className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white active:scale-95 transition"
-          style={{ background: COR_PRIMARY }}
-        >
-          <Plus size={14} /> Configurar
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={exportarIcs}
+            aria-label="Exportar mês para calendário"
+            title="Exportar .ics (Google/Apple Calendar)"
+            className="flex h-8 w-8 items-center justify-center rounded-full active:scale-95 transition"
+            style={{ background: COR_BG_SOFT, color: COR_PRIMARY }}
+          >
+            <Download size={14} />
+          </button>
+          <button
+            onClick={() => { setEditingRegra(null); setEscalaBaseDate(null); setModalOpen(true); }}
+            className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white active:scale-95 transition"
+            style={{ background: COR_PRIMARY }}
+          >
+            <Plus size={14} /> Configurar
+          </button>
+        </div>
       </div>
 
       {/* Navegação mês */}
-      <div className="mt-2 flex items-center justify-between px-1">
+      <div className="mt-2 flex items-center justify-between gap-2 px-1">
         <button
           aria-label="Mês anterior"
           onClick={goPrev}
@@ -268,9 +278,21 @@ export function EscalaCalendarCard() {
         >
           <ChevronLeft size={18} />
         </button>
-        <span className="text-[14px] font-bold text-foreground">
-          {MESES[cursor.getMonth()]} {cursor.getFullYear()}
-        </span>
+        <div className="flex flex-1 items-center justify-center gap-2">
+          <span className="text-[14px] font-bold text-foreground">
+            {MESES[cursor.getMonth()]} {cursor.getFullYear()}
+          </span>
+          {!noMesAtual && (
+            <button
+              onClick={irParaHoje}
+              aria-label="Ir para hoje"
+              className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold active:scale-95 transition"
+              style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
+            >
+              <Home size={10} /> Hoje
+            </button>
+          )}
+        </div>
         <button
           aria-label="Próximo mês"
           onClick={goNext}
@@ -280,6 +302,15 @@ export function EscalaCalendarCard() {
           <ChevronRight size={18} />
         </button>
       </div>
+
+      {/* Resumo do mês */}
+      {resumoMes.qtd > 0 && (
+        <div className="mt-1.5 text-center text-[11px]" style={{ color: "#5b7a8f" }}>
+          <span className="font-bold" style={{ color: COR_PRIMARY }}>{resumoMes.horas}h</span>
+          {" · "}
+          <span>{resumoMes.qtd} plantão{resumoMes.qtd === 1 ? "" : "es"} no mês</span>
+        </div>
+      )}
 
       {/* Dias da semana */}
       <div className="mt-2 grid grid-cols-7 gap-1">
@@ -294,6 +325,7 @@ export function EscalaCalendarCard() {
         ))}
       </div>
 
+
       {/* Grid */}
       <div className="mt-1 grid grid-cols-7 gap-1">
         {grid.map((cell, i) => {
@@ -302,141 +334,73 @@ export function EscalaCalendarCard() {
           const entries: PlantaoEntry[] = dia?.plantoes ?? [];
           const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
           const eventosDia = cell.inMonth ? eventosPorDia.get(key) ?? [] : [];
-          const colunas = cell.inMonth ? colunasDoDia(entries, marcasDia, cell.date) : [];
-          const MAX_COL = 3;
-          const colunasVisiveis = colunas.slice(0, MAX_COL);
-          const slotsVisiveis = colunasVisiveis.reduce((acc, c) => acc + c.slots.length, 0);
-          const slotsTotais = colunas.reduce((acc, c) => acc + c.slots.length, 0);
-          const extras = slotsTotais - slotsVisiveis;
           const temPlantao = entries.length > 0;
           const temMarca = marcasDia.length > 0;
           const temEvento = eventosDia.length > 0;
           const temAlgo = temPlantao || temMarca || temEvento;
           const isToday = sameDay(cell.date, today);
-          const corMarca = temMarca ? MARCA_COR[marcasDia[marcasDia.length - 1]!.tipo] ?? "#3498DB" : null;
+          const corMarca = temMarca
+            ? MARCA_COR[marcasDia[marcasDia.length - 1]!.tipo] ?? "#3498DB"
+            : null;
           const interativo = cell.inMonth;
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
-          const totalCol = colunasVisiveis.length;
-          const cellW = 36; // 40 - 2*2 inset
-          const slotW = totalCol === 0 ? 0 : totalCol === 1 ? cellW : cellW / totalCol;
+
+          // Detecta períodos presentes no dia (para o contorno)
+          let temDia = false;
+          let temNoite = false;
+          for (const e of entries) {
+            const p = periodoDaEntry(e);
+            if (p === "dia") temDia = true;
+            else temNoite = true;
+          }
+
+          // Estilo do contorno: quadrado; se tem os dois períodos, split
+          // horizontal (metade laranja em cima, azul embaixo).
+          const borderStyle: React.CSSProperties = {};
+          if (temDia && temNoite) {
+            borderStyle.border = "2px solid transparent";
+            borderStyle.background = `linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`;
+          } else if (temDia) {
+            borderStyle.border = `2px solid ${COR_DIURNO}`;
+          } else if (temNoite) {
+            borderStyle.border = `2px solid ${COR_NOTURNO}`;
+          } else if (isToday) {
+            borderStyle.border = `1.5px solid ${COR_PRIMARY}`;
+          }
 
           const cellInner = (
             <>
-              {isToday && !temAlgo && (
-                <span
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: COR_BG_SOFT }}
-                />
-              )}
-
               <span
-                className="relative text-[13px]"
-                style={{
-                  zIndex: 2,
-                  color: !cell.inMonth
-                    ? "#a8b5c2"
-                    : temAlgo
-                      ? "#1a1a1a"
-                      : isToday
-                        ? COR_PRIMARY
-                        : "var(--text-dark, #02080d)",
-                  fontWeight: isToday || temAlgo ? 800 : 500,
-                }}
+                className="relative flex h-9 w-9 items-center justify-center rounded-md"
+                style={{ ...borderStyle }}
               >
-                {cell.date.getDate()}
+                <span
+                  className="text-[13px]"
+                  style={{
+                    color: !cell.inMonth
+                      ? "#a8b5c2"
+                      : temAlgo || isToday
+                        ? "#1a1a1a"
+                        : "var(--text-dark, #02080d)",
+                    fontWeight: isToday || temPlantao ? 800 : 500,
+                  }}
+                >
+                  {cell.date.getDate()}
+                </span>
               </span>
-
-              {/* Slots verticais (plantões + marcas) — estilo Google Agenda */}
-              {colunasVisiveis.map((col, ci) => {
-                const left = 2 + ci * slotW;
-                const width = slotW - (totalCol > 1 ? 1 : 0);
-                return col.slots.map((s, si) => {
-                  let top = 2;
-                  let bottom = 2;
-                  let borderRadius = "6px";
-                  if (s.lado === "bottom") {
-                    top = 20;
-                    borderRadius = s.kind === "marca" ? "0 0 4px 4px" : "0 0 6px 6px";
-                  } else if (s.lado === "top") {
-                    bottom = 20;
-                    borderRadius = s.kind === "marca" ? "4px 4px 0 0" : "6px 6px 0 0";
-                  }
-                  if (s.kind === "marca") {
-                    return (
-                      <span
-                        key={`${ci}-${si}`}
-                        aria-hidden
-                        className="pointer-events-none absolute"
-                        style={{
-                          left,
-                          width,
-                          top,
-                          bottom,
-                          background: "#FFE066",
-                          borderTop: `3px solid ${s.cor}`,
-                          borderRadius,
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
-                          transform: "rotate(-3deg)",
-                          zIndex: 1,
-                        }}
-                      />
-                    );
-                  }
-                  const isNoite = s.periodo === "noite";
-                  const bg = `color-mix(in srgb, ${s.cor} 32%, transparent)`;
-                  const emoji = isNoite ? "🌙" : "🌞";
-                  const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
-
-                  return (
-                    <span
-                      key={`${ci}-${si}`}
-                      aria-hidden
-                      className="pointer-events-none absolute"
-                      style={{
-                        left,
-                        width,
-                        top: 2,
-                        bottom: 2,
-                        background: bg,
-                        borderTop: `3px solid ${s.cor}`,
-                        borderRadius: "8px",
-                        zIndex: 0,
-                      }}
-                    >
-                      {emojiSize > 0 && s.lado === "cheia" && (
-                        <span
-                          role="img"
-                          aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
-                          style={{
-                            position: "absolute",
-                            right: 0,
-                            bottom: -1,
-                            fontSize: emojiSize,
-                            lineHeight: 1,
-                            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))",
-                            zIndex: 4,
-                          }}
-                        >
-                          {emoji}
-                        </span>
-                      )}
-                    </span>
-                  );
-                });
-              })}
 
               {temMarca && (
                 <span
                   aria-hidden
                   className="absolute"
                   style={{
-                    right: 2,
-                    top: 2,
+                    right: 0,
+                    top: 0,
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
                     background: corMarca ?? "#3498DB",
-                    boxShadow: "0 0 0 1.5px #fff",
+                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
                     zIndex: 3,
                   }}
                 />
@@ -447,37 +411,21 @@ export function EscalaCalendarCard() {
                   aria-hidden
                   className="absolute"
                   style={{
-                    left: 2,
-                    bottom: 2,
+                    left: 0,
+                    bottom: 0,
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
                     background: "#7C3AED",
-                    boxShadow: "0 0 0 1.5px #fff",
+                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
                     zIndex: 3,
                   }}
                 />
               )}
-
-              {extras > 0 && (
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute"
-                  style={{
-                    right: 3,
-                    bottom: 1,
-                    fontSize: 8,
-                    fontWeight: 700,
-                    color: "#5b7a8f",
-                    lineHeight: 1,
-                    zIndex: 3,
-                  }}
-                >
-                  +{extras}
-                </span>
-              )}
             </>
           );
+
+
 
 
           const baseClass = "relative mx-auto flex h-10 w-10 items-center justify-center";
@@ -622,30 +570,35 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          {/* Miniatura: célula cheia + emoji diurno */}
-          <span style={{ position: "relative", width: 14, height: 18 }}>
-            <span style={{ position: "absolute", inset: 1, borderRadius: 4, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-            <span style={{ position: "absolute", right: -2, bottom: -3, fontSize: 10, lineHeight: 1 }}>🌞</span>
-          </span>
-          Plantão diurno
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid ${COR_DIURNO}` }} />
+          Diurno
         </span>
         <span className="flex items-center gap-1">
-          {/* Miniatura: célula cheia + emoji noturno */}
-          <span style={{ position: "relative", width: 14, height: 18 }}>
-            <span style={{ position: "absolute", inset: 1, borderRadius: 4, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-            <span style={{ position: "absolute", right: -2, bottom: -3, fontSize: 10, lineHeight: 1 }}>🌙</span>
-          </span>
-          Plantão noturno
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid ${COR_NOTURNO}` }} />
+          Noturno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ width: 8, height: 16, borderRadius: 3, background: "#FFE066", borderTop: "3px solid #3498DB", boxShadow: "0 1px 2px rgba(0,0,0,0.2)", transform: "rotate(-3deg)" }} />
+          <span
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: 3,
+              border: "2px solid transparent",
+              background: `linear-gradient(hsl(var(--card)),hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`,
+            }}
+          />
+          Dia + Noite
+        </span>
+        <span className="flex items-center gap-1">
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3498DB" }} />
           Dejem/Delegada
         </span>
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        🌞 indica plantão diurno e 🌙 indica plantão noturno. Toque em um dia para detalhes.
+        Contorno laranja = plantão de dia · azul-marinho = plantão de noite. Toque em um dia para detalhes.
       </p>
+
 
 
 

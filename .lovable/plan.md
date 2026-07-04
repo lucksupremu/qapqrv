@@ -1,48 +1,84 @@
-# Conformidade Google AdSense
+# Plano: Agenda mais clara + funcionalidades do Plantão Fácil
 
-O Google reprovou por duas violações:
-1. **Anúncios em telas sem conteúdo** (splash, onboarding, "em construção", redirecionamentos, telas de navegação/alerta).
-2. **Conteúdo de baixo valor** em algumas rotas.
+## 1. Contorno quadrado no dia (visual da célula)
 
-A causa raiz: hoje o script global do AdSense (`adsbygoogle.js`) é injetado em **todas** as rotas quando ligado, e o `<AdSlot>` pode aparecer em telas predominantemente interativas (ferramentas, anyconnect). Mesmo sem `auto-ads`, o robô do AdSense visita o site e vê o script carregando em páginas vazias — e isso é o suficiente para reprovar.
+Arquivo: `src/components/escala-calendar-card.tsx`
 
-## O que vou fazer
+- Remover o círculo de fundo suave do dia de hoje (`rounded-full` com `COR_BG_SOFT`) e o preenchimento colorido atual das células com plantão.
+- Cada célula do calendário passa a ter:
+  - Borda quadrada (`border-2`, `borderRadius: 6px`) em volta do número do dia.
+  - Cor da borda = cor do plantão do dia (laranja/azul-marinho). Se houver plantão dia + noite no mesmo dia, borda dividida (metade laranja em cima, metade azul embaixo) via gradiente.
+  - Sem plantão → borda transparente. Hoje → borda fina cinza (`#94a3b8`) + número em negrito.
+- Número do dia sempre centralizado, sem fundo colorido — só o contorno indica o plantão.
+- Marcas (Dejem/Delegada) continuam como bolinha no canto superior direito; eventos como bolinha inferior esquerda.
 
-### 1. Allowlist rígida de rotas com anúncio
-Criar `src/lib/ads-allowlist.ts` com APENAS rotas ricas em conteúdo editorial:
-- `/blog`, `/blog/$slug`
-- `/sobre`, `/manual`, `/termos`, `/privacidade`, `/contato`
+## 2. Duas cores fixas: dia e noite
 
-Tudo o resto (splash, onboarding, inicio, calendario, historico, favoritos, intranet, anyconnect, em-construcao, ferramenta.*, escala-viewer, escalas-baixadas, configuracoes) **nunca** carrega o script do AdSense nem renderiza `<AdSlot>`.
+Cores escolhidas:
+- 🌞 **Diurno**: `#F59E0B` (laranja âmbar)
+- 🌙 **Noturno**: `#1E3A8A` (azul-marinho)
 
-### 2. Script AdSense condicional por rota
-No `__root.tsx`, o `loadAds()` passa a checar a rota atual contra a allowlist antes de injetar o `<script>`. Se a rota não estiver na lista, o script não é adicionado — e se já estava adicionado de uma rota anterior, ele permanece mas nenhum `<ins>` será criado nas novas telas.
+Arquivos:
+- `src/lib/escala-trabalho.ts`:
+  - Adicionar constantes `COR_DIURNO` e `COR_NOTURNO` exportadas.
+  - Nova função `classificarPeriodo(horaInicio, minutoInicio, duracaoHoras)` → `"dia" | "noite"` usando **meio do plantão**: se o midpoint cair entre 20:00 e 05:59 → noite, senão dia.
+  - `loadEscalas()` migra automaticamente: sobrescreve `regra.cor` (e `alternada` implícita) com a cor calculada pelo período de cada turno. Escalas com alternada (12x24/12x48) já ficam com 2 cores certas porque cada turno é classificado independente.
+- `src/lib/escala-presets.ts`: presets deixam de definir cor (calculada dinamicamente).
+- `src/components/escala-config-modal.tsx`: remover seletor de cor da UI. Mostrar preview "Este plantão será exibido em 🌞 laranja / 🌙 azul-marinho" calculado a partir do horário.
+- `ESCALA_CORES` (paleta antiga) pode ser removida.
 
-### 3. Guarda no `<AdSlot>`
-O componente vira no-op se:
-- A rota atual não está na allowlist; **ou**
-- `VITE_ADSENSE_ENABLED !== "true"`; **ou**
-- Estiver em APK (mantém comportamento atual de native ad — não muda).
+Marcas (Dejem/Delegada) continuam com suas cores próprias — só as **escalas de trabalho** ficam limitadas a dia/noite.
 
-### 4. Remover `<AdSlot>` das telas reprovadas
-- `src/routes/anyconnect.tsx` → remove `<AdSlot>` (tela de tutorial/ação, pouco texto).
-- `src/routes/ferramenta.consulta-escala.tsx` → remove `<AdSlot>` (tela de busca/ferramenta).
-- `src/routes/manual.tsx` → **mantém** (página densa de conteúdo).
+## 3. Emoji sol/lua na célula
 
-### 5. Reforçar conteúdo das páginas com ads
-- `/sobre`, `/contato`, `/termos`, `/privacidade`: revisar e garantir ≥ 600 palavras de conteúdo original, com headings semânticos.
-- `/blog` index: garantir descrição introdutória + lista visível com resumo de cada post.
-- Posts do blog: validar que cada um tem ≥ 800 palavras úteis (já existem 4 posts; ajusto os que estiverem curtos).
+Como agora o contorno já indica período pela cor, o emoji fica opcional:
+- Manter emoji pequeno no canto inferior direito da célula para acessibilidade (daltônicos).
+- Usar a nova função `classificarPeriodo` (não mais `isNoturno(horaInicio)` simples).
 
-### 6. Bloquear crawler em telas de baixo valor
-Adicionar `<meta name="robots" content="noindex">` dinamicamente (via `__root.tsx`) nas rotas fora da allowlist de conteúdo, exceto `/` que tem landing. Isso impede que o robô do AdSense classifique splash/onboarding/em-construcao como "página do editor".
+## 4. Melhorias inspiradas no Plantão Fácil
 
-### 7. Atualizar `public/robots.txt`
-Desautorizar explicitamente: `/splash`, `/onboarding`, `/em-construcao`, `/intranet`, `/anyconnect`, `/ferramenta/*`, `/escala-viewer/*`, `/escalas-baixadas`, `/configuracoes`, `/favoritos`, `/historico`, `/calendario`, `/inicio`.
+Selecionei o que faz sentido e ainda não existe no app:
 
-### 8. Não atrapalhar o usuário
-- Onde o `<AdSlot>` for removido/no-op, ele simplesmente não renderiza (sem placeholder, sem reserva de espaço) — UX fica mais limpa.
-- Flag `VITE_ADSENSE_ENABLED` continua `false` no `.env` até a aprovação. Quando virar `true`, só as rotas da allowlist exibirão anúncios.
+**a) Contador de horas do mês** (badge no topo do calendário)
+- "Julho: 168h trabalhadas · 12 plantões" calculado a partir das regras.
 
-## Resultado esperado
-Quando você pedir revisão ao AdSense, o crawler só vai encontrar `adsbygoogle.js` em páginas com conteúdo editorial denso (blog + páginas institucionais), eliminando ambas as violações.
+**b) Toque no dia mostra resumo rápido**
+- Já existe modal do dia — adicionar total de horas e valor estimado (se usuário informou valor/hora nas configurações).
+
+**c) Exportar mês para .ics (Google/Apple Calendar)**
+- Botão "Exportar" no header do calendário → gera `.ics` com todos os plantões do mês visível. Zero dependências externas (string builder).
+
+**d) Anotação livre por dia**
+- Já existe `evento-livre-modal` — expor um atalho "Adicionar nota" no modal do dia junto de "Configurar escala".
+
+**e) Modo compacto vs. expandido**
+- Toggle no header: compacto (só contorno) ou expandido (mostra "Dia" / "Noite" em texto pequeno abaixo do número na célula).
+
+**f) Ir para hoje**
+- Botão discreto "Hoje" ao lado da navegação do mês (só aparece quando o cursor não está no mês corrente).
+
+Escopo desta implementação: **a, c, f** de cara (baixo custo, alto valor). **b, d, e** ficam como próxima rodada se quiser.
+
+## Detalhes técnicos
+
+- **Migração de cores**: rodada uma vez em `loadEscalas()`. Se `regra.cor` não for `#F59E0B` ou `#1E3A8A`, recalcula e persiste via `saveEscalas`.
+- **Borda dividida** (dia+noite mesma data): 
+  ```css
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(#fff,#fff) padding-box,
+    linear-gradient(180deg, #F59E0B 50%, #1E3A8A 50%) border-box;
+  ```
+- **Corte noturno**: midpoint = `inicio + duracao/2`. Noturno se `midpoint.hour >= 20 || midpoint.hour < 6`.
+- **.ics**: função pura em `src/lib/escala-ics.ts`, download via `Blob` + `<a download>`.
+- Nenhuma mudança de banco de dados. Tudo localStorage.
+
+## Arquivos afetados
+
+```text
+src/components/escala-calendar-card.tsx   (visual + botão exportar + botão hoje + contador)
+src/components/escala-config-modal.tsx    (remove seletor de cor)
+src/lib/escala-trabalho.ts                (classificarPeriodo, migração, constantes)
+src/lib/escala-presets.ts                 (limpa cores)
+src/lib/escala-ics.ts                     (novo — gerador .ics)
+```

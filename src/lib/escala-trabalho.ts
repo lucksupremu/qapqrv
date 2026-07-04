@@ -20,16 +20,47 @@ export type EscalaRegra = {
 
 const STORAGE_KEY = "qap-escalas-trabalho";
 
+/** Cores fixas do sistema: dia e noite. */
+export const COR_DIURNO = "#F59E0B"; // laranja âmbar
+export const COR_NOTURNO = "#1E3A8A"; // azul-marinho
+
+/** Compat: paleta legada exposta como [diurno, noturno]. */
 export const ESCALA_CORES: { label: string; value: string }[] = [
-  { label: "Vermelho", value: "#e53935" },
-  { label: "Azul", value: "#1e88e5" },
-  { label: "Verde", value: "#2ECC71" },
-  { label: "Magenta", value: "#d81b60" },
-  { label: "Laranja", value: "#fb8c00" },
-  { label: "Ciano", value: "#26c6da" },
-  { label: "Roxo", value: "#8e24aa" },
-  { label: "Amarelo", value: "#fbc02d" },
+  { label: "Diurno", value: COR_DIURNO },
+  { label: "Noturno", value: COR_NOTURNO },
 ];
+
+/**
+ * Classifica um turno como diurno ou noturno pelo horário do MEIO do plantão.
+ * Noturno se o midpoint cair entre 20:00 e 05:59.
+ */
+export function classificarPeriodo(
+  horaInicio: number,
+  minutoInicio: number | undefined,
+  duracaoHoras: number,
+): "dia" | "noite" {
+  const startMin = horaInicio * 60 + (minutoInicio ?? 0);
+  const midMin = startMin + Math.round((duracaoHoras * 60) / 2);
+  const midH = Math.floor((midMin % (24 * 60)) / 60);
+  const noturno = midH >= 20 || midH < 6;
+  return noturno ? "noite" : "dia";
+}
+
+export function corDoTurno(
+  horaInicio: number,
+  minutoInicio: number | undefined,
+  duracaoHoras: number,
+): string {
+  return classificarPeriodo(horaInicio, minutoInicio, duracaoHoras) === "noite"
+    ? COR_NOTURNO
+    : COR_DIURNO;
+}
+
+function migrarCor(r: EscalaRegra): EscalaRegra {
+  const corPrincipal = corDoTurno(r.horaInicio, r.minutoInicio, r.trabalho);
+  if (r.cor === corPrincipal) return r;
+  return { ...r, cor: corPrincipal };
+}
 
 export function loadEscalas(): EscalaRegra[] {
   if (typeof window === "undefined") return [];
@@ -37,7 +68,15 @@ export function loadEscalas(): EscalaRegra[] {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as EscalaRegra[]) : [];
+    if (!Array.isArray(parsed)) return [];
+    const list = (parsed as EscalaRegra[]).map(migrarCor);
+    // persiste migração se algo mudou
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch {
+      /* ignore */
+    }
+    return list;
   } catch {
     return [];
   }
