@@ -451,87 +451,134 @@ export function EscalaCalendarCard() {
 
               </span>
 
-              {temMarca && marcasDia.length === 1 && !temEvento && (
-                <img
-                  aria-hidden
-                  src={POSTIT_URL}
-                  alt=""
-                  draggable={false}
-                  className="absolute pointer-events-none"
-                  style={{
-                    bottom: 0,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: 38,
-                    height: 38,
-                    objectFit: "contain",
-                    zIndex: 0,
-                  }}
-                />
-              )}
-              {temMarca && marcasDia.length === 1 && !temEvento && (
-                <span
-                  className="absolute left-0 right-0 text-center font-bold text-[#3a2a00] pointer-events-none"
-                  style={{
-                    bottom: 3,
-                    fontSize: 6,
-                    lineHeight: 1,
-                    zIndex: 3,
-                    transform: "rotate(-3deg)",
-                  }}
-                >
-                  {(MARCA_LABEL[marcasDia[0]!.tipo] ?? "Marca").slice(0, 8)}
-                </span>
-              )}
-              {temMarca && (marcasDia.length > 1 || temEvento) && (
-                <span
-                  aria-hidden
-                  className="absolute"
-                  style={{
-                    right: 0,
-                    top: 0,
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: corMarca ?? "#3498DB",
-                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
-                    zIndex: 6,
-                  }}
-                />
-              )}
+              {(() => {
+                const marcaUnica = temMarca && marcasDia.length === 1 && !temEvento;
+                const eventoUnico = temEvento;
+                const marcaMultipla = temMarca && (marcasDia.length > 1 || temEvento);
+                const diaOcupado = temPlantao || temAvulso;
 
-              {temEvento && (
-                <img
-                  aria-hidden
-                  src={POSTIT_URL}
-                  alt=""
-                  draggable={false}
-                  className="absolute pointer-events-none"
-                  style={{
-                    bottom: 0,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: 38,
-                    height: 38,
-                    objectFit: "contain",
-                    zIndex: 0,
-                  }}
-                />
-              )}
-              {temEvento && (
-                <span
-                  className="absolute left-0 right-0 text-center font-bold text-[#3a2a00] pointer-events-none"
-                  style={{
-                    bottom: 3,
-                    fontSize: 6,
-                    lineHeight: 1,
-                    zIndex: 3,
-                    transform: "rotate(-3deg)",
-                  }}
-                >
-                  {eventosDia[0]?.titulo.trim().slice(0, 8)}
-                </span>
-              )}
+                // Post-it grande (dia livre) vs mini post-it com clipe (dia com escala)
+                const bigPostIt = (label: string) => (
+                  <>
+                    <img
+                      aria-hidden
+                      src={POSTIT_URL}
+                      alt=""
+                      draggable={false}
+                      className="absolute pointer-events-none"
+                      style={{
+                        bottom: 0,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: 38,
+                        height: 38,
+                        objectFit: "contain",
+                        zIndex: 0,
+                      }}
+                    />
+                    <span
+                      className="absolute left-0 right-0 text-center font-bold text-[#3a2a00] pointer-events-none"
+                      style={{
+                        bottom: 3,
+                        fontSize: 6,
+                        lineHeight: 1,
+                        zIndex: 3,
+                        transform: "rotate(-3deg)",
+                      }}
+                    >
+                      {label.slice(0, 8)}
+                    </span>
+                  </>
+                );
+
+                const miniPostIt = (label: string, key: string) => (
+                  <span
+                    key={key}
+                    aria-hidden
+                    className="absolute pointer-events-none"
+                    style={{
+                      top: -4,
+                      right: -4,
+                      width: 18,
+                      height: 18,
+                      zIndex: 7,
+                    }}
+                  >
+                    <img
+                      src={POSTIT_URL}
+                      alt=""
+                      draggable={false}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        transform: "rotate(6deg)",
+                        filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.35))",
+                      }}
+                    />
+                    {/* Clipe metálico prendendo o post-it */}
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: -2,
+                        left: "50%",
+                        transform: "translateX(-50%) rotate(6deg)",
+                        width: 8,
+                        height: 5,
+                        borderRadius: 1,
+                        background:
+                          "linear-gradient(180deg, #e8ecf1 0%, #b8c0cc 55%, #7d8896 100%)",
+                        border: "0.5px solid #6a7280",
+                        boxShadow: "0 0.5px 1px rgba(0,0,0,0.4)",
+                        zIndex: 8,
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 4,
+                        left: "50%",
+                        transform: "translateX(-50%) rotate(6deg)",
+                        fontSize: 5,
+                        lineHeight: 1,
+                        fontWeight: 700,
+                        color: "#3a2a00",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {label.slice(0, 5)}
+                    </span>
+                  </span>
+                );
+
+                if (marcaUnica) {
+                  const label = MARCA_LABEL[marcasDia[0]!.tipo] ?? "Marca";
+                  return diaOcupado ? miniPostIt(label, "marca-mini") : bigPostIt(label);
+                }
+                if (eventoUnico) {
+                  const label = eventosDia[0]?.titulo.trim() ?? "Evento";
+                  return diaOcupado ? miniPostIt(label, "evt-mini") : bigPostIt(label);
+                }
+                if (marcaMultipla) {
+                  return (
+                    <span
+                      aria-hidden
+                      className="absolute"
+                      style={{
+                        right: 0,
+                        top: 0,
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: corMarca ?? "#3498DB",
+                        boxShadow: "0 0 0 1.5px hsl(var(--card))",
+                        zIndex: 6,
+                      }}
+                    />
+                  );
+                }
+                return null;
+              })()}
             </>
           );
 
