@@ -570,30 +570,35 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          {/* Miniatura: célula cheia + emoji diurno */}
-          <span style={{ position: "relative", width: 14, height: 18 }}>
-            <span style={{ position: "absolute", inset: 1, borderRadius: 4, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-            <span style={{ position: "absolute", right: -2, bottom: -3, fontSize: 10, lineHeight: 1 }}>🌞</span>
-          </span>
-          Plantão diurno
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid ${COR_DIURNO}` }} />
+          Diurno
         </span>
         <span className="flex items-center gap-1">
-          {/* Miniatura: célula cheia + emoji noturno */}
-          <span style={{ position: "relative", width: 14, height: 18 }}>
-            <span style={{ position: "absolute", inset: 1, borderRadius: 4, borderTop: `2px solid ${COR_PRIMARY}`, background: `color-mix(in srgb, ${COR_PRIMARY} 28%, transparent)` }} />
-            <span style={{ position: "absolute", right: -2, bottom: -3, fontSize: 10, lineHeight: 1 }}>🌙</span>
-          </span>
-          Plantão noturno
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid ${COR_NOTURNO}` }} />
+          Noturno
         </span>
         <span className="flex items-center gap-1">
-          <span style={{ width: 8, height: 16, borderRadius: 3, background: "#FFE066", borderTop: "3px solid #3498DB", boxShadow: "0 1px 2px rgba(0,0,0,0.2)", transform: "rotate(-3deg)" }} />
+          <span
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: 3,
+              border: "2px solid transparent",
+              background: `linear-gradient(hsl(var(--card)),hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`,
+            }}
+          />
+          Dia + Noite
+        </span>
+        <span className="flex items-center gap-1">
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3498DB" }} />
           Dejem/Delegada
         </span>
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        🌞 indica plantão diurno e 🌙 indica plantão noturno. Toque em um dia para detalhes.
+        Contorno laranja = plantão de dia · azul-marinho = plantão de noite. Toque em um dia para detalhes.
       </p>
+
 
 
 
