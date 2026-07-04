@@ -516,6 +516,14 @@ export function EscalaCalendarCard() {
                           <div className="min-w-0">
                             <p className="truncate text-[12px] font-bold text-foreground">
                               {e.regra.local}
+                              {e.regra.avulso && (
+                                <span
+                                  className="ml-1.5 inline-flex items-center rounded-full px-1.5 py-[1px] align-middle text-[9px] font-bold uppercase tracking-wide text-white"
+                                  style={{ background: e.regra.cor }}
+                                >
+                                  Avulso
+                                </span>
+                              )}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
                               {fmtHora(e.inicio)} → {fmtHora(e.fim)}
@@ -529,6 +537,7 @@ export function EscalaCalendarCard() {
                                 : `Continuação (vem de ${fmtDiaCurto(e.inicio)})`}
                             </p>
                           </div>
+
                         </div>
                       );
                     })}
