@@ -128,43 +128,62 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
             return (
               <div className="space-y-1.5">
                 <Label>Como aparece no calendário</Label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span
                     aria-hidden
-                    className="relative inline-block h-[22px] w-[26px]"
+                    className="relative inline-flex h-[34px] w-[34px] items-center justify-center"
                     style={{
                       borderRadius: 3,
-                      background: "#FFE66D",
-                      border: "1px solid rgba(125, 93, 0, 0.35)",
-                      boxShadow: "0 0 0 2px hsl(var(--card)), 0 1px 2px rgba(0,0,0,0.22)",
+                      background: "#FFE066",
+                      backgroundImage:
+                        "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
+                      boxShadow:
+                        "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset",
+                      transform: "rotate(-3deg)",
+                      marginTop: 4,
                     }}
                   >
                     <span
-                      aria-hidden
-                      className="absolute left-[4px] right-[4px] top-[6px] h-[2px] rounded-full"
-                      style={{ background: "rgba(92, 70, 0, 0.35)" }}
-                    />
+                      className="text-[13px] font-extrabold"
+                      style={{ color: "#3a2a00" }}
+                    >
+                      {baseDate ? baseDate.getDate() : 15}
+                    </span>
                     <span
                       aria-hidden
-                      className="absolute left-[4px] right-[8px] top-[12px] h-[2px] rounded-full"
-                      style={{ background: "rgba(92, 70, 0, 0.25)" }}
-                    />
-                    <span
-                      aria-hidden
-                      className="absolute bottom-0 left-0 h-[4px] w-full rounded-b-[3px]"
-                      style={{ background: c }}
+                      className="absolute bottom-0 left-0 h-[4px] w-full"
+                      style={{
+                        background: c,
+                        borderBottomLeftRadius: 3,
+                        borderBottomRightRadius: 3,
+                      }}
                     />
                     <span
                       aria-hidden
                       className="absolute right-0 top-0 h-0 w-0"
                       style={{
-                        borderTop: "7px solid rgba(255, 255, 255, 0.85)",
-                        borderLeft: "7px solid rgba(139, 103, 0, 0.28)",
+                        borderTop: "7px solid hsl(var(--card))",
+                        borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
+                      }}
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute"
+                      style={{
+                        top: -3,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background:
+                          "radial-gradient(circle at 30% 30%, #ff6b6b 0%, #d63031 55%, #a51d1d 100%)",
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.45)",
                       }}
                     />
                   </span>
                   <span className="text-[11px] text-muted-foreground">
-                    Post-it no canto do dia — não pinta o contorno da escala.
+                    Post-it com alfinete cobrindo o dia — destaca visualmente o plantão avulso sem se misturar ao contorno da escala.
                   </span>
                 </div>
               </div>
