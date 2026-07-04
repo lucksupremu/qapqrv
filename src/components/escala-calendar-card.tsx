@@ -570,7 +570,7 @@ export function EscalaCalendarCard() {
       {/* Legenda das faixas */}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-1 text-[10px]" style={{ color: "#5b7a8f" }}>
         <span className="flex items-center gap-1">
-          <span style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid ${COR_DIURNO}` }} />
+          <span style={{ width: 14, height: 14, borderRadius: 3, border: `3px solid ${COR_DIURNO}` }} />
           Diurno
         </span>
         <span className="flex items-center gap-1">
