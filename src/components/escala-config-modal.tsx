@@ -186,7 +186,7 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
     const regra: EscalaRegra = {
       id: initial?.id ?? newEscalaId(),
       local: localOk.slice(0, 60),
-      cor,
+      cor: corDoTurno(horaInicio, minutoInicio, trabalho),
       trabalho,
       folga,
       horaInicio,
