@@ -643,17 +643,31 @@ export function EscalaCalendarCard() {
                     })}
                   </div>
                 )}
-                <button
-                  onClick={() => {
-                    setOpenKey(null);
-                    setEscalaBaseDate(cell.date);
-                    setEscalaDiaOpen(true);
-                  }}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
-                  style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
-                >
-                  <Plus size={13} /> Adicionar plantão neste dia
-                </button>
+                <div className="mt-3 space-y-1.5">
+                  <button
+                    onClick={() => {
+                      setOpenKey(null);
+                      setEscalaBaseDate(cell.date);
+                      setEscalaDiaOpen(true);
+                    }}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
+                    style={{ borderColor: COR_PRIMARY, color: COR_PRIMARY }}
+                  >
+                    <Plus size={13} /> Adicionar plantão neste dia
+                  </button>
+                  <button
+                    onClick={() => {
+                      setOpenKey(null);
+                      setEventoEditing(null);
+                      setEventoBaseDate(cell.date);
+                      setEventoModalOpen(true);
+                    }}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-1.5 text-[12px] font-bold transition active:scale-[0.98]"
+                    style={{ borderColor: "#7C3AED", color: "#7C3AED" }}
+                  >
+                    <Plus size={13} /> Adicionar compromisso
+                  </button>
+                </div>
               </PopoverContent>
             </Popover>
           );
