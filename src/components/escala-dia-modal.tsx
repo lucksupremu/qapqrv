@@ -124,7 +124,7 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
           {(() => {
             const p = classificarPeriodo(horaInicio, minutoInicio, duracao);
             const c = p === "noite" ? COR_NOTURNO : COR_DIURNO;
-            const emoji = p === "noite" ? "🌙" : "🌞";
+            const Icon = p === "noite" ? Moon : Sun;
             const label = p === "noite" ? "Noturno" : "Diurno";
             return (
               <div className="space-y-1.5">
@@ -132,10 +132,10 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
                 <div className="flex items-center gap-2">
                   <span
                     aria-hidden
-                    className="flex h-6 w-6 items-center justify-center rounded-full text-[12px] text-white"
-                    style={{ background: c, boxShadow: "0 0 0 2px hsl(var(--card))" }}
+                    className="flex h-6 w-6 items-center justify-center rounded-full text-white"
+                    style={{ background: c, boxShadow: "0 0 0 2px hsl(var(--card)), 0 1px 2px rgba(0,0,0,0.25)" }}
                   >
-                    {emoji}
+                    <Icon size={12} strokeWidth={2.75} />
                   </span>
                   <span className="text-[11px] text-muted-foreground">
                     Selo {label.toLowerCase()} no canto do dia — não pinta o contorno da escala.
@@ -143,6 +143,7 @@ export function EscalaDiaModal({ open, onOpenChange, baseDate, onSave }: Props) 
                 </div>
               </div>
             );
+
           })()}
 
 
