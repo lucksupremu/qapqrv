@@ -480,7 +480,7 @@ export function EscalaCalendarCard() {
               {temMarca && marcasDia.length === 1 && !temEvento && (
                 <span
                   aria-hidden
-                  className="absolute bottom-0 left-0 flex items-center justify-center overflow-hidden"
+                  className="absolute bottom-0 left-0 overflow-hidden"
                   style={{
                     width: 34,
                     height: 34,
@@ -491,7 +491,7 @@ export function EscalaCalendarCard() {
                     boxShadow:
                       "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset, 0 -3px 6px rgba(180,130,0,0.18) inset",
                     transform: "rotate(-3deg)",
-                    zIndex: 5,
+                    zIndex: 0,
                   }}
                 >
                   {/* Faixa inferior com a cor da marca */}
@@ -515,21 +515,20 @@ export function EscalaCalendarCard() {
                       borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
                     }}
                   />
-                  <span
-                    className="text-[7px] font-bold text-[#3a2a00]"
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      width: "100%",
-                      height: "100%",
-                      textAlign: "center",
-                      padding: 1,
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    {(MARCA_LABEL[marcasDia[0]!.tipo] ?? "Marca").slice(0, 8)}
-                  </span>
+                </span>
+              )}
+              {temMarca && marcasDia.length === 1 && !temEvento && (
+                <span
+                  className="absolute left-0 right-0 text-center font-bold text-[#3a2a00] pointer-events-none"
+                  style={{
+                    bottom: 3,
+                    fontSize: 6,
+                    lineHeight: 1,
+                    zIndex: 3,
+                    transform: "rotate(-3deg)",
+                  }}
+                >
+                  {(MARCA_LABEL[marcasDia[0]!.tipo] ?? "Marca").slice(0, 8)}
                 </span>
               )}
               {temMarca && (marcasDia.length > 1 || temEvento) && (
