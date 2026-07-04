@@ -307,141 +307,73 @@ export function EscalaCalendarCard() {
           const entries: PlantaoEntry[] = dia?.plantoes ?? [];
           const marcasDia = cell.inMonth ? marcasPorDia.get(key) ?? [] : [];
           const eventosDia = cell.inMonth ? eventosPorDia.get(key) ?? [] : [];
-          const colunas = cell.inMonth ? colunasDoDia(entries, marcasDia, cell.date) : [];
-          const MAX_COL = 3;
-          const colunasVisiveis = colunas.slice(0, MAX_COL);
-          const slotsVisiveis = colunasVisiveis.reduce((acc, c) => acc + c.slots.length, 0);
-          const slotsTotais = colunas.reduce((acc, c) => acc + c.slots.length, 0);
-          const extras = slotsTotais - slotsVisiveis;
           const temPlantao = entries.length > 0;
           const temMarca = marcasDia.length > 0;
           const temEvento = eventosDia.length > 0;
           const temAlgo = temPlantao || temMarca || temEvento;
           const isToday = sameDay(cell.date, today);
-          const corMarca = temMarca ? MARCA_COR[marcasDia[marcasDia.length - 1]!.tipo] ?? "#3498DB" : null;
+          const corMarca = temMarca
+            ? MARCA_COR[marcasDia[marcasDia.length - 1]!.tipo] ?? "#3498DB"
+            : null;
           const interativo = cell.inMonth;
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
-          const totalCol = colunasVisiveis.length;
-          const cellW = 36; // 40 - 2*2 inset
-          const slotW = totalCol === 0 ? 0 : totalCol === 1 ? cellW : cellW / totalCol;
+
+          // Detecta períodos presentes no dia (para o contorno)
+          let temDia = false;
+          let temNoite = false;
+          for (const e of entries) {
+            const p = periodoDaEntry(e);
+            if (p === "dia") temDia = true;
+            else temNoite = true;
+          }
+
+          // Estilo do contorno: quadrado; se tem os dois períodos, split
+          // horizontal (metade laranja em cima, azul embaixo).
+          const borderStyle: React.CSSProperties = {};
+          if (temDia && temNoite) {
+            borderStyle.border = "2px solid transparent";
+            borderStyle.background = `linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box, linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%) border-box`;
+          } else if (temDia) {
+            borderStyle.border = `2px solid ${COR_DIURNO}`;
+          } else if (temNoite) {
+            borderStyle.border = `2px solid ${COR_NOTURNO}`;
+          } else if (isToday) {
+            borderStyle.border = `1.5px solid ${COR_PRIMARY}`;
+          }
 
           const cellInner = (
             <>
-              {isToday && !temAlgo && (
-                <span
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: COR_BG_SOFT }}
-                />
-              )}
-
               <span
-                className="relative text-[13px]"
-                style={{
-                  zIndex: 2,
-                  color: !cell.inMonth
-                    ? "#a8b5c2"
-                    : temAlgo
-                      ? "#1a1a1a"
-                      : isToday
-                        ? COR_PRIMARY
-                        : "var(--text-dark, #02080d)",
-                  fontWeight: isToday || temAlgo ? 800 : 500,
-                }}
+                className="relative flex h-9 w-9 items-center justify-center rounded-md"
+                style={{ ...borderStyle }}
               >
-                {cell.date.getDate()}
+                <span
+                  className="text-[13px]"
+                  style={{
+                    color: !cell.inMonth
+                      ? "#a8b5c2"
+                      : temAlgo || isToday
+                        ? "#1a1a1a"
+                        : "var(--text-dark, #02080d)",
+                    fontWeight: isToday || temPlantao ? 800 : 500,
+                  }}
+                >
+                  {cell.date.getDate()}
+                </span>
               </span>
-
-              {/* Slots verticais (plantões + marcas) — estilo Google Agenda */}
-              {colunasVisiveis.map((col, ci) => {
-                const left = 2 + ci * slotW;
-                const width = slotW - (totalCol > 1 ? 1 : 0);
-                return col.slots.map((s, si) => {
-                  let top = 2;
-                  let bottom = 2;
-                  let borderRadius = "6px";
-                  if (s.lado === "bottom") {
-                    top = 20;
-                    borderRadius = s.kind === "marca" ? "0 0 4px 4px" : "0 0 6px 6px";
-                  } else if (s.lado === "top") {
-                    bottom = 20;
-                    borderRadius = s.kind === "marca" ? "4px 4px 0 0" : "6px 6px 0 0";
-                  }
-                  if (s.kind === "marca") {
-                    return (
-                      <span
-                        key={`${ci}-${si}`}
-                        aria-hidden
-                        className="pointer-events-none absolute"
-                        style={{
-                          left,
-                          width,
-                          top,
-                          bottom,
-                          background: "#FFE066",
-                          borderTop: `3px solid ${s.cor}`,
-                          borderRadius,
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
-                          transform: "rotate(-3deg)",
-                          zIndex: 1,
-                        }}
-                      />
-                    );
-                  }
-                  const isNoite = s.periodo === "noite";
-                  const bg = `color-mix(in srgb, ${s.cor} 32%, transparent)`;
-                  const emoji = isNoite ? "🌙" : "🌞";
-                  const emojiSize = totalCol === 1 ? 11 : totalCol === 2 ? 9 : 0;
-
-                  return (
-                    <span
-                      key={`${ci}-${si}`}
-                      aria-hidden
-                      className="pointer-events-none absolute"
-                      style={{
-                        left,
-                        width,
-                        top: 2,
-                        bottom: 2,
-                        background: bg,
-                        borderTop: `3px solid ${s.cor}`,
-                        borderRadius: "8px",
-                        zIndex: 0,
-                      }}
-                    >
-                      {emojiSize > 0 && s.lado === "cheia" && (
-                        <span
-                          role="img"
-                          aria-label={isNoite ? "Plantão noturno" : "Plantão diurno"}
-                          style={{
-                            position: "absolute",
-                            right: 0,
-                            bottom: -1,
-                            fontSize: emojiSize,
-                            lineHeight: 1,
-                            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))",
-                            zIndex: 4,
-                          }}
-                        >
-                          {emoji}
-                        </span>
-                      )}
-                    </span>
-                  );
-                });
-              })}
 
               {temMarca && (
                 <span
                   aria-hidden
                   className="absolute"
                   style={{
-                    right: 2,
-                    top: 2,
+                    right: 0,
+                    top: 0,
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
                     background: corMarca ?? "#3498DB",
-                    boxShadow: "0 0 0 1.5px #fff",
+                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
                     zIndex: 3,
                   }}
                 />
@@ -452,37 +384,21 @@ export function EscalaCalendarCard() {
                   aria-hidden
                   className="absolute"
                   style={{
-                    left: 2,
-                    bottom: 2,
+                    left: 0,
+                    bottom: 0,
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
                     background: "#7C3AED",
-                    boxShadow: "0 0 0 1.5px #fff",
+                    boxShadow: "0 0 0 1.5px hsl(var(--card))",
                     zIndex: 3,
                   }}
                 />
               )}
-
-              {extras > 0 && (
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute"
-                  style={{
-                    right: 3,
-                    bottom: 1,
-                    fontSize: 8,
-                    fontWeight: 700,
-                    color: "#5b7a8f",
-                    lineHeight: 1,
-                    zIndex: 3,
-                  }}
-                >
-                  +{extras}
-                </span>
-              )}
             </>
           );
+
+
 
 
           const baseClass = "relative mx-auto flex h-10 w-10 items-center justify-center";
