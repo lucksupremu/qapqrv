@@ -118,7 +118,7 @@ export function EscalaConfigModal({ open, onOpenChange, onSave, initial }: Props
     if (!open) return;
     if (initial) {
       setLocal(initial.local);
-      setCor(initial.cor);
+      // cor é derivada automaticamente do horário
       setTrabalho(initial.trabalho);
       setFolga(initial.folga);
       setHoraInicio(initial.horaInicio);
