@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil, Download, Home, Sun, Moon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil, Download, Home } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
 import { EscalaDiaModal } from "@/components/escala-dia-modal";
@@ -346,7 +346,7 @@ export function EscalaCalendarCard() {
           const cellKey = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}-${i}`;
 
           // Detecta períodos presentes no dia — separando escala recorrente
-          // (contorno quadrado) de plantão avulso (selo redondo).
+          // (contorno quadrado) de plantão avulso (post-it).
           let temDia = false;
           let temNoite = false;
           let avulsoDia = false;
@@ -377,14 +377,12 @@ export function EscalaCalendarCard() {
             borderStyle.border = `3px solid ${COR_PRIMARY}`;
           }
 
-          // Selo do plantão avulso — canto inferior direito.
-          const seloBg =
-            avulsoDia && avulsoNoite
-              ? `linear-gradient(180deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%)`
-              : avulsoDia
-                ? COR_DIURNO
-                : COR_NOTURNO;
-          const SeloIcon = avulsoNoite && !avulsoDia ? Moon : Sun;
+          // Post-it do plantão avulso — formato diferente do contorno da escala.
+          const postItAccent = avulsoDia && avulsoNoite
+            ? `linear-gradient(90deg, ${COR_DIURNO} 50%, ${COR_NOTURNO} 50%)`
+            : avulsoNoite
+              ? COR_NOTURNO
+              : COR_DIURNO;
 
 
           const cellInner = (
@@ -443,19 +441,42 @@ export function EscalaCalendarCard() {
               {temAvulso && (
                 <span
                   aria-hidden
-                  className="absolute flex items-center justify-center text-white"
+                  className="absolute"
                   style={{
-                    right: -3,
+                    right: -4,
                     bottom: -3,
-                    width: 15,
-                    height: 15,
-                    borderRadius: "50%",
-                    background: seloBg,
-                    boxShadow: "0 0 0 1.5px hsl(var(--card)), 0 1px 2px rgba(0,0,0,0.25)",
+                    width: 16,
+                    height: 14,
+                    borderRadius: 2,
+                    background: "#FFE66D",
+                    border: "1px solid rgba(125, 93, 0, 0.35)",
+                    boxShadow: "0 0 0 1.5px hsl(var(--card)), 0 1px 2px rgba(0,0,0,0.22)",
                     zIndex: 4,
                   }}
                 >
-                  <SeloIcon size={9} strokeWidth={2.75} />
+                  <span
+                    aria-hidden
+                    className="absolute left-[2px] right-[2px] top-[3px] h-[1.5px] rounded-full"
+                    style={{ background: "rgba(92, 70, 0, 0.35)" }}
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute left-[2px] right-[5px] top-[7px] h-[1.5px] rounded-full"
+                    style={{ background: "rgba(92, 70, 0, 0.25)" }}
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute bottom-0 left-0 h-[3px] w-full rounded-b-[2px]"
+                    style={{ background: postItAccent }}
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute right-0 top-0 h-0 w-0"
+                    style={{
+                      borderTop: "5px solid rgba(255, 255, 255, 0.85)",
+                      borderLeft: "5px solid rgba(139, 103, 0, 0.28)",
+                    }}
+                  />
                 </span>
               )}
 
@@ -638,21 +659,27 @@ export function EscalaCalendarCard() {
         </span>
         <span className="flex items-center gap-1">
           <span
-            className="flex items-center justify-center text-white"
-            style={{ width: 14, height: 14, borderRadius: "50%", background: COR_DIURNO }}
+            className="relative inline-block"
+            style={{
+              width: 15,
+              height: 13,
+              borderRadius: 2,
+              background: "#FFE66D",
+              border: "1px solid rgba(125, 93, 0, 0.35)",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.16)",
+            }}
           >
-            <Sun size={8} strokeWidth={2.75} />
+            <span className="absolute left-[2px] right-[2px] top-[3px] h-[1.5px] rounded-full bg-[rgba(92,70,0,0.35)]" />
+            <span className="absolute bottom-0 left-0 h-[3px] w-full rounded-b-[2px]" style={{ background: COR_DIURNO }} />
+            <span
+              className="absolute right-0 top-0 h-0 w-0"
+              style={{
+                borderTop: "5px solid rgba(255, 255, 255, 0.85)",
+                borderLeft: "5px solid rgba(139, 103, 0, 0.28)",
+              }}
+            />
           </span>
-          Avulso (dia)
-        </span>
-        <span className="flex items-center gap-1">
-          <span
-            className="flex items-center justify-center text-white"
-            style={{ width: 14, height: 14, borderRadius: "50%", background: COR_NOTURNO }}
-          >
-            <Moon size={8} strokeWidth={2.75} />
-          </span>
-          Avulso (noite)
+          Plantão avulso
         </span>
         <span className="flex items-center gap-1">
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3498DB" }} />
@@ -661,7 +688,7 @@ export function EscalaCalendarCard() {
       </div>
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        Contorno = escala recorrente · Selo com sol/lua = plantão avulso. Toque em um dia para detalhes.
+        Contorno = escala recorrente · Post-it = plantão avulso. Toque em um dia para detalhes.
       </p>
 
 
