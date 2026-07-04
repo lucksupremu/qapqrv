@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarRange, Pencil, Download, Home } from "lucide-react";
 
 import { EscalaConfigModal } from "@/components/escala-config-modal";
 import { EscalaDiaModal } from "@/components/escala-dia-modal";
 import { EventoLivreModal } from "@/components/evento-livre-modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
+  COR_DIURNO,
+  COR_NOTURNO,
+  classificarPeriodo,
+  corDoTurno,
   type EscalaRegra,
   type PlantaoEntry,
   gerarPlantoesDoMes,
@@ -13,8 +17,10 @@ import {
   removeEscala,
   saveEscalas,
 } from "@/lib/escala-trabalho";
+import { gerarIcs, baixarIcs } from "@/lib/escala-ics";
 import { loadMarcas, type Marca } from "@/lib/marcas";
 import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
+import { toast } from "sonner";
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
