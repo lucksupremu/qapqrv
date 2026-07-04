@@ -21,6 +21,9 @@ import { gerarIcs, baixarIcs } from "@/lib/escala-ics";
 import { loadMarcas, type Marca } from "@/lib/marcas";
 import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
 import { toast } from "sonner";
+import postitAsset from "@/assets/postit-alfinete.avif.asset.json";
+
+const POSTIT_URL = postitAsset.url;
 
 const MARCA_COR: Record<string, string> = {
   dejem: "#3498DB",
@@ -395,58 +398,29 @@ export function EscalaCalendarCard() {
                     className="absolute inset-0 flex items-center justify-center"
                     style={{ zIndex: 1 }}
                   >
-                    {/* Post-it grande cobrindo o dia */}
-                    <span
-                      className="relative block"
+                    <img
+                      src={POSTIT_URL}
+                      alt=""
+                      draggable={false}
                       style={{
-                        width: 34,
-                        height: 34,
-                        background: "#FFE066",
-                        backgroundImage:
-                          "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
-                        borderRadius: 3,
-                        boxShadow:
-                          "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset, 0 -3px 6px rgba(180,130,0,0.18) inset",
-                        transform: "rotate(-3deg)",
+                        width: 38,
+                        height: 38,
+                        objectFit: "contain",
+                        pointerEvents: "none",
                       }}
-                    >
-                      {/* Faixa inferior do período (dia/noite) */}
-                      <span
-                        aria-hidden
-                        className="absolute bottom-0 left-0 h-[4px] w-full"
-                        style={{
-                          background: postItAccent,
-                          borderBottomLeftRadius: 3,
-                          borderBottomRightRadius: 3,
-                        }}
-                      />
-                      {/* Cantinho dobrado */}
-                      <span
-                        aria-hidden
-                        className="absolute right-0 top-0"
-                        style={{
-                          width: 0,
-                          height: 0,
-                          borderTop: "7px solid hsl(var(--card))",
-                          borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
-                        }}
-                      />
-                    </span>
-                    {/* Alfinete vermelho */}
+                    />
+                    {/* Faixa inferior do período (dia/noite) sobre o post-it */}
                     <span
                       aria-hidden
                       className="absolute"
                       style={{
-                        top: -3,
                         left: "50%",
+                        bottom: 3,
                         transform: "translateX(-50%)",
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background:
-                          "radial-gradient(circle at 30% 30%, #ff6b6b 0%, #d63031 55%, #a51d1d 100%)",
-                        boxShadow:
-                          "0 1px 2px rgba(0,0,0,0.45), 0 0 0 0.5px rgba(0,0,0,0.25)",
+                        width: 22,
+                        height: 3,
+                        background: postItAccent,
+                        borderRadius: 2,
                         zIndex: 2,
                       }}
                     />
@@ -478,44 +452,22 @@ export function EscalaCalendarCard() {
               </span>
 
               {temMarca && marcasDia.length === 1 && !temEvento && (
-                <span
+                <img
                   aria-hidden
-                  className="absolute bottom-0 left-0 overflow-hidden"
+                  src={POSTIT_URL}
+                  alt=""
+                  draggable={false}
+                  className="absolute pointer-events-none"
                   style={{
-                    width: 34,
-                    height: 34,
-                    background: "#FFE066",
-                    backgroundImage:
-                      "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
-                    borderRadius: 3,
-                    boxShadow:
-                      "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset, 0 -3px 6px rgba(180,130,0,0.18) inset",
-                    transform: "rotate(-3deg)",
+                    bottom: 0,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 38,
+                    height: 38,
+                    objectFit: "contain",
                     zIndex: 0,
                   }}
-                >
-                  {/* Faixa inferior com a cor da marca */}
-                  <span
-                    aria-hidden
-                    className="absolute bottom-0 left-0 h-[4px] w-full"
-                    style={{
-                      background: corMarca ?? "#3498DB",
-                      borderBottomLeftRadius: 3,
-                      borderBottomRightRadius: 3,
-                    }}
-                  />
-                  {/* Cantinho dobrado */}
-                  <span
-                    aria-hidden
-                    className="absolute right-0 top-0"
-                    style={{
-                      width: 0,
-                      height: 0,
-                      borderTop: "7px solid hsl(var(--card))",
-                      borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
-                    }}
-                  />
-                </span>
+                />
               )}
               {temMarca && marcasDia.length === 1 && !temEvento && (
                 <span
@@ -549,34 +501,22 @@ export function EscalaCalendarCard() {
               )}
 
               {temEvento && (
-                <span
+                <img
                   aria-hidden
-                  className="absolute bottom-0 left-0 overflow-hidden"
+                  src={POSTIT_URL}
+                  alt=""
+                  draggable={false}
+                  className="absolute pointer-events-none"
                   style={{
-                    width: 34,
-                    height: 34,
-                    background: "#FFE066",
-                    backgroundImage:
-                      "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 45%), linear-gradient(180deg, #FFE97A 0%, #F7CE3E 100%)",
-                    borderRadius: 3,
-                    boxShadow:
-                      "0 2px 3px rgba(0,0,0,0.28), 0 1px 0 rgba(0,0,0,0.10) inset, 0 -3px 6px rgba(180,130,0,0.18) inset",
-                    transform: "rotate(-3deg)",
+                    bottom: 0,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 38,
+                    height: 38,
+                    objectFit: "contain",
                     zIndex: 0,
                   }}
-                >
-                  {/* Cantinho dobrado */}
-                  <span
-                    aria-hidden
-                    className="absolute right-0 top-0"
-                    style={{
-                      width: 0,
-                      height: 0,
-                      borderTop: "7px solid hsl(var(--card))",
-                      borderLeft: "7px solid rgba(150, 110, 0, 0.35)",
-                    }}
-                  />
-                </span>
+                />
               )}
               {temEvento && (
                 <span
