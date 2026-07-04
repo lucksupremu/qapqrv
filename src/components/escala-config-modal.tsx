@@ -31,7 +31,10 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
-  ESCALA_CORES,
+  COR_DIURNO,
+  COR_NOTURNO,
+  classificarPeriodo,
+  corDoTurno,
   type EscalaRegra,
   newEscalaId,
 } from "@/lib/escala-trabalho";
