@@ -111,6 +111,62 @@ function Sobre() {
         </section>
 
         <section>
+          <h2 className="font-bold text-base mb-2">História do projeto</h2>
+          <p className="text-muted-foreground">
+            O QAP, QRV! começou como um script pessoal para consultar escalas Dejem
+            sem precisar abrir cinco abas na intranet. Em pouco tempo virou uma
+            página web, depois um PWA e, mais adiante, também um aplicativo Android.
+            Hoje é usado diariamente por policiais de várias OPMs do Estado de
+            São Paulo — e continua sendo desenvolvido nas folgas, com base em
+            feedback direto do efetivo.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2">Como sugerir uma ferramenta</h2>
+          <p className="text-muted-foreground">
+            Toda ferramenta nova no app veio de um pedido real. Se você tem uma
+            ideia que pode ajudar outros colegas — checklist, calculadora, atalho,
+            calendário —, envie por e-mail ou pelo formulário de contato. Sugestões
+            claras, com exemplo de uso, entram em desenvolvimento mais rápido.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2">Perguntas frequentes</h2>
+          <div className="space-y-4 text-muted-foreground">
+            <div>
+              <p className="font-semibold text-foreground">O app é oficial da PMESP?</p>
+              <p>Não. É um projeto independente, mantido por iniciativa própria. Sempre confirme dados críticos pelos canais oficiais.</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Preciso fazer cadastro?</p>
+              <p>Não. O app funciona sem login. Seus dados ficam apenas no seu dispositivo.</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">O app custa alguma coisa?</p>
+              <p>Não. É gratuito e sustentado por anúncios discretos em páginas de conteúdo (blog, manual, sobre).</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Funciona offline?</p>
+              <p>Sim. Depois da primeira consulta, escala, calendário e lembretes continuam disponíveis mesmo sem sinal.</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Minha senha da intranet é enviada para vocês?</p>
+              <p>Não. O QAP, QRV! não coleta, não armazena nem transmite credenciais. A autenticação continua sendo feita pelo Cisco Secure Client (AnyConnect) diretamente com o servidor da PMESP.</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Como reporto um bug?</p>
+              <p>Pelo formulário de <Link to="/contato" className="underline">contato</Link> ou pelo e-mail de suporte. Descreva o passo a passo e, se possível, anexe print.</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Vocês recebem dados da PMESP em tempo real?</p>
+              <p>Não temos integração privilegiada. O app consulta as mesmas páginas públicas ou internas às quais qualquer policial autenticado tem acesso.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
           <h2 className="font-bold text-base mb-2">Versão</h2>
           <p className="text-muted-foreground">1.0.0</p>
         </section>
