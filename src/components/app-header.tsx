@@ -43,8 +43,9 @@ export function AppHeader({ subtitle, showBrand = true, title }: Props) {
                   key={l.to}
                   to={l.to}
                   onClick={() => setOpen(false)}
-                  className="rounded-md px-3 py-2.5 hover:bg-accent"
+                  className="flex items-center gap-2 rounded-md px-3 py-2.5 hover:bg-accent"
                 >
+                  {"icon" in l && l.icon && <l.icon className="size-4" />}
                   {l.label}
                 </Link>
               ))}
