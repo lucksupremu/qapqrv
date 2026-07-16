@@ -36,6 +36,7 @@ export function AppHeader({ subtitle, showBrand = true, title }: Props) {
                 { to: "/inicio", label: "Início" },
                 { to: "/favoritos", label: "Favoritos" },
                 { to: "/historico", label: "Histórico" },
+                { to: "/manual", label: "Manual", icon: BookOpenCheck },
                 { to: "/sobre", label: "Sobre" },
               ].map((l) => (
                 <Link
