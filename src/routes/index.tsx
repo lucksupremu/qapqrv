@@ -295,11 +295,12 @@ function HomeScreen() {
         ),
     },
     {
-      label: "Manual",
+      label: "PVT",
       icon: BookOpenCheck,
       gradient: GRAD_PRIMARY,
       shadow: SHADOW_PRIMARY,
-      onClick: () => navigate({ to: "/manual" }),
+      onClick: () =>
+        window.open("https://ead.pmesp.org/login/index.php", "_blank", "noopener,noreferrer"),
     },
   ].filter((b) => native || !(b as { nativeOnly?: boolean }).nativeOnly);
 
