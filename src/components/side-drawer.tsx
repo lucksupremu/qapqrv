@@ -66,6 +66,7 @@ const grupo2: Item[] = [
 ];
 const grupo3: Item[] = [
   { type: "route", to: "/configuracoes", label: "Configurações", icon: Settings },
+  { type: "route", to: "/manual", label: "Manual", icon: BookOpenCheck },
   { type: "external", href: "https://ead.pmesp.org/login/index.php", label: "PVT", icon: GraduationCap },
   { type: "route", to: "/anyconnect", label: "Vídeo tutorial ANYCONECT", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
