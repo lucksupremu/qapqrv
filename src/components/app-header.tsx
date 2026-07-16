@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, Menu } from "lucide-react";
+import { Bell, BookOpenCheck, Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { VpnIndicator } from "@/components/vpn-indicator";
