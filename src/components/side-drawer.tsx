@@ -6,6 +6,7 @@ import {
   Mail,
   Wallet,
   BookOpen,
+  BookOpenCheck,
   GraduationCap,
   Lock,
   X,
