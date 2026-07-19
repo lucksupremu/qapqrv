@@ -434,8 +434,8 @@ function HomeScreen() {
       </section>
 
       {/* MINHA ESCALA — calendário de plantões */}
-      <section className="mt-6">
-        <div className="mb-3 flex items-end justify-between px-6 gap-3">
+      <section className="mt-6 px-5">
+        <div className="mb-3 flex items-end justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
               Minha Escala
@@ -457,6 +457,7 @@ function HomeScreen() {
           </button>
         </div>
         <EscalaCalendarCard />
+        <ProximosEventosList />
       </section>
 
     </div>
