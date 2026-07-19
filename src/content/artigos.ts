@@ -226,7 +226,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Adicionar compromisso" },
       "Toque no dia e escolha 'Adicionar compromisso'. Útil para reuniões, formaturas, cursos.",
       { h: "Cores automáticas" },
-      "As cores dia/noite são fixas para você bater o olho e saber. Sem risco de confundir com outros usuários.",
+      "As cores dia/noite são fixas e automáticas: você bate o olho no calendário e já sabe qual turno vai fazer.",
       { h: "Exportar para o Google Agenda" },
       "Use a opção de exportar .ics no topo do calendário. Importe o arquivo no Google Agenda, Apple Calendário ou Outlook.",
     ],
