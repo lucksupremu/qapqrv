@@ -129,6 +129,7 @@ export function EventoLivreModal({
   const handleDelete = () => {
     if (!editing) return;
     cancelForMarca(`evento:${editing.id}`);
+    void cancelServerReminders(`evento:${editing.id}`);
     removeEvento(editing.id);
     toast.success("Evento excluído.");
     onChanged?.();
