@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { CalendarCheck, CalendarClock, ArrowRight } from "lucide-react";
+import { CalendarCheck, CalendarClock, MapPin } from "lucide-react";
 import { listarProximosEventos, textoDiasRestantes, type EventoProximo } from "@/lib/escala-proximos";
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
