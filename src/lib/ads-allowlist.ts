@@ -30,3 +30,7 @@ export function isAdsAllowedRoute(pathname: string): boolean {
   if (pathname.startsWith("/blog/")) return true;
   return false;
 }
+
+export function isPublicContentRoute(pathname: string): boolean {
+  return pathname === "/" || isAdsAllowedRoute(pathname);
+}

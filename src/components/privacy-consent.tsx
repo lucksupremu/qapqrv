@@ -30,22 +30,21 @@ export function PrivacyConsent() {
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
+      role="region"
       aria-labelledby="privacy-consent-title"
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-x-3 bottom-[76px] z-[60] mx-auto max-w-[430px] animate-in slide-in-from-bottom-4 duration-300"
     >
-      <div className="w-full max-w-[430px] rounded-t-[24px] bg-white shadow-[0_-4px_24px_rgba(0,0,0,0.2)] sm:rounded-[24px] animate-in slide-in-from-bottom-4 duration-300">
-        <div className="flex items-center gap-3 px-5 pt-5">
+      <div className="rounded-[18px] border border-slate-200 bg-white shadow-[0_8px_28px_rgba(15,23,42,0.18)]">
+        <div className="flex items-center gap-3 px-4 pt-4">
           <div
-            className="flex h-12 w-12 items-center justify-center rounded-full"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
             style={{ background: "#e8f0f8", color: "#2e6b8a" }}
           >
-            <ShieldCheck size={24} />
+            <ShieldCheck size={20} />
           </div>
           <h2
             id="privacy-consent-title"
-            className="text-[18px] font-extrabold"
+            className="text-[15px] font-extrabold"
             style={{ color: "#2e6b8a" }}
           >
             Política de Privacidade
@@ -53,7 +52,7 @@ export function PrivacyConsent() {
         </div>
 
         <div
-          className="mx-5 mt-4 max-h-[50vh] overflow-y-auto rounded-[16px] p-4 text-[14px] leading-[1.55]"
+          className="mx-4 mt-3 max-h-[26vh] overflow-y-auto rounded-[14px] p-3 text-[12.5px] leading-[1.45]"
           style={{ background: "#f4f8fc", color: "#3A4A60" }}
         >
           <p>
@@ -92,23 +91,23 @@ export function PrivacyConsent() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 px-5 pb-6 pt-4">
+        <div className="flex gap-2 px-4 pb-4 pt-3">
+          <Link
+            to="/privacidade"
+            onClick={accept}
+            className="h-10 flex-1 text-center text-[13px] font-semibold leading-10"
+            style={{ color: "#2e6b8a" }}
+          >
+            Ler política
+          </Link>
           <button
             type="button"
             onClick={accept}
-            className="h-12 w-full rounded-full text-[15px] font-bold text-white shadow-md transition active:scale-[0.98]"
+            className="h-10 flex-1 rounded-full text-[13px] font-bold text-white shadow-md transition active:scale-[0.98]"
             style={{ background: "#2e6b8a" }}
           >
             Li e aceito
           </button>
-          <Link
-            to="/privacidade"
-            onClick={accept}
-            className="h-11 w-full text-center text-[14px] font-semibold leading-[44px]"
-            style={{ color: "#2e6b8a" }}
-          >
-            Ler política completa
-          </Link>
         </div>
       </div>
     </div>

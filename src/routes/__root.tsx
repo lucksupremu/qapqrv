@@ -22,7 +22,7 @@ import { installAppBadgeUpdater } from "@/lib/app-badge";
 import { InstallConfirmModal } from "@/components/install-confirm-modal";
 import { ShareAppNudge } from "@/components/share-app-nudge";
 import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
-import { isAdsAllowedRoute } from "@/lib/ads-allowlist";
+import { isAdsAllowedRoute, isPublicContentRoute } from "@/lib/ads-allowlist";
 
 
 /** Google AdSense client ID */
@@ -31,11 +31,6 @@ const ADSENSE_CLIENT = "ca-pub-4966192764194561";
  *  Mantemos `ads.txt` e o `<ins>` desligado para evitar reprovação por
  *  "inventário de anúncio sem conteúdo". Ative com VITE_ADSENSE_ENABLED=true. */
 const ADSENSE_ENABLED = import.meta.env.VITE_ADSENSE_ENABLED === "true";
-
-/** User-agents que são crawlers de busca/AdSense. Evitamos redirecionar o
- *  robô para /onboarding (que aparece como conteúdo vazio para indexação). */
-const BOT_UA_RE =
-  /bot|crawler|spider|crawling|googlebot|mediapartners-google|adsbot-google|bingbot|duckduckbot|yandex|baiduspider|facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot/i;
 
 function NotFoundComponent() {
   return (
@@ -107,16 +102,16 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isPublicContent = isPublicContentRoute(pathname);
 
-  // Onboarding: redireciona na primeira abertura.
-  // Importante: NÃO redirecionar bots/crawlers — eles veriam só a tela de
-  // boas-vindas e o Google AdSense reprovaria por "conteúdo insuficiente".
+  // Onboarding automático só no APK. No site público, a URL precisa entregar o
+  // conteúdo real sem interceptação, ou revisões do AdSense podem enxergar
+  // apenas uma tela de boas-vindas como conteúdo de baixo valor.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!isNativeApp()) return;
     if (pathname === "/onboarding") return;
     try {
-      const ua = navigator.userAgent || "";
-      if (BOT_UA_RE.test(ua)) return;
       if (window.localStorage.getItem("onboarding-seen-v1") !== "1") {
         router.navigate({ to: "/onboarding" });
       }
@@ -145,7 +140,7 @@ function RootComponent() {
   // construção" sejam classificadas como inventário de anúncio sem conteúdo.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const allowIndex = pathname === "/" || isAdsAllowedRoute(pathname);
+    const allowIndex = isPublicContentRoute(pathname);
     const existing = document.querySelector('meta[name="robots"][data-dyn="1"]');
     if (!allowIndex) {
       if (!existing) {
@@ -365,11 +360,11 @@ function RootComponent() {
           </div>
           <BottomNav />
           <PrivacyConsent />
-          <PushPermissionPrompt />
-          <BrowserWarningModal />
-          <WhatsNewModal />
-          <InstallConfirmModal />
-          <ShareAppNudge />
+          {!isPublicContent && <PushPermissionPrompt />}
+          {!isPublicContent && <BrowserWarningModal />}
+          {!isPublicContent && <WhatsNewModal />}
+          {!isPublicContent && <InstallConfirmModal />}
+          {!isPublicContent && <ShareAppNudge />}
           <Toaster />
 
         </DrawerProvider>
