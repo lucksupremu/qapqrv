@@ -28,6 +28,7 @@ import {
 } from "@/lib/notifications-adapter";
 import { buildAutoReminders, isoToLocalInput } from "@/lib/auto-reminders";
 import { reportMarcaEvent } from "@/lib/report-marca";
+import { scheduleServerReminders, cancelServerReminders } from "@/lib/server-reminders";
 
 const tipoOptions: { value: TipoMarca; label: string }[] = [
   { value: "dejem", label: "Dejem" },
@@ -200,12 +201,25 @@ export function MarcarModal({
       if (getPermission() === "default") {
         await requestNotificationPermission();
       }
+      const buildTitle = () => `Lembrete — ${tipoLabel}`;
       scheduleRemindersForMarca(marca.id, isoReminders, (whenISO) => ({
-        title: `Lembrete — ${tipoLabel}`,
+        title: buildTitle(),
         body: buildBody(whenISO),
       }));
+      // Backup no servidor: entrega via Web Push mesmo com o app fechado.
+      void scheduleServerReminders(
+        marca.id,
+        isoReminders.map((whenISO) => ({
+          when_at: whenISO,
+          title: buildTitle(),
+          body: buildBody(whenISO),
+          url: "/calendario",
+          tag: `marca-${marca.id}`,
+        })),
+      );
     } else {
       scheduleRemindersForMarca(marca.id, [], () => ({ title: "", body: "" }));
+      void cancelServerReminders(marca.id);
     }
 
 

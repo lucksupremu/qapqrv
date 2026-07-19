@@ -37,6 +37,7 @@ import {
   saveMarcas,
 } from "@/lib/marcas";
 import { cancelForMarca } from "@/lib/notifications-adapter";
+import { cancelServerReminders } from "@/lib/server-reminders";
 
 
 export const Route = createFileRoute("/calendario")({
@@ -256,6 +257,7 @@ function CalendarScreen() {
   const handleDelete = () => {
     if (!confirmDelete) return;
     cancelForMarca(confirmDelete.id);
+    void cancelServerReminders(confirmDelete.id);
     setMarcas((prev) => prev.filter((m) => m.id !== confirmDelete.id));
     setConfirmDelete(null);
     toast.success("Escala excluída com sucesso.");

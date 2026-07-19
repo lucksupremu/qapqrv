@@ -343,17 +343,98 @@ async function cleanupOldMarcaEvents() {
   if (error) console.error("[cleanup] marca_events", error);
 }
 
+async function runReminders() {
+  const now = new Date().toISOString();
+  const { data: due, error } = await supabase
+    .from("push_reminders")
+    .select("id, device_id, title, body, url, tag, when_at")
+    .is("sent_at", null)
+    .lte("when_at", now)
+    .order("when_at", { ascending: true })
+    .limit(500);
+  if (error) {
+    console.error("[reminders] query", error);
+    return 0;
+  }
+  if (!due?.length) return 0;
+
+  const deviceIds = Array.from(new Set(due.map((r) => r.device_id)));
+  const { data: subs, error: eSubs } = await supabase
+    .from("push_subscriptions")
+    .select("id, device_id, endpoint, p256dh, auth, last_seen_at, last_notified_at, inactivity_stage")
+    .is("unsubscribed_at", null)
+    .in("device_id", deviceIds);
+  if (eSubs) {
+    console.error("[reminders] subs query", eSubs);
+    return 0;
+  }
+  const subsByDevice = new Map<string, Sub[]>();
+  for (const s of subs ?? []) {
+    const list = subsByDevice.get((s as Sub).device_id) ?? [];
+    list.push(s as Sub);
+    subsByDevice.set((s as Sub).device_id, list);
+  }
+
+  let sent = 0;
+  for (const r of due) {
+    const targets = subsByDevice.get(r.device_id) ?? [];
+    let anyOk = false;
+    let lastError: string | null = null;
+    for (const sub of targets) {
+      const res = await sendOne(sub, {
+        title: r.title,
+        body: r.body,
+        url: r.url ?? "/calendario",
+        tag: r.tag ?? `reminder-${r.id}`,
+      });
+      if (res.gone) {
+        await supabase
+          .from("push_subscriptions")
+          .update({ unsubscribed_at: new Date().toISOString() })
+          .eq("id", sub.id);
+      } else if (res.ok) {
+        anyOk = true;
+        sent++;
+      } else if (res.error) {
+        lastError = res.error;
+      }
+    }
+    await supabase
+      .from("push_reminders")
+      .update({
+        sent_at: new Date().toISOString(),
+        error: anyOk ? null : lastError ?? "no_active_subscription",
+      })
+      .eq("id", r.id);
+  }
+  return sent;
+}
+
+async function cleanupOldReminders() {
+  const cutoff = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const { error } = await supabase
+    .from("push_reminders")
+    .delete()
+    .not("sent_at", "is", null)
+    .lt("sent_at", cutoff);
+  if (error) console.error("[cleanup] push_reminders", error);
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    const reminders = await runReminders();
     const burst = await runBurstAlerts();
     const inactivity = await runInactivity();
     const campaigns = await runCampaigns();
     const installNudge = await runInstallNudge();
     await cleanupOldMarcaEvents();
+    await cleanupOldReminders();
     return new Response(
       JSON.stringify({
         ok: true,
+        reminders_sent: reminders,
         burst_sent: burst,
         inactivity_sent: inactivity,
         campaign_sent: campaigns,

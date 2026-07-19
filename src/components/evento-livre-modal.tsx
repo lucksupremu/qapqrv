@@ -22,6 +22,7 @@ import {
   scheduleRemindersForMarca,
   getPermission,
 } from "@/lib/notifications-adapter";
+import { scheduleServerReminders, cancelServerReminders } from "@/lib/server-reminders";
 
 const fieldClass =
   "w-full rounded-[12px] border-2 bg-[#ffffff] px-3 py-3 text-[15px] font-semibold outline-none transition focus:ring-2";
@@ -97,24 +98,27 @@ export function EventoLivreModal({
     const marcaKey = `evento:${evt.id}`;
     if (lembreteMin === null) {
       cancelForMarca(marcaKey);
+      void cancelServerReminders(marcaKey);
     } else {
       if (getPermission() !== "granted") {
         await requestNotificationPermission();
       }
       const when = new Date(d.getTime() - lembreteMin * 60 * 1000);
-      scheduleRemindersForMarca(marcaKey, [when.toISOString()], () => ({
-        title: `Lembrete: ${evt.titulo}`,
-        body:
-          (lembreteMin === 0
-            ? "Agora"
-            : lembreteMin < 60
-              ? `Em ${lembreteMin} min`
-              : lembreteMin < 1440
-                ? `Em ${Math.round(lembreteMin / 60)} h`
-                : "Amanhã") +
-          ` — ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` +
-          (evt.observacao ? ` · ${evt.observacao}` : ""),
-      }));
+      const title = `Lembrete: ${evt.titulo}`;
+      const body =
+        (lembreteMin === 0
+          ? "Agora"
+          : lembreteMin < 60
+            ? `Em ${lembreteMin} min`
+            : lembreteMin < 1440
+              ? `Em ${Math.round(lembreteMin / 60)} h`
+              : "Amanhã") +
+        ` — ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` +
+        (evt.observacao ? ` · ${evt.observacao}` : "");
+      scheduleRemindersForMarca(marcaKey, [when.toISOString()], () => ({ title, body }));
+      void scheduleServerReminders(marcaKey, [
+        { when_at: when.toISOString(), title, body, url: "/calendario", tag: marcaKey },
+      ]);
     }
 
     toast.success(isEdit ? "Evento atualizado." : "Evento criado.");
@@ -125,6 +129,7 @@ export function EventoLivreModal({
   const handleDelete = () => {
     if (!editing) return;
     cancelForMarca(`evento:${editing.id}`);
+    void cancelServerReminders(`evento:${editing.id}`);
     removeEvento(editing.id);
     toast.success("Evento excluído.");
     onChanged?.();

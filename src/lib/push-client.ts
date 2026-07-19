@@ -69,7 +69,7 @@ export function markInstallOptInShown(): void {
   }
 }
 
-function getDeviceId(): string {
+export function getOrCreateDeviceId(): string {
   try {
     let id = localStorage.getItem(DEVICE_ID_KEY);
     if (!id) {
@@ -80,6 +80,10 @@ function getDeviceId(): string {
   } catch {
     return "anon-" + Math.random().toString(36).slice(2);
   }
+}
+
+function getDeviceId(): string {
+  return getOrCreateDeviceId();
 }
 
 function isPreviewOrIframe(): boolean {
