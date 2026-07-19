@@ -632,7 +632,10 @@ function BrowserHintBanner() {
     <div className="pt-1">
       <div
         className="flex items-start gap-2.5 rounded-2xl border px-3.5 py-2.5"
-        style={{ borderColor: "rgba(232, 93, 58, 0.25)", background: "rgba(232, 93, 58, 0.08)" }}
+        style={{
+          borderColor: "color-mix(in srgb, var(--tactical-accent) 25%, var(--tactical-border))",
+          background: "color-mix(in srgb, var(--tactical-accent) 8%, var(--tactical-card))",
+        }}
       >
         <Info
           size={16}
