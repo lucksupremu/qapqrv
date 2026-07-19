@@ -1,7 +1,8 @@
 import { gerarPlantoesDoMes, loadEscalas, type PlantaoEntry } from "@/lib/escala-trabalho";
 import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
+import { loadMarcas, TIPO_LABEL_SHORT, type Marca, type TipoMarca } from "@/lib/marcas";
 
-export type TipoEventoProximo = "plantão" | "compromisso";
+export type TipoEventoProximo = "plantão" | "compromisso" | "marca";
 
 export type EventoProximo = {
   id: string;
@@ -11,6 +12,13 @@ export type EventoProximo = {
   tipo: TipoEventoProximo;
   cor: string;
   diasRestantes: number;
+};
+
+const MARCA_COR: Record<TipoMarca, string> = {
+  dejem: "#3498DB",
+  delegada: "#2ECC71",
+  delegada_capital: "#2ECC71",
+  delegada_outras: "#E67E22",
 };
 
 function startOfDay(d: Date): Date {
