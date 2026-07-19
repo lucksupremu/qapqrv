@@ -52,6 +52,9 @@ export function listarProximosEventos(limite = 5): EventoProximo[] {
     const dias = gerarPlantoesDoMes(regras, year, month);
     for (const dia of dias.values()) {
       for (const p of dia.plantoes) {
+        // Só lista plantões avulsos (adicionados manualmente em um dia);
+        // escalas recorrentes/ordinárias ficam apenas no calendário.
+        if (!p.regra.avulso) continue;
         const ts = p.inicio.getTime();
         if (ts < inicioHoje) continue;
         plantoes.push({
