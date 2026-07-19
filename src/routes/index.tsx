@@ -263,13 +263,6 @@ function HomeScreen() {
         }),
     },
     {
-      label: "Calendário",
-      icon: Calendar,
-      gradient: GRAD_PRIMARY,
-      shadow: SHADOW_PRIMARY,
-      onClick: () => navigate({ to: "/calendario" }),
-    },
-    {
       label: "Escalas baixadas",
       icon: FolderDown,
       gradient: GRAD_GOLD,
