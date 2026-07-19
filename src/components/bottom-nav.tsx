@@ -2,7 +2,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Calendar, FolderDown, Menu } from "lucide-react";
 import { useDrawer } from "@/components/side-drawer";
 import { useIsNative } from "@/hooks/use-is-native";
-import { motion } from "framer-motion";
 
 const baseItems = [
   { to: "/", label: "Início", icon: Home },
@@ -21,47 +20,40 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 z-40 -translate-x-1/2 w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl pb-[env(safe-area-inset-bottom)]"
-      style={{
-        background: "var(--tactical-card)",
-        borderTop: "1px solid var(--tactical-border)",
-        height: 64,
-        boxShadow: "0 -4px 20px -10px rgba(0,0,0,0.15)",
-      }}
+      className="fixed bottom-0 left-1/2 z-40 -translate-x-1/2 w-full max-w-[430px] sm:max-w-2xl lg:max-w-5xl bg-[#ffffff] pb-[env(safe-area-inset-bottom)]"
+      style={{ borderTop: "1px solid #d5e3ee", height: 64 }}
     >
       <ul className="flex h-full items-stretch">
         {items.map(({ to, label, icon: Icon }) => {
           const active = path === to;
           return (
-            <li key={to} className="flex-1 relative">
+            <li key={to} className="flex-1">
               <Link
                 to={to}
                 className="relative flex h-full flex-col items-center justify-center gap-1 transition active:scale-95"
-                style={{ color: active ? "var(--tactical-accent)" : "var(--tactical-muted)" }}
+                style={{ color: active ? "#6ba3c8" : "#5b7a8f" }}
               >
                 {active && (
-                  <motion.span
-                    layoutId="bottom-nav-indicator"
+                  <span
                     aria-hidden
                     className="absolute top-0 h-[3px] w-10 rounded-b-full"
-                    style={{ background: "var(--tactical-accent)" }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    style={{ background: "var(--gradient-primary)" }}
                   />
                 )}
-                <Icon size={22} strokeWidth={active ? 2.5 : 2} />
-                <span className="text-[10px] font-semibold tracking-wide font-body">{label}</span>
+                <Icon size={22} />
+                <span className="text-[10px] font-semibold tracking-wide">{label}</span>
               </Link>
             </li>
           );
         })}
-        <li className="flex-1 relative">
+        <li className="flex-1">
           <button
             onClick={() => setOpen(true)}
             className="flex h-full w-full flex-col items-center justify-center gap-1 transition active:scale-95"
-            style={{ color: "var(--tactical-muted)" }}
+            style={{ color: "#5b7a8f" }}
           >
             <Menu size={24} />
-            <span className="text-[10px] font-semibold font-body">Menu</span>
+            <span className="text-[10px] font-semibold">Menu</span>
           </button>
         </li>
       </ul>
