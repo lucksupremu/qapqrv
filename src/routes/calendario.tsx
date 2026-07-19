@@ -39,7 +39,7 @@ import { cancelForMarca } from "@/lib/notifications-adapter";
 
 
 export const Route = createFileRoute("/calendario")({
-  head: () => ({ meta: [{ title: "Calendário — QAP, QRV!" }] }),
+  head: () => ({ meta: [{ title: "Agenda — QAP, QRV!" }] }),
   component: CalendarScreen,
 });
 
