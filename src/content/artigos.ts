@@ -296,7 +296,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Ouvidoria" },
       "A Ouvidoria da PMESP é o canal para elogios, sugestões e denúncias. As informações são tratadas com sigilo.",
       { h: "Ensino" },
-      "O PVT (Portal Virtual do Ensino) concentra cursos, especializações e material didático da Corporação.",
+      "O PVT é o portal de ensino a distância da Corporação, com cursos e material didático.",
       { h: "Redes sociais" },
       "Perfis oficiais da PMESP no Instagram e no X publicam ações e alertas em tempo real. Sempre confira se é a conta verificada.",
     ],
