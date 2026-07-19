@@ -9,6 +9,15 @@
   font-family: "Orbitron", "Inter", system-ui, sans-serif;
 }
 
+/* Fontes táticas escolhidas para a home modernizada */
+.font-tactical {
+  font-family: "Bebas Neue", "Sora", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+.font-body {
+  font-family: "Barlow", "Manrope", system-ui, sans-serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
