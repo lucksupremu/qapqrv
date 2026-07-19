@@ -389,7 +389,7 @@ export function EscalaCalendarCard() {
           const cellInner = (
             <>
               <span
-                className="relative flex h-9 w-9 items-center justify-center rounded-md"
+                className="relative flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-md"
                 style={{ ...borderStyle }}
               >
                 {temAvulso && (
