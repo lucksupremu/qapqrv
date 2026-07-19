@@ -248,6 +248,7 @@ function HomeScreen() {
             ),
           "Marcar / Desmarcar",
         ),
+      nativeOnly: true,
     },
     {
       label: "Email iNotes",
@@ -260,6 +261,7 @@ function HomeScreen() {
           modo: "webview",
           forceMobileUA: true,
         }),
+      nativeOnly: true,
     },
     {
       label: "Escalas baixadas",
@@ -286,6 +288,7 @@ function HomeScreen() {
           "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
           { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
         ),
+      nativeOnly: true,
     },
     {
       label: "PVT",
