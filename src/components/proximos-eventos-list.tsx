@@ -38,14 +38,8 @@ export function ProximosEventosList() {
     return (
       <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-4 text-center dark:border-slate-800 dark:bg-slate-900/40">
         <p className="text-[12px] text-slate-500 dark:text-slate-400">
-          Nenhum lembrete ou escala avulsa nos próximos dias.
+          Nenhum lembrete, escala avulsa ou marcação Dejem/Delegada nos próximos dias.
         </p>
-        <button
-          onClick={() => navigate({ to: "/calendario" })}
-          className="mt-2 text-[12px] font-bold text-amber-600 dark:text-amber-500"
-        >
-          Abrir Agenda →
-        </button>
       </div>
     );
   }
@@ -57,13 +51,18 @@ export function ProximosEventosList() {
           Próximos lembretes
         </h3>
         <span className="text-[10px] text-slate-500 dark:text-slate-500">
-          lembretes e escalas avulsas
+          lembretes, avulsas e Dejem/Delegada
         </span>
       </div>
 
       <div className="space-y-2">
         {itens.map((item) => {
-          const Icon = item.tipo === "plantão" ? CalendarCheck : CalendarClock;
+          const Icon =
+            item.tipo === "plantão"
+              ? CalendarCheck
+              : item.tipo === "marca"
+                ? MapPin
+                : CalendarClock;
           return (
             <div
               key={item.id}
@@ -80,7 +79,8 @@ export function ProximosEventosList() {
                   {item.titulo}
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {fmtDataCurta(item.data)} · {item.hora}
+                  {fmtDataCurta(item.data)}
+                  {item.hora ? ` · ${item.hora}` : ""}
                 </p>
               </div>
               <div
@@ -106,14 +106,6 @@ export function ProximosEventosList() {
           );
         })}
       </div>
-
-      <button
-        onClick={() => navigate({ to: "/calendario" })}
-        className="mt-3 flex w-full items-center justify-center gap-1 rounded-xl border border-dashed py-2 text-[12px] font-bold transition active:scale-[0.98]"
-        style={{ borderColor: "#2e6b8a", color: "#2e6b8a" }}
-      >
-        Ver na Agenda <ArrowRight size={14} />
-      </button>
     </div>
   );
 }
