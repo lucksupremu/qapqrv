@@ -27,6 +27,7 @@ import {
   getPermission,
 } from "@/lib/notifications-adapter";
 import { buildAutoReminders, isoToLocalInput } from "@/lib/auto-reminders";
+import { reportMarcaEvent } from "@/lib/report-marca";
 
 const tipoOptions: { value: TipoMarca; label: string }[] = [
   { value: "dejem", label: "Dejem" },
@@ -182,6 +183,9 @@ export function MarcarModal({
 
 
     onSave(marca);
+
+    // Sinal anônimo pro backend: agrega picos de inscrição em Dejem/Delegada.
+    if (!isEdit) reportMarcaEvent(marca.tipo, marca.data);
 
     const tipoLabel = TIPO_LABEL_SHORT[marca.tipo] ?? "Escala";
     const buildBody = (whenISO: string) =>
