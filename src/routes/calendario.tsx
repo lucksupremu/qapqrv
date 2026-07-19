@@ -501,7 +501,7 @@ function CalendarScreen() {
             key={`${cursor.getFullYear()}-${cursor.getMonth()}`}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
-            className={`mx-3 mt-3 rounded-[20px] bg-[var(--surface)] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.4)] ${
+            className={`mx-0 mt-3 rounded-none bg-[var(--surface)] p-2 shadow-[0_2px_12px_rgba(0,0,0,0.4)] sm:mx-3 sm:rounded-[20px] sm:p-3 ${
               slideDir === "left"
                 ? "animate-in slide-in-from-right-4 fade-in duration-200"
                 : slideDir === "right"
