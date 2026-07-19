@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      marca_events: {
+        Row: {
+          created_at: string
+          data_alvo: string | null
+          device_id: string
+          id: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          data_alvo?: string | null
+          device_id: string
+          id?: string
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          data_alvo?: string | null
+          device_id?: string
+          id?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
+      push_burst_sends: {
+        Row: {
+          device_id: string
+          sent_at: string
+          sent_on: string
+          tipo: string
+        }
+        Insert: {
+          device_id: string
+          sent_at?: string
+          sent_on?: string
+          tipo: string
+        }
+        Update: {
+          device_id?: string
+          sent_at?: string
+          sent_on?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       push_campaign_sends: {
         Row: {
           campaign_id: string | null

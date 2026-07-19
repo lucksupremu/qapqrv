@@ -1,36 +1,79 @@
-Adicionar, abaixo do card "Minha Escala" na tela inicial, uma legenda/lista dos próximos 5 eventos futuros (a partir de hoje), unindo plantões/escalas e compromissos do calendário, com contagem de dias que faltam para cada um.
+# Alerta de "outros usuários estão se inscrevendo"
 
-## O que será feito
+Hoje as marcas de Dejem/Delegada ficam **só no `localStorage`** de cada dispositivo — o backend não sabe quem se inscreveu em nada. Sem esse sinal no servidor é impossível detectar "picos". O plano abaixo cria esse sinal (anônimo, por device) e usa o cron já existente para disparar o push.
 
-1. **Criar helper de próximos eventos** (`src/lib/escala-proximos.ts`):
-   - Ler plantões gerados (`gerarPlantoesDoMes` de `escala-trabalho.ts`) e eventos personalizados (`loadEventos` de `eventos-personalizados.ts`).
-   - Filtrar itens a partir de hoje (data/hora maior ou igual ao início do dia atual).
-   - Ordenar por data/hora crescente.
-   - Limitar a 5 itens.
-   - Calcular "dias que faltam": 0 = hoje, 1 = amanhã, 2+ = "faltam N dias".
-   - Retornar array tipado com: título, data, hora, tipo ("plantão" | "compromisso"), cor, diasRestantes.
+## O que o usuário vai ver
 
-2. **Criar componente visual** (`src/components/proximos-eventos-list.tsx`):
-   - Lista vertical com até 5 cards.
-   - Cada card mostra: ícone/bola de cor, título truncado, data/hora, e distância em dias ("Hoje", "Amanhã", "Faltam 3 dias").
-   - Estilização alinhada ao card da escala: bordas arredondadas, cores do tema, fontes pequenas.
-   - Botão "Ver na Agenda →" no final que leva para `/calendario`.
+Push com título/corpo:
+- **"Escalas abrindo agora?"**
+- **"Outros policiais estão marcando Dejem/Delegada. Já conferiu se há escalas abertas para inscrição?"**
+- Ao tocar, abre `/calendario`.
 
-3. **Integrar na tela inicial** (`src/routes/index.tsx`):
-   - Renderizar `<ProximosEventosList />` logo abaixo do `<EscalaCalendarCard />` dentro da seção "Minha Escala".
-   - Se não houver eventos futuros, mostrar estado vazio discreto: "Nenhum plantão ou compromisso nos próximos dias. Toque em Abrir Agenda para adicionar."
+Regras para não virar spam:
+- Só é enviado quando **≥ 5 dispositivos distintos** registram uma marca (do mesmo tipo — dejem OU delegada) em uma **janela de 30 min**.
+- Cada dispositivo recebe **no máximo 1 alerta desse tipo por dia** (cooldown 24h).
+- Não recebe o alerta quem **já marcou** uma escala do mesmo tipo nos últimos 3 dias (afinal, já se inscreveu).
+- Nunca expõe identidade — só contagem agregada.
 
-4. **Atualizar tipos legados** se necessário (`src/lib/escala-trabalho.ts`):
-   - Garantir que `gerarPlantoesDoMes` já exportado possa ser usado em um helper agnóstico ao mês, ou criar função que itere pelos meses necessários até coletar 5 eventos futuros (provavelmente iterar mês atual + próximo).
+## Como funciona
 
-## O que não será alterado
+```text
+[App] usuário salva marca no MarcarModal
+        │
+        ▼
+POST /functions/v1/report-marca  { device_id, tipo, data_alvo }
+        │
+        ▼
+INSERT em public.marca_events (anônimo, com TTL de 7 dias)
+        │
+        ▼
+[cron push-tick, de hora em hora]  →  runBurstAlerts()
+   ├─ conta marcas por tipo nos últimos 30 min
+   ├─ se ≥ threshold, seleciona push_subscriptions elegíveis
+   │    (não recebeu esse alerta nas últimas 24h,
+   │     não registrou marca desse tipo nos últimos 3d)
+   └─ envia webpush → grava em push_burst_sends (dedupe)
+```
 
-- Não muda a lógica de salvamento de escalas/eventos.
-- Não altera os modais de adicionar plantão/compromisso.
-- Não muda a aparência do calendário em si; apenas adiciona a lista abaixo.
+## Detalhes técnicos
 
-## Critério de aceitação
+**Nova tabela `public.marca_events`** (append-only, anônima):
+- `id uuid pk`, `device_id text`, `tipo text` ('dejem' | 'delegada'), `data_alvo date`, `created_at timestamptz default now()`.
+- Índice `(tipo, created_at desc)` para as janelas.
+- Grants: `INSERT` para `anon` e `authenticated` (é anônimo, só device_id); `ALL` para `service_role`.
+- RLS: policy de `INSERT` liberada (nenhum `SELECT`/`UPDATE`/`DELETE` público — só o service_role lê pelo edge function).
+- Job de limpeza (dentro do `send-push-tick`): apaga rows com `created_at < now() - interval '7 days'`.
 
-- Na tela inicial, abaixo do calendário, aparecem os próximos 5 plantões e compromissos futuros.
-- Cada item exibe quantos dias faltam (Hoje, Amanhã, Faltam N dias).
-- Build passa sem erros de tipo.
+**Nova tabela `public.push_burst_sends`** (cooldown por dispositivo):
+- `device_id text`, `tipo text`, `sent_at timestamptz default now()`, `pk (device_id, tipo, date_trunc('day', sent_at))`.
+- Só o service_role acessa.
+
+**Nova edge function `report-marca`** (verify_jwt = false, CORS aberto):
+- Body validado com Zod: `{ device_id: string, tipo: 'dejem'|'delegada', data_alvo: string(YYYY-MM-DD) }`.
+- Insere em `marca_events` com service_role.
+- Silenciosa em caso de erro (não bloqueia UX do modal).
+
+**Alteração no `send-push-tick`**:
+- Adiciona `runBurstAlerts()`, chamado antes de `runInactivity()`.
+- Para cada `tipo` em `['dejem','delegada']`:
+  1. `SELECT count(distinct device_id)` de `marca_events` nos últimos 30 min → se `< 5`, pula.
+  2. Seleciona `push_subscriptions` ativas onde o `device_id` **não** aparece em `marca_events` (mesmo tipo, últimos 3 dias) e **não** aparece em `push_burst_sends` (mesmo tipo, últimas 24h).
+  3. Envia webpush; grava em `push_burst_sends`.
+- Limpa `marca_events` antigos (>7 dias) ao final.
+
+**Alteração no cliente**:
+- `src/components/marcar-modal.tsx`: no `handleSubmit`, após `onSave`, chamar `reportMarcaEvent(marca.tipo, marca.data)` em fire-and-forget.
+- Novo helper `src/lib/report-marca.ts`: normaliza `dejem`/`delegada` (colapsa `delegada_capital`/`delegada_outras` em `delegada`), pega `device_id` do `qapqrv_device_id`, envia via `supabase.functions.invoke("report-marca", ...)`. Erros são silenciosos.
+
+## Privacidade / AdSense / lojas
+
+- Nada de identidade pessoal — só `device_id` UUID gerado no primeiro uso (mesmo que já usamos para push).
+- Retenção curta (7 dias) e finalidade única (agregar contagem).
+- Vou acrescentar 1 linha em `src/routes/privacidade.tsx`: "Registramos, de forma anônima, quando você marca Dejem/Delegada, apenas para avisar outros usuários sobre picos de inscrição. Nenhum dado pessoal é enviado."
+
+## Pontos que quero confirmar antes de implementar
+
+1. **Threshold**: 5 dispositivos em 30 min é o gatilho padrão. Como a base ainda é pequena, posso começar com **3 em 30 min** e ajustar depois. Prefere 3 ou 5?
+2. **Escopo do "quem recebe"**: enviar para **todos com push ativo** (que não marcaram nos últimos 3d) ou **restringir só a quem marcou alguma vez nos últimos 30 dias** (perfil "interessado em escalas")? A segunda evita incomodar quem baixou o app só pelas ferramentas.
+
+Se você não responder essas 2 perguntas, vou seguir com **threshold = 3 em 30 min** e **público = quem marcou pelo menos 1 vez nos últimos 30 dias** (mais conservador e alinhado ao propósito).

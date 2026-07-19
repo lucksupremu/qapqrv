@@ -78,6 +78,13 @@ function PrivacidadeScreen() {
               qualquer momento nas configurações do navegador/sistema.
             </li>
             <li>
+              <strong>Sinal anônimo de marcação</strong>: quando você registra uma
+              escala (Dejem/Delegada), enviamos apenas o tipo e a data-alvo,
+              associados a um identificador anônimo de dispositivo, para
+              detectar picos de inscrição e avisar outros usuários. Nenhum
+              dado pessoal é enviado e os registros são apagados em 7 dias.
+            </li>
+            <li>
               <strong>Logs técnicos</strong>: nossa hospedagem registra endereço IP,
               user-agent e horário das requisições para fins de segurança e
               prevenção de abuso, por até 30 dias.
