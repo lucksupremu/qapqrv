@@ -509,7 +509,7 @@ function CalendarScreen() {
                   : ""
             }`}
           >
-            <div className="grid grid-cols-7 gap-1 pb-2">
+            <div className="grid grid-cols-7 gap-0.5 pb-2 sm:gap-1">
               {DIAS.map((d, i) => (
                 <div
                   key={d}
@@ -520,7 +520,7 @@ function CalendarScreen() {
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
               {grid.map((cell, i) => {
                 const items = getMarcasDoDia(cell.date);
                 const isToday = sameDay(cell.date, today);
