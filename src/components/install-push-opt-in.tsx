@@ -10,6 +10,7 @@ import { usePwaInstall } from "@/hooks/use-pwa-install";
 import { useIsNative } from "@/hooks/use-is-native";
 import {
   getAccessDays,
+  isFirstSession,
   markInstallOptInShown,
   subscribeToPush,
   wasInstallOptInShown,
