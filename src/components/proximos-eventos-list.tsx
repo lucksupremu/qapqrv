@@ -126,7 +126,7 @@ export function ProximosEventosList() {
       </div>
 
       <Dialog open={!!selecionado} onOpenChange={(v) => !v && setSelecionado(null)}>
-        <DialogContent className="max-w-[420px] gap-0 overflow-hidden rounded-[20px] border border-border bg-background p-0 text-foreground shadow-2xl">
+        <DialogContent className="max-w-[420px] gap-0 overflow-hidden rounded-[20px] border border-border bg-card p-0 text-card-foreground shadow-2xl">
           {selecionado && (() => {
             const Icon = IconFor(selecionado.tipo);
             return (
@@ -139,7 +139,7 @@ export function ProximosEventosList() {
                   <button
                     type="button"
                     onClick={() => setSelecionado(null)}
-                    className="absolute right-3 top-3 rounded-full bg-muted p-1.5 text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                    className="absolute right-3 top-3 rounded-full bg-muted p-1.5 text-card-foreground transition hover:bg-accent hover:text-accent-foreground"
                     aria-label="Fechar"
                   >
                     <X size={16} />
@@ -161,14 +161,17 @@ export function ProximosEventosList() {
                         {TIPO_LABEL[selecionado.tipo]}
                       </p>
                       <DialogTitle asChild>
-                        <h2 className="truncate text-[20px] font-extrabold text-foreground">
+                        <h2
+                          className="truncate text-[20px] font-extrabold text-card-foreground"
+                          title={selecionado.titulo}
+                        >
                           {selecionado.titulo}
                         </h2>
                       </DialogTitle>
                     </div>
                   </div>
 
-                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[12px] font-bold text-foreground">
+                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[12px] font-bold text-card-foreground">
                     {textoDiasRestantes(selecionado.diasRestantes)}
                   </div>
                 </div>
