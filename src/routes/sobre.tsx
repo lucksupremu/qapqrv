@@ -167,9 +167,71 @@ function Sobre() {
         </section>
 
         <section>
-          <h2 className="font-bold text-base mb-2">Versão</h2>
-          <p className="text-muted-foreground">1.0.0</p>
+          <h2 className="font-bold text-base mb-2">Segurança</h2>
+          <p className="text-muted-foreground">
+            Levamos segurança a sério porque o público-alvo é policial militar.
+            Todo o processamento sensível — como digitação de credenciais da
+            intranet, autenticação da VPN e leitura do PDF de escala — acontece
+            no próprio dispositivo. Não temos servidor que armazene senhas,
+            escalas ou informação de contracheque. Cofres biométricos (quando o
+            aparelho suporta) usam a API nativa do Android/iOS, sem chave
+            trafegada. Sempre que o app precisa abrir um serviço externo, ele
+            avisa antes e mostra o domínio de destino.
+          </p>
         </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2">Privacidade</h2>
+          <p className="text-muted-foreground">
+            Não coletamos e-mail, telefone, matrícula ou nome. Dados de escala e
+            preferências ficam no armazenamento local do navegador ou do APK.
+            Cookies de anúncios só aparecem em páginas editoriais públicas
+            (blog, manual, conteúdos institucionais) — nunca dentro das
+            ferramentas operacionais. Todos os detalhes técnicos estão na{" "}
+            <Link to="/privacidade" className="underline font-semibold">
+              Política de Privacidade
+            </Link>
+            .
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2">Tecnologias utilizadas</h2>
+          <p className="text-muted-foreground">
+            O app é construído com React, TypeScript, Vite e TanStack Router.
+            No mobile, empacotamos em APK Android via Capacitor. A base é PWA:
+            funciona offline, pode ser instalada e envia notificações locais.
+            Não usamos backend proprietário — apenas serviços do próprio
+            aparelho e integrações públicas com portais oficiais.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2">Atualizações e melhoria contínua</h2>
+          <p className="text-muted-foreground">
+            Publicamos melhorias com frequência, priorizando estabilidade e
+            velocidade em vez de acumular funcionalidades. Cada nova ferramenta
+            entra depois de ter sido pedida por policiais de campo. O
+            calendário, por exemplo, foi refeito três vezes até chegar à
+            versão atual, com destaque visual para dia e noite, contador
+            mensal de horas e post-it para compromissos.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2">Compromisso</h2>
+          <p className="text-muted-foreground">
+            Enquanto o QAP, QRV! for útil, seguimos publicando atualizações
+            gratuitas. Se você usa o app no plantão, considera compartilhar com
+            um colega — o boca a boca é o que sustenta o projeto vivo.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2">Versão</h2>
+          <p className="text-muted-foreground">3.0.0</p>
+        </section>
+
       </main>
 
       <BottomNav />
