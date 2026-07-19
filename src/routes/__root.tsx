@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { DrawerProvider } from "@/components/side-drawer";
 import { BottomNav } from "@/components/bottom-nav";
+import { SiteFooter } from "@/components/site-footer";
 import { PrivacyConsent } from "@/components/privacy-consent";
 import { PushPermissionPrompt } from "@/components/push-permission-prompt";
 import { BrowserWarningModal } from "@/components/browser-warning-modal";
