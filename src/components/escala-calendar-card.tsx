@@ -427,7 +427,7 @@ export function EscalaCalendarCard() {
                   </span>
                 )}
                 <span
-                  className={`relative text-[13px] ${
+                  className={`relative text-[13px] sm:text-[15px] ${
                     !cell.inMonth
                       ? "text-muted-foreground/60"
                       : temAvulso
