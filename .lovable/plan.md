@@ -1,34 +1,36 @@
-## Objetivo
+Adicionar, abaixo do card "Minha Escala" na tela inicial, uma legenda/lista dos próximos 5 eventos futuros (a partir de hoje), unindo plantões/escalas e compromissos do calendário, com contagem de dias que faltam para cada um.
 
-Deixar claro para o usuário que:
-- O **Calendário da Home** é uma visão rápida (só consulta) dos plantões.
-- A **Agenda** é onde ele efetivamente marca Dejem/Delegada e recebe lembretes/notificações.
+## O que será feito
 
-## Mudanças
+1. **Criar helper de próximos eventos** (`src/lib/escala-proximos.ts`):
+   - Ler plantões gerados (`gerarPlantoesDoMes` de `escala-trabalho.ts`) e eventos personalizados (`loadEventos` de `eventos-personalizados.ts`).
+   - Filtrar itens a partir de hoje (data/hora maior ou igual ao início do dia atual).
+   - Ordenar por data/hora crescente.
+   - Limitar a 5 itens.
+   - Calcular "dias que faltam": 0 = hoje, 1 = amanhã, 2+ = "faltam N dias".
+   - Retornar array tipado com: título, data, hora, tipo ("plantão" | "compromisso"), cor, diasRestantes.
 
-### 1. Home (`src/routes/index.tsx`) — seção "Minha Escala"
-Substituir o título atual por um bloco com título + subtítulo explicativo + CTA:
+2. **Criar componente visual** (`src/components/proximos-eventos-list.tsx`):
+   - Lista vertical com até 5 cards.
+   - Cada card mostra: ícone/bola de cor, título truncado, data/hora, e distância em dias ("Hoje", "Amanhã", "Faltam 3 dias").
+   - Estilização alinhada ao card da escala: bordas arredondadas, cores do tema, fontes pequenas.
+   - Botão "Ver na Agenda →" no final que leva para `/calendario`.
 
-- Título: **"Minha Escala"**
-- Subtítulo pequeno abaixo: *"Visão rápida dos seus plantões deste mês"*
-- Botão/link discreto à direita: **"Abrir Agenda →"** (navega para `/calendario`) com micro-texto: *"marcar e receber lembretes"*
+3. **Integrar na tela inicial** (`src/routes/index.tsx`):
+   - Renderizar `<ProximosEventosList />` logo abaixo do `<EscalaCalendarCard />` dentro da seção "Minha Escala".
+   - Se não houver eventos futuros, mostrar estado vazio discreto: "Nenhum plantão ou compromisso nos próximos dias. Toque em Abrir Agenda para adicionar."
 
-### 2. Agenda (`src/routes/calendario.tsx`) — cabeçalho da tela
-- Título: **"Agenda"**
-- Subtítulo logo abaixo: *"Marque seus plantões Dejem/Delegada e receba lembretes automáticos"*
-- Pequeno badge/ícone de sino indicando que essa tela dispara notificações.
+4. **Atualizar tipos legados** se necessário (`src/lib/escala-trabalho.ts`):
+   - Garantir que `gerarPlantoesDoMes` já exportado possa ser usado em um helper agnóstico ao mês, ou criar função que itere pelos meses necessários até coletar 5 eventos futuros (provavelmente iterar mês atual + próximo).
 
-### 3. Menu lateral (`src/components/side-drawer.tsx`)
-Ajustar os rótulos/descritivos das duas entradas para reforçar a diferença:
-- **Início** — "Resumo e visão rápida"
-- **Agenda** — "Marcar Dejem/Delegada e lembretes"
+## O que não será alterado
 
-### 4. Bottom nav (`src/components/bottom-nav.tsx`)
-Se houver item "Agenda", garantir o label "Agenda" (não "Calendário") para consistência com a nomenclatura da tela.
+- Não muda a lógica de salvamento de escalas/eventos.
+- Não altera os modais de adicionar plantão/compromisso.
+- Não muda a aparência do calendário em si; apenas adiciona a lista abaixo.
 
-## Fora de escopo
-- Não altero lógica de notificações, storage de marcas nem layout do calendário em si.
-- Não mexo em cores/tema — só textos, um subtítulo e um link de CTA na Home.
+## Critério de aceitação
 
-## Verificação
-Após implementar, confiro por screenshot que Home e Agenda mostram os novos textos e que o link "Abrir Agenda" da Home navega corretamente.
+- Na tela inicial, abaixo do calendário, aparecem os próximos 5 plantões e compromissos futuros.
+- Cada item exibe quantos dias faltam (Hoje, Amanhã, Faltam N dias).
+- Build passa sem erros de tipo.
