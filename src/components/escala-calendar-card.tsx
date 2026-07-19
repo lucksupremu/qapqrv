@@ -497,10 +497,10 @@ export function EscalaCalendarCard() {
                     aria-hidden
                     className="absolute pointer-events-none"
                     style={{
-                      bottom: -4,
-                      right: -4,
-                      width: 20,
-                      height: 20,
+                      bottom: "-10%",
+                      right: "-10%",
+                      width: "55%",
+                      height: "55%",
                       zIndex: 7,
                     }}
                   >
@@ -522,7 +522,7 @@ export function EscalaCalendarCard() {
                         top: "45%",
                         left: "50%",
                         transform: "translate(-50%, -50%) rotate(-6deg)",
-                        fontSize: 5,
+                        fontSize: "clamp(4px, 1.8vw, 6px)",
                         lineHeight: 1,
                         fontWeight: 700,
                         color: "#3a2a00",
