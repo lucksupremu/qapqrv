@@ -46,7 +46,7 @@ function CategoriaScreen() {
           </p>
         ) : (
           <div className="space-y-3">
-            {artigos.map((a) => (
+            {artigos.map((a: any) => (
               <Link
                 key={a.slug}
                 to="/conteudos/$categoria/$slug"
