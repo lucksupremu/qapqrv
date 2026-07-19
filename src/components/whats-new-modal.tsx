@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { APP_VERSION, CHANGELOG, type ChangelogEntry } from "@/lib/changelog";
+import { isFirstSession } from "@/lib/push-client";
 
 const STORAGE_KEY = "whats_new_seen_version";
 
@@ -17,9 +18,17 @@ export function WhatsNewModal() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!entry) return;
+    // Não mostra na primeira instalação (onboarding cobre).
+    if (isFirstSession()) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, APP_VERSION);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
     try {
       const seen = window.localStorage.getItem(STORAGE_KEY);
-      // Não mostra na primeira instalação (onboarding cobre).
       if (!seen) {
         window.localStorage.setItem(STORAGE_KEY, APP_VERSION);
         return;

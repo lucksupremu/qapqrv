@@ -1,10 +1,12 @@
 import { Download, X } from "lucide-react";
 import { usePwaInstall } from "@/hooks/use-pwa-install";
+import { isFirstSession } from "@/lib/push-client";
 
 export function PwaInstallBanner() {
   const { shouldShowBanner, promptInstall, dismiss } = usePwaInstall();
 
-  if (!shouldShowBanner) {
+  // Não exibe na primeira abertura do app para não atrapalhar o onboarding.
+  if (!shouldShowBanner || isFirstSession()) {
     return null;
   }
 

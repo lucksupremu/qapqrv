@@ -10,6 +10,7 @@ import { usePwaInstall } from "@/hooks/use-pwa-install";
 import { useIsNative } from "@/hooks/use-is-native";
 import {
   getAccessDays,
+  isFirstSession,
   markInstallOptInShown,
   subscribeToPush,
   wasInstallOptInShown,
@@ -26,6 +27,7 @@ export function InstallPushOptIn() {
 
   useEffect(() => {
     if (native || isInstalled || !canPrompt) return;
+    if (isFirstSession()) return; // não incomodar no primeiro boot
     if (wasInstallOptInShown()) return;
     if (getAccessDays() < MIN_DAYS) return;
     if (typeof Notification === "undefined") return;

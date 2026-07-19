@@ -3,6 +3,7 @@ import { Bell, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { isNativeApp } from "@/lib/in-app-browser";
+import { isFirstSession } from "@/lib/push-client";
 import { requestNotificationPermission } from "@/lib/notifications-adapter";
 
 const STORAGE_KEY = "push-prompt-dismissed-v1";
@@ -24,6 +25,7 @@ export function PushPermissionPrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (isFirstSession()) return; // não pedir nada no primeiro boot
     if (isNativeApp()) return; // no APK a permissão é pedida pelo plugin no agendamento
     if (isPreviewOrIframe()) return;
     if (!("Notification" in window)) return;

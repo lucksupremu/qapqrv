@@ -47,6 +47,12 @@ export function getAccessDays(): number {
   }
 }
 
+/** True enquanto o usuário ainda não completou a primeira sessão (menos de 2 dias de acesso).
+ *  Usado para suprimir banners promocionais no primeiro boot do app. */
+export function isFirstSession(): boolean {
+  return getAccessDays() < 2;
+}
+
 export function wasInstallOptInShown(): boolean {
   try {
     return localStorage.getItem(INSTALL_OPTIN_SHOWN_KEY) === "1";

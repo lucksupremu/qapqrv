@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { Share2, X } from "lucide-react";
 import { toast } from "sonner";
-import { getAccessDays } from "@/lib/push-client";
+import { getAccessDays, isFirstSession } from "@/lib/push-client";
 
 const STORAGE_KEY = "share_banner_last_shown_yyyymm";
 const MIN_ACCESS_DAYS = 3;
@@ -45,6 +45,7 @@ export function ShareAppBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    if (isFirstSession()) return; // não exibir no primeiro boot
     if (!shouldShowThisMonth()) return;
     if (getAccessDays() < MIN_ACCESS_DAYS) return;
     setShow(true);
