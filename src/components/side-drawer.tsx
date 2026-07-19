@@ -14,6 +14,13 @@ import {
   Moon,
   Download,
   Settings,
+  Newspaper,
+  HelpCircle,
+  MessageSquare,
+  Info,
+  FileText,
+  Cookie,
+} from "lucide-react";
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
