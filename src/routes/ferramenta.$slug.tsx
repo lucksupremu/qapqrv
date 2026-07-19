@@ -4,6 +4,8 @@ import { ArrowLeft, FileSearch, Star } from "lucide-react";
 import { getTool } from "@/lib/tools";
 import { BottomNav } from "@/components/bottom-nav";
 import { useFavorites, useHistory } from "@/hooks/use-local-list";
+import { ComoFuncionaBox } from "@/components/como-funciona-box";
+import { getFerramentaInfo } from "@/content";
 
 export const Route = createFileRoute("/ferramenta/$slug")({
   loader: ({ params }) => {
@@ -96,7 +98,11 @@ function ToolPage() {
         </div>
       </header>
 
-      <main className="px-5 mt-6">
+      <main className="px-5 mt-6 space-y-4">
+        {(() => {
+          const info = getFerramentaInfo(tool.slug);
+          return info ? <ComoFuncionaBox info={info} /> : null;
+        })()}
         <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
           <p className="text-sm font-medium text-foreground">Em construção</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-xs mx-auto">

@@ -14,6 +14,12 @@ import {
   Moon,
   Download,
   Settings,
+  Newspaper,
+  HelpCircle,
+  MessageSquare,
+  Info,
+  FileText,
+  Cookie,
 } from "lucide-react";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
@@ -70,6 +76,15 @@ const grupo3: Item[] = [
   { type: "external", href: "https://ead.pmesp.org/login/index.php", label: "PVT", icon: GraduationCap },
   { type: "route", to: "/anyconnect", label: "Vídeo tutorial ANYCONECT", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
+];
+const grupoInstitucional: Item[] = [
+  { type: "route", to: "/conteudos", label: "Central de Conteúdo", icon: Newspaper },
+  { type: "route", to: "/ajuda", label: "Central de Ajuda", icon: HelpCircle },
+  { type: "route", to: "/faq", label: "Perguntas frequentes", icon: HelpCircle },
+  { type: "route", to: "/sobre", label: "Sobre o QAP, QRV!", icon: Info },
+  { type: "route", to: "/contato", label: "Contato", icon: MessageSquare },
+  { type: "route", to: "/termos", label: "Termos de uso", icon: FileText },
+  { type: "route", to: "/cookies", label: "Política de Cookies", icon: Cookie },
 ];
 
 function SideDrawer() {
@@ -185,6 +200,9 @@ function SideDrawer() {
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo3Visible.map(renderItem)}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
+          {grupoInstitucional.map(renderItem)}
+          <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
+
           <button
             onClick={handleToggleTheme}
             className="flex items-center gap-3 px-6 py-4 text-[15px] transition-all duration-200 hover:bg-[#e8f0f8]"

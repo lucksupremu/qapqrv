@@ -8,7 +8,8 @@
  *  - splash / loading / onboarding
  *
  * Por isso só ligamos AdSense (script + <ins>) em páginas densas de
- * conteúdo editorial: blog, manual, e páginas institucionais.
+ * conteúdo editorial: blog, central de conteúdo, manual, ajuda, FAQ
+ * e páginas institucionais/legais.
  *
  * Toda rota fora desta lista NÃO carrega o script `adsbygoogle.js` e
  * o componente <AdSlot> vira no-op.
@@ -21,6 +22,12 @@ const STATIC_ALLOW = new Set<string>([
   "/termos",
   "/contato",
   "/privacidade",
+  "/conteudos",
+  "/ajuda",
+  "/faq",
+  "/cookies",
+  "/aviso-legal",
+  "/mapa-do-site",
 ]);
 
 export function isAdsAllowedRoute(pathname: string): boolean {
@@ -28,6 +35,8 @@ export function isAdsAllowedRoute(pathname: string): boolean {
   if (STATIC_ALLOW.has(pathname)) return true;
   // Posts de blog: /blog/<slug>
   if (pathname.startsWith("/blog/")) return true;
+  // Central de conteúdo: /conteudos/<categoria>[/<slug>]
+  if (pathname.startsWith("/conteudos/")) return true;
   return false;
 }
 
