@@ -118,10 +118,10 @@
   --brand-blue: oklch(0.5 0.12 230);
   --brand-blue-foreground: oklch(0.99 0 0);
 
-  /* Tokens táticos — paleta carvão/âmbar para home modernizada */
-  --tactical-bg: #f4f6f8;
+  /* Tokens táticos — cinza claro/âmbar escolhido para a home */
+  --tactical-bg: #f4f5f7;
   --tactical-card: #ffffff;
-  --tactical-card-2: #eef1f5;
+  --tactical-card-2: #eef0f3;
   --tactical-accent: #e85d3a;
   --tactical-accent-hover: #d44d2e;
   --tactical-text: #1a1a1a;
@@ -178,10 +178,10 @@
   --input: oklch(0.32 0.03 235);
   --ring: oklch(0.6 0.12 230);
 
-  /* Tokens táticos — dark mode */
-  --tactical-bg: #1a1a1a;
-  --tactical-card: #2d2d2d;
-  --tactical-card-2: #252525;
+  /* Tokens táticos — dark mode (cinza escuro, menos pesado que o preto) */
+  --tactical-bg: #252525;
+  --tactical-card: #323232;
+  --tactical-card-2: #2d2d2d;
   --tactical-accent: #e85d3a;
   --tactical-accent-hover: #ff704d;
   --tactical-text: #ffffff;
