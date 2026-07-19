@@ -200,6 +200,9 @@ function SideDrawer() {
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
           {grupo3Visible.map(renderItem)}
           <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
+          {grupoInstitucional.map(renderItem)}
+          <div className="my-2 mx-6 border-t" style={{ borderColor: "#d5e3ee" }} />
+
           <button
             onClick={handleToggleTheme}
             className="flex items-center gap-3 px-6 py-4 text-[15px] transition-all duration-200 hover:bg-[#e8f0f8]"
