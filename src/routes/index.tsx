@@ -569,6 +569,9 @@ function HomeScreen() {
         <EscalaCalendarCard />
       </section>
 
+      <CentralConteudoSection />
+
+
       <section className="mx-5 mt-8 rounded-[28px] border border-slate-200 bg-white p-5 text-[14px] leading-relaxed text-slate-700 shadow-sm dark:border-white/5 dark:bg-slate-900/40 dark:text-slate-300">
         <h2 className="font-display text-[18px] font-extrabold text-slate-900 dark:text-white">
           Ferramentas operacionais para o policial militar
