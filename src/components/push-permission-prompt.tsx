@@ -25,6 +25,7 @@ export function PushPermissionPrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (isFirstSession()) return; // não pedir nada no primeiro boot
     if (isNativeApp()) return; // no APK a permissão é pedida pelo plugin no agendamento
     if (isPreviewOrIframe()) return;
     if (!("Notification" in window)) return;
