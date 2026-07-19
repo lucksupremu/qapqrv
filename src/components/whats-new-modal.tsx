@@ -18,9 +18,17 @@ export function WhatsNewModal() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!entry) return;
+    // Não mostra na primeira instalação (onboarding cobre).
+    if (isFirstSession()) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, APP_VERSION);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
     try {
       const seen = window.localStorage.getItem(STORAGE_KEY);
-      // Não mostra na primeira instalação (onboarding cobre).
       if (!seen) {
         window.localStorage.setItem(STORAGE_KEY, APP_VERSION);
         return;
