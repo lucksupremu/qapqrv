@@ -37,6 +37,7 @@ import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 import { InstallPushOptIn } from "@/components/install-push-opt-in";
 import { ShareAppBanner } from "@/components/share-app-banner";
+import { CentralConteudoSection } from "@/components/central-conteudo-section";
 import { usePwaInstall } from "@/hooks/use-pwa-install";
 
 export const Route = createFileRoute("/")({
