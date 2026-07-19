@@ -1,28 +1,22 @@
-O usuário quer reorganizar dois itens de navegação:
+Plano para aumentar a conformidade com AdSense:
 
-1. **Manual** deve aparecer no menu hamburger do topo (Sheet do `AppHeader`), mantendo o ícone `BookOpenCheck`.
-2. **PVT** deve ocupar o lugar do Manual no drawer lateral (`SideDrawer`), com link externo `https://ead.pmesp.org/login/index.php` e abertura em navegador externo.
+1. Remover bloqueios que aparecem antes do conteúdo público
+- Não redirecionar visitantes web para `/onboarding` automaticamente.
+- Manter onboarding apenas no app nativo.
+- Transformar o aviso de privacidade em um banner não bloqueante, para não esconder o conteúdo editorial da home, blog, manual e páginas institucionais.
+- Não mostrar modais/prompts globais nas rotas públicas de conteúdo.
 
-### Alterações propostas
+2. Garantir que o Google veja conteúdo real nas URLs indexáveis
+- Considerar como conteúdo público: `/`, `/blog`, posts do blog, `/manual`, `/sobre`, `/contato`, `/privacidade` e `/termos`.
+- Manter `noindex` dinâmico nas telas de ferramenta/app, mas sem aplicar nas páginas editoriais.
+- Manter `robots.txt` e `sitemap.xml` apontando apenas para páginas indexáveis.
 
-#### 1. `src/components/app-header.tsx`
-Adicionar o item **Manual** na lista de links do Sheet que abre pelo botão ☰ no topo esquerdo.
+3. Remover qualquer impressão de “inventário de anúncio” antes da aprovação
+- Remover o bloco visual de publicidade do manual enquanto `VITE_ADSENSE_ENABLED=false`.
+- Manter o script AdSense e os slots sem renderizar até aprovação.
 
-- Incluir a importação do ícone `BookOpenCheck` do `lucide-react`.
-- Adicionar `{ to: "/manual", label: "Manual" }` ao array de navegação do Sheet, posicionado junto com Início, Favoritos e Histórico.
-- Manter o comportamento atual de fechar o Sheet ao clicar.
+4. Verificar após implementar
+- Testar `/`, `/manual`, `/blog`, `/sobre`, `/privacidade`, `/termos` e uma tela bloqueada como `/calendario`.
+- Confirmar que páginas públicas abrem diretamente com conteúdo e telas de app continuam sem indexação.
 
-#### 2. `src/components/side-drawer.tsx`
-Substituir o item **Manual** por **PVT** no grupo inferior do drawer (onde hoje está Configurações / Manual / Vídeo tutorial / Privacidade).
-
-- Trocar o item do tipo route `/manual` para um item do tipo external:
-  - `href: "https://ead.pmesp.org/login/index.php"`
-  - `label: "PVT"`
-  - ícone: `GraduationCap` (ou outro ícone apropriado para treinamento/ead)
-- Manter `target="_blank"` e `rel="noopener noreferrer"` para abrir em navegador externo.
-- Ajustar a importação de ícones: remover `BookOpenCheck` se não for mais usado no drawer e adicionar `GraduationCap`.
-
-### Resultado esperado
-- Menu hamburger do topo: Início, Favoritos, Histórico, **Manual**, Sobre.
-- Drawer lateral (botão "Menu" da barra inferior): continua com Configurações, **PVT**, Vídeo tutorial ANYCONNECT, Política de Privacidade.
-- Bottom nav e outras rotas não são alteradas.
+Observação: não dá para garantir aprovação, porque a decisão é do Google, mas isso corrige o problema técnico visível agora: o domínio publicado entrega onboarding e modais antes do conteúdo, o que pode ser lido como conteúdo de baixo valor.
