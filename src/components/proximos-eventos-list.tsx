@@ -38,7 +38,7 @@ export function ProximosEventosList() {
     return (
       <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-4 text-center dark:border-slate-800 dark:bg-slate-900/40">
         <p className="text-[12px] text-slate-500 dark:text-slate-400">
-          Nenhum plantão ou compromisso nos próximos dias.
+          Nenhum lembrete ou escala avulsa nos próximos dias.
         </p>
         <button
           onClick={() => navigate({ to: "/calendario" })}
@@ -54,10 +54,10 @@ export function ProximosEventosList() {
     <div className="mt-4">
       <div className="mb-2 flex items-center justify-between px-1">
         <h3 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
-          Próximos eventos
+          Próximos lembretes
         </h3>
         <span className="text-[10px] text-slate-500 dark:text-slate-500">
-          plantões e compromissos
+          lembretes e escalas avulsas
         </span>
       </div>
 
