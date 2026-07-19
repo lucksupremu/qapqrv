@@ -531,7 +531,7 @@ function CalendarScreen() {
                   <button
                     key={i}
                     onClick={() => handleDayClick(cell)}
-                    className="relative mx-auto flex h-11 w-11 flex-col items-center justify-center rounded-full text-[14px] font-semibold transition active:scale-90"
+                    className="relative mx-auto flex aspect-square w-full min-h-[44px] flex-col items-center justify-center rounded-full text-[14px] font-semibold transition active:scale-90"
                     style={{
                       background: isSelected
                         ? COR_PRIMARY
