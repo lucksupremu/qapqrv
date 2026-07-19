@@ -1,21 +1,39 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { CalendarCheck, CalendarClock, MapPin } from "lucide-react";
+import { CalendarCheck, CalendarClock, MapPin, X } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { listarProximosEventos, textoDiasRestantes, type EventoProximo } from "@/lib/escala-proximos";
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const DIAS_SEMANA_LONG = [
+  "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
+  "Quinta-feira", "Sexta-feira", "Sábado",
+];
 const MESES = [
   "jan", "fev", "mar", "abr", "mai", "jun",
   "jul", "ago", "set", "out", "nov", "dez",
+];
+const MESES_LONG = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
 ];
 
 function fmtDataCurta(d: Date): string {
   return `${DIAS_SEMANA[d.getDay()]}, ${d.getDate()} ${MESES[d.getMonth()]}`;
 }
 
+function fmtDataLonga(d: Date): string {
+  return `${DIAS_SEMANA_LONG[d.getDay()]}, ${d.getDate()} de ${MESES_LONG[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+const TIPO_LABEL: Record<EventoProximo["tipo"], string> = {
+  "plantão": "Escala avulsa",
+  compromisso: "Lembrete pessoal",
+  marca: "Marcação de atividade",
+};
+
 export function ProximosEventosList() {
-  const navigate = useNavigate();
   const [itens, setItens] = useState<EventoProximo[]>([]);
+  const [selecionado, setSelecionado] = useState<EventoProximo | null>(null);
 
   useEffect(() => {
     setItens(listarProximosEventos(5));
@@ -44,6 +62,9 @@ export function ProximosEventosList() {
     );
   }
 
+  const IconFor = (tipo: EventoProximo["tipo"]) =>
+    tipo === "plantão" ? CalendarCheck : tipo === "marca" ? MapPin : CalendarClock;
+
   return (
     <div className="mt-4">
       <div className="mb-2 flex items-center justify-between px-1">
@@ -57,16 +78,13 @@ export function ProximosEventosList() {
 
       <div className="space-y-2">
         {itens.map((item) => {
-          const Icon =
-            item.tipo === "plantão"
-              ? CalendarCheck
-              : item.tipo === "marca"
-                ? MapPin
-                : CalendarClock;
+          const Icon = IconFor(item.tipo);
           return (
-            <div
+            <button
               key={item.id}
-              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/5 dark:bg-slate-900/40"
+              type="button"
+              onClick={() => setSelecionado(item)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:border-white/5 dark:bg-slate-900/40 dark:hover:border-white/10"
             >
               <div
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
@@ -102,10 +120,102 @@ export function ProximosEventosList() {
               >
                 {textoDiasRestantes(item.diasRestantes)}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
+
+      <Dialog open={!!selecionado} onOpenChange={(v) => !v && setSelecionado(null)}>
+        <DialogContent className="max-w-[420px] gap-0 overflow-hidden rounded-[20px] p-0">
+          {selecionado && (() => {
+            const Icon = IconFor(selecionado.tipo);
+            return (
+              <>
+                <div
+                  className="relative px-5 pb-5 pt-6"
+                  style={{ background: `${selecionado.cor}18` }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSelecionado(null)}
+                    className="absolute right-3 top-3 rounded-full bg-white/70 p-1.5 text-slate-600 backdrop-blur transition hover:bg-white"
+                    aria-label="Fechar"
+                  >
+                    <X size={16} />
+                  </button>
+
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm"
+                      style={{ background: selecionado.cor, color: "white" }}
+                    >
+                      <Icon size={26} strokeWidth={2.2} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="text-[10px] font-bold uppercase tracking-[0.18em]"
+                        style={{ color: selecionado.cor }}
+                      >
+                        {TIPO_LABEL[selecionado.tipo]}
+                      </p>
+                      <DialogTitle asChild>
+                        <h2 className="truncate text-[20px] font-extrabold text-slate-900">
+                          {selecionado.titulo}
+                        </h2>
+                      </DialogTitle>
+                    </div>
+                  </div>
+
+                  <div
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold"
+                    style={{ background: "white", color: selecionado.cor }}
+                  >
+                    {textoDiasRestantes(selecionado.diasRestantes)}
+                  </div>
+                </div>
+
+                <div className="space-y-3 bg-white p-5">
+                  <DetalheLinha
+                    label="Data"
+                    value={fmtDataLonga(selecionado.data)}
+                  />
+                  {selecionado.hora ? (
+                    <DetalheLinha label="Horário" value={selecionado.hora} />
+                  ) : null}
+                  <DetalheLinha
+                    label="Contagem"
+                    value={
+                      selecionado.diasRestantes === 0
+                        ? "É hoje"
+                        : selecionado.diasRestantes === 1
+                          ? "É amanhã"
+                          : `Faltam ${selecionado.diasRestantes} dias`
+                    }
+                  />
+
+                  <p className="pt-2 text-[11px] leading-relaxed text-slate-500">
+                    Para editar ou excluir, abra o item diretamente no calendário
+                    da tela inicial ou na Agenda.
+                  </p>
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function DetalheLinha({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+        {label}
+      </span>
+      <span className="text-right text-[13px] font-semibold text-slate-800">
+        {value}
+      </span>
     </div>
   );
 }
