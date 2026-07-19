@@ -178,10 +178,10 @@
   --input: oklch(0.32 0.03 235);
   --ring: oklch(0.6 0.12 230);
 
-  /* Tokens táticos — dark mode */
-  --tactical-bg: #1a1a1a;
-  --tactical-card: #2d2d2d;
-  --tactical-card-2: #252525;
+  /* Tokens táticos — dark mode (cinza escuro, menos pesado que o preto) */
+  --tactical-bg: #252525;
+  --tactical-card: #323232;
+  --tactical-card-2: #2d2d2d;
   --tactical-accent: #e85d3a;
   --tactical-accent-hover: #ff704d;
   --tactical-text: #ffffff;
