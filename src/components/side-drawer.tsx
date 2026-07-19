@@ -46,12 +46,12 @@ export function useDrawer() {
 }
 
 type Item =
-  | { type: "route"; to: string; label: string; icon: typeof Home }
-  | { type: "external"; href: string; label: string; icon: typeof Home };
+  | { type: "route"; to: string; label: string; icon: typeof Home; hint?: string }
+  | { type: "external"; href: string; label: string; icon: typeof Home; hint?: string };
 
 const grupo1Base: Item[] = [
-  { type: "route", to: "/", label: "Início", icon: Home },
-  { type: "route", to: "/calendario", label: "Calendário", icon: Calendar },
+  { type: "route", to: "/", label: "Início", icon: Home, hint: "Resumo e visão rápida" },
+  { type: "route", to: "/calendario", label: "Agenda", icon: Calendar, hint: "Marcar Dejem/Delegada e lembretes" },
 ];
 const grupo1NativeOnly: Item[] = [
   { type: "route", to: "/escalas-baixadas", label: "Escalas Baixadas", icon: FolderDown },
