@@ -31,6 +31,21 @@ export function useDocumentHead() {
   useEffect(() => {
     if (typeof document === "undefined") return;
 
+    // Remove tags estáticas do index.html que precisamos reescrever por rota
+    // (crítico para AdSense: cada URL tem que ter description/canonical próprios).
+    // Só rodamos uma vez — depois disso tudo é gerenciado por este hook.
+    if (!document.documentElement.hasAttribute("data-head-cleaned")) {
+      document.documentElement.setAttribute("data-head-cleaned", "1");
+      document
+        .querySelectorAll(
+          'meta[name="description"], link[rel="canonical"], meta[property="og:title"], meta[property="og:description"], meta[property="og:url"], meta[name="twitter:title"], meta[name="twitter:description"]',
+        )
+        .forEach((el) => {
+          // Não removemos tags que já foram criadas pelo próprio hook.
+          if (!el.hasAttribute(MANAGED)) el.remove();
+        });
+    }
+
     // Agrega head de todos os matches (rota mais profunda vence via dedupe).
     const meta: MetaTag[] = [];
     const links: LinkTag[] = [];
