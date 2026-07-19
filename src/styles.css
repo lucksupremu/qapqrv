@@ -178,16 +178,16 @@
   --input: oklch(0.32 0.03 235);
   --ring: oklch(0.6 0.12 230);
 
-  /* Tokens táticos — dark mode (cinza escuro, menos pesado que o preto) */
+  /* Tokens táticos — dark mode (cinza escuro, destaque azul) */
   --tactical-bg: #252525;
   --tactical-card: #323232;
   --tactical-card-2: #2d2d2d;
-  --tactical-accent: #e85d3a;
-  --tactical-accent-hover: #ff704d;
+  --tactical-accent: #60a5fa;
+  --tactical-accent-hover: #93c5fd;
   --tactical-text: #ffffff;
   --tactical-muted: #9ca3af;
   --tactical-border: #4a4a4a;
-  --tactical-glow: 0 0 28px -8px rgba(232, 93, 58, 0.45);
+  --tactical-glow: 0 0 28px -8px rgba(96, 165, 250, 0.45);
 }
 
 /* Override hardcoded Tailwind arbitrary-value utilities in dark mode */
