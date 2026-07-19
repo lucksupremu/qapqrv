@@ -77,6 +77,15 @@ const grupo3: Item[] = [
   { type: "route", to: "/anyconnect", label: "Vídeo tutorial ANYCONECT", icon: BookOpen },
   { type: "route", to: "/privacidade", label: "Política de Privacidade", icon: Lock },
 ];
+const grupoInstitucional: Item[] = [
+  { type: "route", to: "/conteudos", label: "Central de Conteúdo", icon: Newspaper },
+  { type: "route", to: "/ajuda", label: "Central de Ajuda", icon: HelpCircle },
+  { type: "route", to: "/faq", label: "Perguntas frequentes", icon: HelpCircle },
+  { type: "route", to: "/sobre", label: "Sobre o QAP, QRV!", icon: Info },
+  { type: "route", to: "/contato", label: "Contato", icon: MessageSquare },
+  { type: "route", to: "/termos", label: "Termos de uso", icon: FileText },
+  { type: "route", to: "/cookies", label: "Política de Cookies", icon: Cookie },
+];
 
 function SideDrawer() {
   const { open, setOpen } = useDrawer();
