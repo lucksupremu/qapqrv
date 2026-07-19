@@ -56,6 +56,7 @@ export function ShareAppNudge() {
   // Agenda exibição uma vez por sessão.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (isFirstSession()) return; // não incomodar no primeiro boot
     if (isWithinCooldown()) return;
     if (getAccessDays() < MIN_ACCESS_DAYS) return;
 
