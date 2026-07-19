@@ -106,6 +106,10 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPublicContent = isPublicContentRoute(pathname);
 
+  // Sincroniza head() das rotas com document.head (title/description/canonical
+  // únicos por página) — crítico para AdSense/SEO.
+  useDocumentHead();
+
   // Onboarding automático só no APK. No site público, a URL precisa entregar o
   // conteúdo real sem interceptação, ou revisões do AdSense podem enxergar
   // apenas uma tela de boas-vindas como conteúdo de baixo valor.
