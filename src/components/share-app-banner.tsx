@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { Share2, X } from "lucide-react";
 import { toast } from "sonner";
-import { getAccessDays } from "@/lib/push-client";
+import { getAccessDays, isFirstSession } from "@/lib/push-client";
 
 const STORAGE_KEY = "share_banner_last_shown_yyyymm";
 const MIN_ACCESS_DAYS = 3;
