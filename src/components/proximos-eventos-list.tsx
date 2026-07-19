@@ -126,55 +126,57 @@ export function ProximosEventosList() {
       </div>
 
       <Dialog open={!!selecionado} onOpenChange={(v) => !v && setSelecionado(null)}>
-        <DialogContent className="max-w-[420px] gap-0 overflow-hidden rounded-[20px] p-0">
+        <DialogContent className="max-w-[420px] gap-0 overflow-hidden rounded-[20px] border border-border bg-card p-0 text-card-foreground shadow-2xl">
           {selecionado && (() => {
             const Icon = IconFor(selecionado.tipo);
             return (
               <>
-                <div
-                  className="relative px-5 pb-5 pt-6"
-                  style={{ background: `${selecionado.cor}18` }}
-                >
+                <div className="relative border-b border-border px-5 pb-5 pt-6">
+                  <div
+                    className="absolute left-0 top-0 h-full w-1.5"
+                    style={{ background: selecionado.cor }}
+                  />
                   <button
                     type="button"
                     onClick={() => setSelecionado(null)}
-                    className="absolute right-3 top-3 rounded-full bg-white/70 p-1.5 text-slate-600 backdrop-blur transition hover:bg-white"
+                    className="absolute right-3 top-3 rounded-full bg-muted p-1.5 text-card-foreground transition hover:bg-accent hover:text-accent-foreground"
                     aria-label="Fechar"
                   >
                     <X size={16} />
                   </button>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 pl-2">
                     <div
-                      className="flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm"
+                      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-sm"
                       style={{ background: selecionado.cor, color: "white" }}
                     >
                       <Icon size={26} strokeWidth={2.2} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p
-                        className="text-[10px] font-bold uppercase tracking-[0.18em]"
-                        style={{ color: selecionado.cor }}
-                      >
+                      <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                        <span
+                          className="inline-block h-1.5 w-1.5 rounded-full"
+                          style={{ background: selecionado.cor }}
+                        />
                         {TIPO_LABEL[selecionado.tipo]}
                       </p>
                       <DialogTitle asChild>
-                        <h2 className="truncate text-[20px] font-extrabold text-slate-900">
+                        <h2
+                          className="truncate text-[20px] font-extrabold text-card-foreground"
+                          title={selecionado.titulo}
+                        >
                           {selecionado.titulo}
                         </h2>
                       </DialogTitle>
                     </div>
                   </div>
 
-                  <div
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold"
-                    style={{ background: "white", color: selecionado.cor }}
-                  >
+                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[12px] font-bold text-card-foreground">
                     {textoDiasRestantes(selecionado.diasRestantes)}
                   </div>
                 </div>
 
-                <div className="space-y-3 bg-white p-5">
+                <div className="space-y-3 bg-muted/30 p-5">
                   <DetalheLinha
                     label="Data"
                     value={fmtDataLonga(selecionado.data)}
@@ -193,7 +195,7 @@ export function ProximosEventosList() {
                     }
                   />
 
-                  <p className="pt-2 text-[11px] leading-relaxed text-slate-500">
+                  <p className="pt-2 text-[13px] leading-relaxed text-card-foreground">
                     Para editar ou excluir, abra o item diretamente no calendário
                     da tela inicial ou na Agenda.
                   </p>
@@ -209,11 +211,11 @@ export function ProximosEventosList() {
 
 function DetalheLinha({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+    <div className="flex items-start justify-between gap-3 border-b border-border pb-2 last:border-0 last:pb-0">
+      <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
-      <span className="text-right text-[13px] font-semibold text-slate-800">
+      <span className="text-right text-[15px] font-bold text-card-foreground">
         {value}
       </span>
     </div>
