@@ -4,6 +4,8 @@ import { ArrowLeft, FileSearch, Star } from "lucide-react";
 import { getTool } from "@/lib/tools";
 import { BottomNav } from "@/components/bottom-nav";
 import { useFavorites, useHistory } from "@/hooks/use-local-list";
+import { ComoFuncionaBox } from "@/components/como-funciona-box";
+import { getFerramentaInfo } from "@/content";
 
 export const Route = createFileRoute("/ferramenta/$slug")({
   loader: ({ params }) => {
