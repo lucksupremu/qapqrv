@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { Share2, X } from "lucide-react";
 import { toast } from "sonner";
-import { getAccessDays } from "@/lib/push-client";
+import { getAccessDays, isFirstSession } from "@/lib/push-client";
 
 const STORAGE_KEY = "share_nudge_last_shown_at";
 const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
