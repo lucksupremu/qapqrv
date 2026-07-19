@@ -121,7 +121,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Qualidade de vida" },
       "12x48 tende a favorecer estudo e vida familiar. 12x24 é comum onde a demanda operacional exige mais ciclos de serviço no mês.",
       { h: "Como decidir" },
-      "Nem sempre há escolha: depende da unidade. Quando houver, prefira 12x48 se puder — o ganho em saúde e presença familiar compensa. Registre no Calendário do QAP, QRV! qualquer que seja o modelo para não perder plantão.",
+      "Nem sempre há escolha: o modelo depende da unidade. Quando houver, o 12x48 costuma ser melhor para saúde e presença familiar. Registre a escala no calendário do QAP, QRV! para não perder plantão.",
     ],
     related: ["planejamento-plantao"],
   },
