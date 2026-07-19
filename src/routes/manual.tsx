@@ -366,7 +366,7 @@ function Bloco({
   tom?: "gold" | "blue";
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

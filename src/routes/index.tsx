@@ -569,6 +569,44 @@ function HomeScreen() {
         <EscalaCalendarCard />
       </section>
 
+      <section className="mx-5 mt-8 rounded-[28px] border border-slate-200 bg-white p-5 text-[14px] leading-relaxed text-slate-700 shadow-sm dark:border-white/5 dark:bg-slate-900/40 dark:text-slate-300">
+        <h2 className="font-display text-[18px] font-extrabold text-slate-900 dark:text-white">
+          Ferramentas operacionais para o policial militar
+        </h2>
+        <p className="mt-3">
+          O <strong>QAP, QRV!</strong> reúne recursos de rotina para quem trabalha
+          com escalas Dejem e Delegada: consulta por ID, calendário visual,
+          lembretes locais, escalas salvas para acesso offline e atalhos para
+          serviços úteis da intranet PMESP.
+        </p>
+        <p className="mt-3">
+          O projeto é independente, gratuito e não exige cadastro. Favoritos,
+          histórico, marcações e preferências ficam no próprio dispositivo do
+          usuário, facilitando o uso em plantões, deslocamentos e locais com
+          conexão instável.
+        </p>
+        <div className="mt-4 grid gap-2 text-[13px] sm:grid-cols-3">
+          <button
+            onClick={() => navigate({ to: "/manual" })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 font-bold text-slate-800 transition active:scale-[0.98] dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+          >
+            Manual completo
+          </button>
+          <button
+            onClick={() => navigate({ to: "/blog" })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 font-bold text-slate-800 transition active:scale-[0.98] dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+          >
+            Artigos e guias
+          </button>
+          <button
+            onClick={() => navigate({ to: "/sobre" })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 font-bold text-slate-800 transition active:scale-[0.98] dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+          >
+            Sobre o projeto
+          </button>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="mt-8 text-center">
         <button
