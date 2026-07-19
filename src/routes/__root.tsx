@@ -24,6 +24,7 @@ import { InstallConfirmModal } from "@/components/install-confirm-modal";
 import { ShareAppNudge } from "@/components/share-app-nudge";
 import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
 import { isAdsAllowedRoute, isPublicContentRoute } from "@/lib/ads-allowlist";
+import { useDocumentHead } from "@/lib/use-document-head";
 
 
 /** Google AdSense client ID */
