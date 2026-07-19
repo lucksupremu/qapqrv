@@ -27,6 +27,7 @@ export function InstallPushOptIn() {
 
   useEffect(() => {
     if (native || isInstalled || !canPrompt) return;
+    if (isFirstSession()) return; // não incomodar no primeiro boot
     if (wasInstallOptInShown()) return;
     if (getAccessDays() < MIN_DAYS) return;
     if (typeof Notification === "undefined") return;
