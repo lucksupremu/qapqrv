@@ -357,6 +357,7 @@ function RootComponent() {
             style={{ background: "var(--bg)" }}
           >
             <Outlet />
+            {isPublicContent && <SiteFooter />}
           </div>
           <BottomNav />
           <PrivacyConsent />
