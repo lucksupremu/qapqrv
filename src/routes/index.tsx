@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import {
   CalendarPlus,
   Menu,
-  Globe,
   Mail,
   Wallet,
   BookOpen,
@@ -33,10 +33,8 @@ import { openAnyConnect } from "@/lib/open-anyconnect";
 
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
-
 import { InstallPushOptIn } from "@/components/install-push-opt-in";
 import { ShareAppBanner } from "@/components/share-app-banner";
-
 import { usePwaInstall } from "@/hooks/use-pwa-install";
 
 export const Route = createFileRoute("/")({
@@ -55,19 +53,27 @@ export const Route = createFileRoute("/")({
 type ActionBlock = {
   label: string;
   icon: LucideIcon;
-  gradient: string;
-  shadow: string;
   onClick: () => void;
   nativeOnly?: boolean;
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 28 } },
 };
 
 function HomeScreen() {
   const navigate = useNavigate();
   const { setOpen: setDrawerOpen } = useDrawer();
   const [idEscala, setIdEscala] = useState("");
-  // Inicia vazio para casar com o HTML do SSR (sem acesso a localStorage).
-  // Após hidratar, o useEffect abaixo popula a lista — evita hydration mismatch
-  // que estava derrubando os event handlers da Home em alguns navegadores Android.
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [consultando, setConsultando] = useState(false);
@@ -79,12 +85,10 @@ function HomeScreen() {
     setThemeState(getStoredTheme());
   }, []);
 
-  // Trata abertura via push de instalação: /?install=1
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("install") !== "1") return;
-    // Limpa o param da URL para não repetir
     params.delete("install");
     const q = params.toString();
     const url = window.location.pathname + (q ? `?${q}` : "") + window.location.hash;
@@ -116,8 +120,6 @@ function HomeScreen() {
     saveMarcas(marcas);
   }, [marcas, hydrated]);
 
-  // Recarrega marcas ao voltar para a aba/rota (ex.: depois de adicionar
-  // uma escala em /calendario) sem precisar recarregar a página.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const refresh = () => setMarcas(loadMarcas());
@@ -162,7 +164,6 @@ function HomeScreen() {
     setConsultando(true);
     const nativeApp = isNativeApp();
 
-    // Web/PWA: navegador desktop renderiza PDF nativamente.
     if (!nativeApp) {
       if (typeof window !== "undefined") {
         window.open(url, "_blank", "noopener,noreferrer");
@@ -171,20 +172,17 @@ function HomeScreen() {
       return;
     }
 
-    // APK: baixar PDF nativamente e abrir com app PDF do aparelho.
     const loadingId = toast.loading(`Baixando escala #${id}…`);
     try {
-      // Garante cookies de sessão da intranet antes do download.
       try {
         const { warmupIntranetSession } = await import("@/lib/intranet-warmup");
         await warmupIntranetSession();
       } catch {
-        /* ignore — segue tentativa do download */
+        /* ignore */
       }
       const { InAppWebView } = await import("@/lib/in-app-webview");
       const result = await InAppWebView.downloadPdf({ id, url });
 
-      // Atualiza registro com o caminho local.
       try {
         const lista = lerLista();
         const next = lista.map((x) =>
@@ -205,8 +203,6 @@ function HomeScreen() {
       }
 
       toast.success(`Escala #${id} baixada. Abrindo…`, { id: loadingId });
-      // Tenta primeiro o leitor de PDF do aparelho (Google PDF / Drive / Adobe).
-      // Só cai no visualizador interno se não houver leitor instalado.
       try {
         await InAppWebView.openPdfExternal({ path: result.path });
       } catch (extErr) {
@@ -226,19 +222,10 @@ function HomeScreen() {
     }
   };
 
-  // Paleta sistemática: primário (azul institucional) e accent (dourado do logo),
-  // alternados. Adeus arco-íris.
-  const GRAD_PRIMARY = "var(--gradient-primary)";
-  const GRAD_GOLD = "var(--gradient-gold)";
-  const SHADOW_PRIMARY = "var(--shadow-glow)";
-  const SHADOW_GOLD = "var(--shadow-glow-gold)";
-
   const blocos: ActionBlock[] = [
     {
       label: "Marcar / Desmarcar\nDejem/Delegada",
       icon: CalendarPlus,
-      gradient: GRAD_PRIMARY,
-      shadow: SHADOW_PRIMARY,
       onClick: () =>
         void guardIntranet(
           () =>
@@ -252,8 +239,6 @@ function HomeScreen() {
     {
       label: "Email iNotes",
       icon: Mail,
-      gradient: GRAD_GOLD,
-      shadow: SHADOW_GOLD,
       onClick: () =>
         openInAppBrowser("https://correio.policiamilitar.sp.gov.br/iwaredir.nsf", {
           titulo: "Email iNotes",
@@ -264,23 +249,17 @@ function HomeScreen() {
     {
       label: "Escalas baixadas",
       icon: FolderDown,
-      gradient: GRAD_GOLD,
-      shadow: SHADOW_GOLD,
       onClick: () => navigate({ to: "/escalas-baixadas" }),
       nativeOnly: true,
     },
     {
       label: "Vídeo tutorial ANYCONECT",
       icon: BookOpen,
-      gradient: GRAD_PRIMARY,
-      shadow: SHADOW_PRIMARY,
       onClick: () => navigate({ to: "/anyconnect" }),
     },
     {
       label: "Folha de Pagamento",
       icon: Wallet,
-      gradient: GRAD_GOLD,
-      shadow: SHADOW_GOLD,
       onClick: () =>
         openInAppBrowser(
           "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
@@ -290,8 +269,6 @@ function HomeScreen() {
     {
       label: "PVT",
       icon: BookOpenCheck,
-      gradient: GRAD_PRIMARY,
-      shadow: SHADOW_PRIMARY,
       onClick: () =>
         window.open("https://ead.pmesp.org/login/index.php", "_blank", "noopener,noreferrer"),
     },
@@ -299,22 +276,29 @@ function HomeScreen() {
 
   return (
     <div
-      className="min-h-screen pb-8 text-slate-900 dark:text-slate-100 bg-[#f1f5fb] dark:bg-[#050b18]"
-      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+      className="min-h-screen pb-24 font-body"
+      style={{ background: "var(--tactical-bg)", color: "var(--tactical-text)" }}
     >
       {/* HEADER tático */}
       <header className="flex items-center justify-between px-5 pt-6 pb-3">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-amber-500/25 blur-lg animate-pulse" />
+            <div
+              className="absolute inset-0 rounded-full blur-lg animate-pulse"
+              style={{ background: "var(--tactical-accent)", opacity: 0.25 }}
+            />
             <img
               src={appLogo}
               alt="QAP, QRV!"
-              className="relative h-11 w-11 rounded-full object-cover border border-amber-500/40 no-dark-filter"
+              className="relative h-12 w-12 rounded-full object-cover border-2 no-dark-filter"
+              style={{ borderColor: "var(--tactical-accent)" }}
             />
           </div>
           <div>
-            <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-slate-900 dark:text-white">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--tactical-muted)" }}>
+              Status: Operacional
+            </p>
+            <h1 className="font-tactical text-[22px] font-normal uppercase tracking-wide leading-none">
               QAP, QRV!
             </h1>
           </div>
@@ -323,125 +307,170 @@ function HomeScreen() {
           <button
             aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
             onClick={toggleTheme}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-amber-400 transition active:scale-95"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border transition active:scale-95"
+            style={{
+              background: "var(--tactical-card-2)",
+              borderColor: "var(--tactical-border)",
+              color: "var(--tactical-muted)",
+            }}
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           <button
             aria-label="Menu"
             onClick={() => setDrawerOpen(true)}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300 transition active:scale-95"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border transition active:scale-95"
+            style={{
+              background: "var(--tactical-card-2)",
+              borderColor: "var(--tactical-border)",
+              color: "var(--tactical-muted)",
+            }}
           >
             <Menu size={22} />
           </button>
         </div>
       </header>
 
-      <BrowserHintBanner />
-      <PwaInstallBanner />
-      <InstallPushOptIn />
-      <ShareAppBanner />
+      <motion.main
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-5 px-5 pt-2"
+      >
+        <motion.div variants={itemVariants}>
+          <BrowserHintBanner />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <PwaInstallBanner />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <InstallPushOptIn />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <ShareAppBanner />
+        </motion.div>
 
+        {/* CONSULTA — hero card */}
+        <motion.section variants={itemVariants}>
+          <div
+            className="relative overflow-hidden rounded-[24px] p-5"
+            style={{
+              background: "var(--tactical-card)",
+              border: "1px solid var(--tactical-border)",
+              boxShadow: "var(--shadow-card)",
+            }}
+          >
+            <div
+              className="pointer-events-none absolute -right-8 -bottom-8 h-40 w-40 rounded-full blur-3xl"
+              style={{ background: "var(--tactical-accent)", opacity: 0.12 }}
+            />
+            <div className="relative z-10">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-tactical text-lg tracking-wide uppercase" style={{ color: "var(--tactical-accent)" }}>
+                  Consulta de Escala
+                </h2>
+                <InlineVpnChip />
+              </div>
 
+              <div className="relative flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2"
+                    style={{ color: "var(--tactical-muted)" }}
+                  />
+                  <input
+                    id="id-escala-input"
+                    inputMode="numeric"
+                    placeholder="Insira o ID da Escala"
+                    value={idEscala}
+                    onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
+                    onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
+                    className="w-full rounded-xl border py-3.5 pl-11 pr-4 text-sm font-semibold transition-all focus:outline-none"
+                    style={{
+                      background: "var(--tactical-bg)",
+                      borderColor: "var(--tactical-border)",
+                      color: "var(--tactical-text)",
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={handleConsultar}
+                  disabled={consultando}
+                  aria-label="Consultar"
+                  className="flex h-12 w-12 items-center justify-center rounded-xl transition active:scale-95 disabled:opacity-70"
+                  style={{
+                    background: "var(--tactical-accent)",
+                    color: "#ffffff",
+                    boxShadow: "var(--tactical-glow)",
+                  }}
+                >
+                  {consultando ? (
+                    <Loader2 size={22} className="animate-spin" strokeWidth={3} />
+                  ) : (
+                    <ArrowRight size={22} strokeWidth={3} />
+                  )}
+                </button>
+              </div>
 
-      
-
-      {/* CONSULTA — card tático com glow dourado */}
-      <section className="px-5 pt-2">
-        <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white dark:border-white/5 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-5 shadow-sm dark:shadow-none">
-          <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl" />
-
-          <div className="mb-4 flex items-center justify-between">
-            <label
-              htmlFor="id-escala-input"
-              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-500"
-            >
-              Consulta escala dejem/delegada
-            </label>
-            <InlineVpnChip />
-          </div>
-
-          <div className="relative flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search
-                size={16}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-              />
-              <input
-                id="id-escala-input"
-                inputMode="numeric"
-                placeholder="Insira o ID da Escala"
-                value={idEscala}
-                onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
-                onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-                className="w-full rounded-2xl border border-slate-300 bg-white dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-500 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
-              />
+              <VpnDetailRow />
             </div>
-            <button
-              onClick={handleConsultar}
-              disabled={consultando}
-              aria-label="Consultar"
-              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-black shadow-lg shadow-amber-500/20 transition active:scale-95 disabled:opacity-70"
-            >
-              {consultando ? (
-                <Loader2 size={20} className="animate-spin" strokeWidth={3} />
-              ) : (
-                <ArrowRight size={20} strokeWidth={3} />
-              )}
-            </button>
           </div>
+        </motion.section>
 
-          <VpnDetailRow />
-        </div>
-      </section>
-
-
-
-
-      {/* ACESSO RÁPIDO — grid tático */}
-      <section className="px-5 mt-6">
-        <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
+        {/* ACESSO RÁPIDO — grid tático */}
+        <motion.section variants={itemVariants}>
+          <h3 className="font-tactical text-sm tracking-[0.18em] uppercase mb-3" style={{ color: "var(--tactical-muted)" }}>
             Acesso Rápido
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {blocos.map((b, i) => {
-            const gold = i % 2 === 0;
-            return (
+          </h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {blocos.map((b) => (
               <button
                 key={b.label}
                 onClick={b.onClick}
-                className="group flex flex-col items-start gap-3 rounded-3xl border border-slate-200 bg-white dark:border-white/5 dark:bg-slate-900/40 p-4 text-left shadow-sm dark:shadow-none transition-all hover:bg-slate-50 dark:hover:bg-slate-900/70 active:scale-95"
+                className="group flex flex-col items-start gap-3 rounded-2xl border p-4 text-left transition-all active:scale-95"
+                style={{
+                  background: "var(--tactical-card)",
+                  borderColor: "var(--tactical-border)",
+                }}
               >
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
-                    gold
-                      ? "bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-500"
-                      : "bg-blue-500/15 border-blue-500/30 text-blue-700 dark:text-blue-400"
-                  }`}
+                  className="flex h-11 w-11 items-center justify-center rounded-xl border transition-colors"
+                  style={{
+                    background: "rgba(232, 93, 58, 0.12)",
+                    borderColor: "rgba(232, 93, 58, 0.25)",
+                    color: "var(--tactical-accent)",
+                  }}
                 >
                   <b.icon size={20} strokeWidth={2} />
                 </div>
-                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-900 dark:text-slate-200 whitespace-pre-line">
+                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide whitespace-pre-line">
                   {b.label}
                 </span>
               </button>
-            );
-          })}
-        </div>
-      </section>
+            ))}
+          </div>
+        </motion.section>
 
-      {/* MINHA ESCALA — calendário de plantões */}
-      <section className="mt-6">
-        <div className="mb-3 flex items-center justify-between px-6">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
-            Minha Escala
-          </h2>
-        </div>
-        <EscalaCalendarCard />
-      </section>
-
+        {/* MINHA ESCALA — calendário de plantões */}
+        <motion.section variants={itemVariants}>
+          <div
+            className="rounded-[24px] border p-4"
+            style={{
+              background: "var(--tactical-card)",
+              borderColor: "var(--tactical-border)",
+              boxShadow: "var(--shadow-card)",
+            }}
+          >
+            <div className="mb-3 flex items-center justify-between px-1">
+              <h3 className="font-tactical text-sm tracking-[0.18em] uppercase" style={{ color: "var(--tactical-muted)" }}>
+                Minha Escala
+              </h3>
+            </div>
+            <EscalaCalendarCard />
+          </div>
+        </motion.section>
+      </motion.main>
     </div>
   );
 }
@@ -467,9 +496,12 @@ function InlineVpnChip() {
 
   if (status === "checking") {
     return (
-      <div className="flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-900/60 px-2.5 py-1">
-        <Loader2 size={10} className="animate-spin text-slate-500" />
-        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+      <div
+        className="flex items-center gap-1.5 rounded-full border px-2.5 py-1"
+        style={{ background: "var(--tactical-card-2)", borderColor: "var(--tactical-border)" }}
+      >
+        <Loader2 size={10} className="animate-spin" style={{ color: "var(--tactical-muted)" }} />
+        <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "var(--tactical-muted)" }}>
           Verificando
         </span>
       </div>
@@ -477,7 +509,7 @@ function InlineVpnChip() {
   }
   if (status === "on") {
     return (
-      <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1">
+      <div className="flex items-center gap-2 rounded-full border px-2.5 py-1" style={{ borderColor: "#10b981", background: "rgba(16, 185, 129, 0.12)" }}>
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
         <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400">
           VPN Ativa
@@ -486,9 +518,9 @@ function InlineVpnChip() {
     );
   }
   return (
-    <div className="flex items-center gap-2 rounded-full border border-red-800 bg-red-700 px-2.5 py-1 dark:border-red-400/60 dark:bg-red-950">
-      <span className="h-1.5 w-1.5 rounded-full bg-white dark:bg-red-300" />
-      <span className="text-[9px] font-black uppercase tracking-wider text-white dark:text-red-50">
+    <div className="flex items-center gap-2 rounded-full border px-2.5 py-1" style={{ borderColor: "#ef4444", background: "rgba(239, 68, 68, 0.15)" }}>
+      <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+      <span className="text-[9px] font-black uppercase tracking-wider text-red-400">
         VPN Off
       </span>
     </div>
@@ -524,25 +556,29 @@ function VpnDetailRow() {
     <div className="mt-3">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-full border border-red-800 bg-red-700 px-3 py-1.5 shadow-sm transition active:scale-[0.98] dark:border-red-400/60 dark:bg-red-950"
+        className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-sm transition active:scale-[0.98]"
         aria-expanded={expanded}
+        style={{ borderColor: "#ef4444", background: "rgba(239, 68, 68, 0.85)" }}
       >
-        <ShieldCheck size={12} className="text-white dark:text-red-100" />
-        <span className="text-[10px] font-black uppercase tracking-wider text-white dark:text-red-50">
+        <ShieldCheck size={12} className="text-white" />
+        <span className="text-[10px] font-black uppercase tracking-wider text-white">
           Conectar VPN — acesso às escalas
         </span>
-        <Info size={11} className="text-white/90 dark:text-red-100" />
+        <Info size={11} className="text-white/90" />
       </button>
 
       {expanded && (
-        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-red-700 bg-red-50 px-3 py-2.5 animate-fade-in dark:border-red-400/50 dark:bg-red-950/80">
-          <p className="text-[11px] font-semibold leading-snug text-red-950 dark:text-red-50">
+        <div
+          className="mt-2 flex flex-col gap-2 rounded-2xl border px-3 py-2.5 animate-fade-in"
+          style={{ borderColor: "rgba(239, 68, 68, 0.4)", background: "rgba(239, 68, 68, 0.12)" }}
+        >
+          <p className="text-[11px] font-semibold leading-snug text-red-50">
             Conecte ao Cisco AnyConnect para liberar o acesso às escalas.
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => openAnyConnect()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-700 px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-white active:scale-95 dark:bg-red-400 dark:text-red-950"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-white active:scale-95"
             >
               <ShieldCheck size={12} />
               Abrir Cisco AnyConnect
@@ -550,7 +586,8 @@ function VpnDetailRow() {
             {isNative && (
               <button
                 onClick={refresh}
-                className="inline-flex items-center gap-1 rounded-lg border border-red-700 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-red-800 active:scale-95 dark:border-red-400/60 dark:bg-red-950 dark:text-red-50"
+                className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-[11px] font-black uppercase tracking-wider active:scale-95"
+                style={{ borderColor: "rgba(239, 68, 68, 0.6)", background: "var(--tactical-card)", color: "var(--tactical-text)" }}
               >
                 Verificar conexão
               </button>
@@ -588,20 +625,25 @@ function BrowserHintBanner() {
   };
 
   return (
-    <div className="px-5 pt-1">
-      <div className="flex items-start gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-3.5 py-2.5">
+    <div className="pt-1">
+      <div
+        className="flex items-start gap-2.5 rounded-2xl border px-3.5 py-2.5"
+        style={{ borderColor: "rgba(232, 93, 58, 0.25)", background: "rgba(232, 93, 58, 0.08)" }}
+      >
         <Info
           size={16}
-          className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-400"
+          className="mt-0.5 shrink-0"
+          style={{ color: "var(--tactical-accent)" }}
         />
-        <p className="flex-1 text-[12px] leading-snug text-amber-900 dark:text-amber-200">
+        <p className="flex-1 text-[12px] leading-snug" style={{ color: "var(--tactical-text)" }}>
           Se o Chrome bloquear o acesso a escalas ou à marcação Dejem/Delegada,
           abra em outro navegador (Firefox ou Edge).
         </p>
         <button
           aria-label="Dispensar"
           onClick={dismiss}
-          className="-mr-1 -mt-1 shrink-0 rounded-full p-1 text-amber-700/70 hover:bg-amber-500/10 dark:text-amber-300/70"
+          className="-mr-1 -mt-1 shrink-0 rounded-full p-1 transition"
+          style={{ color: "var(--tactical-muted)" }}
         >
           <X size={14} />
         </button>
@@ -609,4 +651,3 @@ function BrowserHintBanner() {
     </div>
   );
 }
-
