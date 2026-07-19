@@ -119,7 +119,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Impacto na renda" },
       "Se a base salarial é por soldo, ambas rendem o mesmo. Se há complementos por hora, a 12x24 rende mais no curto prazo, mas com maior desgaste.",
       { h: "Qualidade de vida" },
-      "12x48 é mais amiga da família e dos estudos. 12x24 é usada em unidades com déficit de efetivo e demanda operacional intensa.",
+      "12x48 tende a favorecer estudo e vida familiar. 12x24 é comum onde a demanda operacional exige mais ciclos de serviço no mês.",
       { h: "Como decidir" },
       "Nem sempre há escolha: depende da unidade. Quando houver, prefira 12x48 se puder — o ganho em saúde e presença familiar compensa. Registre no Calendário do QAP, QRV! qualquer que seja o modelo para não perder plantão.",
     ],
