@@ -177,6 +177,17 @@
   --border: oklch(0.32 0.03 235);
   --input: oklch(0.32 0.03 235);
   --ring: oklch(0.6 0.12 230);
+
+  /* Tokens táticos — dark mode */
+  --tactical-bg: #1a1a1a;
+  --tactical-card: #2d2d2d;
+  --tactical-card-2: #252525;
+  --tactical-accent: #e85d3a;
+  --tactical-accent-hover: #ff704d;
+  --tactical-text: #ffffff;
+  --tactical-muted: #9ca3af;
+  --tactical-border: #4a4a4a;
+  --tactical-glow: 0 0 28px -8px rgba(232, 93, 58, 0.45);
 }
 
 /* Override hardcoded Tailwind arbitrary-value utilities in dark mode */
