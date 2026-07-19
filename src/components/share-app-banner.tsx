@@ -45,6 +45,7 @@ export function ShareAppBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    if (isFirstSession()) return; // não exibir no primeiro boot
     if (!shouldShowThisMonth()) return;
     if (getAccessDays() < MIN_ACCESS_DAYS) return;
     setShow(true);
