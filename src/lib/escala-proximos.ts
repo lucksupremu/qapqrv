@@ -1,7 +1,8 @@
 import { gerarPlantoesDoMes, loadEscalas, type PlantaoEntry } from "@/lib/escala-trabalho";
 import { loadEventos, type EventoPersonalizado } from "@/lib/eventos-personalizados";
+import { loadMarcas, TIPO_LABEL_SHORT, type Marca, type TipoMarca } from "@/lib/marcas";
 
-export type TipoEventoProximo = "plantão" | "compromisso";
+export type TipoEventoProximo = "plantão" | "compromisso" | "marca";
 
 export type EventoProximo = {
   id: string;
@@ -11,6 +12,13 @@ export type EventoProximo = {
   tipo: TipoEventoProximo;
   cor: string;
   diasRestantes: number;
+};
+
+const MARCA_COR: Record<TipoMarca, string> = {
+  dejem: "#3498DB",
+  delegada: "#2ECC71",
+  delegada_capital: "#2ECC71",
+  delegada_outras: "#E67E22",
 };
 
 function startOfDay(d: Date): Date {
@@ -85,7 +93,24 @@ export function listarProximosEventos(limite = 5): EventoProximo[] {
       };
     });
 
-  const todos = [...plantoes, ...compromissos].sort((a, b) => a.data.getTime() - b.data.getTime());
+  const marcas: EventoProximo[] = loadMarcas()
+    .filter((m) => new Date(m.data).getTime() >= inicioHoje)
+    .map((m) => {
+      const d = new Date(m.data);
+      return {
+        id: m.id,
+        titulo: TIPO_LABEL_SHORT[m.tipo] || m.tipo,
+        data: d,
+        hora: "",
+        tipo: "marca",
+        cor: MARCA_COR[m.tipo] || "#94A3B8",
+        diasRestantes: diasRestantes(d),
+      };
+    });
+
+  const todos = [...plantoes, ...compromissos, ...marcas].sort(
+    (a, b) => a.data.getTime() - b.data.getTime(),
+  );
 
   return todos.slice(0, limite);
 }
