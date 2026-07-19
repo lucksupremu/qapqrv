@@ -62,7 +62,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Quem paga" },
       "Na Dejem, a fonte pagadora é o Estado de São Paulo. Na Delegada, é a prefeitura que firmou o convênio. Isso impacta valores, prazos de pagamento e rubricas no contracheque.",
       { h: "Onde se atua" },
-      "A Dejem cobre pontos definidos pela unidade — reforço em áreas críticas, complemento de policiamento ostensivo. A Delegada é pautada por demandas municipais: feiras, terminais, áreas comerciais, eventos e zeladoria urbana.",
+      "A Dejem cobre pontos definidos pela própria unidade. A Delegada é pautada por demandas do município conveniado: feiras, terminais, áreas comerciais, eventos e zeladoria urbana.",
       { h: "Inscrição" },
       "As duas usam a intranet PMESP, mas em sistemas próprios com editais separados. Confira o edital de cada operação para vagas, requisitos e valores.",
       { h: "Remuneração" },
