@@ -24,6 +24,7 @@ import { InstallConfirmModal } from "@/components/install-confirm-modal";
 import { ShareAppNudge } from "@/components/share-app-nudge";
 import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
 import { isAdsAllowedRoute, isPublicContentRoute } from "@/lib/ads-allowlist";
+import { useDocumentHead } from "@/lib/use-document-head";
 
 
 /** Google AdSense client ID */
@@ -104,6 +105,10 @@ function RootComponent() {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPublicContent = isPublicContentRoute(pathname);
+
+  // Sincroniza head() das rotas com document.head (title/description/canonical
+  // únicos por página) — crítico para AdSense/SEO.
+  useDocumentHead();
 
   // Onboarding automático só no APK. No site público, a URL precisa entregar o
   // conteúdo real sem interceptação, ou revisões do AdSense podem enxergar

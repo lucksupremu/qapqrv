@@ -1,12 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { ARTIGOS, CATEGORIAS } from "@/content";
 
 const BASE_URL = "https://miketools.top";
 
 interface SitemapEntry {
   path: string;
   lastmod?: string;
-  changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
+  changefreq?:
+    | "always"
+    | "hourly"
+    | "daily"
+    | "weekly"
+    | "monthly"
+    | "yearly"
+    | "never";
   priority?: string;
 }
 
@@ -15,25 +23,39 @@ export const Route = createFileRoute("/sitemap.xml")({
     handlers: {
       GET: async () => {
         const today = new Date().toISOString().split("T")[0];
-        const entries: SitemapEntry[] = [
+
+        const staticEntries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0", lastmod: today },
           { path: "/sobre", changefreq: "monthly", priority: "0.8" },
-          { path: "/manual", changefreq: "monthly", priority: "0.8" },
-          { path: "/blog", changefreq: "weekly", priority: "0.9" },
-          { path: "/blog/escala-dejem-pmesp", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/diferenca-dejem-delegada", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/consultar-escala-passo-a-passo", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/direitos-operacao-delegada", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/escala-12x36-higidez-fisica", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/organizacao-plantao", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/vpn-anyconnect-seguranca", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/configurar-anyconnect-android", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/erros-comuns-intranet-pmesp", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/usar-app-offline", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/compartilhar-escala-com-seguranca", changefreq: "monthly", priority: "0.7" },
+          { path: "/manual", changefreq: "monthly", priority: "0.7" },
+          { path: "/ajuda", changefreq: "monthly", priority: "0.7" },
+          { path: "/faq", changefreq: "monthly", priority: "0.7" },
+          { path: "/conteudos", changefreq: "weekly", priority: "0.9", lastmod: today },
           { path: "/contato", changefreq: "yearly", priority: "0.5" },
+          { path: "/mapa-do-site", changefreq: "monthly", priority: "0.4" },
           { path: "/privacidade", changefreq: "yearly", priority: "0.5" },
           { path: "/termos", changefreq: "yearly", priority: "0.4" },
+          { path: "/cookies", changefreq: "yearly", priority: "0.3" },
+          { path: "/aviso-legal", changefreq: "yearly", priority: "0.3" },
+        ];
+
+        const categoriaEntries: SitemapEntry[] = CATEGORIAS.map((c) => ({
+          path: `/conteudos/${c.slug}`,
+          changefreq: "monthly",
+          priority: "0.7",
+        }));
+
+        const artigoEntries: SitemapEntry[] = ARTIGOS.map((a) => ({
+          path: `/conteudos/${a.category}/${a.slug}`,
+          changefreq: "monthly",
+          priority: "0.7",
+          lastmod: a.date,
+        }));
+
+        const entries = [
+          ...staticEntries,
+          ...categoriaEntries,
+          ...artigoEntries,
         ];
 
         const urls = entries.map((e) =>
