@@ -470,8 +470,8 @@ export function EscalaCalendarCard() {
                         bottom: 0,
                         left: "50%",
                         transform: "translateX(-50%)",
-                        width: 38,
-                        height: 38,
+                        width: "92%",
+                        height: "92%",
                         objectFit: "contain",
                         zIndex: 0,
                       }}
@@ -479,8 +479,8 @@ export function EscalaCalendarCard() {
                     <span
                       className="absolute left-0 right-0 text-center font-bold text-[#3a2a00] pointer-events-none"
                       style={{
-                        bottom: 3,
-                        fontSize: 6,
+                        bottom: "10%",
+                        fontSize: "clamp(5px, 2.2vw, 8px)",
                         lineHeight: 1,
                         zIndex: 3,
                         transform: "rotate(-3deg)",
