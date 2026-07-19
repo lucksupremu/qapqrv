@@ -424,14 +424,17 @@ async function cleanupOldReminders() {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    const reminders = await runReminders();
     const burst = await runBurstAlerts();
     const inactivity = await runInactivity();
     const campaigns = await runCampaigns();
     const installNudge = await runInstallNudge();
     await cleanupOldMarcaEvents();
+    await cleanupOldReminders();
     return new Response(
       JSON.stringify({
         ok: true,
+        reminders_sent: reminders,
         burst_sent: burst,
         inactivity_sent: inactivity,
         campaign_sent: campaigns,
