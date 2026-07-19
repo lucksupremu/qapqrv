@@ -32,6 +32,7 @@ import { guardIntranet } from "@/lib/vpn-guard";
 import { openAnyConnect } from "@/lib/open-anyconnect";
 
 import { EscalaCalendarCard } from "@/components/escala-calendar-card";
+import { ProximosEventosList } from "@/components/proximos-eventos-list";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 import { InstallPushOptIn } from "@/components/install-push-opt-in";
