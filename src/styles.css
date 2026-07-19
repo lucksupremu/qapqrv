@@ -118,16 +118,16 @@
   --brand-blue: oklch(0.5 0.12 230);
   --brand-blue-foreground: oklch(0.99 0 0);
 
-  /* Tokens táticos — cinza claro/âmbar escolhido para a home */
+  /* Tokens táticos — cinza claro/azul escolhido para a home */
   --tactical-bg: #f4f5f7;
   --tactical-card: #ffffff;
   --tactical-card-2: #eef0f3;
-  --tactical-accent: #e85d3a;
-  --tactical-accent-hover: #d44d2e;
+  --tactical-accent: #2563eb;
+  --tactical-accent-hover: #1d4ed8;
   --tactical-text: #1a1a1a;
   --tactical-muted: #5b626a;
   --tactical-border: #e2e5e9;
-  --tactical-glow: 0 0 24px -8px rgba(232, 93, 58, 0.35);
+  --tactical-glow: 0 0 24px -8px rgba(37, 99, 235, 0.35);
 }
 
 /* ============================ DARK MODE ============================ */
@@ -178,16 +178,16 @@
   --input: oklch(0.32 0.03 235);
   --ring: oklch(0.6 0.12 230);
 
-  /* Tokens táticos — dark mode (cinza escuro, menos pesado que o preto) */
+  /* Tokens táticos — dark mode (cinza escuro, destaque azul) */
   --tactical-bg: #252525;
   --tactical-card: #323232;
   --tactical-card-2: #2d2d2d;
-  --tactical-accent: #e85d3a;
-  --tactical-accent-hover: #ff704d;
+  --tactical-accent: #60a5fa;
+  --tactical-accent-hover: #93c5fd;
   --tactical-text: #ffffff;
   --tactical-muted: #9ca3af;
   --tactical-border: #4a4a4a;
-  --tactical-glow: 0 0 28px -8px rgba(232, 93, 58, 0.45);
+  --tactical-glow: 0 0 28px -8px rgba(96, 165, 250, 0.45);
 }
 
 /* Override hardcoded Tailwind arbitrary-value utilities in dark mode */
