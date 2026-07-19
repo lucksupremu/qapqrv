@@ -330,7 +330,7 @@ export function EscalaCalendarCard() {
 
 
       {/* Grid */}
-      <div className="mt-1 grid grid-cols-7 gap-1">
+      <div className="mt-1 grid grid-cols-7 gap-0.5 sm:gap-1">
         {grid.map((cell, i) => {
           const key = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}`;
           const dia = plantoes.get(key);
