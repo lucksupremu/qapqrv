@@ -132,7 +132,14 @@ function SideDrawer() {
           />
         )}
         <Icon size={20} style={{ color: isActive ? "#2e6b8a" : "#5b7a8f" }} />
-        <span>{it.label}</span>
+        <span className="flex flex-col leading-tight">
+          <span>{it.label}</span>
+          {it.hint && (
+            <span className="text-[11px] font-normal" style={{ color: "#5b7a8f" }}>
+              {it.hint}
+            </span>
+          )}
+        </span>
       </>
     );
 
