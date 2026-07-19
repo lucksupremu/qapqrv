@@ -242,7 +242,7 @@ export const ARTIGOS: Artigo[] = [
     author: "Equipe QAP, QRV!",
     toc: ["Onde os dados ficam", "Backup manual", "Backup no APK", "Restauração", "Privacidade"],
     body: [
-      "O QAP, QRV! foi desenhado com privacidade em primeiro lugar. Nada dos seus dados operacionais é enviado a servidor.",
+      "O QAP, QRV! foi desenhado com privacidade em primeiro lugar: seus dados operacionais ficam no aparelho, sem envio para servidor.",
       { h: "Onde os dados ficam" },
       "Plantões, marcas, preferências e escalas salvas ficam no armazenamento local do navegador (IndexedDB/localStorage) ou no armazenamento do APK Android.",
       { h: "Backup manual" },
