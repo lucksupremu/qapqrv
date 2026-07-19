@@ -403,8 +403,8 @@ export function EscalaCalendarCard() {
                       alt=""
                       draggable={false}
                       style={{
-                        width: 38,
-                        height: 38,
+                        width: "92%",
+                        height: "92%",
                         objectFit: "contain",
                         pointerEvents: "none",
                       }}
@@ -415,9 +415,9 @@ export function EscalaCalendarCard() {
                       className="absolute"
                       style={{
                         left: "50%",
-                        bottom: 3,
+                        bottom: "12%",
                         transform: "translateX(-50%)",
-                        width: 22,
+                        width: "55%",
                         height: 3,
                         background: postItAccent,
                         borderRadius: 2,
