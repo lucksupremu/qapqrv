@@ -232,15 +232,129 @@ async function runInstallNudge() {
   return sent;
 }
 
+const BURST_WINDOW_MIN = 30;
+const BURST_THRESHOLD = 3;
+const BURST_RECENT_MARK_DAYS = 3;
+const AUDIENCE_WINDOW_DAYS = 30;
+
+async function runBurstAlerts() {
+  const now = Date.now();
+  const windowStart = new Date(now - BURST_WINDOW_MIN * 60_000).toISOString();
+  const recentMarkCutoff = new Date(now - BURST_RECENT_MARK_DAYS * 86_400_000).toISOString();
+  const audienceCutoff = new Date(now - AUDIENCE_WINDOW_DAYS * 86_400_000).toISOString();
+  const today = new Date().toISOString().slice(0, 10);
+
+  let totalSent = 0;
+
+  for (const tipo of ["dejem", "delegada"] as const) {
+    // 1) Conta dispositivos distintos com marca desse tipo na janela.
+    const { data: recent, error: eRecent } = await supabase
+      .from("marca_events")
+      .select("device_id")
+      .eq("tipo", tipo)
+      .gte("created_at", windowStart);
+    if (eRecent) {
+      console.error("[burst] recent query", tipo, eRecent);
+      continue;
+    }
+    const distinctDevices = new Set((recent ?? []).map((r) => r.device_id));
+    if (distinctDevices.size < BURST_THRESHOLD) continue;
+
+    // 2) Público-alvo: quem marcou nos últimos 30d (qualquer tipo).
+    const { data: audience, error: eAud } = await supabase
+      .from("marca_events")
+      .select("device_id")
+      .gte("created_at", audienceCutoff);
+    if (eAud) {
+      console.error("[burst] audience query", tipo, eAud);
+      continue;
+    }
+    const audienceSet = new Set((audience ?? []).map((r) => r.device_id));
+    if (audienceSet.size === 0) continue;
+
+    // 3) Exclui quem marcou o MESMO tipo nos últimos 3d.
+    const { data: recentMarks, error: eRM } = await supabase
+      .from("marca_events")
+      .select("device_id")
+      .eq("tipo", tipo)
+      .gte("created_at", recentMarkCutoff);
+    if (eRM) {
+      console.error("[burst] recent marks query", tipo, eRM);
+      continue;
+    }
+    for (const r of recentMarks ?? []) audienceSet.delete(r.device_id);
+
+    // 4) Exclui quem já recebeu alerta desse tipo hoje.
+    const { data: sentToday, error: eST } = await supabase
+      .from("push_burst_sends")
+      .select("device_id")
+      .eq("tipo", tipo)
+      .eq("sent_on", today);
+    if (eST) {
+      console.error("[burst] sent today query", tipo, eST);
+      continue;
+    }
+    for (const r of sentToday ?? []) audienceSet.delete(r.device_id);
+
+    if (audienceSet.size === 0) continue;
+
+    // 5) Carrega subscriptions elegíveis.
+    const deviceIds = Array.from(audienceSet);
+    const { data: subs, error: eSubs } = await supabase
+      .from("push_subscriptions")
+      .select("id, device_id, endpoint, p256dh, auth, last_seen_at, last_notified_at, inactivity_stage")
+      .is("unsubscribed_at", null)
+      .in("device_id", deviceIds)
+      .limit(2000);
+    if (eSubs) {
+      console.error("[burst] subs query", tipo, eSubs);
+      continue;
+    }
+
+    const tipoLabel = tipo === "dejem" ? "Dejem" : "Delegada";
+    for (const sub of subs ?? []) {
+      const res = await sendOne(sub as Sub, {
+        title: "Escalas abrindo agora?",
+        body: `Outros policiais estão marcando ${tipoLabel}. Já conferiu se há escalas abertas para inscrição?`,
+        url: "/calendario",
+        tag: `burst-${tipo}`,
+      });
+      if (res.gone) {
+        await supabase
+          .from("push_subscriptions")
+          .update({ unsubscribed_at: new Date().toISOString() })
+          .eq("id", (sub as Sub).id);
+      } else if (res.ok) {
+        totalSent++;
+        await supabase.from("push_burst_sends").upsert(
+          { device_id: (sub as Sub).device_id, tipo, sent_on: today },
+          { onConflict: "device_id,tipo,sent_on" },
+        );
+      }
+    }
+  }
+
+  return totalSent;
+}
+
+async function cleanupOldMarcaEvents() {
+  const cutoff = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const { error } = await supabase.from("marca_events").delete().lt("created_at", cutoff);
+  if (error) console.error("[cleanup] marca_events", error);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    const burst = await runBurstAlerts();
     const inactivity = await runInactivity();
     const campaigns = await runCampaigns();
     const installNudge = await runInstallNudge();
+    await cleanupOldMarcaEvents();
     return new Response(
       JSON.stringify({
         ok: true,
+        burst_sent: burst,
         inactivity_sent: inactivity,
         campaign_sent: campaigns,
         install_nudge_sent: installNudge,
