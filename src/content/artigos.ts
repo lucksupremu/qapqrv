@@ -18,7 +18,7 @@ export const ARTIGOS: Artigo[] = [
     body: [
       "A Dejem — Detalhe de Jornada Extra Militar — é uma das principais formas de jornada complementar remunerada disponíveis ao policial militar do Estado de São Paulo. Ela permite reforçar o policiamento em pontos e horários definidos pela Corporação, com remuneração por hora trabalhada, fora do horário de serviço ordinário.",
       { h: "O que é a DEJEM" },
-      "Regulamentada por diretriz específica da PMESP, a Dejem é facultativa: o militar só entra se se inscrever e for convocado. Cada OPM (unidade) publica suas necessidades — motorizado, a pé, atendimento, ROTAM, entre outros modais — e organiza a distribuição respeitando os intervalos mínimos de descanso.",
+      "Regulamentada por diretriz específica da PMESP, a Dejem é facultativa: o militar só entra se se inscrever e for convocado. Cada OPM publica as necessidades do período — rádio-patrulha, policiamento a pé, motopatrulhamento, atendimento ao público e reforços definidos pelo comando local — e organiza a distribuição respeitando os intervalos mínimos de descanso.",
       { h: "Quem pode participar" },
       "Podem participar policiais militares da ativa que estejam em condições de saúde compatíveis com a jornada extra, sem impedimentos disciplinares e que atendam aos requisitos da diretriz vigente. Alunos e casos específicos seguem regras próprias.",
       { h: "Como se inscrever" },
