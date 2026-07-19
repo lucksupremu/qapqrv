@@ -195,7 +195,7 @@ export function ProximosEventosList() {
                     }
                   />
 
-                  <p className="pt-2 text-[12px] leading-relaxed text-muted-foreground">
+                  <p className="pt-2 text-[13px] leading-relaxed text-card-foreground">
                     Para editar ou excluir, abra o item diretamente no calendário
                     da tela inicial ou na Agenda.
                   </p>
@@ -215,7 +215,7 @@ function DetalheLinha({ label, value }: { label: string; value: string }) {
       <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
-      <span className="text-right text-[14px] font-semibold text-foreground">
+      <span className="text-right text-[15px] font-bold text-card-foreground">
         {value}
       </span>
     </div>
