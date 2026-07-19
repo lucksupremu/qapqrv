@@ -134,7 +134,9 @@ function ConsultaEscalaPage() {
       </header>
 
       <main className="px-4 -mt-6 space-y-5">
+        <ComoFuncionaBox info={getFerramentaInfo("consulta-escala")!} />
         <VpnBadge status={vpnStatus} onRecheck={checkVpn} />
+
 
         <form
           onSubmit={handleSubmit}
