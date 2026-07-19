@@ -28,6 +28,7 @@ import {
 } from "@/lib/notifications-adapter";
 import { buildAutoReminders, isoToLocalInput } from "@/lib/auto-reminders";
 import { reportMarcaEvent } from "@/lib/report-marca";
+import { scheduleServerReminders, cancelServerReminders } from "@/lib/server-reminders";
 
 const tipoOptions: { value: TipoMarca; label: string }[] = [
   { value: "dejem", label: "Dejem" },
