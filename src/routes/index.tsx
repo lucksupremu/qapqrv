@@ -4,7 +4,7 @@ import { Sun, Moon } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { toast } from "sonner";
 import {
-  Calendar,
+  CalendarPlus,
   CalendarPlus,
   Menu,
   Globe,
