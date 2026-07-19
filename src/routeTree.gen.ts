@@ -26,6 +26,7 @@ import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as ConteudosRouteImport } from './routes/conteudos'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as CalendarioRouteImport } from './routes/calendario'
@@ -39,6 +40,7 @@ import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferrame
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 import { Route as EscalaViewerIdRouteImport } from './routes/escala-viewer.$id'
+import { Route as ConteudosCategoriaRouteImport } from './routes/conteudos.$categoria'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ConteudosCategoriaIndexRouteImport } from './routes/conteudos.$categoria.index'
 import { Route as ConteudosCategoriaSlugRouteImport } from './routes/conteudos.$categoria.$slug'
@@ -129,6 +131,11 @@ const CookiesRoute = CookiesRouteImport.update({
   path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConteudosRoute = ConteudosRouteImport.update({
+  id: '/conteudos',
+  path: '/conteudos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -170,9 +177,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConteudosIndexRoute = ConteudosIndexRouteImport.update({
-  id: '/conteudos/',
-  path: '/conteudos/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConteudosRoute,
 } as any)
 const FerramentaMinhaLocalizacaoRoute =
   FerramentaMinhaLocalizacaoRouteImport.update({
@@ -196,15 +203,20 @@ const EscalaViewerIdRoute = EscalaViewerIdRouteImport.update({
   path: '/escala-viewer/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConteudosCategoriaRoute = ConteudosCategoriaRouteImport.update({
+  id: '/$categoria',
+  path: '/$categoria',
+  getParentRoute: () => ConteudosRoute,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
 const ConteudosCategoriaIndexRoute = ConteudosCategoriaIndexRouteImport.update({
-  id: '/conteudos/$categoria/',
-  path: '/conteudos/$categoria/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConteudosCategoriaRoute,
 } as any)
 const ConteudosCategoriaSlugRoute = ConteudosCategoriaSlugRouteImport.update({
   id: '/$slug',
@@ -221,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
+  '/conteudos': typeof ConteudosRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/faq': typeof FaqRoute
@@ -239,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/conteudos/$categoria': typeof ConteudosCategoriaRouteWithChildren
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -292,6 +306,7 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
+  '/conteudos': typeof ConteudosRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/faq': typeof FaqRoute
@@ -310,6 +325,7 @@ export interface FileRoutesById {
   '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/conteudos/$categoria': typeof ConteudosCategoriaRouteWithChildren
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
@@ -329,6 +345,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/configuracoes'
     | '/contato'
+    | '/conteudos'
     | '/cookies'
     | '/escalas-baixadas'
     | '/faq'
@@ -347,6 +364,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/termos'
     | '/blog/$slug'
+    | '/conteudos/$categoria'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -399,6 +417,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/configuracoes'
     | '/contato'
+    | '/conteudos'
     | '/cookies'
     | '/escalas-baixadas'
     | '/faq'
@@ -417,6 +436,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/termos'
     | '/blog/$slug'
+    | '/conteudos/$categoria'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
@@ -435,6 +455,7 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ContatoRoute: typeof ContatoRoute
+  ConteudosRoute: typeof ConteudosRouteWithChildren
   CookiesRoute: typeof CookiesRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FaqRoute: typeof FaqRoute
@@ -456,8 +477,6 @@ export interface RootRouteChildren {
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
   FerramentaMinhaLocalizacaoRoute: typeof FerramentaMinhaLocalizacaoRoute
-  ConteudosIndexRoute: typeof ConteudosIndexRoute
-  ConteudosCategoriaIndexRoute: typeof ConteudosCategoriaIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -581,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conteudos': {
+      id: '/conteudos'
+      path: '/conteudos'
+      fullPath: '/conteudos'
+      preLoaderRoute: typeof ConteudosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contato': {
       id: '/contato'
       path: '/contato'
@@ -639,10 +665,10 @@ declare module '@tanstack/react-router' {
     }
     '/conteudos/': {
       id: '/conteudos/'
-      path: '/conteudos'
+      path: '/'
       fullPath: '/conteudos/'
       preLoaderRoute: typeof ConteudosIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ConteudosRoute
     }
     '/ferramenta/minha-localizacao': {
       id: '/ferramenta/minha-localizacao'
@@ -672,6 +698,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalaViewerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conteudos/$categoria': {
+      id: '/conteudos/$categoria'
+      path: '/$categoria'
+      fullPath: '/conteudos/$categoria'
+      preLoaderRoute: typeof ConteudosCategoriaRouteImport
+      parentRoute: typeof ConteudosRoute
+    }
     '/blog/$slug': {
       id: '/blog/$slug'
       path: '/$slug'
@@ -681,10 +714,10 @@ declare module '@tanstack/react-router' {
     }
     '/conteudos/$categoria/': {
       id: '/conteudos/$categoria/'
-      path: '/conteudos/$categoria'
+      path: '/'
       fullPath: '/conteudos/$categoria/'
       preLoaderRoute: typeof ConteudosCategoriaIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ConteudosCategoriaRoute
     }
     '/conteudos/$categoria/$slug': {
       id: '/conteudos/$categoria/$slug'
@@ -706,6 +739,33 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface ConteudosCategoriaRouteChildren {
+  ConteudosCategoriaSlugRoute: typeof ConteudosCategoriaSlugRoute
+  ConteudosCategoriaIndexRoute: typeof ConteudosCategoriaIndexRoute
+}
+
+const ConteudosCategoriaRouteChildren: ConteudosCategoriaRouteChildren = {
+  ConteudosCategoriaSlugRoute: ConteudosCategoriaSlugRoute,
+  ConteudosCategoriaIndexRoute: ConteudosCategoriaIndexRoute,
+}
+
+const ConteudosCategoriaRouteWithChildren =
+  ConteudosCategoriaRoute._addFileChildren(ConteudosCategoriaRouteChildren)
+
+interface ConteudosRouteChildren {
+  ConteudosCategoriaRoute: typeof ConteudosCategoriaRouteWithChildren
+  ConteudosIndexRoute: typeof ConteudosIndexRoute
+}
+
+const ConteudosRouteChildren: ConteudosRouteChildren = {
+  ConteudosCategoriaRoute: ConteudosCategoriaRouteWithChildren,
+  ConteudosIndexRoute: ConteudosIndexRoute,
+}
+
+const ConteudosRouteWithChildren = ConteudosRoute._addFileChildren(
+  ConteudosRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AjudaRoute: AjudaRoute,
@@ -715,6 +775,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ContatoRoute: ContatoRoute,
+  ConteudosRoute: ConteudosRouteWithChildren,
   CookiesRoute: CookiesRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FaqRoute: FaqRoute,
@@ -736,8 +797,6 @@ const rootRouteChildren: RootRouteChildren = {
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
   FerramentaMinhaLocalizacaoRoute: FerramentaMinhaLocalizacaoRoute,
-  ConteudosIndexRoute: ConteudosIndexRoute,
-  ConteudosCategoriaIndexRoute: ConteudosCategoriaIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
