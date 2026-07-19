@@ -208,11 +208,11 @@ export function ProximosEventosList() {
 
 function DetalheLinha({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+    <div className="flex items-start justify-between gap-3 border-b border-border pb-2 last:border-0 last:pb-0">
+      <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
-      <span className="text-right text-[13px] font-semibold text-slate-800">
+      <span className="text-right text-[14px] font-semibold text-foreground">
         {value}
       </span>
     </div>
