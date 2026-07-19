@@ -61,7 +61,7 @@ export const Route = createFileRoute("/conteudos/$categoria/$slug")({
               children: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "FAQPage",
-                mainEntity: artigo.faq.map((f) => ({
+                mainEntity: artigo.faq.map((f: {q:string;a:string}) => ({
                   "@type": "Question",
                   name: f.q,
                   acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -78,7 +78,7 @@ export const Route = createFileRoute("/conteudos/$categoria/$slug")({
 function ArtigoScreen() {
   const { categoria, artigo } = Route.useLoaderData();
   const related = (artigo.related || [])
-    .map((s) => ARTIGOS.find((a) => a.slug === s))
+    .map((s: string) => ARTIGOS.find((a) => a.slug === s))
     .filter(Boolean)
     .slice(0, 3);
 
@@ -126,7 +126,7 @@ function ArtigoScreen() {
           <nav aria-label="Índice" className="mt-5 rounded-xl border border-border bg-muted/30 p-3">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Neste artigo</p>
             <ol className="space-y-1 pl-4 text-[13px] text-foreground/85 [counter-reset:sec]">
-              {artigo.toc.map((h) => (
+              {artigo.toc.map((h: string) => (
                 <li key={h} className="list-decimal">
                   <a href={`#${slugify(h)}`} className="hover:text-primary hover:underline">{h}</a>
                 </li>
@@ -143,7 +143,7 @@ function ArtigoScreen() {
           <section className="mt-8">
             <h2 className="text-lg font-bold text-foreground">Perguntas frequentes</h2>
             <dl className="mt-3 space-y-3">
-              {artigo.faq.map((f) => (
+              {artigo.faq.map((f: {q:string;a:string}) => (
                 <div key={f.q} className="rounded-xl border border-border bg-card p-3">
                   <dt className="text-sm font-semibold text-foreground">{f.q}</dt>
                   <dd className="mt-1 text-[13.5px] text-foreground/80">{f.a}</dd>
@@ -166,7 +166,7 @@ function ArtigoScreen() {
           <section className="mt-10">
             <h2 className="text-lg font-bold text-foreground">Artigos relacionados</h2>
             <div className="mt-3 space-y-2">
-              {related.map((r) => r && (
+              {related.map((r: any) => r && (
                 <Link
                   key={r.slug}
                   to="/conteudos/$categoria/$slug"

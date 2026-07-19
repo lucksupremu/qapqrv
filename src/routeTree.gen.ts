@@ -16,24 +16,32 @@ import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as MapaDoSiteRouteImport } from './routes/mapa-do-site'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as IntranetRouteImport } from './routes/intranet'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as Googlef2edc9e3a6b2e4a9DothtmlRouteImport } from './routes/googlef2edc9e3a6b2e4a9[.]html'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as ConteudosRouteImport } from './routes/conteudos'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AnyconnectRouteImport } from './routes/anyconnect'
+import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
 import { Route as EscalaViewerIdRouteImport } from './routes/escala-viewer.$id'
+import { Route as ConteudosCategoriaRouteImport } from './routes/conteudos.$categoria'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ConteudosCategoriaSlugRouteImport } from './routes/conteudos.$categoria.$slug'
 
 const Char91indexChar93Route = Char91indexChar93RouteImport.update({
   id: '/index',
@@ -70,6 +78,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapaDoSiteRoute = MapaDoSiteRouteImport.update({
+  id: '/mapa-do-site',
+  path: '/mapa-do-site',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ManualRoute = ManualRouteImport.update({
   id: '/manual',
   path: '/manual',
@@ -101,9 +114,24 @@ const FavoritosRoute = FavoritosRouteImport.update({
   path: '/favoritos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EscalasBaixadasRoute = EscalasBaixadasRouteImport.update({
   id: '/escalas-baixadas',
   path: '/escalas-baixadas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConteudosRoute = ConteudosRouteImport.update({
+  id: '/conteudos',
+  path: '/conteudos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContatoRoute = ContatoRouteImport.update({
@@ -126,9 +154,19 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AvisoLegalRoute = AvisoLegalRouteImport.update({
+  id: '/aviso-legal',
+  path: '/aviso-legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnyconnectRoute = AnyconnectRouteImport.update({
   id: '/anyconnect',
   path: '/anyconnect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AjudaRoute = AjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -158,20 +196,35 @@ const EscalaViewerIdRoute = EscalaViewerIdRouteImport.update({
   path: '/escala-viewer/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConteudosCategoriaRoute = ConteudosCategoriaRouteImport.update({
+  id: '/$categoria',
+  path: '/$categoria',
+  getParentRoute: () => ConteudosRoute,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const ConteudosCategoriaSlugRoute = ConteudosCategoriaSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ConteudosCategoriaRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ajuda': typeof AjudaRoute
   '/anyconnect': typeof AnyconnectRoute
+  '/aviso-legal': typeof AvisoLegalRoute
   '/blog': typeof BlogRouteWithChildren
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
+  '/conteudos': typeof ConteudosRouteWithChildren
+  '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
+  '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   '/historico': typeof HistoricoRoute
@@ -179,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
+  '/mapa-do-site': typeof MapaDoSiteRoute
   '/onboarding': typeof OnboardingRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -186,19 +240,26 @@ export interface FileRoutesByFullPath {
   '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/conteudos/$categoria': typeof ConteudosCategoriaRouteWithChildren
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ajuda': typeof AjudaRoute
   '/anyconnect': typeof AnyconnectRoute
+  '/aviso-legal': typeof AvisoLegalRoute
   '/blog': typeof BlogRouteWithChildren
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
+  '/conteudos': typeof ConteudosRouteWithChildren
+  '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
+  '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   '/historico': typeof HistoricoRoute
@@ -206,6 +267,7 @@ export interface FileRoutesByTo {
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
+  '/mapa-do-site': typeof MapaDoSiteRoute
   '/onboarding': typeof OnboardingRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -213,20 +275,27 @@ export interface FileRoutesByTo {
   '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/conteudos/$categoria': typeof ConteudosCategoriaRouteWithChildren
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ajuda': typeof AjudaRoute
   '/anyconnect': typeof AnyconnectRoute
+  '/aviso-legal': typeof AvisoLegalRoute
   '/blog': typeof BlogRouteWithChildren
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
+  '/conteudos': typeof ConteudosRouteWithChildren
+  '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
+  '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/googlef2edc9e3a6b2e4a9.html': typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   '/historico': typeof HistoricoRoute
@@ -234,6 +303,7 @@ export interface FileRoutesById {
   '/inicio': typeof InicioRoute
   '/intranet': typeof IntranetRoute
   '/manual': typeof ManualRoute
+  '/mapa-do-site': typeof MapaDoSiteRoute
   '/onboarding': typeof OnboardingRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -241,21 +311,28 @@ export interface FileRoutesById {
   '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/conteudos/$categoria': typeof ConteudosCategoriaRouteWithChildren
   '/escala-viewer/$id': typeof EscalaViewerIdRoute
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ajuda'
     | '/anyconnect'
+    | '/aviso-legal'
     | '/blog'
     | '/calendario'
     | '/configuracoes'
     | '/contato'
+    | '/conteudos'
+    | '/cookies'
     | '/escalas-baixadas'
+    | '/faq'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
     | '/historico'
@@ -263,6 +340,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/intranet'
     | '/manual'
+    | '/mapa-do-site'
     | '/onboarding'
     | '/privacidade'
     | '/sitemap.xml'
@@ -270,19 +348,26 @@ export interface FileRouteTypes {
     | '/splash'
     | '/termos'
     | '/blog/$slug'
+    | '/conteudos/$categoria'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/conteudos/$categoria/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ajuda'
     | '/anyconnect'
+    | '/aviso-legal'
     | '/blog'
     | '/calendario'
     | '/configuracoes'
     | '/contato'
+    | '/conteudos'
+    | '/cookies'
     | '/escalas-baixadas'
+    | '/faq'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
     | '/historico'
@@ -290,6 +375,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/intranet'
     | '/manual'
+    | '/mapa-do-site'
     | '/onboarding'
     | '/privacidade'
     | '/sitemap.xml'
@@ -297,19 +383,26 @@ export interface FileRouteTypes {
     | '/splash'
     | '/termos'
     | '/blog/$slug'
+    | '/conteudos/$categoria'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/conteudos/$categoria/$slug'
   id:
     | '__root__'
     | '/'
+    | '/ajuda'
     | '/anyconnect'
+    | '/aviso-legal'
     | '/blog'
     | '/calendario'
     | '/configuracoes'
     | '/contato'
+    | '/conteudos'
+    | '/cookies'
     | '/escalas-baixadas'
+    | '/faq'
     | '/favoritos'
     | '/googlef2edc9e3a6b2e4a9.html'
     | '/historico'
@@ -317,6 +410,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/intranet'
     | '/manual'
+    | '/mapa-do-site'
     | '/onboarding'
     | '/privacidade'
     | '/sitemap.xml'
@@ -324,20 +418,27 @@ export interface FileRouteTypes {
     | '/splash'
     | '/termos'
     | '/blog/$slug'
+    | '/conteudos/$categoria'
     | '/escala-viewer/$id'
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/conteudos/$categoria/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AjudaRoute: typeof AjudaRoute
   AnyconnectRoute: typeof AnyconnectRoute
+  AvisoLegalRoute: typeof AvisoLegalRoute
   BlogRoute: typeof BlogRouteWithChildren
   CalendarioRoute: typeof CalendarioRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ContatoRoute: typeof ContatoRoute
+  ConteudosRoute: typeof ConteudosRouteWithChildren
+  CookiesRoute: typeof CookiesRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
+  FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
   Googlef2edc9e3a6b2e4a9DothtmlRoute: typeof Googlef2edc9e3a6b2e4a9DothtmlRoute
   HistoricoRoute: typeof HistoricoRoute
@@ -345,6 +446,7 @@ export interface RootRouteChildren {
   InicioRoute: typeof InicioRoute
   IntranetRoute: typeof IntranetRoute
   ManualRoute: typeof ManualRoute
+  MapaDoSiteRoute: typeof MapaDoSiteRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -408,6 +510,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mapa-do-site': {
+      id: '/mapa-do-site'
+      path: '/mapa-do-site'
+      fullPath: '/mapa-do-site'
+      preLoaderRoute: typeof MapaDoSiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/manual': {
       id: '/manual'
       path: '/manual'
@@ -450,11 +559,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/escalas-baixadas': {
       id: '/escalas-baixadas'
       path: '/escalas-baixadas'
       fullPath: '/escalas-baixadas'
       preLoaderRoute: typeof EscalasBaixadasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conteudos': {
+      id: '/conteudos'
+      path: '/conteudos'
+      fullPath: '/conteudos'
+      preLoaderRoute: typeof ConteudosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contato': {
@@ -485,11 +615,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aviso-legal': {
+      id: '/aviso-legal'
+      path: '/aviso-legal'
+      fullPath: '/aviso-legal'
+      preLoaderRoute: typeof AvisoLegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/anyconnect': {
       id: '/anyconnect'
       path: '/anyconnect'
       fullPath: '/anyconnect'
       preLoaderRoute: typeof AnyconnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ajuda': {
+      id: '/ajuda'
+      path: '/ajuda'
+      fullPath: '/ajuda'
+      preLoaderRoute: typeof AjudaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -527,12 +671,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalaViewerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conteudos/$categoria': {
+      id: '/conteudos/$categoria'
+      path: '/$categoria'
+      fullPath: '/conteudos/$categoria'
+      preLoaderRoute: typeof ConteudosCategoriaRouteImport
+      parentRoute: typeof ConteudosRoute
+    }
     '/blog/$slug': {
       id: '/blog/$slug'
       path: '/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
+    }
+    '/conteudos/$categoria/$slug': {
+      id: '/conteudos/$categoria/$slug'
+      path: '/$slug'
+      fullPath: '/conteudos/$categoria/$slug'
+      preLoaderRoute: typeof ConteudosCategoriaSlugRouteImport
+      parentRoute: typeof ConteudosCategoriaRoute
     }
   }
 }
@@ -547,14 +705,42 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface ConteudosCategoriaRouteChildren {
+  ConteudosCategoriaSlugRoute: typeof ConteudosCategoriaSlugRoute
+}
+
+const ConteudosCategoriaRouteChildren: ConteudosCategoriaRouteChildren = {
+  ConteudosCategoriaSlugRoute: ConteudosCategoriaSlugRoute,
+}
+
+const ConteudosCategoriaRouteWithChildren =
+  ConteudosCategoriaRoute._addFileChildren(ConteudosCategoriaRouteChildren)
+
+interface ConteudosRouteChildren {
+  ConteudosCategoriaRoute: typeof ConteudosCategoriaRouteWithChildren
+}
+
+const ConteudosRouteChildren: ConteudosRouteChildren = {
+  ConteudosCategoriaRoute: ConteudosCategoriaRouteWithChildren,
+}
+
+const ConteudosRouteWithChildren = ConteudosRoute._addFileChildren(
+  ConteudosRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AjudaRoute: AjudaRoute,
   AnyconnectRoute: AnyconnectRoute,
+  AvisoLegalRoute: AvisoLegalRoute,
   BlogRoute: BlogRouteWithChildren,
   CalendarioRoute: CalendarioRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ContatoRoute: ContatoRoute,
+  ConteudosRoute: ConteudosRouteWithChildren,
+  CookiesRoute: CookiesRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
+  FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
   Googlef2edc9e3a6b2e4a9DothtmlRoute: Googlef2edc9e3a6b2e4a9DothtmlRoute,
   HistoricoRoute: HistoricoRoute,
@@ -562,6 +748,7 @@ const rootRouteChildren: RootRouteChildren = {
   InicioRoute: InicioRoute,
   IntranetRoute: IntranetRoute,
   ManualRoute: ManualRoute,
+  MapaDoSiteRoute: MapaDoSiteRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
