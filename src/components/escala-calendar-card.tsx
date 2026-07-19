@@ -570,7 +570,7 @@ export function EscalaCalendarCard() {
 
 
 
-          const baseClass = "relative mx-auto flex h-10 w-10 items-center justify-center";
+          const baseClass = "relative mx-auto flex aspect-square w-full min-h-[40px] sm:min-h-[48px] items-center justify-center";
           const ariaLabel = dia
             ? `${cell.date.getDate()} — ${dia.plantoes.length} plantão(ões)`
             : `${cell.date.getDate()}`;
