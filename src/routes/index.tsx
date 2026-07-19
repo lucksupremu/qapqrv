@@ -5,7 +5,6 @@ import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { toast } from "sonner";
 import {
   CalendarPlus,
-  CalendarPlus,
   Menu,
   Globe,
   Mail,
