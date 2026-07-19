@@ -3,7 +3,7 @@ import { AppHeader } from "@/components/app-header";
 import { CATEGORIAS, ARTIGOS } from "@/content";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
-export const Route = createFileRoute("/conteudos")({
+export const Route = createFileRoute("/conteudos/")({
   head: () => ({
     meta: [
       { title: "Central de Conteúdo — QAP, QRV!" },

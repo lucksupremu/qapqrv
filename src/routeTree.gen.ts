@@ -26,7 +26,6 @@ import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EscalasBaixadasRouteImport } from './routes/escalas-baixadas'
 import { Route as CookiesRouteImport } from './routes/cookies'
-import { Route as ConteudosRouteImport } from './routes/conteudos'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as CalendarioRouteImport } from './routes/calendario'
@@ -35,6 +34,7 @@ import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AnyconnectRouteImport } from './routes/anyconnect'
 import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConteudosIndexRouteImport } from './routes/conteudos.index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
@@ -129,11 +129,6 @@ const CookiesRoute = CookiesRouteImport.update({
   path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConteudosRoute = ConteudosRouteImport.update({
-  id: '/conteudos',
-  path: '/conteudos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -172,6 +167,11 @@ const AjudaRoute = AjudaRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConteudosIndexRoute = ConteudosIndexRouteImport.update({
+  id: '/conteudos/',
+  path: '/conteudos/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FerramentaMinhaLocalizacaoRoute =
@@ -221,7 +221,6 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
-  '/conteudos': typeof ConteudosRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/faq': typeof FaqRoute
@@ -245,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/conteudos/': typeof ConteudosIndexRoute
   '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
 }
 export interface FileRoutesByTo {
@@ -256,7 +256,6 @@ export interface FileRoutesByTo {
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
-  '/conteudos': typeof ConteudosRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/faq': typeof FaqRoute
@@ -280,6 +279,7 @@ export interface FileRoutesByTo {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/conteudos': typeof ConteudosIndexRoute
   '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
 }
 export interface FileRoutesById {
@@ -292,7 +292,6 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
-  '/conteudos': typeof ConteudosRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/escalas-baixadas': typeof EscalasBaixadasRoute
   '/faq': typeof FaqRoute
@@ -316,6 +315,7 @@ export interface FileRoutesById {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/conteudos/': typeof ConteudosIndexRoute
   '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
 }
 export interface FileRouteTypes {
@@ -329,7 +329,6 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/configuracoes'
     | '/contato'
-    | '/conteudos'
     | '/cookies'
     | '/escalas-baixadas'
     | '/faq'
@@ -353,6 +352,7 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/conteudos/'
     | '/conteudos/$categoria/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -364,7 +364,6 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/configuracoes'
     | '/contato'
-    | '/conteudos'
     | '/cookies'
     | '/escalas-baixadas'
     | '/faq'
@@ -388,6 +387,7 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/conteudos'
     | '/conteudos/$categoria/$slug'
   id:
     | '__root__'
@@ -399,7 +399,6 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/configuracoes'
     | '/contato'
-    | '/conteudos'
     | '/cookies'
     | '/escalas-baixadas'
     | '/faq'
@@ -423,6 +422,7 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/conteudos/'
     | '/conteudos/$categoria/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -435,7 +435,6 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ContatoRoute: typeof ContatoRoute
-  ConteudosRoute: typeof ConteudosRouteWithChildren
   CookiesRoute: typeof CookiesRoute
   EscalasBaixadasRoute: typeof EscalasBaixadasRoute
   FaqRoute: typeof FaqRoute
@@ -457,6 +456,7 @@ export interface RootRouteChildren {
   FerramentaSlugRoute: typeof FerramentaSlugRoute
   FerramentaConsultaEscalaRoute: typeof FerramentaConsultaEscalaRoute
   FerramentaMinhaLocalizacaoRoute: typeof FerramentaMinhaLocalizacaoRoute
+  ConteudosIndexRoute: typeof ConteudosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -580,13 +580,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/conteudos': {
-      id: '/conteudos'
-      path: '/conteudos'
-      fullPath: '/conteudos'
-      preLoaderRoute: typeof ConteudosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contato': {
       id: '/contato'
       path: '/contato'
@@ -641,6 +634,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conteudos/': {
+      id: '/conteudos/'
+      path: '/conteudos'
+      fullPath: '/conteudos/'
+      preLoaderRoute: typeof ConteudosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ferramenta/minha-localizacao': {
@@ -705,29 +705,6 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
-interface ConteudosCategoriaRouteChildren {
-  ConteudosCategoriaSlugRoute: typeof ConteudosCategoriaSlugRoute
-}
-
-const ConteudosCategoriaRouteChildren: ConteudosCategoriaRouteChildren = {
-  ConteudosCategoriaSlugRoute: ConteudosCategoriaSlugRoute,
-}
-
-const ConteudosCategoriaRouteWithChildren =
-  ConteudosCategoriaRoute._addFileChildren(ConteudosCategoriaRouteChildren)
-
-interface ConteudosRouteChildren {
-  ConteudosCategoriaRoute: typeof ConteudosCategoriaRouteWithChildren
-}
-
-const ConteudosRouteChildren: ConteudosRouteChildren = {
-  ConteudosCategoriaRoute: ConteudosCategoriaRouteWithChildren,
-}
-
-const ConteudosRouteWithChildren = ConteudosRoute._addFileChildren(
-  ConteudosRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AjudaRoute: AjudaRoute,
@@ -737,7 +714,6 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ContatoRoute: ContatoRoute,
-  ConteudosRoute: ConteudosRouteWithChildren,
   CookiesRoute: CookiesRoute,
   EscalasBaixadasRoute: EscalasBaixadasRoute,
   FaqRoute: FaqRoute,
@@ -759,6 +735,7 @@ const rootRouteChildren: RootRouteChildren = {
   FerramentaSlugRoute: FerramentaSlugRoute,
   FerramentaConsultaEscalaRoute: FerramentaConsultaEscalaRoute,
   FerramentaMinhaLocalizacaoRoute: FerramentaMinhaLocalizacaoRoute,
+  ConteudosIndexRoute: ConteudosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
