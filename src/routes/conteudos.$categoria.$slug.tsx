@@ -107,7 +107,7 @@ function ArtigoScreen() {
         items={[
           { label: "Início", to: "/" },
           { label: "Conteúdos", to: "/conteudos" },
-          { label: categoria.title, to: "/conteudos/$categoria", ...({} as object) },
+          { label: categoria.title },
           { label: artigo.title },
         ]}
       />
