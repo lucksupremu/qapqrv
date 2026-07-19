@@ -10,6 +10,7 @@ import {
   List,
   Share2,
   CalendarCheck2,
+  Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,7 +40,7 @@ import { cancelForMarca } from "@/lib/notifications-adapter";
 
 
 export const Route = createFileRoute("/calendario")({
-  head: () => ({ meta: [{ title: "Calendário — QAP, QRV!" }] }),
+  head: () => ({ meta: [{ title: "Agenda — QAP, QRV!" }] }),
   component: CalendarScreen,
 });
 
@@ -320,9 +321,15 @@ function CalendarScreen() {
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="flex-1 text-center text-[18px] font-bold" style={{ color: COR_PRIMARY }}>
-          Calendário
-        </h1>
+        <div className="flex-1 flex flex-col items-center">
+          <h1 className="flex items-center gap-1.5 text-[18px] font-bold" style={{ color: COR_PRIMARY }}>
+            <Bell size={14} style={{ color: COR_PRIMARY }} />
+            Agenda
+          </h1>
+          <p className="text-[10.5px] leading-tight text-center" style={{ color: "#5b7a8f" }}>
+            Marque Dejem/Delegada e receba lembretes
+          </p>
+        </div>
         <button
           aria-label="Compartilhar mês"
           onClick={handleShare}

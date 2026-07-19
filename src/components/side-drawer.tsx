@@ -46,12 +46,12 @@ export function useDrawer() {
 }
 
 type Item =
-  | { type: "route"; to: string; label: string; icon: typeof Home }
-  | { type: "external"; href: string; label: string; icon: typeof Home };
+  | { type: "route"; to: string; label: string; icon: typeof Home; hint?: string }
+  | { type: "external"; href: string; label: string; icon: typeof Home; hint?: string };
 
 const grupo1Base: Item[] = [
-  { type: "route", to: "/", label: "Início", icon: Home },
-  { type: "route", to: "/calendario", label: "Calendário", icon: Calendar },
+  { type: "route", to: "/", label: "Início", icon: Home, hint: "Resumo e visão rápida" },
+  { type: "route", to: "/calendario", label: "Agenda", icon: Calendar, hint: "Marcar Dejem/Delegada e lembretes" },
 ];
 const grupo1NativeOnly: Item[] = [
   { type: "route", to: "/escalas-baixadas", label: "Escalas Baixadas", icon: FolderDown },
@@ -132,7 +132,14 @@ function SideDrawer() {
           />
         )}
         <Icon size={20} style={{ color: isActive ? "#2e6b8a" : "#5b7a8f" }} />
-        <span>{it.label}</span>
+        <span className="flex flex-col leading-tight">
+          <span>{it.label}</span>
+          {it.hint && (
+            <span className="text-[11px] font-normal" style={{ color: "#5b7a8f" }}>
+              {it.hint}
+            </span>
+          )}
+        </span>
       </>
     );
 

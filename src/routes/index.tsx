@@ -434,10 +434,26 @@ function HomeScreen() {
 
       {/* MINHA ESCALA — calendário de plantões */}
       <section className="mt-6">
-        <div className="mb-3 flex items-center justify-between px-6">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
-            Minha Escala
-          </h2>
+        <div className="mb-3 flex items-end justify-between px-6 gap-3">
+          <div className="min-w-0">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
+              Minha Escala
+            </h2>
+            <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-500">
+              Visão rápida dos seus plantões deste mês
+            </p>
+          </div>
+          <button
+            onClick={() => navigate({ to: "/calendario" })}
+            className="shrink-0 flex flex-col items-end text-right"
+          >
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">
+              Abrir Agenda →
+            </span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-500">
+              marcar e receber lembretes
+            </span>
+          </button>
         </div>
         <EscalaCalendarCard />
       </section>

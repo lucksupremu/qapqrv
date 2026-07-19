@@ -1,24 +1,34 @@
-## Escopo (opção B aprovada)
+## Objetivo
 
-Edições cirúrgicas em `src/content/artigos.ts` — sem tocar em rotas, sitemap, títulos ou slugs (para não quebrar SEO).
+Deixar claro para o usuário que:
+- O **Calendário da Home** é uma visão rápida (só consulta) dos plantões.
+- A **Agenda** é onde ele efetivamente marca Dejem/Delegada e recebe lembretes/notificações.
 
-### 1. Correções de fato
-- **Linha 21** (guia-dejem-completo): remover "ROTAM" (não existe na PMESP). Trocar por: "rádio-patrulha, policiamento a pé, motopatrulhamento, atendimento e reforços definidos pelo comando local".
-- **Linha 299** (pmesp-canais-oficiais): remover expansão inventada "Portal Virtual do Ensino". Trocar por: "O PVT é o portal de ensino a distância da Corporação, com cursos e material didático."
+## Mudanças
 
-### 2. Enxugar generalidades nos 12 artigos
-Passar em cada artigo cortando/reescrevendo frases vagas que soam a "texto de IA", mantendo o tamanho aproximado mas com linguagem mais concreta. Exemplos do que sai:
-- "reforço em áreas críticas, complemento de policiamento ostensivo" → descrição mais neutra
-- "unidades com déficit de efetivo e demanda operacional intensa" → enxugado
-- "Produtividade não é fazer mais em menos tempo — é proteger o essencial" → cortado
-- Frases de fecho tipo "Deixe o app trabalhar" → removidas ou reescritas
+### 1. Home (`src/routes/index.tsx`) — seção "Minha Escala"
+Substituir o título atual por um bloco com título + subtítulo explicativo + CTA:
 
-### 3. O que NÃO muda
-- Slugs, títulos, categorias, datas, ordem dos artigos
-- Estrutura (TOC, FAQ, related)
-- Nenhum dado numérico novo, nenhuma norma inventada, nenhuma unidade especializada citada sem fonte
+- Título: **"Minha Escala"**
+- Subtítulo pequeno abaixo: *"Visão rápida dos seus plantões deste mês"*
+- Botão/link discreto à direita: **"Abrir Agenda →"** (navega para `/calendario`) com micro-texto: *"marcar e receber lembretes"*
 
-### Resultado esperado
-Conteúdo mais curto em alguns trechos, mais fiel à realidade da PMESP, sem imprecisões factuais. Zero impacto em URLs indexadas.
+### 2. Agenda (`src/routes/calendario.tsx`) — cabeçalho da tela
+- Título: **"Agenda"**
+- Subtítulo logo abaixo: *"Marque seus plantões Dejem/Delegada e receba lembretes automáticos"*
+- Pequeno badge/ícone de sino indicando que essa tela dispara notificações.
 
-Aprove para eu executar.
+### 3. Menu lateral (`src/components/side-drawer.tsx`)
+Ajustar os rótulos/descritivos das duas entradas para reforçar a diferença:
+- **Início** — "Resumo e visão rápida"
+- **Agenda** — "Marcar Dejem/Delegada e lembretes"
+
+### 4. Bottom nav (`src/components/bottom-nav.tsx`)
+Se houver item "Agenda", garantir o label "Agenda" (não "Calendário") para consistência com a nomenclatura da tela.
+
+## Fora de escopo
+- Não altero lógica de notificações, storage de marcas nem layout do calendário em si.
+- Não mexo em cores/tema — só textos, um subtítulo e um link de CTA na Home.
+
+## Verificação
+Após implementar, confiro por screenshot que Home e Agenda mostram os novos textos e que o link "Abrir Agenda" da Home navega corretamente.
