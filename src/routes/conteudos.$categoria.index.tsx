@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCategoria, artigosPorCategoria } from "@/content";
 import { Clock } from "lucide-react";
 
-export const Route = createFileRoute("/conteudos/$categoria")({
+export const Route = createFileRoute("/conteudos/$categoria/")({
   loader: ({ params }) => {
     const cat = getCategoria(params.categoria);
     if (!cat) throw notFound();
