@@ -248,6 +248,7 @@ function HomeScreen() {
             ),
           "Marcar / Desmarcar",
         ),
+      nativeOnly: true,
     },
     {
       label: "Email iNotes",
@@ -260,6 +261,7 @@ function HomeScreen() {
           modo: "webview",
           forceMobileUA: true,
         }),
+      nativeOnly: true,
     },
     {
       label: "Escalas baixadas",
@@ -286,6 +288,7 @@ function HomeScreen() {
           "https://www.ciaf.policiamilitar.sp.gov.br/flp/mobile/mobileview.aspx",
           { titulo: "Folha de Pagamento", modo: "webview", forceMobileUA: true },
         ),
+      nativeOnly: true,
     },
     {
       label: "PVT",
@@ -346,117 +349,148 @@ function HomeScreen() {
 
       
 
-      {/* CONSULTA — card tático com glow dourado */}
-      <section className="px-5 pt-2">
-        <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white dark:border-white/5 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-5 shadow-sm dark:shadow-none">
-          <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl" />
+      {/* CONSULTA — só faz sentido no APK (VPN + download PDF nativo) */}
+      {native && (
+        <section className="px-5 pt-2">
+          <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white dark:border-white/5 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-5 shadow-sm dark:shadow-none">
+            <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl" />
 
-          <div className="mb-4 flex items-center justify-between">
-            <label
-              htmlFor="id-escala-input"
-              className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-500"
-            >
-              Consulta escala dejem/delegada
-            </label>
-            <InlineVpnChip />
+            <div className="mb-4 flex items-center justify-between">
+              <label
+                htmlFor="id-escala-input"
+                className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-500"
+              >
+                Consulta escala dejem/delegada
+              </label>
+              <InlineVpnChip />
+            </div>
+
+            <div className="relative flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                />
+                <input
+                  id="id-escala-input"
+                  inputMode="numeric"
+                  placeholder="Insira o ID da Escala"
+                  value={idEscala}
+                  onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
+                  onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
+                  className="w-full rounded-2xl border border-slate-300 bg-white dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-500 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
+                />
+              </div>
+              <button
+                onClick={handleConsultar}
+                disabled={consultando}
+                aria-label="Consultar"
+                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-black shadow-lg shadow-amber-500/20 transition active:scale-95 disabled:opacity-70"
+              >
+                {consultando ? (
+                  <Loader2 size={20} className="animate-spin" strokeWidth={3} />
+                ) : (
+                  <ArrowRight size={20} strokeWidth={3} />
+                )}
+              </button>
+            </div>
+
+            <VpnDetailRow />
           </div>
+        </section>
+      )}
 
-          <div className="relative flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search
-                size={16}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-              />
-              <input
-                id="id-escala-input"
-                inputMode="numeric"
-                placeholder="Insira o ID da Escala"
-                value={idEscala}
-                onChange={(e) => setIdEscala(e.target.value.replace(/\D/g, ""))}
-                onKeyDown={(e) => e.key === "Enter" && handleConsultar()}
-                className="w-full rounded-2xl border border-slate-300 bg-white dark:border-slate-800/80 dark:bg-[#020617] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white placeholder:font-normal placeholder:text-slate-500 dark:placeholder:text-slate-600 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-4 focus:ring-amber-500/10"
-              />
+      {/* Na web, "Minha Escala" é o destaque principal — vem antes dos links. */}
+      {!native && (
+        <section className="mt-4">
+          <div className="mb-3 flex items-end justify-between px-6 gap-3">
+            <div className="min-w-0">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
+                Minha Escala
+              </h2>
+              <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-500">
+                Visão rápida dos seus plantões deste mês
+              </p>
             </div>
             <button
-              onClick={handleConsultar}
-              disabled={consultando}
-              aria-label="Consultar"
-              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-black shadow-lg shadow-amber-500/20 transition active:scale-95 disabled:opacity-70"
+              onClick={() => navigate({ to: "/calendario" })}
+              className="shrink-0 flex flex-col items-end text-right"
             >
-              {consultando ? (
-                <Loader2 size={20} className="animate-spin" strokeWidth={3} />
-              ) : (
-                <ArrowRight size={20} strokeWidth={3} />
-              )}
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">
+                Abrir Agenda →
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-500">
+                marcar e receber lembretes
+              </span>
             </button>
           </div>
+          <EscalaCalendarCard />
+        </section>
+      )}
 
-          <VpnDetailRow />
-        </div>
-      </section>
-
-
-
-
-      {/* ACESSO RÁPIDO — grid tático */}
-      <section className="px-5 mt-6">
-        <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
-            Acesso Rápido
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {blocos.map((b, i) => {
-            const gold = i % 2 === 0;
-            return (
-              <button
-                key={b.label}
-                onClick={b.onClick}
-                className="group flex flex-col items-start gap-3 rounded-3xl border border-slate-200 bg-white dark:border-white/5 dark:bg-slate-900/40 p-4 text-left shadow-sm dark:shadow-none transition-all hover:bg-slate-50 dark:hover:bg-slate-900/70 active:scale-95"
-              >
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
-                    gold
-                      ? "bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-500"
-                      : "bg-blue-500/15 border-blue-500/30 text-blue-700 dark:text-blue-400"
-                  }`}
-                >
-                  <b.icon size={20} strokeWidth={2} />
-                </div>
-                <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-900 dark:text-slate-200 whitespace-pre-line">
-                  {b.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* MINHA ESCALA — calendário de plantões */}
-      <section className="mt-6">
-        <div className="mb-3 flex items-end justify-between px-6 gap-3">
-          <div className="min-w-0">
+      {/* ACESSO RÁPIDO / LINKS ÚTEIS — grid */}
+      {blocos.length > 0 && (
+        <section className="px-5 mt-6">
+          <div className="mb-4 flex items-center justify-between px-1">
             <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
-              Minha Escala
+              {native ? "Acesso Rápido" : "Links úteis"}
             </h2>
-            <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-500">
-              Visão rápida dos seus plantões deste mês
-            </p>
           </div>
-          <button
-            onClick={() => navigate({ to: "/calendario" })}
-            className="shrink-0 flex flex-col items-end text-right"
-          >
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">
-              Abrir Agenda →
-            </span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-500">
-              marcar e receber lembretes
-            </span>
-          </button>
-        </div>
-        <EscalaCalendarCard />
-      </section>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {blocos.map((b, i) => {
+              const gold = i % 2 === 0;
+              return (
+                <button
+                  key={b.label}
+                  onClick={b.onClick}
+                  className="group flex flex-col items-start gap-3 rounded-3xl border border-slate-200 bg-white dark:border-white/5 dark:bg-slate-900/40 p-4 text-left shadow-sm dark:shadow-none transition-all hover:bg-slate-50 dark:hover:bg-slate-900/70 active:scale-95"
+                >
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
+                      gold
+                        ? "bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-500"
+                        : "bg-blue-500/15 border-blue-500/30 text-blue-700 dark:text-blue-400"
+                    }`}
+                  >
+                    <b.icon size={20} strokeWidth={2} />
+                  </div>
+                  <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-slate-900 dark:text-slate-200 whitespace-pre-line">
+                    {b.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* MINHA ESCALA no APK — permanece após o grid */}
+      {native && (
+        <section className="mt-6">
+          <div className="mb-3 flex items-end justify-between px-6 gap-3">
+            <div className="min-w-0">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700 dark:text-slate-400">
+                Minha Escala
+              </h2>
+              <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-500">
+                Visão rápida dos seus plantões deste mês
+              </p>
+            </div>
+            <button
+              onClick={() => navigate({ to: "/calendario" })}
+              className="shrink-0 flex flex-col items-end text-right"
+            >
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">
+                Abrir Agenda →
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-500">
+                marcar e receber lembretes
+              </span>
+            </button>
+          </div>
+          <EscalaCalendarCard />
+        </section>
+      )}
 
     </div>
   );
