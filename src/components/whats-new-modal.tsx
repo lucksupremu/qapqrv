@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { APP_VERSION, CHANGELOG, type ChangelogEntry } from "@/lib/changelog";
+import { isFirstSession } from "@/lib/push-client";
 
 const STORAGE_KEY = "whats_new_seen_version";
 
