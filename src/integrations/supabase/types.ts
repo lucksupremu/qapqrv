@@ -136,6 +136,54 @@ export type Database = {
         }
         Relationships: []
       }
+      push_reminders: {
+        Row: {
+          body: string
+          created_at: string
+          device_id: string
+          error: string | null
+          id: string
+          marca_key: string
+          reminder_index: number
+          sent_at: string | null
+          tag: string | null
+          title: string
+          updated_at: string
+          url: string
+          when_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          device_id: string
+          error?: string | null
+          id?: string
+          marca_key: string
+          reminder_index?: number
+          sent_at?: string | null
+          tag?: string | null
+          title: string
+          updated_at?: string
+          url?: string
+          when_at: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          device_id?: string
+          error?: string | null
+          id?: string
+          marca_key?: string
+          reminder_index?: number
+          sent_at?: string | null
+          tag?: string | null
+          title?: string
+          updated_at?: string
+          url?: string
+          when_at?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
