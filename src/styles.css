@@ -117,6 +117,17 @@
   --brand-navy-foreground: oklch(0.99 0 0);
   --brand-blue: oklch(0.5 0.12 230);
   --brand-blue-foreground: oklch(0.99 0 0);
+
+  /* Tokens táticos — paleta carvão/âmbar para home modernizada */
+  --tactical-bg: #f4f6f8;
+  --tactical-card: #ffffff;
+  --tactical-card-2: #eef1f5;
+  --tactical-accent: #e85d3a;
+  --tactical-accent-hover: #d44d2e;
+  --tactical-text: #1a1a1a;
+  --tactical-muted: #5b626a;
+  --tactical-border: #e2e5e9;
+  --tactical-glow: 0 0 24px -8px rgba(232, 93, 58, 0.35);
 }
 
 /* ============================ DARK MODE ============================ */
