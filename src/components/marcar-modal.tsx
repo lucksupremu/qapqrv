@@ -200,12 +200,25 @@ export function MarcarModal({
       if (getPermission() === "default") {
         await requestNotificationPermission();
       }
+      const buildTitle = () => `Lembrete — ${tipoLabel}`;
       scheduleRemindersForMarca(marca.id, isoReminders, (whenISO) => ({
-        title: `Lembrete — ${tipoLabel}`,
+        title: buildTitle(),
         body: buildBody(whenISO),
       }));
+      // Backup no servidor: entrega via Web Push mesmo com o app fechado.
+      void scheduleServerReminders(
+        marca.id,
+        isoReminders.map((whenISO) => ({
+          when_at: whenISO,
+          title: buildTitle(),
+          body: buildBody(whenISO),
+          url: "/calendario",
+          tag: `marca-${marca.id}`,
+        })),
+      );
     } else {
       scheduleRemindersForMarca(marca.id, [], () => ({ title: "", body: "" }));
+      void cancelServerReminders(marca.id);
     }
 
 
