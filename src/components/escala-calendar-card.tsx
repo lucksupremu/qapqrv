@@ -237,7 +237,7 @@ export function EscalaCalendarCard() {
 
   return (
     <div
-      className="escala-light-scope mx-4 mt-6 rounded-2xl bg-card p-3"
+      className="escala-light-scope mx-0 mt-6 w-full rounded-none bg-card p-2 sm:mx-4 sm:rounded-2xl sm:p-3"
       style={{ boxShadow: "var(--shadow-card)" }}
     >
       {/* Header */}
@@ -316,11 +316,11 @@ export function EscalaCalendarCard() {
       )}
 
       {/* Dias da semana */}
-      <div className="mt-2 grid grid-cols-7 gap-1">
+      <div className="mt-2 grid grid-cols-7 gap-0.5 sm:gap-1">
         {DIAS.map((d, i) => (
           <div
             key={d}
-            className="text-center text-[10px] font-bold tracking-wider"
+            className="text-center text-[10px] sm:text-[11px] font-bold tracking-wider"
             style={{ color: i === 0 || i === 6 ? "#c44569" : "#5b7a8f" }}
           >
             {d}
@@ -330,7 +330,7 @@ export function EscalaCalendarCard() {
 
 
       {/* Grid */}
-      <div className="mt-1 grid grid-cols-7 gap-1">
+      <div className="mt-1 grid grid-cols-7 gap-0.5 sm:gap-1">
         {grid.map((cell, i) => {
           const key = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}`;
           const dia = plantoes.get(key);
@@ -389,7 +389,7 @@ export function EscalaCalendarCard() {
           const cellInner = (
             <>
               <span
-                className="relative flex h-9 w-9 items-center justify-center rounded-md"
+                className="relative flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-md"
                 style={{ ...borderStyle }}
               >
                 {temAvulso && (
@@ -403,8 +403,8 @@ export function EscalaCalendarCard() {
                       alt=""
                       draggable={false}
                       style={{
-                        width: 38,
-                        height: 38,
+                        width: "92%",
+                        height: "92%",
                         objectFit: "contain",
                         pointerEvents: "none",
                       }}
@@ -415,9 +415,9 @@ export function EscalaCalendarCard() {
                       className="absolute"
                       style={{
                         left: "50%",
-                        bottom: 3,
+                        bottom: "12%",
                         transform: "translateX(-50%)",
-                        width: 22,
+                        width: "55%",
                         height: 3,
                         background: postItAccent,
                         borderRadius: 2,
@@ -427,7 +427,7 @@ export function EscalaCalendarCard() {
                   </span>
                 )}
                 <span
-                  className={`relative text-[13px] ${
+                  className={`relative text-[13px] sm:text-[15px] ${
                     !cell.inMonth
                       ? "text-muted-foreground/60"
                       : temAvulso
@@ -443,7 +443,7 @@ export function EscalaCalendarCard() {
                   {isToday && (
                     <span
                       aria-hidden
-                      className="absolute -bottom-1 left-1/2 h-[3px] w-5 -translate-x-1/2 rounded-full"
+                      className="absolute -bottom-1 left-1/2 h-[3px] w-5 sm:w-6 -translate-x-1/2 rounded-full"
                       style={{ background: COR_PRIMARY }}
                     />
                   )}
@@ -470,8 +470,8 @@ export function EscalaCalendarCard() {
                         bottom: 0,
                         left: "50%",
                         transform: "translateX(-50%)",
-                        width: 38,
-                        height: 38,
+                        width: "92%",
+                        height: "92%",
                         objectFit: "contain",
                         zIndex: 0,
                       }}
@@ -479,8 +479,8 @@ export function EscalaCalendarCard() {
                     <span
                       className="absolute left-0 right-0 text-center font-bold text-[#3a2a00] pointer-events-none"
                       style={{
-                        bottom: 3,
-                        fontSize: 6,
+                        bottom: "10%",
+                        fontSize: "clamp(5px, 2.2vw, 8px)",
                         lineHeight: 1,
                         zIndex: 3,
                         transform: "rotate(-3deg)",
@@ -497,10 +497,10 @@ export function EscalaCalendarCard() {
                     aria-hidden
                     className="absolute pointer-events-none"
                     style={{
-                      bottom: -4,
-                      right: -4,
-                      width: 20,
-                      height: 20,
+                      bottom: "-10%",
+                      right: "-10%",
+                      width: "55%",
+                      height: "55%",
                       zIndex: 7,
                     }}
                   >
@@ -522,7 +522,7 @@ export function EscalaCalendarCard() {
                         top: "45%",
                         left: "50%",
                         transform: "translate(-50%, -50%) rotate(-6deg)",
-                        fontSize: 5,
+                        fontSize: "clamp(4px, 1.8vw, 6px)",
                         lineHeight: 1,
                         fontWeight: 700,
                         color: "#3a2a00",
@@ -570,7 +570,7 @@ export function EscalaCalendarCard() {
 
 
 
-          const baseClass = "relative mx-auto flex h-10 w-10 items-center justify-center";
+          const baseClass = "relative mx-auto flex aspect-square w-full min-h-[40px] sm:min-h-[48px] items-center justify-center";
           const ariaLabel = dia
             ? `${cell.date.getDate()} — ${dia.plantoes.length} plantão(ões)`
             : `${cell.date.getDate()}`;

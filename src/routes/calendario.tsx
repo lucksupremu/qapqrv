@@ -501,7 +501,7 @@ function CalendarScreen() {
             key={`${cursor.getFullYear()}-${cursor.getMonth()}`}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
-            className={`mx-3 mt-3 rounded-[20px] bg-[var(--surface)] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.4)] ${
+            className={`mx-0 mt-3 rounded-none bg-[var(--surface)] p-2 shadow-[0_2px_12px_rgba(0,0,0,0.4)] sm:mx-3 sm:rounded-[20px] sm:p-3 ${
               slideDir === "left"
                 ? "animate-in slide-in-from-right-4 fade-in duration-200"
                 : slideDir === "right"
@@ -509,7 +509,7 @@ function CalendarScreen() {
                   : ""
             }`}
           >
-            <div className="grid grid-cols-7 gap-1 pb-2">
+            <div className="grid grid-cols-7 gap-0.5 pb-2 sm:gap-1">
               {DIAS.map((d, i) => (
                 <div
                   key={d}
@@ -520,7 +520,7 @@ function CalendarScreen() {
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
               {grid.map((cell, i) => {
                 const items = getMarcasDoDia(cell.date);
                 const isToday = sameDay(cell.date, today);
@@ -531,7 +531,7 @@ function CalendarScreen() {
                   <button
                     key={i}
                     onClick={() => handleDayClick(cell)}
-                    className="relative mx-auto flex h-11 w-11 flex-col items-center justify-center rounded-full text-[14px] font-semibold transition active:scale-90"
+                    className="relative mx-auto flex aspect-square w-full min-h-[44px] flex-col items-center justify-center rounded-full text-[14px] font-semibold transition active:scale-90"
                     style={{
                       background: isSelected
                         ? COR_PRIMARY
