@@ -93,7 +93,24 @@ export function listarProximosEventos(limite = 5): EventoProximo[] {
       };
     });
 
-  const todos = [...plantoes, ...compromissos].sort((a, b) => a.data.getTime() - b.data.getTime());
+  const marcas: EventoProximo[] = loadMarcas()
+    .filter((m) => new Date(m.data).getTime() >= inicioHoje)
+    .map((m) => {
+      const d = new Date(m.data);
+      return {
+        id: m.id,
+        titulo: TIPO_LABEL_SHORT[m.tipo] || m.tipo,
+        data: d,
+        hora: "",
+        tipo: "marca",
+        cor: MARCA_COR[m.tipo] || "#94A3B8",
+        diasRestantes: diasRestantes(d),
+      };
+    });
+
+  const todos = [...plantoes, ...compromissos, ...marcas].sort(
+    (a, b) => a.data.getTime() - b.data.getTime(),
+  );
 
   return todos.slice(0, limite);
 }
