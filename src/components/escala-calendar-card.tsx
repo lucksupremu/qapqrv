@@ -316,11 +316,11 @@ export function EscalaCalendarCard() {
       )}
 
       {/* Dias da semana */}
-      <div className="mt-2 grid grid-cols-7 gap-1">
+      <div className="mt-2 grid grid-cols-7 gap-0.5 sm:gap-1">
         {DIAS.map((d, i) => (
           <div
             key={d}
-            className="text-center text-[10px] font-bold tracking-wider"
+            className="text-center text-[10px] sm:text-[11px] font-bold tracking-wider"
             style={{ color: i === 0 || i === 6 ? "#c44569" : "#5b7a8f" }}
           >
             {d}
