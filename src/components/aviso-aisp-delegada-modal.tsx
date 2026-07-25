@@ -7,14 +7,19 @@ import { X, Download, Megaphone } from "lucide-react";
 
 const IMAGE_URL = "/aisp-delegada-jul26.jpg";
 const STORAGE_PREFIX = "aviso_aisp_delegada_v2_";
-const ACTIVE_DAYS = ["2026-07-25", "2026-07-26"];
+const AUTO_OPEN_DAYS = ["2026-07-25", "2026-07-26"];
+const BUTTON_VISIBLE_UNTIL = "2026-07-31"; // botão no topo fica até o fim de 31/07
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
-function isActiveToday() {
-  return ACTIVE_DAYS.includes(todayKey());
+function shouldAutoOpen() {
+  return AUTO_OPEN_DAYS.includes(todayKey());
 }
+function isButtonVisible() {
+  return todayKey() <= BUTTON_VISIBLE_UNTIL;
+}
+
 function wasDismissedToday() {
   try {
     return localStorage.getItem(STORAGE_PREFIX + todayKey()) === "1";
@@ -29,8 +34,7 @@ export function AvisoAispDelegadaModal() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!isActiveToday()) return;
-    setVisibleButton(true);
+    if (isButtonVisible()) setVisibleButton(true);
 
     const params = new URLSearchParams(window.location.search);
     const forced = params.get("aviso") === "aisp-delegada";
@@ -41,11 +45,15 @@ export function AvisoAispDelegadaModal() {
       window.history.replaceState({}, "", url);
     }
 
-    if (!forced && wasDismissedToday()) return;
+    if (!forced) {
+      if (!shouldAutoOpen()) return;
+      if (wasDismissedToday()) return;
+    }
 
     const t = window.setTimeout(() => setOpen(true), 400);
     return () => window.clearTimeout(t);
   }, []);
+
 
   const close = () => {
     try {
