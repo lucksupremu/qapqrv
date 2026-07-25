@@ -28,7 +28,10 @@ Deno.serve(async (req) => {
   try {
     const expected = Deno.env.get("BROADCAST_TOKEN");
     const provided = req.headers.get("x-broadcast-token");
-    if (!expected || provided !== expected) {
+    const authHeader = req.headers.get("authorization") ?? "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const isService = serviceKey && authHeader === `Bearer ${serviceKey}`;
+    if (!isService && (!expected || provided !== expected)) {
       return new Response(JSON.stringify({ error: "unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
