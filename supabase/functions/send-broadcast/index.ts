@@ -26,8 +26,14 @@ type Sub = { id: string; endpoint: string; p256dh: string; auth: string };
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    // Auth desabilitada temporariamente para disparo único do broadcast AISP.
-    // TODO: reativar checagem de BROADCAST_TOKEN após o envio.
+    const expected = Deno.env.get("BROADCAST_TOKEN");
+    const provided = req.headers.get("x-broadcast-token");
+    if (!expected || provided !== expected) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const body = await req.json();
     const payload = {
