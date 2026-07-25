@@ -34,8 +34,7 @@ export function AvisoAispDelegadaModal() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!isActiveToday()) return;
-    setVisibleButton(true);
+    if (isButtonVisible()) setVisibleButton(true);
 
     const params = new URLSearchParams(window.location.search);
     const forced = params.get("aviso") === "aisp-delegada";
@@ -46,11 +45,15 @@ export function AvisoAispDelegadaModal() {
       window.history.replaceState({}, "", url);
     }
 
-    if (!forced && wasDismissedToday()) return;
+    if (!forced) {
+      if (!shouldAutoOpen()) return;
+      if (wasDismissedToday()) return;
+    }
 
     const t = window.setTimeout(() => setOpen(true), 400);
     return () => window.clearTimeout(t);
   }, []);
+
 
   const close = () => {
     try {
