@@ -190,6 +190,7 @@ self.addEventListener("push", (event) => {
     body: payload.body || "",
     icon: payload.icon || "/notif-icon-192.png",
     badge: payload.badge || "/notif-badge-72.png",
+    image: payload.image || undefined,
     tag: payload.tag || `push-${Date.now()}`,
     data: { url: payload.url || "/" },
     requireInteraction: false,
