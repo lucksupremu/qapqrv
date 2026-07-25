@@ -37,6 +37,7 @@ import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 import { InstallPushOptIn } from "@/components/install-push-opt-in";
 import { ShareAppBanner } from "@/components/share-app-banner";
+import { AvisoAispDelegadaModal } from "@/components/aviso-aisp-delegada-modal";
 
 import { usePwaInstall } from "@/hooks/use-pwa-install";
 
@@ -342,6 +343,7 @@ function HomeScreen() {
       <PwaInstallBanner />
       <InstallPushOptIn />
       <ShareAppBanner />
+      <AvisoAispDelegadaModal />
 
 
 
