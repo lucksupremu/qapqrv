@@ -339,11 +339,11 @@ function HomeScreen() {
         </div>
       </header>
 
+      <AvisoAispDelegadaModal />
       <BrowserHintBanner />
       <PwaInstallBanner />
       <InstallPushOptIn />
       <ShareAppBanner />
-      <AvisoAispDelegadaModal />
 
 
 
