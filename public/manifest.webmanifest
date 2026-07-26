@@ -1,6 +1,6 @@
 {
-  "name": "QAP, QRV!",
-  "short_name": "QAP, QRV!",
+  "name": "MIKE TOOLS",
+  "short_name": "MIKE TOOLS",
   "id": "/?source=pwa",
   "description": "Ferramentas operacionais para o policial militar: calendário de escalas, intranet PMESP, lembretes e cálculo de dejem/delegada.",
   "start_url": "/?source=pwa",
@@ -27,7 +27,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Tela inicial do QAP, QRV!"
+      "label": "Tela inicial do MIKE TOOLS"
     }
   ],
   "shortcuts": [

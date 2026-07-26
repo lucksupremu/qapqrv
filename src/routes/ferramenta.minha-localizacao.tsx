@@ -38,7 +38,7 @@ const SLUG = "minha-localizacao";
 export const Route = createFileRoute("/ferramenta/minha-localizacao")({
   head: () => ({
     meta: [
-      { title: "Minha Localização — QAP, QRV!" },
+      { title: "Minha Localização — MIKE TOOLS" },
       {
         name: "description",
         content:

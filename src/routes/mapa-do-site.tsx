@@ -6,8 +6,8 @@ import { CATEGORIAS, ARTIGOS } from "@/content";
 export const Route = createFileRoute("/mapa-do-site")({
   head: () => ({
     meta: [
-      { title: "Mapa do site — QAP, QRV!" },
-      { name: "description", content: "Todas as páginas públicas do QAP, QRV!: conteúdos, ajuda, ferramentas, institucional e legal." },
+      { title: "Mapa do site — MIKE TOOLS" },
+      { name: "description", content: "Todas as páginas públicas do MIKE TOOLS: conteúdos, ajuda, ferramentas, institucional e legal." },
       { property: "og:url", content: "https://miketools.top/mapa-do-site" },
     ],
     links: [{ rel: "canonical", href: "https://miketools.top/mapa-do-site" }],

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/conteudos/$categoria/$slug")({
     const url = `https://miketools.top/conteudos/${categoria.slug}/${artigo.slug}`;
     return {
       meta: [
-        { title: `${artigo.title} — QAP, QRV!` },
+        { title: `${artigo.title} — MIKE TOOLS` },
         { name: "description", content: artigo.subtitle },
         { property: "og:title", content: artigo.title },
         { property: "og:description", content: artigo.subtitle },
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/conteudos/$categoria/$slug")({
             description: artigo.subtitle,
             datePublished: artigo.date,
             author: { "@type": "Organization", name: artigo.author },
-            publisher: { "@type": "Organization", name: "QAP, QRV!" },
+            publisher: { "@type": "Organization", name: "MIKE TOOLS" },
             mainEntityOfPage: url,
           }),
         },

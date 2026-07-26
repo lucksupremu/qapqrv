@@ -11,7 +11,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-border/60 bg-muted/30 px-5 py-6 text-sm text-muted-foreground">
       <div className="mx-auto max-w-3xl">
-        <p className="text-base font-bold text-foreground">QAP, QRV!</p>
+        <p className="text-base font-bold text-foreground">MIKE TOOLS</p>
 
         <button
           type="button"
@@ -70,7 +70,7 @@ export function SiteFooter() {
             </div>
 
             <p className="pt-2 text-[11px] text-muted-foreground/80">
-              © {year} QAP, QRV! · Todos os direitos reservados · v3.0
+              © {year} MIKE TOOLS · Todos os direitos reservados · v3.0
             </p>
           </div>
         </div>

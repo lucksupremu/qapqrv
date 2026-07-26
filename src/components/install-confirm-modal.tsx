@@ -88,7 +88,7 @@ export function InstallConfirmModal() {
               className="text-[17px] font-bold"
               style={{ color: "#0c2340" }}
             >
-              Instalar o QAP, QRV!?
+              Instalar o MIKE TOOLS?
             </h2>
             <p className="mt-1 text-[13px]" style={{ color: "#5b7a8f" }}>
               Acesso rápido pela tela inicial, tela cheia e funciona mesmo sem

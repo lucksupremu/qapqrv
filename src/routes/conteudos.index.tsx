@@ -6,9 +6,9 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 export const Route = createFileRoute("/conteudos/")({
   head: () => ({
     meta: [
-      { title: "Central de Conteúdo — QAP, QRV!" },
-      { name: "description", content: "Guias, tutoriais e artigos sobre DEJEM, Operação Delegada, escalas, VPN AnyConnect, produtividade e ferramentas do QAP, QRV!." },
-      { property: "og:title", content: "Central de Conteúdo — QAP, QRV!" },
+      { title: "Central de Conteúdo — MIKE TOOLS" },
+      { name: "description", content: "Guias, tutoriais e artigos sobre DEJEM, Operação Delegada, escalas, VPN AnyConnect, produtividade e ferramentas do MIKE TOOLS." },
+      { property: "og:title", content: "Central de Conteúdo — MIKE TOOLS" },
       { property: "og:url", content: "https://miketools.top/conteudos" },
       { property: "og:type", content: "website" },
     ],
@@ -24,7 +24,7 @@ function ConteudosIndex() {
       <Breadcrumbs items={[{ label: "Início", to: "/" }, { label: "Conteúdos" }]} />
       <main className="mx-auto max-w-3xl px-5 py-5">
         <p className="mb-5 text-sm text-muted-foreground">
-          Reunimos aqui tudo o que você precisa saber para aproveitar o QAP, QRV! e o cotidiano operacional na PMESP. Escolha uma categoria abaixo.
+          Reunimos aqui tudo o que você precisa saber para aproveitar o MIKE TOOLS e o cotidiano operacional na PMESP. Escolha uma categoria abaixo.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {CATEGORIAS.map((c) => {

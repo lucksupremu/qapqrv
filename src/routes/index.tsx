@@ -44,7 +44,7 @@ import { usePwaInstall } from "@/hooks/use-pwa-install";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "QAP, QRV! — Escalas PMESP" },
+      { title: "MIKE TOOLS — Escalas PMESP" },
       {
         name: "description",
         content: "Acompanhe suas escalas Dejem e Delegada da PMESP em um só lugar.",
@@ -311,13 +311,13 @@ function HomeScreen() {
             <div className="absolute inset-0 rounded-full bg-amber-500/25 blur-lg animate-pulse" />
             <img
               src={appLogo}
-              alt="QAP, QRV!"
+              alt="MIKE TOOLS"
               className="relative h-11 w-11 rounded-full object-cover border border-amber-500/40 no-dark-filter"
             />
           </div>
           <div>
             <h1 className="font-display text-[18px] font-extrabold uppercase tracking-tight leading-none text-slate-900 dark:text-white">
-              QAP, QRV!
+              MIKE TOOLS
             </h1>
           </div>
         </div>

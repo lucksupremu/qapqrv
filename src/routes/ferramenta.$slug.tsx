@@ -23,7 +23,7 @@ export const Route = createFileRoute("/ferramenta/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.tool.name} — QAP, QRV!` },
+          { title: `${loaderData.tool.name} — MIKE TOOLS` },
           { name: "description", content: loaderData.tool.description },
         ]
       : [],

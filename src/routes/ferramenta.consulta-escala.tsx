@@ -38,7 +38,7 @@ const idSchema = z
 export const Route = createFileRoute("/ferramenta/consulta-escala")({
   head: () => ({
     meta: [
-      { title: "Consulta de Escala — QAP, QRV!" },
+      { title: "Consulta de Escala — MIKE TOOLS" },
       {
         name: "description",
         content:

@@ -4,11 +4,11 @@ import { ArrowLeft } from "lucide-react";
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
-      { title: "Política de Privacidade — QAP, QRV!" },
+      { title: "Política de Privacidade — MIKE TOOLS" },
       {
         name: "description",
         content:
-          "Política de Privacidade do QAP, QRV!: dados, cookies, Google AdSense, AdMob, permissões, LGPD e contato.",
+          "Política de Privacidade do MIKE TOOLS: dados, cookies, Google AdSense, AdMob, permissões, LGPD e contato.",
       },
     ],
   }),
@@ -47,14 +47,14 @@ function PrivacidadeScreen() {
 
       <div className="mx-4 mt-2 rounded-[20px] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-bottom-2 duration-300">
         <h1 className="text-[20px] font-extrabold" style={{ color: "#2e6b8a" }}>
-          Política de Privacidade — QAP, QRV!
+          Política de Privacidade — MIKE TOOLS
         </h1>
         <p className="mt-1 text-[13px]" style={{ color: "#5b7a8f" }}>
           Última atualização: 19 de junho de 2026
         </p>
 
         <Section title="1. Quem somos">
-          O <strong>QAP, QRV!</strong> (site <a className="underline" href="https://miketools.top">miketools.top</a>) é
+          O <strong>MIKE TOOLS</strong> (site <a className="underline" href="https://miketools.top">miketools.top</a>) é
           uma central gratuita de ferramentas operacionais voltada ao policial
           militar do Estado de São Paulo. Esta política descreve como tratamos
           suas informações ao usar o site ou o aplicativo. Em caso de dúvidas,

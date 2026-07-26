@@ -12,9 +12,9 @@ import {
 export const Route = createFileRoute("/ajuda")({
   head: () => ({
     meta: [
-      { title: "Central de Ajuda — QAP, QRV!" },
-      { name: "description", content: "Tudo o que você precisa para configurar escalas, DEJEM, Delegada, calendário, VPN AnyConnect, folha de pagamento, backup e instalação no QAP, QRV!." },
-      { property: "og:title", content: "Central de Ajuda — QAP, QRV!" },
+      { title: "Central de Ajuda — MIKE TOOLS" },
+      { name: "description", content: "Tudo o que você precisa para configurar escalas, DEJEM, Delegada, calendário, VPN AnyConnect, folha de pagamento, backup e instalação no MIKE TOOLS." },
+      { property: "og:title", content: "Central de Ajuda — MIKE TOOLS" },
       { property: "og:url", content: "https://miketools.top/ajuda" },
     ],
     links: [{ rel: "canonical", href: "https://miketools.top/ajuda" }],

@@ -5,11 +5,11 @@ import { useState } from "react";
 export const Route = createFileRoute("/contato")({
   head: () => ({
     meta: [
-      { title: "Contato — QAP, QRV!" },
+      { title: "Contato — MIKE TOOLS" },
       {
         name: "description",
         content:
-          "Entre em contato com a equipe do QAP, QRV! para sugestões, parcerias, suporte e solicitações relacionadas à LGPD.",
+          "Entre em contato com a equipe do MIKE TOOLS para sugestões, parcerias, suporte e solicitações relacionadas à LGPD.",
       },
     ],
   }),

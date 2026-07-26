@@ -36,7 +36,7 @@ Existem 3 formas — qualquer uma funciona:
 1. No Android, habilite **Fontes desconhecidas** / **Instalar apps de fonte desconhecida**
    para o app que vai abrir o APK (ex.: navegador ou gerenciador de arquivos).
 2. Toque no arquivo `.apk` → **Instalar**.
-3. Pronto. O ícone do **QAP, QRV!** aparece na tela inicial.
+3. Pronto. O ícone do **MIKE TOOLS** aparece na tela inicial.
 
 ---
 
@@ -115,7 +115,7 @@ Ou direto pelo GitHub: **Releases → Draft a new release → Choose a tag →
 ## 4. Subir na Play Console
 
 1. https://play.google.com/console (conta de US$ 25, uma vez na vida)
-2. **Criar app** → idioma `pt-BR` → nome **QAP, QRV!** → gratuito
+2. **Criar app** → idioma `pt-BR` → nome **MIKE TOOLS** → gratuito
 3. **Configurações da loja**: descrição curta + completa, ícone 512×512,
    gráfico de destaque 1024×500, ≥2 capturas de tela
 4. **Classificação etária**: responder o questionário IARC

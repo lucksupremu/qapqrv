@@ -29,7 +29,7 @@ export function AppHeader({ subtitle, showBrand = true, title }: Props) {
           </SheetTrigger>
           <SheetContent side="left" className="w-72">
             <SheetHeader>
-              <SheetTitle>QAP, QRV!</SheetTitle>
+              <SheetTitle>MIKE TOOLS</SheetTitle>
             </SheetHeader>
             <nav className="mt-6 flex flex-col gap-1 text-sm">
               {[
@@ -69,7 +69,7 @@ export function AppHeader({ subtitle, showBrand = true, title }: Props) {
       <div className="mt-3 text-center">
         {showBrand ? (
           <h1 className="text-4xl font-black tracking-tight">
-            QAP, <span className="text-brand-blue">QRV!</span>
+            MIKE <span className="text-brand-blue">TOOLS</span>
           </h1>
         ) : (
           <h1 className="text-2xl font-bold">{title}</h1>

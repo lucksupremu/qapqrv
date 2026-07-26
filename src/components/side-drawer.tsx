@@ -81,7 +81,7 @@ const grupoInstitucional: Item[] = [
   { type: "route", to: "/conteudos", label: "Central de Conteúdo", icon: Newspaper },
   { type: "route", to: "/ajuda", label: "Central de Ajuda", icon: HelpCircle },
   { type: "route", to: "/faq", label: "Perguntas frequentes", icon: HelpCircle },
-  { type: "route", to: "/sobre", label: "Sobre o QAP, QRV!", icon: Info },
+  { type: "route", to: "/sobre", label: "Sobre o MIKE TOOLS", icon: Info },
   { type: "route", to: "/contato", label: "Contato", icon: MessageSquare },
   { type: "route", to: "/termos", label: "Termos de uso", icon: FileText },
   { type: "route", to: "/cookies", label: "Política de Cookies", icon: Cookie },
@@ -189,7 +189,7 @@ function SideDrawer() {
       >
         <div className="flex items-start justify-between p-6" style={{ background: "var(--gradient-primary)", borderRadius: "20px 0 0 0", boxShadow: "var(--shadow-glow)" }}>
           <div>
-            <h2 className="text-[22px] font-bold text-white">QAP, QRV!</h2>
+            <h2 className="text-[22px] font-bold text-white">MIKE TOOLS</h2>
             <p className="text-[14px] text-white/70">PMESP</p>
           </div>
           <button

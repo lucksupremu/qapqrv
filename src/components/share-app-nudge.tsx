@@ -16,7 +16,7 @@ const SHOW_AFTER_MS = 20_000; // espera 20s na sessão antes de mostrar
 const AUTO_HIDE_MS = 12_000; // some sozinho após 12s
 
 const APP_URL = "https://www.miketools.top";
-const SHARE_TEXT = `🚔 QAP, QRV! — app do PM com escalas, lembretes e intranet. Baixa aí: ${APP_URL}`;
+const SHARE_TEXT = `🚔 MIKE TOOLS — app do PM com escalas, lembretes e intranet. Baixa aí: ${APP_URL}`;
 
 const EXCLUDED_PREFIXES = [
   "/onboarding",
@@ -84,7 +84,7 @@ export function ShareAppNudge() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "QAP, QRV!",
+          title: "MIKE TOOLS",
           text: SHARE_TEXT,
           url: APP_URL,
         });
@@ -133,7 +133,7 @@ export function ShareAppNudge() {
             className="truncate text-[11.5px] leading-snug"
             style={{ color: "#475569" }}
           >
-            Ajude a tropa a conhecer o QAP, QRV!
+            Ajude a tropa a conhecer o MIKE TOOLS
           </p>
         </div>
         <button

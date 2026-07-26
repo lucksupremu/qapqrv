@@ -5,8 +5,8 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
-      { title: "Política de Cookies — QAP, QRV!" },
-      { name: "description", content: "Como o QAP, QRV! usa cookies e tecnologias similares, quais tipos utilizamos e como você controla." },
+      { title: "Política de Cookies — MIKE TOOLS" },
+      { name: "description", content: "Como o MIKE TOOLS usa cookies e tecnologias similares, quais tipos utilizamos e como você controla." },
       { property: "og:url", content: "https://miketools.top/cookies" },
     ],
     links: [{ rel: "canonical", href: "https://miketools.top/cookies" }],
@@ -21,7 +21,7 @@ function CookiesScreen() {
       <Breadcrumbs items={[{ label: "Início", to: "/" }, { label: "Cookies" }]} />
       <main className="mx-auto max-w-3xl px-5 py-5 space-y-4 text-[15px] leading-relaxed text-foreground/85">
         <p>
-          Esta política explica como o QAP, QRV! utiliza cookies e tecnologias
+          Esta política explica como o MIKE TOOLS utiliza cookies e tecnologias
           similares no site <strong>miketools.top</strong>. Ao continuar
           navegando, você concorda com este uso, sem prejuízo dos controles
           descritos abaixo.
@@ -39,7 +39,7 @@ function CookiesScreen() {
         </ul>
         <h2 className="pt-2 text-lg font-bold text-foreground">Anúncios (Google AdSense)</h2>
         <p>
-          O QAP, QRV! participa do programa Google AdSense em páginas editoriais.
+          O MIKE TOOLS participa do programa Google AdSense em páginas editoriais.
           O Google, como provedor terceirizado, utiliza cookies para veicular
           anúncios no nosso site. O uso do cookie DoubleClick DART permite ao
           Google veicular anúncios com base em visitas anteriores. Os usuários

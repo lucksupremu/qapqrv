@@ -5,11 +5,11 @@ import { BottomNav } from "@/components/bottom-nav";
 export const Route = createFileRoute("/sobre")({
   head: () => ({
     meta: [
-      { title: "Sobre — QAP, QRV! | Ferramentas operacionais PMESP" },
+      { title: "Sobre — MIKE TOOLS | Ferramentas operacionais PMESP" },
       {
         name: "description",
         content:
-          "Conheça o QAP, QRV!: missão, equipe, funcionalidades, contato e política de privacidade do app de ferramentas para o policial militar de São Paulo.",
+          "Conheça o MIKE TOOLS: missão, equipe, funcionalidades, contato e política de privacidade do app de ferramentas para o policial militar de São Paulo.",
       },
     ],
   }),
@@ -19,13 +19,13 @@ export const Route = createFileRoute("/sobre")({
 function Sobre() {
   return (
     <div className="min-h-screen pb-24 bg-background">
-      <AppHeader showBrand={false} title="Sobre" subtitle="QAP, QRV!" />
+      <AppHeader showBrand={false} title="Sobre" subtitle="MIKE TOOLS" />
 
       <main className="px-5 mt-6 space-y-7 text-sm leading-relaxed max-w-2xl mx-auto">
         <section>
           <h2 className="font-bold text-base mb-2">Nossa missão</h2>
           <p className="text-muted-foreground">
-            O <strong>QAP, QRV!</strong> nasceu para reunir, em um único lugar, as
+            O <strong>MIKE TOOLS</strong> nasceu para reunir, em um único lugar, as
             ferramentas que o policial militar do Estado de São Paulo usa todos
             os dias: consulta de escalas Dejem e Delegada, calendário, lembretes,
             atalhos para a intranet via AnyConnect e utilidades de campo. Tudo
@@ -113,7 +113,7 @@ function Sobre() {
         <section>
           <h2 className="font-bold text-base mb-2">História do projeto</h2>
           <p className="text-muted-foreground">
-            O QAP, QRV! começou como um script pessoal para consultar escalas Dejem
+            O MIKE TOOLS começou como um script pessoal para consultar escalas Dejem
             sem precisar abrir cinco abas na intranet. Em pouco tempo virou uma
             página web, depois um PWA e, mais adiante, também um aplicativo Android.
             Hoje é usado diariamente por policiais de várias OPMs do Estado de
@@ -153,7 +153,7 @@ function Sobre() {
             </div>
             <div>
               <p className="font-semibold text-foreground">Minha senha da intranet é enviada para vocês?</p>
-              <p>Não. O QAP, QRV! não coleta, não armazena nem transmite credenciais. A autenticação continua sendo feita pelo Cisco Secure Client (AnyConnect) diretamente com o servidor da PMESP.</p>
+              <p>Não. O MIKE TOOLS não coleta, não armazena nem transmite credenciais. A autenticação continua sendo feita pelo Cisco Secure Client (AnyConnect) diretamente com o servidor da PMESP.</p>
             </div>
             <div>
               <p className="font-semibold text-foreground">Como reporto um bug?</p>
@@ -221,7 +221,7 @@ function Sobre() {
         <section>
           <h2 className="font-bold text-base mb-2">Compromisso</h2>
           <p className="text-muted-foreground">
-            Enquanto o QAP, QRV! for útil, seguimos publicando atualizações
+            Enquanto o MIKE TOOLS for útil, seguimos publicando atualizações
             gratuitas. Se você usa o app no plantão, considera compartilhar com
             um colega — o boca a boca é o que sustenta o projeto vivo.
           </p>

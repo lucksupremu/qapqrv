@@ -13,7 +13,7 @@ const STORAGE_KEY = "share_banner_last_shown_yyyymm";
 const MIN_ACCESS_DAYS = 3;
 const APP_URL = "https://www.miketools.top";
 
-const SHARE_TEXT = `🚔 *QAP, QRV!* — o app do PM
+const SHARE_TEXT = `🚔 *MIKE TOOLS* — o app do PM
 
 Calendário de escalas (dejem/delegada), lembretes automáticos, acesso fácil à intranet PMESP e escalas offline. Tudo num só lugar, de graça.
 
@@ -68,7 +68,7 @@ export function ShareAppBanner() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "QAP, QRV!",
+          title: "MIKE TOOLS",
           text: SHARE_TEXT,
           url: APP_URL,
         });
@@ -105,7 +105,7 @@ export function ShareAppBanner() {
             Tem colega de farda que ainda não conhece?
           </p>
           <p className="mt-0.5 text-[12px] leading-snug" style={{ color: "#166534" }}>
-            Compartilhe o QAP, QRV! e ajude a tropa a controlar escalas,
+            Compartilhe o MIKE TOOLS e ajude a tropa a controlar escalas,
             lembretes e intranet num só app.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">

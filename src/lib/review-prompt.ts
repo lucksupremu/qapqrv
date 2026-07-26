@@ -110,7 +110,7 @@ export async function maybePromptReview(): Promise<void> {
     }
 
     // Fallback: toast com ação.
-    toast("Está curtindo o QAP, QRV!?", {
+    toast("Está curtindo o MIKE TOOLS?", {
       description: "Sua avaliação ajuda muito outros policiais a encontrarem o app.",
       duration: 12000,
       action: {

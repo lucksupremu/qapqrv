@@ -1,4 +1,4 @@
-# Plugins nativos Android — QAP, QRV!
+# Plugins nativos Android — MIKE TOOLS
 
 Este diretório contém os fontes Kotlin que precisam ser copiados para
 o projeto Android gerado pelo Capacitor (`android/`).

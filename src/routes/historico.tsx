@@ -8,7 +8,7 @@ import { useHistory } from "@/hooks/use-local-list";
 export const Route = createFileRoute("/historico")({
   head: () => ({
     meta: [
-      { title: "Histórico — QAP, QRV!" },
+      { title: "Histórico — MIKE TOOLS" },
       { name: "description", content: "Ferramentas acessadas recentemente." },
     ],
   }),
