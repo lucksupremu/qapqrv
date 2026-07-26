@@ -1,79 +1,60 @@
-# Alerta de "outros usuários estão se inscrevendo"
 
-Hoje as marcas de Dejem/Delegada ficam **só no `localStorage`** de cada dispositivo — o backend não sabe quem se inscreveu em nada. Sem esse sinal no servidor é impossível detectar "picos". O plano abaixo cria esse sinal (anônimo, por device) e usa o cron já existente para disparar o push.
+# Rebrand para MIKE TOOLS
 
-## O que o usuário vai ver
+Trocar todo o nome visível do app de "QAP, QRV!" para "MIKE TOOLS" e regenerar o ícone/logo com a **mesma arte atual**, apenas substituindo o texto "QAP, QRV!" por "MIKE TOOLS".
 
-Push com título/corpo:
-- **"Escalas abrindo agora?"**
-- **"Outros policiais estão marcando Dejem/Delegada. Já conferiu se há escalas abertas para inscrição?"**
-- Ao tocar, abre `/calendario`.
+## Importante — o que NÃO vai mudar
+- **`appId` do Android** (`app.lovable.c4ba12aede4d4739b500bee9ca5bb9e9`) permanece igual. Trocar o `appId` na Play Store cria um app novo do zero (perde usuários, avaliações e histórico de versões). O nome exibido é controlado por `appName`/label, não pelo `appId`.
+- Domínios (`miketools.top`, `qapqrv.lovable.app`) e Supabase project ref ficam iguais.
+- Versionamento (`versionCode`/`versionName`) continua como está — só sobe o PATCH normalmente na próxima build.
 
-Regras para não virar spam:
-- Só é enviado quando **≥ 5 dispositivos distintos** registram uma marca (do mesmo tipo — dejem OU delegada) em uma **janela de 30 min**.
-- Cada dispositivo recebe **no máximo 1 alerta desse tipo por dia** (cooldown 24h).
-- Não recebe o alerta quem **já marcou** uma escala do mesmo tipo nos últimos 3 dias (afinal, já se inscreveu).
-- Nunca expõe identidade — só contagem agregada.
+## O que muda
 
-## Como funciona
+### 1. Ícones e logo (mesma arte, novo texto)
+Regenerar com IA, mantendo layout/cores/estilo do ícone atual, apenas trocando o texto central por **MIKE TOOLS**:
+- `public/app-icon.png`, `public/icon-192.png`, `public/icon-512.png`, `public/apple-touch-icon.png`, `public/favicon.ico`
+- `public/notif-icon-192.png`, `public/notif-icon-512.png`, `public/notif-badge-72.png`
+- `resources/icon.png`, `resources/icon-foreground.png` (a `icon-background.png` fica igual — é só o fundo)
+- `resources/splash.png`, `resources/splash-dark.png` (splash com nova wordmark)
+- `src/assets/app-logo.png` (logo usada dentro do app)
 
-```text
-[App] usuário salva marca no MarcarModal
-        │
-        ▼
-POST /functions/v1/report-marca  { device_id, tipo, data_alvo }
-        │
-        ▼
-INSERT em public.marca_events (anônimo, com TTL de 7 dias)
-        │
-        ▼
-[cron push-tick, de hora em hora]  →  runBurstAlerts()
-   ├─ conta marcas por tipo nos últimos 30 min
-   ├─ se ≥ threshold, seleciona push_subscriptions elegíveis
-   │    (não recebeu esse alerta nas últimas 24h,
-   │     não registrou marca desse tipo nos últimos 3d)
-   └─ envia webpush → grava em push_burst_sends (dedupe)
-```
+O workflow de build (`capacitor-assets generate --android`) regenera automaticamente todos os tamanhos Android a partir de `resources/`.
 
-## Detalhes técnicos
+### 2. Configuração do app
+- **`capacitor.config.ts`**: `appName: "MIKE TOOLS"` (era `qapqrv`).
+- **`public/manifest.webmanifest`**: `name` e `short_name` = `"MIKE TOOLS"`; atualizar `description` e labels dos `shortcuts`/`screenshots`.
+- **`index.html`**: `<title>`, meta description, `og:title`, `og:description`, `apple-mobile-web-app-title`.
+- **`.github/workflows/build-apk.yml`**: nome dos artefatos/release e comentários (`qapqrv-release.jks` continua com o mesmo nome de arquivo — trocar o nome da keystore quebra a assinatura).
 
-**Nova tabela `public.marca_events`** (append-only, anônima):
-- `id uuid pk`, `device_id text`, `tipo text` ('dejem' | 'delegada'), `data_alvo date`, `created_at timestamptz default now()`.
-- Índice `(tipo, created_at desc)` para as janelas.
-- Grants: `INSERT` para `anon` e `authenticated` (é anônimo, só device_id); `ALL` para `service_role`.
-- RLS: policy de `INSERT` liberada (nenhum `SELECT`/`UPDATE`/`DELETE` público — só o service_role lê pelo edge function).
-- Job de limpeza (dentro do `send-push-tick`): apaga rows com `created_at < now() - interval '7 days'`.
+### 3. Componentes e textos visíveis
+Substituir a string "QAP, QRV!" (e "QAP,QRV") em todos os locais de UI:
+- `src/components/app-header.tsx` (título grande do topo — vira `MIKE TOOLS` sem split de cor, ou mantém `MIKE` + `TOOLS` colorido; ver "Detalhe visual" abaixo)
+- `src/components/side-drawer.tsx`, `pwa-install-banner.tsx`, `pwa-install-card.tsx`, `install-confirm-modal.tsx`, `share-app-banner.tsx`, `share-app-nudge.tsx`, `whats-new-modal.tsx`, `browser-warning-modal.tsx`, `privacy-consent.tsx`, `site-footer.tsx`, `bottom-nav.tsx` (se aplicável)
+- Rotas: `sobre.tsx`, `contato.tsx`, `privacidade.tsx`, `termos.tsx`, `aviso-legal.tsx`, `cookies.tsx`, `manual.tsx`, `ajuda.tsx`, `faq.tsx`, `blog.tsx`, `anyconnect.tsx`, `splash.tsx`, `onboarding.tsx`, `ferramenta.minha-localizacao.tsx`, `index.tsx`, `inicio.tsx`
+- `src/routes/__root.tsx` (head padrão)
+- `src/content/artigos.ts`, `src/content/ajuda.ts`, `src/content/faq.ts`, `src/content/ferramentas-info.ts` (menções ao nome do app)
+- `src/lib/*`: `push-client.ts`, `review-prompt.ts`, `in-app-browser.ts`, `report-marca.ts`, `escala-ics.ts`, `escala-storage.ts` (títulos, `ORGANIZER`/`PRODID` do .ics, nome exibido em notificações)
+- `src/hooks/use-live-location.ts`, `use-local-list.ts` (labels/textos)
+- `public/sw.js` (título default de push)
+- `public/privacidade.html` (nome nas políticas)
 
-**Nova tabela `public.push_burst_sends`** (cooldown por dispositivo):
-- `device_id text`, `tipo text`, `sent_at timestamptz default now()`, `pk (device_id, tipo, date_trunc('day', sent_at))`.
-- Só o service_role acessa.
+### 4. Backend / Edge Functions
+- `supabase/functions/send-broadcast/index.ts` e `supabase/functions/send-push-tick/index.ts`: trocar o `title` default e ORIGIN de exibição para "MIKE TOOLS" (o project ref do Supabase e nomes de funções ficam iguais).
 
-**Nova edge function `report-marca`** (verify_jwt = false, CORS aberto):
-- Body validado com Zod: `{ device_id: string, tipo: 'dejem'|'delegada', data_alvo: string(YYYY-MM-DD) }`.
-- Insere em `marca_events` com service_role.
-- Silenciosa em caso de erro (não bloqueia UX do modal).
+### 5. Plugins Android nativos
+Nos arquivos em `android-plugin/` (`AppOpenAdPlugin.kt`, `NativeAdPlugin.kt`, `VpnStatusPlugin.kt`, `InAppWebViewPlugin.kt`, `InAppWebViewActivity.kt`, `WidgetDataPlugin.kt`, `ProximaEscalaWidget.kt`, `install.sh`, `README.md`): trocar apenas **strings visíveis ao usuário** (título do widget, título da activity do WebView, textos de log user-facing). Nomes de classes, packages Kotlin e IDs internos ficam iguais para não quebrar o build.
 
-**Alteração no `send-push-tick`**:
-- Adiciona `runBurstAlerts()`, chamado antes de `runInactivity()`.
-- Para cada `tipo` em `['dejem','delegada']`:
-  1. `SELECT count(distinct device_id)` de `marca_events` nos últimos 30 min → se `< 5`, pula.
-  2. Seleciona `push_subscriptions` ativas onde o `device_id` **não** aparece em `marca_events` (mesmo tipo, últimos 3 dias) e **não** aparece em `push_burst_sends` (mesmo tipo, últimas 24h).
-  3. Envia webpush; grava em `push_burst_sends`.
-- Limpa `marca_events` antigos (>7 dias) ao final.
+### 6. Documentação
+- `APK-BUILD.md`: substituir "QAP, QRV!" por "MIKE TOOLS" nos textos explicativos (mantendo nomes de arquivos/keystore).
 
-**Alteração no cliente**:
-- `src/components/marcar-modal.tsx`: no `handleSubmit`, após `onSave`, chamar `reportMarcaEvent(marca.tipo, marca.data)` em fire-and-forget.
-- Novo helper `src/lib/report-marca.ts`: normaliza `dejem`/`delegada` (colapsa `delegada_capital`/`delegada_outras` em `delegada`), pega `device_id` do `qapqrv_device_id`, envia via `supabase.functions.invoke("report-marca", ...)`. Erros são silenciosos.
+## Detalhe visual do cabeçalho
+Hoje `AppHeader` renderiza `QAP, <span text-brand-blue>QRV!</span>` (split de cor). Proposta: `MIKE <span text-brand-blue>TOOLS</span>` — mantém a identidade visual (duas palavras, segunda em azul). Se preferir "MIKE TOOLS" tudo na mesma cor, é só remover o `<span>`.
 
-## Privacidade / AdSense / lojas
+## Ordem de execução
+1. Gerar novo ícone (1024×1024) e nova splash com IA a partir da arte atual, salvando em `resources/` e derivando as versões de `public/`.
+2. Atualizar `capacitor.config.ts`, `manifest.webmanifest`, `index.html`.
+3. Substituição textual em componentes, rotas, libs, content, sw.js e edge functions.
+4. Atualizar textos user-facing dos plugins Kotlin e do `APK-BUILD.md`.
+5. Fazer redeploy das edge functions afetadas.
 
-- Nada de identidade pessoal — só `device_id` UUID gerado no primeiro uso (mesmo que já usamos para push).
-- Retenção curta (7 dias) e finalidade única (agregar contagem).
-- Vou acrescentar 1 linha em `src/routes/privacidade.tsx`: "Registramos, de forma anônima, quando você marca Dejem/Delegada, apenas para avisar outros usuários sobre picos de inscrição. Nenhum dado pessoal é enviado."
-
-## Pontos que quero confirmar antes de implementar
-
-1. **Threshold**: 5 dispositivos em 30 min é o gatilho padrão. Como a base ainda é pequena, posso começar com **3 em 30 min** e ajustar depois. Prefere 3 ou 5?
-2. **Escopo do "quem recebe"**: enviar para **todos com push ativo** (que não marcaram nos últimos 3d) ou **restringir só a quem marcou alguma vez nos últimos 30 dias** (perfil "interessado em escalas")? A segunda evita incomodar quem baixou o app só pelas ferramentas.
-
-Se você não responder essas 2 perguntas, vou seguir com **threshold = 3 em 30 min** e **público = quem marcou pelo menos 1 vez nos últimos 30 dias** (mais conservador e alinhado ao propósito).
+Próxima build no GitHub Actions gera o APK/AAB já com o novo nome e ícone (Play Store atualiza por cima da versão anterior porque o `appId` não mudou).
