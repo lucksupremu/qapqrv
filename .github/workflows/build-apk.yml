@@ -150,20 +150,26 @@ jobs:
           RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           GRADLE=android/app/build.gradle
-          # versionCode estritamente monotônico para a Play Store.
-          # Estratégia: minutos decorridos desde 2024-01-01 UTC + run_attempt.
-          # - Sempre cresce a cada build (mesmo em re-runs, graças ao run_attempt).
-          # - Cabe largamente no limite da Play (max 2.100.000.000).
-          # - Independe de run_number/branch/fork.
+          # versionCode: estritamente monotônico (Play Store exige).
+          # Estratégia: minutos desde 2024-01-01 UTC + run_attempt. Sempre cresce.
           EPOCH_BASE=1704067200   # 2024-01-01T00:00:00Z
           NOW=$(date -u +%s)
           VCODE=$(( (NOW - EPOCH_BASE) / 60 + RUN_ATTEMPT ))
-          # versionName derivado da data (YY.MM.DD-buildN) — legível e sempre crescente.
-          VNAME="$(date -u +%y.%-m.%-d).${RUN_NUMBER}"
+          # versionName: SemVer padronizado começando em 1.0.0.
+          # Fórmula: MAJOR.MINOR.PATCH onde PATCH = RUN_NUMBER - VERSION_OFFSET.
+          # Bump MAJOR/MINOR ajustando VERSION_MAJOR/VERSION_MINOR e VERSION_OFFSET
+          # (defina VERSION_OFFSET = RUN_NUMBER atual - 1 para reiniciar o PATCH em 0).
+          VERSION_MAJOR=1
+          VERSION_MINOR=0
+          VERSION_OFFSET=${VERSION_OFFSET:-0}
+          PATCH=$(( RUN_NUMBER - VERSION_OFFSET ))
+          if [ "$PATCH" -lt 0 ]; then PATCH=0; fi
+          VNAME="${VERSION_MAJOR}.${VERSION_MINOR}.${PATCH}"
           echo "versionCode=${VCODE}"
           echo "versionName=${VNAME}"
           sed -i "s/versionCode [0-9][0-9]*/versionCode ${VCODE}/" "$GRADLE"
           sed -i "s/versionName \"[^\"]*\"/versionName \"${VNAME}\"/" "$GRADLE"
+
 
           if ! grep -q "signingConfigs {" "$GRADLE"; then
             python3 .github/scripts/patch-gradle-signing.py
