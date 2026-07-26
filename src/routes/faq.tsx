@@ -12,9 +12,9 @@ import {
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "Perguntas frequentes — QAP, QRV!" },
-      { name: "description", content: "Respostas para as dúvidas mais comuns sobre DEJEM, Delegada, calendário, VPN, instalação e uso do QAP, QRV!." },
-      { property: "og:title", content: "Perguntas frequentes — QAP, QRV!" },
+      { title: "Perguntas frequentes — MIKE TOOLS" },
+      { name: "description", content: "Respostas para as dúvidas mais comuns sobre DEJEM, Delegada, calendário, VPN, instalação e uso do MIKE TOOLS." },
+      { property: "og:title", content: "Perguntas frequentes — MIKE TOOLS" },
       { property: "og:url", content: "https://miketools.top/faq" },
     ],
     links: [{ rel: "canonical", href: "https://miketools.top/faq" }],

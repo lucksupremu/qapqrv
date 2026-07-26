@@ -12,7 +12,7 @@ type PdfComponents = {
 };
 
 export const Route = createFileRoute("/escala-viewer/$id")({
-  head: ({ params }) => ({ meta: [{ title: `Escala ${params.id} — QAP, QRV!` }] }),
+  head: ({ params }) => ({ meta: [{ title: `Escala ${params.id} — MIKE TOOLS` }] }),
   component: EscalaViewer,
 });
 

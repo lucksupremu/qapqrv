@@ -47,7 +47,7 @@ export function PwaInstallCard() {
       </div>
 
       <p className="mb-3 text-[12px]" style={{ color: "#5b7a8f" }}>
-        Adicione o QAP, QRV! à tela inicial para abrir como aplicativo, com
+        Adicione o MIKE TOOLS à tela inicial para abrir como aplicativo, com
         acesso rápido e em tela cheia.
       </p>
 

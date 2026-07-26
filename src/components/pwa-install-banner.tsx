@@ -17,7 +17,7 @@ export function PwaInstallBanner() {
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-bold text-slate-900 dark:text-white">
-          Instalar QAP, QRV!
+          Instalar MIKE TOOLS
         </p>
         <p className="text-[11px] text-slate-600 dark:text-slate-400">
           Acesso rápido na tela inicial.

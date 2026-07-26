@@ -9,7 +9,7 @@ export const AJUDA: SecaoAjuda[] = [
     slug: "primeiros-passos",
     titulo: "Primeiros passos",
     itens: [
-      { titulo: "O que é o QAP, QRV!", conteudo: "Um aplicativo independente com ferramentas úteis para o policial militar da PMESP — calendário, consulta de escala, atalhos, backup. Funciona no navegador (PWA) e como APK Android." },
+      { titulo: "O que é o MIKE TOOLS", conteudo: "Um aplicativo independente com ferramentas úteis para o policial militar da PMESP — calendário, consulta de escala, atalhos, backup. Funciona no navegador (PWA) e como APK Android." },
       { titulo: "Preciso criar conta?", conteudo: "Não. Nenhuma ferramenta exige cadastro. Todos os dados ficam no seu aparelho." },
       { titulo: "Como abrir o app?", conteudo: "Acesse pelo navegador ou pelo ícone instalado. A tela inicial é o Dashboard, com atalhos para as principais ferramentas." },
     ],
@@ -27,7 +27,7 @@ export const AJUDA: SecaoAjuda[] = [
     slug: "cadastrar-dejem",
     titulo: "Como cadastrar DEJEM",
     itens: [
-      { titulo: "Fluxo típico", conteudo: "A inscrição em Dejem é feita na intranet PMESP. Use o atalho 'Marcar / Desmarcar Dejem/Delegada' na Home para chegar direto na página oficial. Depois, registre o serviço no calendário do QAP, QRV! para receber lembrete." },
+      { titulo: "Fluxo típico", conteudo: "A inscrição em Dejem é feita na intranet PMESP. Use o atalho 'Marcar / Desmarcar Dejem/Delegada' na Home para chegar direto na página oficial. Depois, registre o serviço no calendário do MIKE TOOLS para receber lembrete." },
       { titulo: "Vale para todos?", conteudo: "Somente policiais que atendem aos requisitos da diretriz vigente (higidez, situação funcional regular)." },
     ],
   },
@@ -52,7 +52,7 @@ export const AJUDA: SecaoAjuda[] = [
     slug: "vpn",
     titulo: "Como utilizar VPN",
     itens: [
-      { titulo: "Por que usar", conteudo: "Vários serviços da intranet exigem VPN AnyConnect. O QAP, QRV! detecta e orienta você a ativá-la antes de acessar a intranet." },
+      { titulo: "Por que usar", conteudo: "Vários serviços da intranet exigem VPN AnyConnect. O MIKE TOOLS detecta e orienta você a ativá-la antes de acessar a intranet." },
       { titulo: "Instalação", conteudo: "Consulte o 'Vídeo tutorial ANYCONECT' no menu para o passo a passo oficial." },
     ],
   },
@@ -61,7 +61,7 @@ export const AJUDA: SecaoAjuda[] = [
     titulo: "Folha de pagamento",
     itens: [
       { titulo: "Consulta", conteudo: "Use o atalho 'Folha de Pagamento' na Home. Ele abre o portal oficial CIAF-PMESP dentro do app." },
-      { titulo: "Segurança", conteudo: "Digite sua senha apenas em conexões de confiança. O QAP, QRV! não armazena a senha." },
+      { titulo: "Segurança", conteudo: "Digite sua senha apenas em conexões de confiança. O MIKE TOOLS não armazena a senha." },
     ],
   },
   {

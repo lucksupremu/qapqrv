@@ -6,7 +6,7 @@ export const CATEGORIAS: Categoria[] = [
   { slug: "escalas", title: "Escalas", description: "Modelos de escala, 12x24, 12x48, planejamento e descanso.", icon: "CalendarClock" },
   { slug: "procedimentos", title: "Procedimentos", description: "Rotinas administrativas, apresentação, comunicação e etiqueta.", icon: "ClipboardList" },
   { slug: "produtividade", title: "Produtividade", description: "Rotinas para o dia a dia do policial: agenda, foco, descanso.", icon: "Sparkles" },
-  { slug: "ferramentas", title: "Ferramentas", description: "Guias das ferramentas do QAP, QRV! e integrações úteis.", icon: "Wrench" },
+  { slug: "ferramentas", title: "Ferramentas", description: "Guias das ferramentas do MIKE TOOLS e integrações úteis.", icon: "Wrench" },
   { slug: "tecnologia", title: "Tecnologia", description: "Aplicativos, PWA, offline, notificações e boas práticas.", icon: "Cpu" },
   { slug: "pmesp", title: "PMESP", description: "Instituição, unidades, canais oficiais e informações públicas.", icon: "Shield" },
   { slug: "seguranca-digital", title: "Segurança Digital", description: "VPN, senhas, phishing, proteção de dados pessoais.", icon: "Lock" },

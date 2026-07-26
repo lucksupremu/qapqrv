@@ -1,4 +1,4 @@
-// Service Worker do QAP, QRV!
+// Service Worker do MIKE TOOLS
 // 1) Mantém notificações locais via showNotification (Chrome Android exige SW).
 // 2) Cache app-shell para abrir offline (NetworkFirst HTML, CacheFirst assets hashados).
 // 3) Stale-while-revalidate para PDFs de escala (rede primeiro em background,
@@ -183,9 +183,9 @@ self.addEventListener("push", (event) => {
   try {
     payload = event.data ? event.data.json() : {};
   } catch {
-    payload = { title: "QAP, QRV!", body: event.data ? event.data.text() : "" };
+    payload = { title: "MIKE TOOLS", body: event.data ? event.data.text() : "" };
   }
-  const title = payload.title || "QAP, QRV!";
+  const title = payload.title || "MIKE TOOLS";
   const options = {
     body: payload.body || "",
     icon: payload.icon || "/notif-icon-192.png",

@@ -72,7 +72,7 @@ export function InstallPushOptIn() {
             Quer um lembrete para instalar?
           </p>
           <p className="mt-0.5 text-[12px] leading-snug text-slate-700 dark:text-slate-300">
-            Ative notificações e te avisamos como deixar o QAP, QRV! na tela
+            Ative notificações e te avisamos como deixar o MIKE TOOLS na tela
             inicial — só 1 lembrete, sem spam.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">

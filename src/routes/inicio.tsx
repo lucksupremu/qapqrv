@@ -11,7 +11,7 @@ import { tools } from "@/lib/tools";
 export const Route = createFileRoute("/inicio")({
   head: () => ({
     meta: [
-      { title: "Início — QAP, QRV!" },
+      { title: "Início — MIKE TOOLS" },
       { name: "description", content: "Acesse todas as ferramentas operacionais." },
     ],
   }),

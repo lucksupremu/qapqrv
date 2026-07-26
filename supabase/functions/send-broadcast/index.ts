@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const payload = {
-      title: body.title ?? "QAP, QRV!",
+      title: body.title ?? "MIKE TOOLS",
       body: body.body ?? "",
       url: body.url ?? "/",
       image: body.image ?? undefined,

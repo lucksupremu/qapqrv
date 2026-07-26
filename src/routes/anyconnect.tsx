@@ -12,7 +12,7 @@ import { useIsNative } from "@/hooks/use-is-native";
 const PUBLIC_HOST = "https://qapqrv.lovable.app";
 
 export const Route = createFileRoute("/anyconnect")({
-  head: () => ({ meta: [{ title: "Configurar AnyConnect — QAP, QRV!" }] }),
+  head: () => ({ meta: [{ title: "Configurar AnyConnect — MIKE TOOLS" }] }),
   component: AnyConnectGuideScreen,
 });
 

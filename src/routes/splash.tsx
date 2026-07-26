@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export const Route = createFileRoute("/splash")({
   head: () => ({
-    meta: [{ title: "QAP, QRV!" }],
+    meta: [{ title: "MIKE TOOLS" }],
   }),
   component: SplashScreen,
 });

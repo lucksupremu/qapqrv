@@ -56,7 +56,7 @@ export function PrivacyConsent() {
           style={{ background: "#f4f8fc", color: "#3A4A60" }}
         >
           <p>
-            Bem-vindo ao <strong>QAP, QRV!</strong>. Antes de continuar, leia
+            Bem-vindo ao <strong>MIKE TOOLS</strong>. Antes de continuar, leia
             como tratamos suas informações:
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5">

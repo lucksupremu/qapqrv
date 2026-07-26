@@ -4,11 +4,11 @@ import { ArrowLeft } from "lucide-react";
 export const Route = createFileRoute("/termos")({
   head: () => ({
     meta: [
-      { title: "Termos de Uso — QAP, QRV!" },
+      { title: "Termos de Uso — MIKE TOOLS" },
       {
         name: "description",
         content:
-          "Termos de Uso do aplicativo QAP, QRV!: condições, responsabilidades, propriedade intelectual e limitações.",
+          "Termos de Uso do aplicativo MIKE TOOLS: condições, responsabilidades, propriedade intelectual e limitações.",
       },
     ],
   }),
@@ -45,7 +45,7 @@ function TermosScreen() {
 
       <div className="mx-auto mt-2 max-w-2xl rounded-[20px] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.15)] mx-4">
         <h1 className="text-[20px] font-extrabold" style={{ color: "#2e6b8a" }}>
-          Termos de Uso — QAP, QRV!
+          Termos de Uso — MIKE TOOLS
         </h1>
         <p className="mt-1 text-[13px] text-slate-500">
           Última atualização: 19 de junho de 2026
@@ -53,14 +53,14 @@ function TermosScreen() {
 
         <Section title="1. Aceitação dos termos">
           Ao acessar ou usar o site <strong>miketools.top</strong> ou o
-          aplicativo <strong>QAP, QRV!</strong>, você concorda com estes Termos
+          aplicativo <strong>MIKE TOOLS</strong>, você concorda com estes Termos
           de Uso e com a nossa{" "}
           <Link to="/privacidade" className="underline">Política de Privacidade</Link>.
           Se não concordar, não utilize o serviço.
         </Section>
 
         <Section title="2. Natureza do serviço">
-          O QAP, QRV! é uma ferramenta independente de apoio operacional. Não
+          O MIKE TOOLS é uma ferramenta independente de apoio operacional. Não
           possui vínculo oficial com a Polícia Militar do Estado de São Paulo
           nem com qualquer órgão público. Os dados exibidos pelo aplicativo
           dependem de sistemas oficiais — que podem ficar indisponíveis ou
@@ -89,7 +89,7 @@ function TermosScreen() {
         </Section>
 
         <Section title="6. Propriedade intelectual">
-          O nome "QAP, QRV!", o logotipo, o design e os textos originais deste
+          O nome "MIKE TOOLS", o logotipo, o design e os textos originais deste
           site são protegidos por direitos autorais. Marcas de terceiros
           (Google, AnyConnect, PMESP) pertencem aos seus respectivos titulares
           e são citadas apenas para referência.

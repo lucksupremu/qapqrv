@@ -25,17 +25,17 @@ import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 export const Route = createFileRoute("/manual")({
   head: () => ({
     meta: [
-      { title: "Manual de Uso — QAP, QRV!" },
+      { title: "Manual de Uso — MIKE TOOLS" },
       {
         name: "description",
         content:
-          "Manual completo do app QAP, QRV! com passo a passo de cada função para usuários iniciantes da PMESP.",
+          "Manual completo do app MIKE TOOLS com passo a passo de cada função para usuários iniciantes da PMESP.",
       },
-      { property: "og:title", content: "Manual de Uso — QAP, QRV!" },
+      { property: "og:title", content: "Manual de Uso — MIKE TOOLS" },
       {
         property: "og:description",
         content:
-          "Aprenda a usar todas as funções do QAP, QRV! com tutoriais simples e diretos.",
+          "Aprenda a usar todas as funções do MIKE TOOLS com tutoriais simples e diretos.",
       },
     ],
   }),
@@ -103,7 +103,7 @@ function ManualScreen() {
                 Bem-vindo ao manual
               </h2>
               <p className="mt-1 text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">
-                Aqui você encontra explicações claras de cada função do app QAP, QRV!,
+                Aqui você encontra explicações claras de cada função do app MIKE TOOLS,
                 com o passo a passo para quem está usando pela primeira vez.
                 Toque em uma seção para abrir o conteúdo.
               </p>
@@ -117,7 +117,7 @@ function ManualScreen() {
       <div className="mt-8 space-y-6 px-5">
         <Bloco id="boas-vindas" titulo="1. Boas-vindas" icone={BookOpenCheck}>
           <p>
-            O <strong>QAP, QRV!</strong> é um aplicativo feito para policiais militares
+            O <strong>MIKE TOOLS</strong> é um aplicativo feito para policiais militares
             do Estado de São Paulo (PMESP). Ele reúne, em um só lugar, atalhos para os
             sistemas internos mais usados no dia a dia: consultar escalas por ID,
             marcar e desmarcar plantões (Dejem e Delegada), acessar a Folha de

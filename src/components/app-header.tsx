@@ -29,7 +29,7 @@ export function AppHeader({ subtitle, showBrand = true, title }: Props) {
           </SheetTrigger>
           <SheetContent side="left" className="w-72">
             <SheetHeader>
-              <SheetTitle>QAP, QRV!</SheetTitle>
+              <SheetTitle>MIKE TOOLS</SheetTitle>
             </SheetHeader>
             <nav className="mt-6 flex flex-col gap-1 text-sm">
               {[

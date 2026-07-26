@@ -42,9 +42,9 @@ export const POSTS: BlogPost[] = [
           "Em caso de impedimento, comunique a chefia o quanto antes para abrir vaga a outro militar.",
         ],
       },
-      { h: "Como o QAP, QRV! ajuda" },
+      { h: "Como o MIKE TOOLS ajuda" },
       "O app permite consultar a escala publicada pela sua unidade, salvar o PDF para acesso offline, marcar o serviço no calendário com lembrete automático e compartilhar a escala com colegas. Tudo sem cadastro: basta abrir e usar.",
-      "Importante: o QAP, QRV! é independente. Sempre confirme dados oficiais nos canais da Corporação.",
+      "Importante: o MIKE TOOLS é independente. Sempre confirme dados oficiais nos canais da Corporação.",
     ],
   },
   {
@@ -66,7 +66,7 @@ export const POSTS: BlogPost[] = [
       { h: "Remuneração" },
       "Os valores por hora costumam ser diferentes. A Delegada, por ser custeada pelo município, segue tabela do convênio. A Dejem segue tabela estadual. Em ambos os casos, há tributação na fonte e os valores entram em rubrica específica do contracheque, separados do soldo.",
       { h: "Qual escolher" },
-      "Não há regra única. Muitos policiais combinam as duas conforme disponibilidade e proximidade do local. Use o QAP, QRV! para enxergar Dejem e Delegada no mesmo calendário, evitar conflitos de horário e respeitar o intervalo mínimo entre serviços.",
+      "Não há regra única. Muitos policiais combinam as duas conforme disponibilidade e proximidade do local. Use o MIKE TOOLS para enxergar Dejem e Delegada no mesmo calendário, evitar conflitos de horário e respeitar o intervalo mínimo entre serviços.",
     ],
   },
   {
@@ -86,7 +86,7 @@ export const POSTS: BlogPost[] = [
       { h: "3. Cheque o material no dia anterior" },
       "Colete, arma, munição, lanterna, rádio carregado, documentos. Uma checklist evita esquecer item crítico na correria.",
       { h: "4. Calendário visível" },
-      "Tenha sua escala em um lugar fácil de consultar — no app QAP, QRV!, num calendário compartilhado com a família e, se possível, com lembrete 24h antes do serviço.",
+      "Tenha sua escala em um lugar fácil de consultar — no app MIKE TOOLS, num calendário compartilhado com a família e, se possível, com lembrete 24h antes do serviço.",
       { h: "5. Cuide da saúde mental" },
       "Conversar com pares de confiança sobre o que sentiu no serviço previne acúmulos. Se notar sinais de esgotamento, procure o SAS (Serviço de Assistência Social) ou um profissional de saúde mental.",
     ],
@@ -111,7 +111,7 @@ export const POSTS: BlogPost[] = [
       "Encerre a sessão e desconecte a VPN ao terminar o uso. Deixar a conexão ativa em segundo plano expõe a rede caso o aparelho seja perdido ou roubado.",
       { h: "Cuidado com o que você acessa" },
       "Não tire screenshots de telas restritas para postar em redes sociais ou grupos. Informação interna é informação interna — vazamentos podem gerar consequências disciplinares e penais.",
-      "O QAP, QRV! oferece um atalho para abrir o AnyConnect e indicadores de status da VPN, mas não armazena suas credenciais nem trafega dados sensíveis pelos nossos servidores. O acesso continua sob sua responsabilidade.",
+      "O MIKE TOOLS oferece um atalho para abrir o AnyConnect e indicadores de status da VPN, mas não armazena suas credenciais nem trafega dados sensíveis pelos nossos servidores. O acesso continua sob sua responsabilidade.",
     ],
   },
   {
@@ -128,8 +128,8 @@ export const POSTS: BlogPost[] = [
       "A publicação oficial ocorre em canais internos: intranet da PMESP, murais físicos da OPM e, em muitas unidades, grupos oficiais de comunicação. A versão que vale é sempre a assinada pelo Comandante da OPM ou por quem ele designar. Documentos que circulam sem assinatura devem ser confirmados antes de servir de referência.",
       { h: "Passo 2 — Frequência de conferência" },
       "Adote uma rotina fixa. Uma boa prática é conferir a escala ao menos duas vezes por semana: uma no início da semana, para se planejar, e outra 24 a 48 horas antes de cada plantão previsto, para confirmar horário e local. Alterações de última hora acontecem, especialmente em datas com eventos.",
-      { h: "Passo 3 — Como abrir a escala no QAP, QRV!" },
-      "No app, toque em ‘Consulta de Escala’, informe sua unidade e o período desejado. O QAP, QRV! busca a escala publicada, exibe em formato legível e permite marcar o serviço no calendário do próprio app com um lembrete automático programado para algumas horas antes do horário de apresentação.",
+      { h: "Passo 3 — Como abrir a escala no MIKE TOOLS" },
+      "No app, toque em ‘Consulta de Escala’, informe sua unidade e o período desejado. O MIKE TOOLS busca a escala publicada, exibe em formato legível e permite marcar o serviço no calendário do próprio app com um lembrete automático programado para algumas horas antes do horário de apresentação.",
       { h: "Passo 4 — Salvando para acesso offline" },
       "Toque em ‘Baixar’ para armazenar a escala localmente. A cópia fica disponível em ‘Escalas baixadas’ e pode ser aberta mesmo sem sinal de internet — útil em plantões em bairros com cobertura ruim ou em áreas rurais. O download não expira e você pode remover a qualquer momento.",
       { h: "Passo 5 — Compartilhando com colegas" },
@@ -140,7 +140,7 @@ export const POSTS: BlogPost[] = [
           "Escala não aparece: confirme se a OPM já publicou o período. Alguns comandos publicam apenas na sexta-feira anterior.",
           "Dados diferentes do publicado: force uma atualização puxando a lista para baixo; o app faz nova busca.",
           "Sem internet: abra em ‘Escalas baixadas’ a última versão salva localmente.",
-          "Escala com nome trocado: comunique imediatamente sua Seção de Pessoal — o QAP, QRV! só exibe o que foi publicado oficialmente.",
+          "Escala com nome trocado: comunique imediatamente sua Seção de Pessoal — o MIKE TOOLS só exibe o que foi publicado oficialmente.",
         ],
       },
       { h: "Passo 7 — Depois do plantão" },
@@ -180,7 +180,7 @@ export const POSTS: BlogPost[] = [
       },
       { h: "Direitos" },
       "Além da remuneração prevista no convênio, o policial tem direito a assistência jurídica da Corporação em ocorrências realizadas em serviço, a atendimento médico em caso de acidente e a benefícios previdenciários aplicáveis à atividade militar.",
-      "A Operação Delegada é uma oportunidade importante de complementação de renda. Como toda atividade remunerada em folga, exige planejamento e respeito aos limites físicos. Use o calendário do QAP, QRV! para visualizar serviço ordinário, Dejem e Delegada no mesmo painel.",
+      "A Operação Delegada é uma oportunidade importante de complementação de renda. Como toda atividade remunerada em folga, exige planejamento e respeito aos limites físicos. Use o calendário do MIKE TOOLS para visualizar serviço ordinário, Dejem e Delegada no mesmo painel.",
     ],
   },
   {
@@ -248,7 +248,7 @@ export const POSTS: BlogPost[] = [
       },
       { h: "6. Boas práticas de segurança" },
       "Desconecte a VPN quando não estiver usando. Não deixe seu celular desbloqueado em locais públicos. Ative bloqueio biométrico. Evite conectar em Wi-Fi público sem antes ativar um segundo túnel confiável. Se perder o aparelho, comunique imediatamente a TI para revogar o acesso.",
-      { h: "7. Como o QAP, QRV! ajuda" },
+      { h: "7. Como o MIKE TOOLS ajuda" },
       "O app oferece um atalho para abrir o Cisco Secure Client, um indicador de status da VPN (conectado ou não) e um teste rápido de acesso a serviços da intranet. Ele não armazena sua senha nem intercepta o tráfego — apenas facilita o uso.",
       "Se você é o primeiro do seu Batalhão a usar o Secure Client em Android, tire foto das etapas e passe adiante. Documentação simples resolve 80% das dúvidas dos colegas.",
     ],
@@ -277,19 +277,19 @@ export const POSTS: BlogPost[] = [
       "Menos comum, mas ocorre: o roteador de casa ou o Wi-Fi do quartel não resolvem o nome interno. Se você tiver instruções da TI para trocar o DNS do celular, siga-as. Caso contrário, tente pelos dados móveis.",
       { h: "7. Quando acionar o suporte" },
       "Testou tudo acima e nada resolveu? Registre o horário exato, print da tela de erro e descrição da rede (Wi-Fi ou 4G). Envie ao canal de suporte da TI da sua unidade — dados objetivos aceleram a solução.",
-      "O QAP, QRV! oferece um teste de acesso rápido à intranet, indicando se o problema é geral ou específico do seu dispositivo. É um bom primeiro passo antes de reinstalar aplicativos ou entrar em contato com o suporte.",
+      "O MIKE TOOLS oferece um teste de acesso rápido à intranet, indicando se o problema é geral ou específico do seu dispositivo. É um bom primeiro passo antes de reinstalar aplicativos ou entrar em contato com o suporte.",
     ],
   },
   {
     slug: "usar-app-offline",
-    title: "Como usar o QAP, QRV! sem sinal de internet",
+    title: "Como usar o MIKE TOOLS sem sinal de internet",
     description:
       "O que continua funcionando no app quando você está em área sem sinal, como preparar antes do plantão e limites do modo offline.",
     publishedAt: "2026-07-05",
     readingMinutes: 5,
     category: "App",
     body: [
-      "Boa parte da rotina policial acontece em bairros ou regiões com sinal instável. O QAP, QRV! foi pensado para continuar útil mesmo quando o celular fica sem conexão — desde que você faça um pequeno preparo antes de sair de casa.",
+      "Boa parte da rotina policial acontece em bairros ou regiões com sinal instável. O MIKE TOOLS foi pensado para continuar útil mesmo quando o celular fica sem conexão — desde que você faça um pequeno preparo antes de sair de casa.",
       { h: "O que funciona offline" },
       {
         list: [
@@ -310,7 +310,7 @@ export const POSTS: BlogPost[] = [
         ],
       },
       { h: "Preparando o app antes do plantão" },
-      "Na noite anterior, abra o QAP, QRV! conectado ao Wi-Fi de casa e:",
+      "Na noite anterior, abra o MIKE TOOLS conectado ao Wi-Fi de casa e:",
       {
         list: [
           "Consulte a escala do dia seguinte para forçar cache atualizado.",
@@ -338,7 +338,7 @@ export const POSTS: BlogPost[] = [
       "Compartilhar a escala é rotineiro — chefe de equipe precisa saber quem entra, família precisa se organizar, colega troca dia. Mas cuidado com o que exatamente você envia: uma foto de tela pode revelar mais informação do que parece.",
       { h: "Riscos de compartilhar prints diretos" },
       "Um print de tela pode incluir número da viatura, nome de operações sensíveis, endereço de residência de terceiros, telefones e até anotações pessoais. Antes de enviar qualquer imagem, revise o que está visível.",
-      { h: "Como o QAP, QRV! ajuda" },
+      { h: "Como o MIKE TOOLS ajuda" },
       "O botão de compartilhar do app gera uma imagem otimizada da escala: só data, horário, função e local. Nome do policial fica visível apenas se ele estiver na escala — dados de terceiros que não sejam colegas ficam ocultos por padrão.",
       { h: "Escolhendo o canal certo" },
       {

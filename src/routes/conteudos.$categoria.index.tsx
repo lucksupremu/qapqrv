@@ -15,9 +15,9 @@ export const Route = createFileRoute("/conteudos/$categoria/")({
     const { categoria } = loaderData;
     return {
       meta: [
-        { title: `${categoria.title} — Central de Conteúdo QAP, QRV!` },
+        { title: `${categoria.title} — Central de Conteúdo MIKE TOOLS` },
         { name: "description", content: categoria.description },
-        { property: "og:title", content: `${categoria.title} — QAP, QRV!` },
+        { property: "og:title", content: `${categoria.title} — MIKE TOOLS` },
         { property: "og:url", content: `https://miketools.top/conteudos/${categoria.slug}` },
       ],
       links: [{ rel: "canonical", href: `https://miketools.top/conteudos/${categoria.slug}` }],

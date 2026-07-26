@@ -20,7 +20,7 @@ export function gerarIcs(entries: PlantaoEntry[], nome: string): string {
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//QAP QRV//Escala//PT",
+    "PRODID:-//MIKE TOOLS//Escala//PT",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${esc(nome)}`,

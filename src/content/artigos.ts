@@ -1,7 +1,7 @@
 import type { Artigo } from "./tipos";
 
 /**
- * Biblioteca editorial do QAP, QRV!
+ * Biblioteca editorial do MIKE TOOLS
  * Cada artigo tem ~600-900 palavras, TOC explícito e FAQ opcional.
  * Adicionar novos artigos aqui não requer mudança de código de rota.
  */
@@ -13,7 +13,7 @@ export const ARTIGOS: Artigo[] = [
     category: "dejem",
     date: "2026-05-02",
     readingMinutes: 8,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["O que é a DEJEM", "Quem pode participar", "Como se inscrever", "Como a escala é montada", "Remuneração", "Cuidados práticos", "Erros comuns"],
     body: [
       "A Dejem — Detalhe de Jornada Extra Militar — é uma das principais formas de jornada complementar remunerada disponíveis ao policial militar do Estado de São Paulo. Ela permite reforçar o policiamento em pontos e horários definidos pela Corporação, com remuneração por hora trabalhada, fora do horário de serviço ordinário.",
@@ -22,9 +22,9 @@ export const ARTIGOS: Artigo[] = [
       { h: "Quem pode participar" },
       "Podem participar policiais militares da ativa que estejam em condições de saúde compatíveis com a jornada extra, sem impedimentos disciplinares e que atendam aos requisitos da diretriz vigente. Alunos e casos específicos seguem regras próprias.",
       { h: "Como se inscrever" },
-      "A inscrição é feita pela intranet PMESP, dentro do sistema de escalas. O QAP, QRV! oferece atalho direto para essa página na Home: basta tocar em 'Marcar / Desmarcar Dejem/Delegada'. É necessário estar com a VPN AnyConnect ativa se estiver fora da rede corporativa.",
+      "A inscrição é feita pela intranet PMESP, dentro do sistema de escalas. O MIKE TOOLS oferece atalho direto para essa página na Home: basta tocar em 'Marcar / Desmarcar Dejem/Delegada'. É necessário estar com a VPN AnyConnect ativa se estiver fora da rede corporativa.",
       { h: "Como a escala é montada" },
-      "A OPM consolida as inscrições, prioriza a antiguidade e a disponibilidade e publica a escala oficial em PDF. Cada policial recebe seu ID de escala e pode consultar o documento pela consulta de escala do QAP, QRV! ou pela intranet.",
+      "A OPM consolida as inscrições, prioriza a antiguidade e a disponibilidade e publica a escala oficial em PDF. Cada policial recebe seu ID de escala e pode consultar o documento pela consulta de escala do MIKE TOOLS ou pela intranet.",
       { h: "Remuneração" },
       "A Dejem é paga pelo Governo do Estado por hora trabalhada, com valores definidos por tabela vigente. O crédito aparece em rubrica separada no contracheque, com incidência de tributos na fonte conforme legislação.",
       { h: "Cuidados práticos" },
@@ -38,7 +38,7 @@ export const ARTIGOS: Artigo[] = [
         ],
       },
       { h: "Erros comuns" },
-      "Os erros mais comuns são: inscrever-se sem verificar disponibilidade real, esquecer o intervalo mínimo entre serviços e chegar sem conferir a função no dia. Todos evitáveis com uma agenda organizada e conferência prévia. Use o calendário do QAP, QRV! para não ter surpresas.",
+      "Os erros mais comuns são: inscrever-se sem verificar disponibilidade real, esquecer o intervalo mínimo entre serviços e chegar sem conferir a função no dia. Todos evitáveis com uma agenda organizada e conferência prévia. Use o calendário do MIKE TOOLS para não ter surpresas.",
     ],
     faq: [
       { q: "Posso fazer Dejem no dia seguinte ao serviço ordinário?", a: "Depende do intervalo previsto na diretriz vigente. Consulte sua Seção de Pessoal antes de se inscrever." },
@@ -53,7 +53,7 @@ export const ARTIGOS: Artigo[] = [
     category: "delegada",
     date: "2026-05-05",
     readingMinutes: 6,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Origem de cada operação", "Quem paga", "Onde se atua", "Inscrição", "Remuneração", "Qual escolher"],
     body: [
       "Muito policial ainda confunde Dejem e Operação Delegada porque ambas são jornadas extras remuneradas. Mas elas nascem de fontes diferentes e obedecem regras próprias. Entender essa diferença ajuda a planejar a agenda com segurança.",
@@ -68,7 +68,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Remuneração" },
       "Os valores por hora são diferentes e podem variar entre operações. Nos dois casos, o valor aparece em rubrica específica do contracheque e tem tributação na fonte.",
       { h: "Qual escolher" },
-      "Não há resposta única. Muitos policiais combinam as duas conforme disponibilidade e proximidade do local. Use o Calendário do QAP, QRV! para ver ambas na mesma agenda e evitar conflitos.",
+      "Não há resposta única. Muitos policiais combinam as duas conforme disponibilidade e proximidade do local. Use o Calendário do MIKE TOOLS para ver ambas na mesma agenda e evitar conflitos.",
     ],
     faq: [
       { q: "Posso fazer Dejem e Delegada no mesmo dia?", a: "Somente se respeitados os intervalos mínimos e desde que não haja sobreposição de horário." },
@@ -82,7 +82,7 @@ export const ARTIGOS: Artigo[] = [
     category: "escalas",
     date: "2026-05-08",
     readingMinutes: 7,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Escolha um modelo de escala", "Priorize o sono", "Alimentação inteligente", "Use o calendário", "Comunique-se com a família", "Evite acúmulo excessivo"],
     body: [
       "Trabalhar em regime de plantão exige mais do que disposição: exige planejamento. O corpo e a mente pagam preço alto quando a escala vira improviso. Este guia reúne práticas simples que fazem grande diferença no longo prazo.",
@@ -93,7 +93,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Alimentação inteligente" },
       "Refeições leves antes do serviço, hidratação constante e evitar excesso de cafeína após o meio do turno mantêm a atenção sem provocar picos de energia seguidos de queda.",
       { h: "Use o calendário" },
-      "Marque cada plantão no Calendário do QAP, QRV! e ative lembretes 60 e 120 minutos antes. Ver a semana inteira de uma vez evita compromissos conflitantes.",
+      "Marque cada plantão no Calendário do MIKE TOOLS e ative lembretes 60 e 120 minutos antes. Ver a semana inteira de uma vez evita compromissos conflitantes.",
       { h: "Comunique-se com a família" },
       "Compartilhe a escala com quem convive com você. O app permite exportar em .ics para o Google Agenda familiar.",
       { h: "Evite acúmulo excessivo" },
@@ -108,7 +108,7 @@ export const ARTIGOS: Artigo[] = [
     category: "escalas",
     date: "2026-05-11",
     readingMinutes: 6,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Como cada escala funciona", "Impacto no descanso", "Impacto na renda", "Qualidade de vida", "Como decidir"],
     body: [
       "A escolha entre 12x24 e 12x48 (ou 24x72) é uma das discussões mais frequentes entre policiais em regime de plantão. Cada modelo tem trade-offs claros.",
@@ -121,7 +121,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Qualidade de vida" },
       "12x48 tende a favorecer estudo e vida familiar. 12x24 é comum onde a demanda operacional exige mais ciclos de serviço no mês.",
       { h: "Como decidir" },
-      "Nem sempre há escolha: o modelo depende da unidade. Quando houver, o 12x48 costuma ser melhor para saúde e presença familiar. Registre a escala no calendário do QAP, QRV! para não perder plantão.",
+      "Nem sempre há escolha: o modelo depende da unidade. Quando houver, o 12x48 costuma ser melhor para saúde e presença familiar. Registre a escala no calendário do MIKE TOOLS para não perder plantão.",
     ],
     related: ["planejamento-plantao"],
   },
@@ -132,12 +132,12 @@ export const ARTIGOS: Artigo[] = [
     category: "procedimentos",
     date: "2026-05-14",
     readingMinutes: 5,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Sempre com VPN", "Cuidado com senhas", "Evite salvar em navegador público", "Feche a sessão", "Reporte problemas"],
     body: [
       "A intranet da PMESP é ferramenta central para escala, contracheque, ofícios e comunicações. Alguns hábitos simples evitam dor de cabeça.",
       { h: "Sempre com VPN" },
-      "Fora da rede corporativa, acesse sempre com AnyConnect ativa. O QAP, QRV! detecta e avisa se a VPN está desligada.",
+      "Fora da rede corporativa, acesse sempre com AnyConnect ativa. O MIKE TOOLS detecta e avisa se a VPN está desligada.",
       { h: "Cuidado com senhas" },
       "Não reutilize a senha da intranet em serviços pessoais. Troque com frequência e use gerenciador seguro.",
       { h: "Evite salvar em navegador público" },
@@ -145,7 +145,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Feche a sessão" },
       "Ao terminar, faça logout. Fechar apenas a aba pode deixar a sessão ativa.",
       { h: "Reporte problemas" },
-      "Instabilidade ou erro estranho? Reporte à sua unidade e ao suporte oficial. O QAP, QRV! não substitui a intranet — apenas facilita atalhos.",
+      "Instabilidade ou erro estranho? Reporte à sua unidade e ao suporte oficial. O MIKE TOOLS não substitui a intranet — apenas facilita atalhos.",
     ],
     related: ["seguranca-anyconnect", "senha-forte-policial"],
   },
@@ -156,7 +156,7 @@ export const ARTIGOS: Artigo[] = [
     category: "seguranca-digital",
     date: "2026-05-17",
     readingMinutes: 7,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["O que é a VPN AnyConnect", "Por que a PMESP usa", "Instalação no Android", "Instalação no Windows", "Problemas comuns", "Boas práticas"],
     body: [
       "A VPN AnyConnect da Cisco é a ferramenta que permite ao policial militar acessar sistemas internos da PMESP a partir de redes externas com segurança.",
@@ -178,7 +178,7 @@ export const ARTIGOS: Artigo[] = [
         ],
       },
       { h: "Boas práticas" },
-      "Desligue a VPN quando não estiver usando serviços internos para preservar bateria. Nunca compartilhe suas credenciais. Consulte o vídeo tutorial ANYCONECT no menu do QAP, QRV!.",
+      "Desligue a VPN quando não estiver usando serviços internos para preservar bateria. Nunca compartilhe suas credenciais. Consulte o vídeo tutorial ANYCONECT no menu do MIKE TOOLS.",
     ],
     related: ["boas-praticas-intranet-pmesp", "senha-forte-policial"],
   },
@@ -189,7 +189,7 @@ export const ARTIGOS: Artigo[] = [
     category: "seguranca-digital",
     date: "2026-05-19",
     readingMinutes: 5,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["O que é senha forte", "Erros a evitar", "Gerenciador de senhas", "Autenticação em duas etapas", "O que fazer se vazou"],
     body: [
       "Senha fraca é porta aberta. Para quem lida com sistemas sensíveis, o cuidado precisa ser dobrado.",
@@ -208,15 +208,15 @@ export const ARTIGOS: Artigo[] = [
   },
   {
     slug: "calendario-operacional-guia",
-    title: "Como usar o calendário operacional do QAP, QRV!",
+    title: "Como usar o calendário operacional do MIKE TOOLS",
     subtitle: "Passo a passo: plantões, avulsos, compromissos e exportação",
     category: "ferramentas",
     date: "2026-05-22",
     readingMinutes: 6,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Visão geral", "Adicionar plantão recorrente", "Adicionar plantão avulso", "Adicionar compromisso", "Cores automáticas", "Exportar para o Google Agenda"],
     body: [
-      "O Calendário é o coração do QAP, QRV!. Ele centraliza escalas, compromissos e horas trabalhadas.",
+      "O Calendário é o coração do MIKE TOOLS. Ele centraliza escalas, compromissos e horas trabalhadas.",
       { h: "Visão geral" },
       "Cada célula do calendário representa um dia. Um plantão de dia (06h–18h) recebe fundo dourado; noite (18h–06h), azul-marinho. Compromissos pessoais aparecem como post-it amarelo. Um risco horizontal azul marca o dia de hoje.",
       { h: "Adicionar plantão recorrente" },
@@ -234,15 +234,15 @@ export const ARTIGOS: Artigo[] = [
   },
   {
     slug: "backup-e-privacidade-app",
-    title: "Backup e privacidade no QAP, QRV!",
+    title: "Backup e privacidade no MIKE TOOLS",
     subtitle: "Onde ficam seus dados e como protegê-los",
     category: "tecnologia",
     date: "2026-05-25",
     readingMinutes: 5,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Onde os dados ficam", "Backup manual", "Backup no APK", "Restauração", "Privacidade"],
     body: [
-      "O QAP, QRV! foi desenhado com privacidade em primeiro lugar: seus dados operacionais ficam no aparelho, sem envio para servidor.",
+      "O MIKE TOOLS foi desenhado com privacidade em primeiro lugar: seus dados operacionais ficam no aparelho, sem envio para servidor.",
       { h: "Onde os dados ficam" },
       "Plantões, marcas, preferências e escalas salvas ficam no armazenamento local do navegador (IndexedDB/localStorage) ou no armazenamento do APK Android.",
       { h: "Backup manual" },
@@ -263,7 +263,7 @@ export const ARTIGOS: Artigo[] = [
     category: "produtividade",
     date: "2026-05-28",
     readingMinutes: 6,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Comece pelo sono", "Bloqueie tempo", "Reduza notificações", "Estude em blocos", "Automatize o que puder"],
     body: [
       "Para quem trabalha em escala, produtividade é proteger o essencial: sono, saúde, estudo e família.",
@@ -272,7 +272,7 @@ export const ARTIGOS: Artigo[] = [
       { h: "Bloqueie tempo" },
       "Reserve blocos fixos para estudo, exercício e família. Compromisso com você mesmo também entra no calendário.",
       { h: "Reduza notificações" },
-      "Desative alertas de redes sociais. Deixe ativas só as do QAP, QRV! e dos apps realmente essenciais.",
+      "Desative alertas de redes sociais. Deixe ativas só as do MIKE TOOLS e dos apps realmente essenciais.",
       { h: "Estude em blocos" },
       "Sessões de 45 minutos com 10 de pausa (Pomodoro adaptado) tendem a render mais que 3 horas seguidas.",
       { h: "Automatize o que puder" },
@@ -287,10 +287,10 @@ export const ARTIGOS: Artigo[] = [
     category: "pmesp",
     date: "2026-05-31",
     readingMinutes: 4,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Portais oficiais", "Ouvidoria", "Ensino", "Redes sociais"],
     body: [
-      "O QAP, QRV! é ferramenta auxiliar. Para informação oficial, sempre consulte a fonte primária.",
+      "O MIKE TOOLS é ferramenta auxiliar. Para informação oficial, sempre consulte a fonte primária.",
       { h: "Portais oficiais" },
       "O portal principal da PMESP concentra editais, comunicados e diretrizes. A intranet acessa serviços internos como escala e folha.",
       { h: "Ouvidoria" },
@@ -304,15 +304,15 @@ export const ARTIGOS: Artigo[] = [
   },
   {
     slug: "instalar-pwa-android",
-    title: "Como instalar o QAP, QRV! como app no Android",
+    title: "Como instalar o MIKE TOOLS como app no Android",
     subtitle: "Passo a passo pelo Chrome e sem precisar da Play Store",
     category: "tecnologia",
     date: "2026-06-03",
     readingMinutes: 4,
-    author: "Equipe QAP, QRV!",
+    author: "Equipe MIKE TOOLS",
     toc: ["Pelo Chrome", "Pelo APK", "Benefícios", "Desinstalação"],
     body: [
-      "O QAP, QRV! é um PWA — instala como app sem passar pela Play Store, e ainda existe APK oficial.",
+      "O MIKE TOOLS é um PWA — instala como app sem passar pela Play Store, e ainda existe APK oficial.",
       { h: "Pelo Chrome" },
       "Abra o site no Chrome, toque no menu ⋮ e selecione 'Instalar app' ou 'Adicionar à tela inicial'. O ícone aparece na home do celular e abre em tela cheia.",
       { h: "Pelo APK" },

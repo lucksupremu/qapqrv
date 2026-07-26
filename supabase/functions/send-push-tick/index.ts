@@ -58,8 +58,8 @@ async function sendOne(
 async function runInactivity() {
   const now = Date.now();
   const stages = [
-    { stage: 3, days: 30, title: "Faz tempo!", body: "Quer voltar a acompanhar suas escalas no QAP, QRV!?" },
-    { stage: 2, days: 14, title: "Sentimos sua falta", body: "Tem novidade no QAP, QRV! Bora dar uma olhada." },
+    { stage: 3, days: 30, title: "Faz tempo!", body: "Quer voltar a acompanhar suas escalas no MIKE TOOLS?" },
+    { stage: 2, days: 14, title: "Sentimos sua falta", body: "Tem novidade no MIKE TOOLS Bora dar uma olhada." },
     { stage: 1, days: 3,  title: "Já conferiu sua escala hoje?", body: "Abra o app e veja seus próximos turnos." },
   ];
 
@@ -211,7 +211,7 @@ async function runInstallNudge() {
   let sent = 0;
   for (const sub of subs ?? []) {
     const res = await sendOne(sub as Sub, {
-      title: "Instale o QAP, QRV! na tela inicial",
+      title: "Instale o MIKE TOOLS na tela inicial",
       body: "Acesso rápido, sem abrir o navegador. Toque para instalar.",
       url: "/?install=1",
       tag: "install-nudge",
