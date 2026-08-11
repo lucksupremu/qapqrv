@@ -36,6 +36,7 @@ import { Route as AnyconnectRouteImport } from './routes/anyconnect'
 import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConteudosIndexRouteImport } from './routes/conteudos.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as FerramentaMinhaLocalizacaoRouteImport } from './routes/ferramenta.minha-localizacao'
 import { Route as FerramentaConsultaEscalaRouteImport } from './routes/ferramenta.consulta-escala'
 import { Route as FerramentaSlugRouteImport } from './routes/ferramenta.$slug'
@@ -181,6 +182,11 @@ const ConteudosIndexRoute = ConteudosIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ConteudosRoute,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRoute,
+} as any)
 const FerramentaMinhaLocalizacaoRoute =
   FerramentaMinhaLocalizacaoRouteImport.update({
     id: '/ferramenta/minha-localizacao',
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/blog/': typeof BlogIndexRoute
   '/conteudos/': typeof ConteudosIndexRoute
   '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
   '/conteudos/$categoria/': typeof ConteudosCategoriaIndexRoute
@@ -266,7 +273,6 @@ export interface FileRoutesByTo {
   '/ajuda': typeof AjudaRoute
   '/anyconnect': typeof AnyconnectRoute
   '/aviso-legal': typeof AvisoLegalRoute
-  '/blog': typeof BlogRouteWithChildren
   '/calendario': typeof CalendarioRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contato': typeof ContatoRoute
@@ -292,6 +298,7 @@ export interface FileRoutesByTo {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/blog': typeof BlogIndexRoute
   '/conteudos': typeof ConteudosIndexRoute
   '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
   '/conteudos/$categoria': typeof ConteudosCategoriaIndexRoute
@@ -330,6 +337,7 @@ export interface FileRoutesById {
   '/ferramenta/$slug': typeof FerramentaSlugRoute
   '/ferramenta/consulta-escala': typeof FerramentaConsultaEscalaRoute
   '/ferramenta/minha-localizacao': typeof FerramentaMinhaLocalizacaoRoute
+  '/blog/': typeof BlogIndexRoute
   '/conteudos/': typeof ConteudosIndexRoute
   '/conteudos/$categoria/$slug': typeof ConteudosCategoriaSlugRoute
   '/conteudos/$categoria/': typeof ConteudosCategoriaIndexRoute
@@ -369,6 +377,7 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/blog/'
     | '/conteudos/'
     | '/conteudos/$categoria/$slug'
     | '/conteudos/$categoria/'
@@ -378,7 +387,6 @@ export interface FileRouteTypes {
     | '/ajuda'
     | '/anyconnect'
     | '/aviso-legal'
-    | '/blog'
     | '/calendario'
     | '/configuracoes'
     | '/contato'
@@ -404,6 +412,7 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/blog'
     | '/conteudos'
     | '/conteudos/$categoria/$slug'
     | '/conteudos/$categoria'
@@ -441,6 +450,7 @@ export interface FileRouteTypes {
     | '/ferramenta/$slug'
     | '/ferramenta/consulta-escala'
     | '/ferramenta/minha-localizacao'
+    | '/blog/'
     | '/conteudos/'
     | '/conteudos/$categoria/$slug'
     | '/conteudos/$categoria/'
@@ -670,6 +680,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConteudosIndexRouteImport
       parentRoute: typeof ConteudosRoute
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRoute
+    }
     '/ferramenta/minha-localizacao': {
       id: '/ferramenta/minha-localizacao'
       path: '/ferramenta/minha-localizacao'
@@ -731,10 +748,12 @@ declare module '@tanstack/react-router' {
 
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 const BlogRouteChildren: BlogRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
@@ -801,3 +820,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
