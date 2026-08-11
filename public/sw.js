@@ -5,7 +5,9 @@
 //    cache servido imediato se já houver).
 // Não interfere com a intranet PMESP (URLs externas passam direto pela rede).
 
-const CACHE_VERSION = "qapqrv-v5";
+// v6 invalida o app-shell SPA anterior, que continha /src/main.tsx e podia
+// restaurar uma página branca depois da migração do site para SSR.
+const CACHE_VERSION = "qapqrv-v6";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const PDF_CACHE = `${CACHE_VERSION}-pdf`;
@@ -87,6 +89,10 @@ if (IS_PREVIEW) {
             .map((n) => caches.delete(n)),
         );
         await self.clients.claim();
+        // Recarrega abas controladas para que recebam imediatamente o HTML SSR
+        // atual, em vez de continuarem executando o shell SPA antigo em memória.
+        const clientsList = await self.clients.matchAll({ type: "window" });
+        await Promise.allSettled(clientsList.map((client) => client.navigate(client.url)));
       })(),
     );
   });

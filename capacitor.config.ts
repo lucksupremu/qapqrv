@@ -3,7 +3,8 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "br.com.qapqrv.app",
   appName: "MIKE TOOLS",
-  webDir: "dist",
+  // Artefato SPA exclusivo do Android; o site usa o build SSR do TanStack Start.
+  webDir: "android-dist",
   server: {
     androidScheme: "https",
   },
