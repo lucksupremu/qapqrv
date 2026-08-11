@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+# Telas sem conteúdo editorial — bloqueadas para crawlers de busca/AdSense
+# para evitar serem classificadas como inventário de anúncio sem conteúdo.
+Disallow: /splash
+Disallow: /onboarding
+Disallow: /em-construcao
+Disallow: /intranet
+Disallow: /anyconnect
+Disallow: /ferramenta/
+Disallow: /escala-viewer/
+Disallow: /escalas-baixadas
+Disallow: /configuracoes
+Disallow: /favoritos
+Disallow: /historico
+Disallow: /calendario
+Disallow: /inicio
+
+Sitemap: https://miketools.top/sitemap.xml

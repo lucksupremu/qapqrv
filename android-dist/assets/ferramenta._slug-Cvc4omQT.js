@@ -1,0 +1,1 @@
+import{j as e}from"./index-Wdl0A0SG.js";const s=({error:t})=>e.jsx("div",{className:"min-h-screen flex items-center justify-center px-6 text-center",children:e.jsxs("div",{children:[e.jsx("h1",{className:"text-xl font-bold",children:"Algo deu errado"}),e.jsx("p",{className:"text-sm text-muted-foreground mt-2",children:t.message})]})});export{s as errorComponent};

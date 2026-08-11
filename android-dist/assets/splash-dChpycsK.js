@@ -1,0 +1,1 @@
+import{u as t,d as s}from"./index-Wdl0A0SG.js";function o(){const e=t();return s.useEffect(()=>{try{sessionStorage.setItem("splash_shown","1")}catch{}e({to:"/",replace:!0})},[e]),null}export{o as component};
