@@ -26,7 +26,9 @@ import {
 
 
 export const Route = createFileRoute("/escalas-baixadas")({
-  head: () => ({ meta: [{ title: "Escalas baixadas — MIKE TOOLS" }] }),
+  head: () => ({
+    meta: [{ title: "Escalas baixadas — MIKE TOOLS" }, { name: "robots", content: "noindex,nofollow" }],
+  }),
   component: DownloadedReportsScreen,
 });
 

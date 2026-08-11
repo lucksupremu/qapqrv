@@ -1,29 +1,14 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+// Build WEB (SSR real por rota, usado no site miketools.top).
+// O build estático para o APK Capacitor vive em `vite.config.apk.ts`.
+//
+// @lovable.dev/vite-tanstack-config já inclui: tanstackStart, viteReact,
+// tailwindcss, tsConfigPaths, nitro, componentTagger (dev), alias @, etc.
+// Não adicione esses plugins manualmente.
+import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// SPA estática para empacotar no APK via Capacitor.
-// Sem SSR/Nitro: `vite build` gera `dist/` puro.
 export default defineConfig({
-  plugins: [
-    tsconfigPaths(),
-    tanstackRouter({
-      target: "react",
-      autoCodeSplitting: true,
-      routesDirectory: "src/routes",
-      generatedRouteTree: "src/routeTree.gen.ts",
-    }),
-    react(),
-    tailwindcss(),
-  ],
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  build: {
-    outDir: "dist",
-    sourcemap: false,
+  tanstackStart: {
+    // Redireciona o server entry do Start para src/server.ts (wrapper de erro SSR).
+    server: { entry: "server" },
   },
 });

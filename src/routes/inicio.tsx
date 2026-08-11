@@ -11,6 +11,7 @@ import { tools } from "@/lib/tools";
 export const Route = createFileRoute("/inicio")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex,nofollow" },
       { title: "Início — MIKE TOOLS" },
       { name: "description", content: "Acesse todas as ferramentas operacionais." },
     ],

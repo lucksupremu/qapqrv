@@ -64,7 +64,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build web bundle
-        run: bun run build
+        run: bun run build:apk
 
       - name: Add Android platform (if missing)
         run: |

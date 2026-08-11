@@ -11,7 +11,9 @@ export const Route = createFileRoute("/contato")({
         content:
           "Entre em contato com a equipe do MIKE TOOLS para sugestões, parcerias, suporte e solicitações relacionadas à LGPD.",
       },
+      { property: "og:url", content: "https://miketools.top/contato" },
     ],
+    links: [{ rel: "canonical", href: "https://miketools.top/contato" }],
   }),
   component: ContatoScreen,
 });

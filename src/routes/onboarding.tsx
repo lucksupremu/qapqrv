@@ -3,7 +3,9 @@ import { useState } from "react";
 import { Calendar, Bell, ChevronRight, Check } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Bem-vindo — MIKE TOOLS" }] }),
+  head: () => ({
+    meta: [{ title: "Bem-vindo — MIKE TOOLS" }, { name: "robots", content: "noindex,nofollow" }],
+  }),
   component: OnboardingScreen,
 });
 

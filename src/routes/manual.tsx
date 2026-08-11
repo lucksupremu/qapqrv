@@ -37,7 +37,9 @@ export const Route = createFileRoute("/manual")({
         content:
           "Aprenda a usar todas as funções do MIKE TOOLS com tutoriais simples e diretos.",
       },
+      { property: "og:url", content: "https://miketools.top/manual" },
     ],
+    links: [{ rel: "canonical", href: "https://miketools.top/manual" }],
   }),
   component: ManualScreen,
 });
