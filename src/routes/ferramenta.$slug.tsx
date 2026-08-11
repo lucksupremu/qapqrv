@@ -8,11 +8,6 @@ import { ComoFuncionaBox } from "@/components/como-funciona-box";
 import { getFerramentaInfo } from "@/content";
 
 export const Route = createFileRoute("/ferramenta/$slug")({
-  head: () => ({
-    meta: [
-      { name: "robots", content: "noindex,nofollow" },
-    ],
-  }),
   loader: ({ params }) => {
     const tool = getTool(params.slug);
     if (!tool) throw notFound();

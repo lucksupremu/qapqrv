@@ -13,11 +13,8 @@ const PUBLIC_HOST = "https://qapqrv.lovable.app";
 
 export const Route = createFileRoute("/anyconnect")({
   head: () => ({
-    meta: [
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "Configurar AnyConnect — MIKE TOOLS" }, { name: "robots", content: "noindex,nofollow" }],
   }),
-  head: () => ({ meta: [{ title: "Configurar AnyConnect — MIKE TOOLS" }] }),
   component: AnyConnectGuideScreen,
 });
 

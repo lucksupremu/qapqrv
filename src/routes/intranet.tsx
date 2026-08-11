@@ -20,11 +20,8 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/intranet")({
   head: () => ({
-    meta: [
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "Intranet — MIKE TOOLS" }, { name: "robots", content: "noindex,nofollow" }],
   }),
-  head: () => ({ meta: [{ title: "Intranet — MIKE TOOLS" }] }),
   validateSearch: (s) => searchSchema.parse(s),
   component: IntranetRedirect,
 });
