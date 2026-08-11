@@ -18,8 +18,9 @@ export const Route = createFileRoute("/blog/$slug")({
         to: "/conteudos/$categoria/$slug",
         params: mapped,
         replace: true,
+        statusCode: 301,
       });
     }
-    throw redirect({ to: "/conteudos", replace: true });
+    throw redirect({ to: "/conteudos", replace: true, statusCode: 301 });
   },
 });
