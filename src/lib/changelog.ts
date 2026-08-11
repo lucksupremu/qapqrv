@@ -1,7 +1,7 @@
 // Changelog do app — exibido na "Novidades" após cada update.
 // Bump APP_VERSION sempre que tiver algo novo pra mostrar.
 
-export const APP_VERSION = "1.0.2";
+export const APP_VERSION = "1.0.3";
 
 export type ChangelogEntry = {
   version: string;
@@ -10,6 +10,14 @@ export type ChangelogEntry = {
 };
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.3",
+    date: "11/08/2026",
+    highlights: [
+      "Rotas da Home e Privacidade protegidas contra arquivos HTML estáticos antigos.",
+      "Build web agora limpa integralmente a saída antes de cada publicação.",
+    ],
+  },
   {
     version: "1.0.2",
     date: "11/08/2026",
