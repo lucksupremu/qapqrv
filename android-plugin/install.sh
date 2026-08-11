@@ -289,8 +289,11 @@ fi
 # ----- <queries> para descobrir leitores/compartilhadores de PDF (Android 11+) -----
 if ! grep -q "<!-- qapqrv-pdf-queries -->" "$MANIFEST"; then
   echo "==> Adicionando bloco <queries> ao AndroidManifest"
-  QUERIES_BLOCK='    <!-- qapqrv-pdf-queries -->\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" \/>\n            <data android:mimeType="application\/pdf" \/>\n        <\/intent>\n        <intent>\n            <action android:name="android.intent.action.SEND" \/>\n            <data android:mimeType="application\/pdf" \/>\n        <\/intent>\n    <\/queries>\n    <application'
+  QUERIES_BLOCK='    <!-- qapqrv-pdf-queries -->\n    <queries>\n        <package android:name="com.cisco.anyconnect.vpn.android.avf" \/>\n        <package android:name="com.cisco.anyconnect.vpn.android.apex" \/>\n        <intent>\n            <action android:name="android.intent.action.VIEW" \/>\n            <data android:mimeType="application\/pdf" \/>\n        <\/intent>\n        <intent>\n            <action android:name="android.intent.action.SEND" \/>\n            <data android:mimeType="application\/pdf" \/>\n        <\/intent>\n    <\/queries>\n    <application'
   sed -i "0,/<application/s##$QUERIES_BLOCK#" "$MANIFEST"
+elif ! grep -q "com.cisco.anyconnect" "$MANIFEST"; then
+  echo "==> Adicionando <package> do AnyConnect ao bloco <queries>"
+  sed -i '0,/<queries>/s##<queries>\n        <package android:name="com.cisco.anyconnect.vpn.android.avf" \/>\n        <package android:name="com.cisco.anyconnect.vpn.android.apex" \/>#' "$MANIFEST"
 fi
 
 # ----- Network Security Config: confia em CAs do sistema + do usuário (VPN) -----

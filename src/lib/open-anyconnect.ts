@@ -2,6 +2,8 @@ import { toast } from "sonner";
 import { isNativeApp } from "@/lib/in-app-browser";
 
 const ANDROID_PACKAGE = "com.cisco.anyconnect.vpn.android.avf";
+// Cisco Secure Client (v5) mantém o mesmo pacote; variantes corporativas usam este outro
+const ANDROID_PACKAGES = [ANDROID_PACKAGE, "com.cisco.anyconnect.vpn.android.apex"];
 const PLAY_STORE_URL = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
 const PLAY_STORE_MARKET = `market://details?id=${ANDROID_PACKAGE}`;
 const APP_STORE_URL = "https://apps.apple.com/us/app/cisco-secure-client/id1135064690";
@@ -19,15 +21,29 @@ function detectPlatform(): Platform {
   return "other";
 }
 
+function intentUri(pkg: string): string {
+  const fallback = encodeURIComponent(
+    `https://play.google.com/store/apps/details?id=${pkg}`,
+  );
+  // Formato canônico: sem host/scheme, o Android resolve a activity de launch
+  // do pacote informado. Se o app não estiver instalado, cai na Play Store.
+  return `intent://#Intent;package=${pkg};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;S.browser_fallback_url=${fallback};end`;
+}
+
 async function openViaCapacitor(platform: Platform): Promise<boolean> {
   try {
     const { AppLauncher } = await import("@capacitor/app-launcher");
     if (platform === "android") {
-      // Tenta abrir pelo package (Android consegue resolver direto)
-      const { value } = await AppLauncher.canOpenUrl({ url: ANDROID_PACKAGE });
-      if (value) {
-        await AppLauncher.openUrl({ url: ANDROID_PACKAGE });
-        return true;
+      for (const pkg of ANDROID_PACKAGES) {
+        // No Android, canOpenUrl recebe o nome do pacote
+        const { value } = await AppLauncher.canOpenUrl({ url: pkg }).catch(
+          () => ({ value: false }),
+        );
+        if (value) {
+          // openUrl precisa de uma URL/intent URI válida
+          await AppLauncher.openUrl({ url: intentUri(pkg) });
+          return true;
+        }
       }
       // App não instalado → Play Store
       await AppLauncher.openUrl({ url: PLAY_STORE_MARKET }).catch(async () => {
@@ -36,7 +52,9 @@ async function openViaCapacitor(platform: Platform): Promise<boolean> {
       return true;
     }
     if (platform === "ios") {
-      const { value } = await AppLauncher.canOpenUrl({ url: SCHEME });
+      const { value } = await AppLauncher.canOpenUrl({ url: SCHEME }).catch(
+        () => ({ value: false }),
+      );
       if (value) {
         await AppLauncher.openUrl({ url: SCHEME });
         return true;
@@ -63,12 +81,9 @@ export async function openAnyConnect() {
   }
 
   if (platform === "android") {
-    // Intent URL: abre o app se instalado, ou cai na Play Store via fallback.
-    // Usa scheme=android-app + package como host (formato comprovadamente
-    // funcional na tela /intranet) — o formato com scheme=anyconnect causava
-    // "página não encontrada" no Chrome quando o app não registrava o esquema.
-    const fallback = encodeURIComponent(PLAY_STORE_URL);
-    window.location.href = `intent://${ANDROID_PACKAGE}#Intent;scheme=android-app;package=${ANDROID_PACKAGE};S.browser_fallback_url=${fallback};end`;
+    // Intent URI canônico: abre a activity de launch do app; se não estiver
+    // instalado, o Chrome usa o browser_fallback_url (Play Store).
+    window.location.href = intentUri(ANDROID_PACKAGE);
     return;
   }
 
