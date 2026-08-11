@@ -1,60 +1,44 @@
+# SSR real por rota (corrigir "conteúdo de baixo valor" do AdSense)
 
-# Rebrand para MIKE TOOLS
+## Diagnóstico confirmado
 
-Trocar todo o nome visível do app de "QAP, QRV!" para "MIKE TOOLS" e regenerar o ícone/logo com a **mesma arte atual**, apenas substituindo o texto "QAP, QRV!" por "MIKE TOOLS".
+Verifiquei o projeto e o problema é exatamente o descrito:
 
-## Importante — o que NÃO vai mudar
-- **`appId` do Android** (`app.lovable.c4ba12aede4d4739b500bee9ca5bb9e9`) permanece igual. Trocar o `appId` na Play Store cria um app novo do zero (perde usuários, avaliações e histórico de versões). O nome exibido é controlado por `appName`/label, não pelo `appId`.
-- Domínios (`miketools.top`, `qapqrv.lovable.app`) e Supabase project ref ficam iguais.
-- Versionamento (`versionCode`/`versionName`) continua como está — só sobe o PATCH normalmente na próxima build.
+- `vite.config.ts` está configurado como SPA pura (só `@vitejs/plugin-react` + plugin de rotas), sem o plugin do TanStack Start. Não existe renderização no servidor.
+- `src/main.tsx` monta o app 100% no cliente (`createRoot(...).render`).
+- `index.html` traz `<title>`, `description`, `og:*` e `<link rel="canonical" href="https://miketools.top/">` fixos, mais um bloco `#seo-fallback` com o texto da home. Todas as URLs recebem esse mesmo HTML.
+- `src/lib/use-document-head.ts` corrige title/description/canonical, mas só depois do JS rodar — o AdsBot não vê.
+- `src/routes/sitemap[.]xml.ts` existe como server route, porém sem servidor ela nunca é executada; o que é servido é o `public/sitemap.xml` estático, que ainda lista URLs `/blog/...` que hoje redirecionam para `/conteudos`.
 
-## O que muda
+## O que será feito
 
-### 1. Ícones e logo (mesma arte, novo texto)
-Regenerar com IA, mantendo layout/cores/estilo do ícone atual, apenas trocando o texto central por **MIKE TOOLS**:
-- `public/app-icon.png`, `public/icon-192.png`, `public/icon-512.png`, `public/apple-touch-icon.png`, `public/favicon.ico`
-- `public/notif-icon-192.png`, `public/notif-icon-512.png`, `public/notif-badge-72.png`
-- `resources/icon.png`, `resources/icon-foreground.png` (a `icon-background.png` fica igual — é só o fundo)
-- `resources/splash.png`, `resources/splash-dark.png` (splash com nova wordmark)
-- `src/assets/app-logo.png` (logo usada dentro do app)
+### 1. Reativar o build com SSR para a web
+- Passar o `vite.config.ts` a usar `@lovable.dev/vite-tanstack-config` (já está no projeto), habilitando o servidor do TanStack Start.
+- Criar as entradas de servidor/cliente do Start (`src/server.ts`, `src/client.tsx`) e mover a inicialização atual de `main.tsx` (tema, service worker, PWA) para o lado cliente, com guardas de `typeof window`.
+- Adicionar `<HeadContent />` e `<Scripts />` no `__root.tsx`, com `head()` global (charset, viewport, JSON-LD do site, ícones, fontes) migrado do `index.html`.
 
-O workflow de build (`capacitor-assets generate --android`) regenera automaticamente todos os tamanhos Android a partir de `resources/`.
+### 2. Manter o APK funcionando
+- O Capacitor continua com um build estático próprio: script `build:apk` usando modo SPA (hash history preservada por `isNativeApp()`), sem SSR.
+- `cap:sync` passa a usar esse build. Nada muda no comportamento do app nativo.
 
-### 2. Configuração do app
-- **`capacitor.config.ts`**: `appName: "MIKE TOOLS"` (era `qapqrv`).
-- **`public/manifest.webmanifest`**: `name` e `short_name` = `"MIKE TOOLS"`; atualizar `description` e labels dos `shortcuts`/`screenshots`.
-- **`index.html`**: `<title>`, meta description, `og:title`, `og:description`, `apple-mobile-web-app-title`.
-- **`.github/workflows/build-apk.yml`**: nome dos artefatos/release e comentários (`qapqrv-release.jks` continua com o mesmo nome de arquivo — trocar o nome da keystore quebra a assinatura).
+### 3. head() e canonical por rota
+- Cada rota passa a declarar no `head()`: `title`, `description`, `og:title`, `og:description`, `og:url`, `twitter:*` e `canonical` autorreferente.
+- Rotas de conteúdo dinâmico (`/conteudos/$categoria/$slug`) geram esses valores a partir do `loader`, retornando apenas dados serializáveis (slug/campos de texto), nunca componentes.
+- Rotas de ferramentas/telas internas continuam com `robots: noindex`, agora emitido já no HTML do servidor em vez de via efeito no cliente.
+- `useDocumentHead` é removido (vira redundante) e as tags fixas do `index.html`, incluindo o canonical da home e o bloco `#seo-fallback`, saem — o servidor passa a entregar o conteúdo real de cada página.
 
-### 3. Componentes e textos visíveis
-Substituir a string "QAP, QRV!" (e "QAP,QRV") em todos os locais de UI:
-- `src/components/app-header.tsx` (título grande do topo — vira `MIKE TOOLS` sem split de cor, ou mantém `MIKE` + `TOOLS` colorido; ver "Detalhe visual" abaixo)
-- `src/components/side-drawer.tsx`, `pwa-install-banner.tsx`, `pwa-install-card.tsx`, `install-confirm-modal.tsx`, `share-app-banner.tsx`, `share-app-nudge.tsx`, `whats-new-modal.tsx`, `browser-warning-modal.tsx`, `privacy-consent.tsx`, `site-footer.tsx`, `bottom-nav.tsx` (se aplicável)
-- Rotas: `sobre.tsx`, `contato.tsx`, `privacidade.tsx`, `termos.tsx`, `aviso-legal.tsx`, `cookies.tsx`, `manual.tsx`, `ajuda.tsx`, `faq.tsx`, `blog.tsx`, `anyconnect.tsx`, `splash.tsx`, `onboarding.tsx`, `ferramenta.minha-localizacao.tsx`, `index.tsx`, `inicio.tsx`
-- `src/routes/__root.tsx` (head padrão)
-- `src/content/artigos.ts`, `src/content/ajuda.ts`, `src/content/faq.ts`, `src/content/ferramentas-info.ts` (menções ao nome do app)
-- `src/lib/*`: `push-client.ts`, `review-prompt.ts`, `in-app-browser.ts`, `report-marca.ts`, `escala-ics.ts`, `escala-storage.ts` (títulos, `ORGANIZER`/`PRODID` do .ics, nome exibido em notificações)
-- `src/hooks/use-live-location.ts`, `use-local-list.ts` (labels/textos)
-- `public/sw.js` (título default de push)
-- `public/privacidade.html` (nome nas políticas)
+### 4. Auditoria de segurança para SSR
+- Varredura das rotas e componentes que tocam `window`, `document`, `localStorage` ou Capacitor durante a renderização, movendo tudo para `useEffect` ou import dinâmico. Isso evita erro 500 na primeira renderização no servidor.
 
-### 4. Backend / Edge Functions
-- `supabase/functions/send-broadcast/index.ts` e `supabase/functions/send-push-tick/index.ts`: trocar o `title` default e ORIGIN de exibição para "MIKE TOOLS" (o project ref do Supabase e nomes de funções ficam iguais).
+### 5. Sitemap
+- `sitemap.xml` volta a ser servido pela server route (que já cobre home, institucionais, categorias e todos os artigos), e o `public/sitemap.xml` estático desatualizado é removido para não conflitar.
+- Entradas `/blog/...` obsoletas saem; `/blog` continua redirecionando para `/conteudos`.
 
-### 5. Plugins Android nativos
-Nos arquivos em `android-plugin/` (`AppOpenAdPlugin.kt`, `NativeAdPlugin.kt`, `VpnStatusPlugin.kt`, `InAppWebViewPlugin.kt`, `InAppWebViewActivity.kt`, `WidgetDataPlugin.kt`, `ProximaEscalaWidget.kt`, `install.sh`, `README.md`): trocar apenas **strings visíveis ao usuário** (título do widget, título da activity do WebView, textos de log user-facing). Nomes de classes, packages Kotlin e IDs internos ficam iguais para não quebrar o build.
+### 6. Verificação
+- Buscar o HTML bruto (sem JS) de pelo menos 4 URLs — `/`, um artigo de `/conteudos/...`, `/privacidade` e `/sobre` — e conferir que title, meta description, og:* e o corpo de texto são diferentes entre si e que cada canonical aponta para a própria URL.
+- Conferir também que `/sitemap.xml` responde XML válido e que `/robots.txt` continua liberando o crawler.
 
-### 6. Documentação
-- `APK-BUILD.md`: substituir "QAP, QRV!" por "MIKE TOOLS" nos textos explicativos (mantendo nomes de arquivos/keystore).
+## Observações
 
-## Detalhe visual do cabeçalho
-Hoje `AppHeader` renderiza `QAP, <span text-brand-blue>QRV!</span>` (split de cor). Proposta: `MIKE <span text-brand-blue>TOOLS</span>` — mantém a identidade visual (duas palavras, segunda em azul). Se preferir "MIKE TOOLS" tudo na mesma cor, é só remover o `<span>`.
-
-## Ordem de execução
-1. Gerar novo ícone (1024×1024) e nova splash com IA a partir da arte atual, salvando em `resources/` e derivando as versões de `public/`.
-2. Atualizar `capacitor.config.ts`, `manifest.webmanifest`, `index.html`.
-3. Substituição textual em componentes, rotas, libs, content, sw.js e edge functions.
-4. Atualizar textos user-facing dos plugins Kotlin e do `APK-BUILD.md`.
-5. Fazer redeploy das edge functions afetadas.
-
-Próxima build no GitHub Actions gera o APK/AAB já com o novo nome e ícone (Play Store atualiza por cima da versão anterior porque o `appId` não mudou).
+- O AdSense e o Google só reprocessam depois de um novo rastreamento; após publicar, vale pedir reindexação no Search Console.
+- O script do AdSense segue desligado por flag até a aprovação, como está hoje.
