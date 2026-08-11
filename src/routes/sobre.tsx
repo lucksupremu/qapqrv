@@ -85,7 +85,7 @@ function Sobre() {
               <Link to="/manual" className="underline">Manual completo</Link>
             </li>
             <li>
-              <Link to="/blog" className="underline">Artigos e dicas operacionais</Link>
+              <Link to="/conteudos" className="underline">Artigos e dicas operacionais</Link>
             </li>
             <li>
               <Link to="/contato" className="underline">Fale conosco</Link>
