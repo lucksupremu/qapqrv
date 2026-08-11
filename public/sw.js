@@ -5,9 +5,9 @@
 //    cache servido imediato se já houver).
 // Não interfere com a intranet PMESP (URLs externas passam direto pela rede).
 
-// v7 remove definitivamente qualquer app-shell SPA/HTML antigo. Isso evita que
+// v8 remove definitivamente qualquer app-shell SPA/HTML antigo. Isso evita que
 // um cache legado restaure /src/main.tsx após a migração para SSR.
-const CACHE_VERSION = "qapqrv-v7";
+const CACHE_VERSION = "qapqrv-v8";
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const PDF_CACHE = `${CACHE_VERSION}-pdf`;
 const PDF_MAX_ENTRIES = 20;
