@@ -13,8 +13,13 @@ initPwaInstallManager();
 registerAppServiceWorker();
 
 const router = getRouter();
+const rootElement = document.getElementById("root");
 
-createRoot(document.getElementById("root")!).render(
+if (!rootElement) {
+  throw new Error("Elemento raiz do aplicativo Android não encontrado.");
+}
+
+createRoot(rootElement).render(
   <StrictMode>
     <RouterProvider router={router} />
   </StrictMode>,
