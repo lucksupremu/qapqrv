@@ -21,13 +21,17 @@ export const Route = createFileRoute("/ferramenta/$slug")({
     };
   },
   head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.tool.name} — MIKE TOOLS` },
-          { name: "description", content: loaderData.tool.description },
-        ]
-      : [],
+    meta: [
+      ...(loaderData
+        ? [
+            { title: `${loaderData.tool.name} — MIKE TOOLS` },
+            { name: "description", content: loaderData.tool.description },
+          ]
+        : []),
+      { name: "robots", content: "noindex,nofollow" },
+    ],
   }),
+
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center px-6 text-center">
       <div>
