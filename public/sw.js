@@ -1,26 +1,16 @@
 // Service Worker do MIKE TOOLS
 // 1) Mantém notificações locais via showNotification (Chrome Android exige SW).
-// 2) Cache app-shell para abrir offline (NetworkFirst HTML, CacheFirst assets hashados).
+// 2) Cache de assets hashados; páginas SSR nunca são persistidas neste worker.
 // 3) Stale-while-revalidate para PDFs de escala (rede primeiro em background,
 //    cache servido imediato se já houver).
 // Não interfere com a intranet PMESP (URLs externas passam direto pela rede).
 
-// v6 invalida o app-shell SPA anterior, que continha /src/main.tsx e podia
-// restaurar uma página branca depois da migração do site para SSR.
-const CACHE_VERSION = "qapqrv-v6";
-const SHELL_CACHE = `${CACHE_VERSION}-shell`;
+// v7 remove definitivamente qualquer app-shell SPA/HTML antigo. Isso evita que
+// um cache legado restaure /src/main.tsx após a migração para SSR.
+const CACHE_VERSION = "qapqrv-v7";
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const PDF_CACHE = `${CACHE_VERSION}-pdf`;
 const PDF_MAX_ENTRIES = 20;
-const SHELL_URLS = [
-  "/",
-  "/escalas-baixadas",
-  "/calendario",
-  "/historico",
-  "/favoritos",
-  "/configuracoes",
-  "/manifest.webmanifest",
-];
 
 // Detecta ambientes de preview Lovable — nestes domínios o SW deve se
 // auto-desregistrar e limpar caches.
@@ -68,15 +58,7 @@ if (IS_PREVIEW) {
   });
 } else {
   self.addEventListener("install", (event) => {
-    event.waitUntil(
-      (async () => {
-        try {
-          const cache = await caches.open(SHELL_CACHE);
-          await cache.addAll(SHELL_URLS).catch(() => {});
-        } catch {}
-        await self.skipWaiting();
-      })(),
-    );
+    event.waitUntil(self.skipWaiting());
   });
 
   self.addEventListener("activate", (event) => {
@@ -147,22 +129,9 @@ if (IS_PREVIEW) {
     }
 
     if (req.mode === "navigate" || req.destination === "document") {
-      event.respondWith(
-        (async () => {
-          const cache = await caches.open(SHELL_CACHE);
-          try {
-            const resp = await fetch(req);
-            if (resp.ok) cache.put(req, resp.clone());
-            return resp;
-          } catch {
-            const cached = await cache.match(req);
-            if (cached) return cached;
-            const fallback = await cache.match("/");
-            if (fallback) return fallback;
-            return new Response("Offline", { status: 503, statusText: "Offline" });
-          }
-        })(),
-      );
+      // O HTML precisa vir sempre do servidor para manter SSR, metadados por
+      // rota e releases atuais. Não há fallback para o antigo shell SPA.
+      event.respondWith(fetch(req));
     }
   });
 }
