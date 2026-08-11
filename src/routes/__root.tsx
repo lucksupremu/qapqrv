@@ -5,9 +5,12 @@ import {
   createRootRouteWithContext,
   useRouter,
   useRouterState,
+  HeadContent,
+  Scripts,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 
+import appCss from "../styles.css?url";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
@@ -24,7 +27,7 @@ import { InstallConfirmModal } from "@/components/install-confirm-modal";
 import { ShareAppNudge } from "@/components/share-app-nudge";
 import { updateDynamicShortcuts } from "@/lib/dynamic-shortcuts";
 import { isAdsAllowedRoute, isPublicContentRoute } from "@/lib/ads-allowlist";
-import { useDocumentHead } from "@/lib/use-document-head";
+import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 
 
 /** Google AdSense client ID */
@@ -33,6 +36,7 @@ const ADSENSE_CLIENT = "ca-pub-4966192764194561";
  *  Mantemos `ads.txt` e o `<ins>` desligado para evitar reprovação por
  *  "inventário de anúncio sem conteúdo". Ative com VITE_ADSENSE_ENABLED=true. */
 const ADSENSE_ENABLED = import.meta.env.VITE_ADSENSE_ENABLED === "true";
+
 
 function NotFoundComponent() {
   return (
@@ -95,10 +99,94 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Head global — cada rota sobrescreve title/description/canonical/og no seu
+  // próprio head(). Isso é renderizado no HTML do servidor (SSR), que é o que
+  // o Googlebot e o AdsBot leem antes do JavaScript rodar.
+  head: ({ match }) => {
+    const pathname = match?.pathname ?? "/";
+    const indexable = isPublicContentRoute(pathname);
+    return {
+    meta: [
+      { charSet: "utf-8" },
+      {
+        name: "viewport",
+        content:
+          "width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no",
+      },
+      { name: "theme-color", content: "#f4f8fc" },
+      { title: "MIKE TOOLS — Ferramentas operacionais para o policial militar" },
+      {
+        name: "description",
+        content:
+          "Central gratuita de ferramentas operacionais para o policial militar do Estado de São Paulo: escalas Dejem e Delegada, calendário, lembretes e atalhos para a intranet.",
+      },
+      {
+        name: "robots",
+        content: indexable ? "index,follow" : "noindex,nofollow",
+      },
+      { property: "og:site_name", content: "MIKE TOOLS" },
+      { property: "og:type", content: "website" },
+      { property: "og:locale", content: "pt_BR" },
+      { property: "og:image", content: "https://miketools.top/icon-512.png" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:image", content: "https://miketools.top/icon-512.png" },
+    ],
+
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "MIKE TOOLS",
+          url: "https://miketools.top",
+          inLanguage: "pt-BR",
+          description:
+            "Ferramentas operacionais gratuitas para o policial militar do Estado de São Paulo.",
+        }),
+      },
+    ],
+    };
+  },
+
+  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+function RootShell({ children }: { children: ReactNode }) {
+  return (
+    <html lang="pt-BR">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -106,9 +194,12 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPublicContent = isPublicContentRoute(pathname);
 
-  // Sincroniza head() das rotas com document.head (title/description/canonical
-  // únicos por página) — crítico para AdSense/SEO.
-  useDocumentHead();
+  // Boot do cliente (tema, service worker, PWA) — só no navegador.
+  useEffect(() => {
+    void import("@/lib/client-boot").then(({ bootClient }) => bootClient());
+  }, []);
+
+
 
   // Onboarding automático só no APK. No site público, a URL precisa entregar o
   // conteúdo real sem interceptação, ou revisões do AdSense podem enxergar
@@ -135,31 +226,10 @@ function RootComponent() {
     // Atualiza atalhos dinâmicos do PWA conforme a rota.
     void updateDynamicShortcuts(pathname);
   }, [pathname]);
+  // O <meta name="robots"> por rota agora é emitido no HTML do servidor
+  // (ver head() do root), então não há mais manipulação de DOM aqui.
 
 
-
-
-
-  // Aplica <meta name="robots" content="noindex"> em rotas sem conteúdo
-  // editorial. Mantém o crawler do AdSense focado nas páginas ricas (blog,
-  // manual, institucionais) e impede que telas de "alerta/navegação/em
-  // construção" sejam classificadas como inventário de anúncio sem conteúdo.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const allowIndex = isPublicContentRoute(pathname);
-    const existing = document.querySelector('meta[name="robots"][data-dyn="1"]');
-    if (!allowIndex) {
-      if (!existing) {
-        const m = document.createElement("meta");
-        m.setAttribute("name", "robots");
-        m.setAttribute("content", "noindex,nofollow");
-        m.setAttribute("data-dyn", "1");
-        document.head.appendChild(m);
-      }
-    } else if (existing) {
-      existing.remove();
-    }
-  }, [pathname]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

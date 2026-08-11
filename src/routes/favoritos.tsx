@@ -8,6 +8,7 @@ import { useFavorites } from "@/hooks/use-local-list";
 export const Route = createFileRoute("/favoritos")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex,nofollow" },
       { title: "Favoritos — MIKE TOOLS" },
       { name: "description", content: "Suas ferramentas favoritas." },
     ],

@@ -11,7 +11,9 @@ export const Route = createFileRoute("/sobre")({
         content:
           "Conheça o MIKE TOOLS: missão, equipe, funcionalidades, contato e política de privacidade do app de ferramentas para o policial militar de São Paulo.",
       },
+      { property: "og:url", content: "https://miketools.top/sobre" },
     ],
+    links: [{ rel: "canonical", href: "https://miketools.top/sobre" }],
   }),
   component: Sobre,
 });

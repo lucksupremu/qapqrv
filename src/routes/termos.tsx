@@ -10,7 +10,9 @@ export const Route = createFileRoute("/termos")({
         content:
           "Termos de Uso do aplicativo MIKE TOOLS: condições, responsabilidades, propriedade intelectual e limitações.",
       },
+      { property: "og:url", content: "https://miketools.top/termos" },
     ],
+    links: [{ rel: "canonical", href: "https://miketools.top/termos" }],
   }),
   component: TermosScreen,
 });

@@ -38,6 +38,7 @@ const SLUG = "minha-localizacao";
 export const Route = createFileRoute("/ferramenta/minha-localizacao")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex,nofollow" },
       { title: "Minha Localização — MIKE TOOLS" },
       {
         name: "description",

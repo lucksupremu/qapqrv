@@ -22,15 +22,13 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const today = new Date().toISOString().split("T")[0];
-
         const staticEntries: SitemapEntry[] = [
-          { path: "/", changefreq: "weekly", priority: "1.0", lastmod: today },
+          { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/sobre", changefreq: "monthly", priority: "0.8" },
           { path: "/manual", changefreq: "monthly", priority: "0.7" },
           { path: "/ajuda", changefreq: "monthly", priority: "0.7" },
           { path: "/faq", changefreq: "monthly", priority: "0.7" },
-          { path: "/conteudos", changefreq: "weekly", priority: "0.9", lastmod: today },
+          { path: "/conteudos", changefreq: "weekly", priority: "0.9" },
           { path: "/contato", changefreq: "yearly", priority: "0.5" },
           { path: "/mapa-do-site", changefreq: "monthly", priority: "0.4" },
           { path: "/privacidade", changefreq: "yearly", priority: "0.5" },

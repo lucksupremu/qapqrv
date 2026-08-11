@@ -38,6 +38,7 @@ const idSchema = z
 export const Route = createFileRoute("/ferramenta/consulta-escala")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex,nofollow" },
       { title: "Consulta de Escala — MIKE TOOLS" },
       {
         name: "description",

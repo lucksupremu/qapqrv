@@ -8,6 +8,7 @@ import { PwaInstallCard } from "@/components/pwa-install-card";
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex,nofollow" },
       { title: "Configurações — MIKE TOOLS" },
       {
         name: "description",

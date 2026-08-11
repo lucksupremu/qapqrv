@@ -41,7 +41,13 @@ import { cancelServerReminders } from "@/lib/server-reminders";
 
 
 export const Route = createFileRoute("/calendario")({
-  head: () => ({ meta: [{ title: "Agenda — MIKE TOOLS" }] }),
+  head: () => ({
+    meta: [
+      { title: "Agenda — MIKE TOOLS" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
+
   component: CalendarScreen,
 });
 

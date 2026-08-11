@@ -10,7 +10,9 @@ export const Route = createFileRoute("/privacidade")({
         content:
           "Política de Privacidade do MIKE TOOLS: dados, cookies, Google AdSense, AdMob, permissões, LGPD e contato.",
       },
+      { property: "og:url", content: "https://miketools.top/privacidade" },
     ],
+    links: [{ rel: "canonical", href: "https://miketools.top/privacidade" }],
   }),
   component: PrivacidadeScreen,
 });

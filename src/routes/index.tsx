@@ -44,15 +44,31 @@ import { usePwaInstall } from "@/hooks/use-pwa-install";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MIKE TOOLS — Escalas PMESP" },
+      {
+        title:
+          "MIKE TOOLS — Escalas Dejem e Delegada da PMESP em um só lugar",
+      },
       {
         name: "description",
-        content: "Acompanhe suas escalas Dejem e Delegada da PMESP em um só lugar.",
+        content:
+          "Consulte e organize suas escalas Dejem e Operação Delegada da PMESP: calendário de plantões, lembretes, escalas offline e atalhos para a intranet. Gratuito e sem cadastro.",
       },
+      {
+        property: "og:title",
+        content: "MIKE TOOLS — Escalas Dejem e Delegada da PMESP",
+      },
+      {
+        property: "og:description",
+        content:
+          "Calendário de plantões, lembretes e consulta de escalas Dejem e Delegada para o policial militar de São Paulo.",
+      },
+      { property: "og:url", content: "https://miketools.top/" },
     ],
+    links: [{ rel: "canonical", href: "https://miketools.top/" }],
   }),
   component: HomeScreen,
 });
+
 
 type ActionBlock = {
   label: string;
