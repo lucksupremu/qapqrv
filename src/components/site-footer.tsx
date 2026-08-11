@@ -44,7 +44,7 @@ export function SiteFooter() {
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground">Conteúdo</p>
                 <ul className="space-y-1.5 text-xs">
                   <li><Link to="/conteudos" className="hover:text-foreground hover:underline">Central de Conteúdo</Link></li>
-                  <li><Link to="/blog" className="hover:text-foreground hover:underline">Blog</Link></li>
+                  
                   <li><Link to="/manual" className="hover:text-foreground hover:underline">Manual</Link></li>
                   <li><Link to="/faq" className="hover:text-foreground hover:underline">Perguntas frequentes</Link></li>
                 </ul>
